@@ -12,9 +12,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#08080c;--bg2:rgba(255,255,255,0.03);--bg3:rgba(255,255,255,0.055);--bg4:rgba(255,255,255,0.08);
+  --bg:#08080c;
   --glass:rgba(255,255,255,0.04);--glass2:rgba(255,255,255,0.07);--glass3:rgba(255,255,255,0.11);
-  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);--border3:rgba(255,255,255,0.24);
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);--border3:rgba(255,255,255,0.26);
   --text:#ede9e2;--text2:#9a9590;--text3:#4e4c48;
   --gold:#c9a96e;--gold2:#e8c98a;--gold3:rgba(201,169,110,0.15);--gold4:rgba(201,169,110,0.08);
   --blu:#6399d4;--verde:#72b882;--rosso:#d4726a;
@@ -25,178 +25,215 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
 body{font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text);background:var(--bg);min-height:100dvh;overflow-x:hidden;
-  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,169,110,0.06) 0%,transparent 70%)}
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,169,110,0.05) 0%,transparent 70%)}
 
-.app-header{position:sticky;top:0;z-index:100;background:rgba(8,8,12,0.82);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border)}
-.header-inner{padding:14px 16px 0}
-.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.app-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--gold2);letter-spacing:.06em;display:flex;align-items:center;gap:8px}
-.title-mark{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block}
-.count-pill{font-size:11px;font-weight:400;color:var(--text2);background:var(--glass2);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
+/* ── HEADER ─────────────────────────────────── */
+.app-header{position:sticky;top:0;z-index:100;background:rgba(8,8,12,0.86);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border)}
+.hdr-main{padding:12px 14px 10px;display:flex;align-items:center;gap:8px}
+.app-title{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--gold2);letter-spacing:.06em;display:flex;align-items:center;gap:7px;flex:1}
+.title-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.hdr-actions{display:flex;align-items:center;gap:6px}
+.count-pill{font-size:11px;color:var(--text2);background:var(--glass2);border:1px solid var(--border);border-radius:20px;padding:3px 9px}
+.icon-btn{width:34px;height:34px;border-radius:var(--radius-xs);background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .2s;flex-shrink:0}
+.icon-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold4)}
+.icon-btn svg{width:15px;height:15px}
 
-.search-row{display:flex;gap:8px;margin-bottom:10px}
+/* search */
+.search-row{padding:0 14px 10px;display:flex;gap:7px}
 .search-wrap{position:relative;flex:1}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
-input[type=search]{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;padding:10px 10px 10px 36px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s,background .2s}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+input[type=search]{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;padding:9px 9px 9px 32px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s,background .2s}
 input[type=search]:focus{border-color:var(--border2);background:var(--glass2)}
 input[type=search]::-webkit-search-cancel-button{display:none}
-.sort-btn{flex-shrink:0;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;padding:0 13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .2s}
-.sort-btn.has-sort{border-color:var(--gold);color:var(--gold);background:var(--gold4)}
+.sort-btn{flex-shrink:0;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11.5px;padding:0 11px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .2s;height:38px}
+.sort-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold4)}
 
-.filter-panel{padding:0 16px 12px}
-.filter-group{margin-bottom:8px}
-.filter-group-label{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-left:2px}
+/* filter panel */
+.filter-panel{overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .25s;max-height:300px;opacity:1}
+.filter-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
+.filter-inner{padding:0 14px 12px}
+.filter-group{margin-bottom:9px}
+.filter-group:last-child{margin-bottom:0}
+.fg-label{font-size:9px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-left:1px}
 .chips-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
 .chips-row::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;font-size:11.5px;font-weight:400;color:var(--text2);background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap;position:relative;overflow:hidden}
 .chip::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
-.chip:active{transform:scale(0.97)}
+.chip:active{transform:scale(.97)}
 .chip.active{font-weight:500}
-.chip.occ.active{background:rgba(201,169,110,0.18);border-color:rgba(201,169,110,0.45);color:var(--gold2)}
 .chip.stag.active{background:rgba(99,153,212,0.18);border-color:rgba(99,153,212,0.4);color:#9bbfe0}
+.chip.occ.active{background:rgba(201,169,110,0.18);border-color:rgba(201,169,110,0.45);color:var(--gold2)}
 .chip.c-blu.active{background:rgba(99,153,212,0.2);border-color:rgba(99,153,212,0.45);color:#9bbfe0}
 .chip.c-verde.active{background:rgba(114,184,130,0.2);border-color:rgba(114,184,130,0.45);color:#9dd4ad}
 .chip.c-rosso.active{background:rgba(212,114,106,0.2);border-color:rgba(212,114,106,0.45);color:#e4a09a}
-.chip.mom.active{background:rgba(255,255,255,0.09);border-color:var(--border2);color:var(--text)}
+.chip.mom.active{background:var(--glass3);border-color:var(--border2);color:var(--text)}
+.chip.nota.active{background:rgba(180,140,220,0.18);border-color:rgba(180,140,220,0.4);color:#d4b8f0}
 
-.active-bar{display:none;flex-wrap:wrap;gap:5px;padding:6px 16px 10px;border-top:1px solid var(--border)}
+/* active filter bar */
+.active-bar{display:none;flex-wrap:wrap;gap:5px;padding:6px 14px 10px;border-top:1px solid var(--border)}
 .active-bar.show{display:flex}
 .af-tag{font-size:11px;padding:4px 10px 4px 11px;border-radius:20px;background:var(--gold4);border:1px solid rgba(201,169,110,0.28);color:var(--gold);display:flex;align-items:center;gap:5px;cursor:pointer;transition:background .15s}
-.af-tag:hover{background:var(--gold3)}
-.af-remove{font-size:9px;opacity:.6}
-.af-clear{background:rgba(212,114,106,0.1);border-color:rgba(212,114,106,0.28);color:var(--rosso)}
+.af-tag:active{background:var(--gold3)}
+.af-x{font-size:9px;opacity:.6}
+.af-clear{background:rgba(212,114,106,0.09);border-color:rgba(212,114,106,0.3);color:var(--rosso)}
 
-.view{display:none;padding:14px 13px 100px}
+/* ── VIEWS ─────────────────────────────────── */
+.view{display:none;padding:13px 13px 100px}
 .view.active{display:block}
-#view-collezione{display:none;padding:14px 13px 100px}
+#view-collezione{display:none;padding:13px 13px 100px}
 #view-collezione.active{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:560px){#view-collezione.active{grid-template-columns:1fr 1fr}}
-@media(min-width:900px){#view-collezione.active{grid-template-columns:1fr 1fr 1fr;padding:18px 18px 40px}}
+@media(min-width:900px){#view-collezione.active{grid-template-columns:1fr 1fr 1fr;padding:16px 16px 40px}}
 
-.card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
+/* ── CARD ───────────────────────────────────── */
+.card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:15px;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
 .card::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none;border-radius:inherit}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:0;transition:opacity .25s}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:0;transition:opacity .3s}
 .card.blu::before{background:linear-gradient(90deg,transparent,var(--blu),transparent)}
 .card.verde::before{background:linear-gradient(90deg,transparent,var(--verde),transparent)}
 .card.rosso::before{background:linear-gradient(90deg,transparent,var(--rosso),transparent)}
 .card.open{background:var(--glass2);border-color:var(--border2)}.card.open::before{opacity:1}
-.card:active{transform:scale(0.99)}
-.card-top{display:flex;align-items:flex-start;gap:11px}
-.num{width:24px;height:24px;border-radius:50%;background:var(--glass3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:500;color:var(--text3);flex-shrink:0;margin-top:2px}
+.card:active{transform:scale(.99)}
+.card-top{display:flex;align-items:flex-start;gap:10px}
+.num{width:23px;height:23px;border-radius:50%;background:var(--glass3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:var(--text3);flex-shrink:0;margin-top:2px}
 .card-info{flex:1;min-width:0}
 .card-brand{font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
-.card-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;line-height:1.15;color:var(--text);margin-bottom:5px}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;line-height:1.15;color:var(--text);margin-bottom:4px}
 .card-conc{font-size:10px;color:var(--text3);background:var(--glass3);border:1px solid var(--border);border-radius:var(--radius-xs);padding:1px 7px;display:inline-block;letter-spacing:.04em}
-.gem{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;position:relative;overflow:hidden}
-.gem::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.25) 0%,transparent 60%);pointer-events:none}
+.gem{width:29px;height:29px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;position:relative;overflow:hidden}
+.gem::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.22) 0%,transparent 60%);pointer-events:none}
 .gem.blu{background:var(--blu-bg);border:1px solid rgba(99,153,212,0.25);color:var(--blu)}
 .gem.verde{background:var(--verde-bg);border:1px solid rgba(114,184,130,0.25);color:var(--verde)}
 .gem.rosso{background:var(--rosso-bg);border:1px solid rgba(212,114,106,0.25);color:var(--rosso)}
-.card-notes{font-size:12px;color:var(--text2);margin:11px 0 9px;line-height:1.55}
-.card-tags{display:flex;flex-wrap:wrap;gap:5px}
-.tag{font-size:10.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--text3);white-space:nowrap}
+.card-notes{font-size:12px;color:var(--text2);margin:10px 0 8px;line-height:1.55}
+/* note highlights when a nota-filter is active */
+.card-notes mark{background:rgba(180,140,220,0.22);color:#d4b8f0;border-radius:3px;padding:0 2px}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:10.5px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text3);white-space:nowrap}
 .tag.stagione{border-color:rgba(201,169,110,.2);color:rgba(201,169,110,.75)}
-.card-expand{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.card-expand{display:none;margin-top:13px;padding-top:13px;border-top:1px solid var(--border)}
 .card.open .card-expand{display:block}
-.expand-label{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.uso-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:13px}
-.uso-item{display:flex;align-items:center;gap:7px;font-size:12px}
+.expand-lbl{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.uso-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
+.uso-item{display:flex;align-items:center;gap:6px;font-size:11.5px}
 .uso-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.uso-dot.si{background:var(--verde)}.uso-dot.si-mod{background:var(--gold)}.uso-dot.no{background:var(--glass3);border:1px solid var(--border2)}
-.uso-label.si{color:var(--text2)}.uso-label.si-mod{color:var(--gold)}.uso-label.no{color:var(--text3)}
-.card-desc{font-size:12px;color:var(--text2);line-height:1.65;font-style:italic;border-left:2px solid var(--border2);padding-left:10px;margin-bottom:12px}
-.fragrantica-link{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);border:1px solid var(--border);border-radius:var(--radius-xs);padding:5px 10px;text-decoration:none;background:var(--glass);transition:all .2s}
-.fragrantica-link:hover,.fragrantica-link:active{border-color:var(--border2);color:var(--text2);background:var(--glass2)}
+.uso-dot.si{background:var(--verde)}.uso-dot.mod{background:var(--gold)}.uso-dot.no{background:var(--glass3);border:1px solid var(--border2)}
+.uso-lbl.si{color:var(--text2)}.uso-lbl.mod{color:var(--gold)}.uso-lbl.no{color:var(--text3)}
+.card-desc{font-size:12px;color:var(--text2);line-height:1.65;font-style:italic;border-left:2px solid var(--border2);padding-left:10px}
 .empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3);font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic}
 
+/* ── SORT SHEET ─────────────────────────────── */
 .backdrop{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end}
 .backdrop.open{display:flex}
-.bottom-sheet{width:100%;background:rgba(14,14,18,0.96);border-radius:20px 20px 0 0;border:1px solid var(--border2);border-bottom:none;padding:0 0 max(20px,env(safe-area-inset-bottom));animation:slideUp .22s cubic-bezier(.32,.72,0,1)}
+.bsheet{width:100%;background:rgba(14,14,18,0.97);border-radius:20px 20px 0 0;border:1px solid var(--border2);border-bottom:none;padding:0 0 max(20px,env(safe-area-inset-bottom));animation:slideUp .22s cubic-bezier(.32,.72,0,1)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet-handle{width:36px;height:3px;border-radius:2px;background:var(--border3);margin:14px auto 18px}
-.sheet-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:var(--gold2);padding:0 22px 14px;border-bottom:1px solid var(--border)}
-.sort-opt{display:flex;align-items:center;justify-content:space-between;padding:15px 22px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
-.sort-opt:last-child{border-bottom:none}
-.sort-opt:active{background:var(--glass2)}
-.sort-opt-label{font-size:15px;color:var(--text2)}
-.sort-opt.active .sort-opt-label{color:var(--gold);font-weight:500}
-.sort-radio{width:18px;height:18px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center}
-.sort-opt.active .sort-radio{background:var(--gold);border-color:var(--gold)}
-.sort-dot{width:7px;height:7px;border-radius:50%;background:#0d0d0f;display:none}
-.sort-opt.active .sort-dot{display:block}
+.bsheet-handle{width:36px;height:3px;border-radius:2px;background:var(--border3);margin:13px auto 16px}
+.bsheet-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:var(--gold2);padding:0 20px 13px;border-bottom:1px solid var(--border)}
+.sopt{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.sopt:last-child{border-bottom:none}
+.sopt:active{background:var(--glass2)}
+.sopt-lbl{font-size:14px;color:var(--text2)}
+.sopt.active .sopt-lbl{color:var(--gold);font-weight:500}
+.sopt-radio{width:18px;height:18px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center}
+.sopt.active .sopt-radio{background:var(--gold);border-color:var(--gold)}
+.sopt-dot{width:7px;height:7px;border-radius:50%;background:#08080c;display:none}
+.sopt.active .sopt-dot{display:block}
 
-.guida-section{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;position:relative}
-.guida-section::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
-.guida-hdr{padding:15px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.guida-hdr-left{display:flex;align-items:center;gap:11px}
-.guida-icon-box{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border)}
-.guida-ttl{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--text)}
-.guida-chev{color:var(--text3);transition:transform .2s;display:flex}
-.guida-section.open .guida-chev{transform:rotate(180deg)}
-.guida-body{display:none;padding:0 16px 14px;border-top:1px solid var(--border)}
-.guida-section.open .guida-body{display:block}
-.guida-row{padding:10px 0;border-bottom:1px solid var(--border)}
-.guida-row:last-child{border-bottom:none}
-.guida-row-lbl{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;opacity:.8}
-.guida-row-val{font-size:13px;color:var(--text2);line-height:1.65}
+/* ── GUIDA ──────────────────────────────────── */
+.guida-sec{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;position:relative}
+.guida-sec::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
+.ghdr{padding:14px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.ghdr-left{display:flex;align-items:center;gap:10px}
+.gicon{width:31px;height:31px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border)}
+.gicon svg{width:15px;height:15px}
+.gttl{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text)}
+.gchev{color:var(--text3);transition:transform .2s}
+.guida-sec.open .gchev{transform:rotate(180deg)}
+.gbody{display:none;padding:0 15px 13px;border-top:1px solid var(--border)}
+.guida-sec.open .gbody{display:block}
+.grow{padding:9px 0;border-bottom:1px solid var(--border)}
+.grow:last-child{border-bottom:none}
+.grow-lbl{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:5px}
+.grow-val{font-size:13px;color:var(--text2);line-height:1.65}
 
-.rec-intro{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text2);line-height:1.6;margin-bottom:14px;padding:14px 16px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius)}
-.rec-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;position:relative}
+/* ── CONSIGLIATI ────────────────────────────── */
+.rec-intro{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text2);line-height:1.65;padding:14px 15px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;position:relative}
+.rec-intro::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
+.rec-group-title{font-size:9px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px;padding-left:2px}
+.rec-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:9px;overflow:hidden;position:relative}
 .rec-card::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
-.rec-card-hdr{padding:14px 16px;display:flex;align-items:flex-start;gap:12px}
-.rec-gap-badge{flex-shrink:0;width:32px;height:32px;border-radius:8px;background:var(--gold4);border:1px solid rgba(201,169,110,.25);display:flex;align-items:center;justify-content:center;margin-top:1px}
-.rec-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;color:var(--gold2);margin-bottom:3px}
-.rec-why{font-size:12px;color:var(--text2);line-height:1.55}
-.rec-picks{padding:0 16px 14px;border-top:1px solid var(--border)}
-.rec-pick-row{padding:9px 0;border-bottom:1px solid var(--border)}
-.rec-pick-row:last-child{border-bottom:none}
-.rec-pick-name{color:var(--text);font-size:13px;font-weight:400;display:block;margin-bottom:3px}
-.rec-pick-detail{font-size:11.5px;color:var(--text3);line-height:1.5}
-.rec-frag-link{font-size:11px;color:var(--text3);text-decoration:none;border-bottom:1px dotted var(--border2)}
-.rec-frag-link:hover{color:var(--gold)}
+.rec-hdr{padding:14px 15px;display:flex;align-items:flex-start;gap:11px;cursor:pointer}
+.rec-badge{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:var(--gold4);border:1px solid rgba(201,169,110,.22);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.rec-badge svg{width:14px;height:14px}
+.rec-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold2);margin-bottom:3px}
+.rec-gap{font-size:12px;color:var(--text2);line-height:1.55}
+.rec-body{padding:0 15px 13px;border-top:1px solid var(--border)}
+.rec-pick{padding:9px 0;border-bottom:1px solid var(--border)}
+.rec-pick:last-child{border-bottom:none}
+.rec-pick-name{font-size:13px;color:var(--text);display:block;margin-bottom:3px}
+.rec-pick-detail{font-size:12px;color:var(--text3);line-height:1.5}
+.rec-card.open .rec-body{display:block}
+.rec-body{display:none}
 
-.stats-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.kpi{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+/* ── STATS ──────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.kpi{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:15px;position:relative;overflow:hidden}
 .kpi::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
-.kpi-n{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:var(--gold2);line-height:1;margin-bottom:3px}
-.kpi-lbl{font-size:11.5px;color:var(--text3)}
-.bar-section{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px}
-.bar-section-title{font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
-.bar-row{margin-bottom:13px}.bar-row:last-child{margin-bottom:0}
-.bar-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px}
-.bar-track{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden}
-.bar-fill{height:100%;border-radius:2px;background:var(--gold)}
-.bar-fill.blu{background:var(--blu)}.bar-fill.verde{background:var(--verde)}.bar-fill.rosso{background:var(--rosso)}
+.kpi-n{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--gold2);line-height:1;margin-bottom:3px}
+.kpi-l{font-size:11px;color:var(--text3)}
+.bsec{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:10px}
+.bsec-t{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:13px}
+.brow{margin-bottom:12px}.brow:last-child{margin-bottom:0}
+.blbl{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px}
+.btrack{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden}
+.bfill{height:100%;border-radius:2px;background:var(--gold)}
+.bfill.blu{background:var(--blu)}.bfill.verde{background:var(--verde)}.bfill.rosso{background:var(--rosso)}
 
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,8,12,0.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:8px 0 max(8px,env(safe-area-inset-bottom))}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 4px;cursor:pointer;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:400;transition:color .15s}
+/* ── PROFILE LINK ───────────────────────────── */
+.profile-link{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px 15px;text-decoration:none;color:var(--text2);transition:border-color .2s,background .2s;margin-bottom:12px;position:relative;overflow:hidden}
+.profile-link::after{content:'';position:absolute;inset:0;background:var(--shine);pointer-events:none}
+.profile-link:active{background:var(--glass2);border-color:var(--border2)}
+.profile-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold4);border:1px solid rgba(201,169,110,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.profile-avatar svg{width:18px;height:18px;color:var(--gold)}
+.profile-info{flex:1}
+.profile-label{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.profile-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold2)}
+.profile-arrow{color:var(--text3)}
+
+/* ── BOTTOM NAV ─────────────────────────────── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,8,12,0.9);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;cursor:pointer;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:400;transition:color .15s}
 .nav-btn.active{color:var(--gold)}
-.nav-btn svg{width:20px;height:20px}
-.nav-indicator{width:4px;height:4px;border-radius:50%;background:var(--gold);display:none}
-.nav-btn.active .nav-indicator{display:block}
+.nav-btn svg{width:19px;height:19px}
+.nav-dot{width:3px;height:3px;border-radius:50%;background:var(--gold);display:none;margin-top:1px}
+.nav-btn.active .nav-dot{display:block}
 </style>
 </head>
 <body>
 
 <div class="app-header" id="app-header">
-  <div class="header-inner">
-    <div class="header-top">
-      <span class="app-title"><span class="title-mark"></span>Sillage</span>
-      <span class="count-pill" id="count-pill">25 fragranze</span>
-    </div>
-    <div class="search-row">
-      <div class="search-wrap">
-        <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="15" height="15"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 3.5 3.5"/></svg>
-        <input type="search" id="search" placeholder="Cerca marca, nota, famiglia…" autocomplete="off">
+  <div class="hdr-main">
+    <span class="app-title"><span class="title-dot"></span>Sillage</span>
+    <div class="hdr-actions">
+      <span class="count-pill" id="count-pill">25</span>
+      <div class="icon-btn" id="filter-toggle-btn" onclick="toggleFilters()" title="Mostra/nascondi filtri">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
       </div>
-      <button class="sort-btn" id="sort-btn" onclick="openSort()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
-        <span id="sort-label">Ordina</span>
-      </button>
+      <div class="icon-btn" id="sort-btn" onclick="openSort()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      </div>
     </div>
-    <div class="filter-panel">
+  </div>
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 3.5 3.5"/></svg>
+      <input type="search" id="search" placeholder="Cerca marca, nota olfattiva, famiglia…" autocomplete="off">
+    </div>
+  </div>
+  <div class="filter-panel" id="filter-panel">
+    <div class="filter-inner">
       <div class="filter-group">
-        <div class="filter-group-label">Stagione</div>
+        <div class="fg-label">Stagione</div>
         <div class="chips-row">
           <div class="chip stag" data-filter="pe">Primavera / Estate</div>
           <div class="chip stag" data-filter="ai">Autunno / Inverno</div>
@@ -204,7 +241,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
         </div>
       </div>
       <div class="filter-group">
-        <div class="filter-group-label">Occasione</div>
+        <div class="fg-label">Occasione</div>
         <div class="chips-row">
           <div class="chip occ" data-filter="ufficio">Ufficio</div>
           <div class="chip occ" data-filter="appuntamento">Appuntamento</div>
@@ -216,7 +253,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
         </div>
       </div>
       <div class="filter-group">
-        <div class="filter-group-label">Famiglia · Momento</div>
+        <div class="fg-label">Famiglia · Momento</div>
         <div class="chips-row">
           <div class="chip c-blu" data-filter="blu">Blu — Acquatici</div>
           <div class="chip c-verde" data-filter="verde">Verde — Legnosi</div>
@@ -225,196 +262,223 @@ input[type=search]::-webkit-search-cancel-button{display:none}
           <div class="chip mom" data-filter="sera">Solo sera</div>
         </div>
       </div>
+      <div class="filter-group">
+        <div class="fg-label">Note olfattive</div>
+        <div class="chips-row" id="note-chips">
+          <div class="chip nota" data-nota="vetiver">Vetiver</div>
+          <div class="chip nota" data-nota="agrumi">Agrumi</div>
+          <div class="chip nota" data-nota="ambra">Ambra</div>
+          <div class="chip nota" data-nota="muschio">Muschio</div>
+          <div class="chip nota" data-nota="vaniglia">Vaniglia</div>
+          <div class="chip nota" data-nota="legni">Legni</div>
+          <div class="chip nota" data-nota="cuoio">Cuoio</div>
+          <div class="chip nota" data-nota="spezie">Spezie</div>
+          <div class="chip nota" data-nota="marine">Marine</div>
+          <div class="chip nota" data-nota="iris">Iris</div>
+          <div class="chip nota" data-nota="tonka">Tonka</div>
+          <div class="chip nota" data-nota="patchouli">Patchouli</div>
+          <div class="chip nota" data-nota="rum">Rum</div>
+          <div class="chip nota" data-nota="cedro">Cedro</div>
+          <div class="chip nota" data-nota="sandalo">Sandalo</div>
+          <div class="chip nota" data-nota="lavanda">Lavanda</div>
+          <div class="chip nota" data-nota="ginepro">Ginepro</div>
+          <div class="chip nota" data-nota="menta">Menta</div>
+          <div class="chip nota" data-nota="tabacco">Tabacco</div>
+          <div class="chip nota" data-nota="zafferano">Zafferano</div>
+          <div class="chip nota" data-nota="pompelmo">Pompelmo</div>
+          <div class="chip nota" data-nota="bergamotto">Bergamotto</div>
+          <div class="chip nota" data-nota="cipresso">Cipresso</div>
+          <div class="chip nota" data-nota="caffè">Caffè</div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="active-bar" id="active-bar"></div>
 </div>
 
+<!-- VIEWS -->
 <div id="view-collezione"></div>
 
 <div id="view-guida" class="view">
-  <div class="guida-section open" id="g-uff">
-    <div class="guida-hdr" onclick="tg('g-uff')"><div class="guida-hdr-left"><div class="guida-icon-box" style="background:rgba(99,153,212,0.1);border-color:rgba(99,153,212,0.2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6399d4" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><span class="guida-ttl">Ufficio / Lavoro</span></div><span class="guida-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="guida-body">
-      <div class="guida-row"><div class="guida-row-lbl">Versatili tutto l'anno</div><div class="guida-row-val">Acqua di Giò EDP #3 · Acqua di Giò Profondo #11 · Gucci Guilty Cologne #4 · Gucci Guilty Parfum #19</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Primavera / Estate</div><div class="guida-row-val">TdH Eau Givrée #2 · Armaf Sillage #5 · Missoni Wave #9 · Davidoff Cool Water #18</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Autunno / Inverno</div><div class="guida-row-val">Lalique Encre Noire #24 · L'Erbolario Ginepro Nero #13 · Helan Vetiver & Rum #1</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Con moderazione</div><div class="guida-row-val">Emporio Armani SWY Abs. #10 · Ferragamo Uomo Sig. #21 · Prada L'Homme Int. #22</div></div>
-    </div>
+  <div class="guida-sec open" id="g-uff">
+    <div class="ghdr" onclick="tg('g-uff')"><div class="ghdr-left"><div class="gicon" style="background:rgba(99,153,212,0.1);border-color:rgba(99,153,212,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#6399d4" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><span class="gttl">Ufficio / Lavoro</span></div><svg class="gchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="gbody"><div class="grow"><div class="grow-lbl">Versatili tutto l'anno</div><div class="grow-val">Acqua di Giò EDP #3 · Acqua di Giò Profondo #11 · Gucci Guilty Cologne #4 · Gucci Guilty Parfum #19</div></div><div class="grow"><div class="grow-lbl">Primavera / Estate</div><div class="grow-val">TdH Eau Givrée #2 · Armaf Sillage #5 · Missoni Wave #9 · Davidoff Cool Water #18</div></div><div class="grow"><div class="grow-lbl">Autunno / Inverno</div><div class="grow-val">Lalique Encre Noire #24 · L'Erbolario Ginepro Nero #13 · Helan Vetiver & Rum #1</div></div><div class="grow"><div class="grow-lbl">Con moderazione</div><div class="grow-val">Emporio Armani SWY Abs. #10 · Ferragamo Uomo Sig. #21 · Prada L'Homme Int. #22</div></div></div>
   </div>
-  <div class="guida-section" id="g-app">
-    <div class="guida-hdr" onclick="tg('g-app')"><div class="guida-hdr-left"><div class="guida-icon-box" style="background:rgba(212,114,106,0.1);border-color:rgba(212,114,106,0.2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4726a" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span class="guida-ttl">Appuntamento / Serata</span></div><span class="guida-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="guida-body">
-      <div class="guida-row"><div class="guida-row-lbl">Romantico elegante (A/I)</div><div class="guida-row-val">D&G The One #12 · Givenchy Gentleman RPr. #20 · Prada L'Homme Int. #22 · Rue Broca Théorème #7</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Seducente / Club (A/I)</div><div class="guida-row-val">Versace Eros EDT #14 · Eros EDP #15 · Eros Flame #16 · Armaf CDNI #17</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Gourmand passionale (A/I)</div><div class="guida-row-val">Emporio Armani SWY Abs. #10 · Ferragamo Uomo Sig. #21 · Rasasi La Yuqawam #23</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Fresco estivo (P/E)</div><div class="guida-row-val">Rasasi Hawas #6 · Acqua di Giò Profondo #11 · Gucci Guilty Parfum #19</div></div>
-    </div>
+  <div class="guida-sec" id="g-app">
+    <div class="ghdr" onclick="tg('g-app')"><div class="ghdr-left"><div class="gicon" style="background:rgba(212,114,106,0.1);border-color:rgba(212,114,106,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#d4726a" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span class="gttl">Appuntamento / Serata</span></div><svg class="gchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="gbody"><div class="grow"><div class="grow-lbl">Romantico elegante (A/I)</div><div class="grow-val">D&G The One #12 · Givenchy Gentleman RPr. #20 · Prada L'Homme Int. #22 · Rue Broca Théorème #7</div></div><div class="grow"><div class="grow-lbl">Seducente / Club (A/I)</div><div class="grow-val">Versace Eros EDT #14 · Eros EDP #15 · Eros Flame #16 · Armaf CDNI #17</div></div><div class="grow"><div class="grow-lbl">Gourmand passionale (A/I)</div><div class="grow-val">Emporio Armani SWY Abs. #10 · Ferragamo Uomo Sig. #21 · Rasasi La Yuqawam #23</div></div><div class="grow"><div class="grow-lbl">Fresco estivo (P/E)</div><div class="grow-val">Rasasi Hawas #6 · Acqua di Giò Profondo #11 · Gucci Guilty Parfum #19</div></div></div>
   </div>
-  <div class="guida-section" id="g-quot">
-    <div class="guida-hdr" onclick="tg('g-quot')"><div class="guida-hdr-left"><div class="guida-icon-box" style="background:rgba(114,184,130,0.1);border-color:rgba(114,184,130,0.2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#72b882" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div><span class="guida-ttl">Quotidiano / Casual</span></div><span class="guida-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="guida-body">
-      <div class="guida-row"><div class="guida-row-lbl">Tutto l'anno</div><div class="guida-row-val">Acqua di Giò EDP #3 · Acqua di Giò Profondo #11 · Gucci Guilty Parfum #19</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Primavera / Estate</div><div class="guida-row-val">Davidoff Adventure #8 · Cool Water #18 · Hawas #6 · Encre Noire Sport #25</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Autunno / Inverno</div><div class="guida-row-val">Helan Vetiver & Rum #1 · L'Erbolario Ginepro Nero #13 · Lalique Encre Noire #24</div></div>
-    </div>
+  <div class="guida-sec" id="g-quot">
+    <div class="ghdr" onclick="tg('g-quot')"><div class="ghdr-left"><div class="gicon" style="background:rgba(114,184,130,0.1);border-color:rgba(114,184,130,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#72b882" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div><span class="gttl">Quotidiano / Casual</span></div><svg class="gchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="gbody"><div class="grow"><div class="grow-lbl">Tutto l'anno</div><div class="grow-val">Acqua di Giò EDP #3 · Acqua di Giò Profondo #11 · Gucci Guilty Parfum #19</div></div><div class="grow"><div class="grow-lbl">Primavera / Estate</div><div class="grow-val">Davidoff Adventure #8 · Cool Water #18 · Hawas #6 · Encre Noire Sport #25</div></div><div class="grow"><div class="grow-lbl">Autunno / Inverno</div><div class="grow-val">Helan Vetiver & Rum #1 · L'Erbolario Ginepro Nero #13 · Lalique Encre Noire #24</div></div></div>
   </div>
-  <div class="guida-section" id="g-pal">
-    <div class="guida-hdr" onclick="tg('g-pal')"><div class="guida-hdr-left"><div class="guida-icon-box" style="background:rgba(99,153,212,0.1);border-color:rgba(99,153,212,0.2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6399d4" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><span class="guida-ttl">Palestra / Sport</span></div><span class="guida-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="guida-body">
-      <div class="guida-row"><div class="guida-row-lbl">Consigliati</div><div class="guida-row-val">Armaf Sillage #5 · Missoni Wave #9 · Davidoff Cool Water #18 · Encre Noire Sport #25</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Da evitare</div><div class="guida-row-val">Tutti gli orientali/gourmand — troppo intensi per l'attività fisica</div></div>
-    </div>
+  <div class="guida-sec" id="g-pal">
+    <div class="ghdr" onclick="tg('g-pal')"><div class="ghdr-left"><div class="gicon" style="background:rgba(99,153,212,0.1);border-color:rgba(99,153,212,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#6399d4" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><span class="gttl">Palestra / Sport</span></div><svg class="gchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="gbody"><div class="grow"><div class="grow-lbl">Consigliati</div><div class="grow-val">Armaf Sillage #5 · Missoni Wave #9 · Davidoff Cool Water #18 · Encre Noire Sport #25</div></div><div class="grow"><div class="grow-lbl">Da evitare</div><div class="grow-val">Tutti gli orientali/gourmand — troppo intensi per l'attività fisica</div></div></div>
   </div>
-  <div class="guida-section" id="g-fest">
-    <div class="guida-hdr" onclick="tg('g-fest')"><div class="guida-hdr-left"><div class="guida-icon-box" style="background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><span class="guida-ttl">Festività / Inverno</span></div><span class="guida-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="guida-body">
-      <div class="guida-row"><div class="guida-row-lbl">Top picks</div><div class="guida-row-val">Emporio Armani SWY Abs. #10 · D&G The One #12 · Versace Eros Flame #16</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Eleganti</div><div class="guida-row-val">Givenchy Gentleman RPr. #20 · Rue Broca Théorème #7 · Prada L'Homme Int. #22</div></div>
-      <div class="guida-row"><div class="guida-row-lbl">Avvolgenti</div><div class="guida-row-val">Ferragamo Uomo Sig. #21 · Rasasi La Yuqawam #23 · Helan Vetiver & Rum #1</div></div>
-    </div>
+  <div class="guida-sec" id="g-fest">
+    <div class="ghdr" onclick="tg('g-fest')"><div class="ghdr-left"><div class="gicon" style="background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><span class="gttl">Festività / Inverno</span></div><svg class="gchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="gbody"><div class="grow"><div class="grow-lbl">Top picks</div><div class="grow-val">Emporio Armani SWY Abs. #10 · D&G The One #12 · Versace Eros Flame #16</div></div><div class="grow"><div class="grow-lbl">Eleganti</div><div class="grow-val">Givenchy Gentleman RPr. #20 · Rue Broca Théorème #7 · Prada L'Homme Int. #22</div></div><div class="grow"><div class="grow-lbl">Avvolgenti</div><div class="grow-val">Ferragamo Uomo Sig. #21 · Rasasi La Yuqawam #23 · Helan Vetiver & Rum #1</div></div></div>
+  </div>
+  <div class="guida-sec" id="g-casa">
+    <div class="ghdr" onclick="tg('g-casa')"><div class="ghdr-left"><div class="gicon" style="background:rgba(114,184,130,0.1);border-color:rgba(114,184,130,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#72b882" stroke-width="1.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span class="gttl">In casa / Relax</span></div><svg class="gchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="gbody"><div class="grow"><div class="grow-lbl">Tutto l'anno</div><div class="grow-val">Acqua di Giò EDP #3 · Acqua di Giò Profondo #11 · Gucci Guilty Parfum #19 · Helan Vetiver & Rum #1</div></div><div class="grow"><div class="grow-lbl">Invernali avvolgenti</div><div class="grow-val">Lalique Encre Noire #24 · L'Erbolario Ginepro Nero #13 · Armaf Sillage #5</div></div><div class="grow"><div class="grow-lbl">Estivi leggeri</div><div class="grow-val">Davidoff Cool Water #18 · Missoni Wave #9 · Lalique Encre Noire Sport #25 · Davidoff Adventure #8</div></div></div>
   </div>
 </div>
 
 <div id="view-consigliati" class="view">
-  <div class="rec-intro">Analizzando la tua collezione, queste sono le lacune olfattive più significative — famiglie che mancano o scenari poco coperti.</div>
-  <div class="rec-card">
-    <div class="rec-card-hdr">
-      <div class="rec-gap-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg></div>
-      <div><div class="rec-name">Fougère fresca da uomo</div><div class="rec-why">Manca completamente — nessun Sauvage, Bleu de Chanel o simile. È la famiglia più versatile e da complimenti, copre ufficio, weekend e sera.</div></div>
-    </div>
-    <div class="rec-picks">
-      <div class="rec-pick-row"><span class="rec-pick-name">Dior Sauvage EDP</span><span class="rec-pick-detail">Lavanda + ambroxan + pepe. Versatile 365 giorni. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Christian-Dior/Sauvage-Eau-de-Parfum-38541.html" target="_blank">Fragrantica →</a></span></div>
-      <div class="rec-pick-row"><span class="rec-pick-name">Bleu de Chanel EDP</span><span class="rec-pick-detail">Cedro, vetiver, incenso. Elegante, non banale. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Chanel/Bleu-de-Chanel-Eau-de-Parfum-31644.html" target="_blank">Fragrantica →</a></span></div>
-      <div class="rec-pick-row"><span class="rec-pick-name">Azzaro Wanted by Night (alternativa economica)</span><span class="rec-pick-detail">Vaniglia, cuoio, spezie. Ottimo rapporto Q/P. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Azzaro/Wanted-by-Night-56218.html" target="_blank">Fragrantica →</a></span></div>
-    </div>
+  <a class="profile-link" href="https://www.fragrantica.it/members/74018" target="_blank">
+    <div class="profile-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <div class="profile-info"><div class="profile-label">Fragrantica.it</div><div class="profile-name">Il mio profilo →</div></div>
+    <svg class="profile-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg>
+  </a>
+  <div class="rec-intro">Analisi dei gap olfattivi basata sulla tua collezione attuale. Queste sono le famiglie mancanti o poco coperte — ordinate per impatto sul guardaroba.</div>
+
+  <div class="rec-group-title">Lacune principali</div>
+
+  <div class="rec-card" id="rc1">
+    <div class="rec-hdr" onclick="toggleRec('rc1')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Fougère fresca — il grande assente</div><div class="rec-gap">Nessun Sauvage, Bleu de Chanel o equivalente. È la famiglia più versatile al mondo, copre ufficio, casual e sera 365 giorni.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Dior Sauvage EDP</span><span class="rec-pick-detail">Il più venduto al mondo, per una ragione. Lavanda + ambroxan + pepe. Bestia sul sillage, funziona in ogni stagione. Cerca campione prima.</span></div><div class="rec-pick"><span class="rec-pick-name">Bleu de Chanel EDP</span><span class="rec-pick-detail">Cedro, incenso, vetiver — più complesso del Sauvage, più elegante. Il "Armani Profondo" della fougère. Ottimo per ufficio e cena.</span></div><div class="rec-pick"><span class="rec-pick-name">YSL Y EDP</span><span class="rec-pick-detail">Mela, cedro ambroxan. Più giovane e secco, ottimo alternativa economica al Sauvage. Buona longevità.</span></div><div class="rec-pick"><span class="rec-pick-name">Azzaro Wanted by Night (budget)</span><span class="rec-pick-detail">Vaniglia, cuoio, spezie. Ottimo rapporto qualità-prezzo, più orientaleggiante del Sauvage ma nella stessa direzione.</span></div></div>
   </div>
-  <div class="rec-card">
-    <div class="rec-card-hdr">
-      <div class="rec-gap-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg></div>
-      <div><div class="rec-name">Legnoso secco invernale da giorno</div><div class="rec-why">Hai molti orientali dolci per la sera fredda, ma pochi legnosi secchi da portare di giorno in autunno.</div></div>
-    </div>
-    <div class="rec-picks">
-      <div class="rec-pick-row"><span class="rec-pick-name">Terre d'Hermès EDT originale</span><span class="rec-pick-detail">Arancia, silex, vetiver. Complementare perfetto alla tua Eau Givrée. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Hermes/Terre-d-Hermes-1598.html" target="_blank">Fragrantica →</a></span></div>
-      <div class="rec-pick-row"><span class="rec-pick-name">Hermès H24 EDP</span><span class="rec-pick-detail">Salvia, legno di pino, ambra. Moderno, fresco anche d'inverno. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Hermes/H24-Eau-de-Parfum-86474.html" target="_blank">Fragrantica →</a></span></div>
-    </div>
+
+  <div class="rec-card" id="rc2">
+    <div class="rec-hdr" onclick="toggleRec('rc2')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Legnoso secco invernale da giorno</div><div class="rec-gap">Hai molti orientali dolci da sera fredda, ma pochi legnosi secchi asciutti da portare di giorno in autunno-inverno.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Terre d'Hermès EDT originale</span><span class="rec-pick-detail">Arancia, silex, vetiver. Il complemento perfetto alla tua Eau Givrée: questa è la versione invernale della stessa maison.</span></div><div class="rec-pick"><span class="rec-pick-name">Hermès H24 EDP</span><span class="rec-pick-detail">Salvia, legno di pino, ambra. Moderno e maschile, fresco anche in autunno. Ottimo da ufficio.</span></div><div class="rec-pick"><span class="rec-pick-name">Prada L'Homme EDT</span><span class="rec-pick-detail">Iris + ambra secca. Più sobrio dell'Intense che già hai — perfetto per i giorni in cui vuoi qualcosa di discreto.</span></div></div>
   </div>
-  <div class="rec-card">
-    <div class="rec-card-hdr">
-      <div class="rec-gap-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg></div>
-      <div><div class="rec-name">Citrico da sera estiva</div><div class="rec-why">I tuoi blu/verdi estivi sono tutti da giorno. Manca qualcosa di fresco ma abbastanza elaborato per la sera d'estate o un appuntamento primaverile.</div></div>
-    </div>
-    <div class="rec-picks">
-      <div class="rec-pick-row"><span class="rec-pick-name">Acqua di Parma Colonia Essenza</span><span class="rec-pick-detail">Agrumi italiani + cuoio. Classico raffinato, funziona a cena estiva. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Acqua-di-Parma/Colonia-Essenza-14095.html" target="_blank">Fragrantica →</a></span></div>
-      <div class="rec-pick-row"><span class="rec-pick-name">Creed Aventus (aspirazionale)</span><span class="rec-pick-detail">Il clone è già il tuo CDNI #17, ma l'originale ha una complessità diversa. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Creed/Aventus-27040.html" target="_blank">Fragrantica →</a></span></div>
-    </div>
+
+  <div class="rec-card" id="rc3">
+    <div class="rec-hdr" onclick="toggleRec('rc3')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Citrico/fresco da sera estiva</div><div class="rec-gap">I tuoi profumi estivi sono quasi tutti da giorno. Manca qualcosa di fresco ma elaborato per una cena o appuntamento primaverile.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Acqua di Parma Colonia Essenza</span><span class="rec-pick-detail">Agrumi italiani + cuoio + ambra. Classico raffinato, funziona a cena estiva o in viaggio.</span></div><div class="rec-pick"><span class="rec-pick-name">Guerlain Homme Intense</span><span class="rec-pick-detail">Limone, cedro, ambra. Agrumato con un cuore caldo — raro equilibrio per la sera d'estate.</span></div><div class="rec-pick"><span class="rec-pick-name">Creed Aventus</span><span class="rec-pick-detail">Il tuo Club de Nuit Intense #17 è già un clone eccellente, ma l'originale ha una profondità di betulla affumicata diversa. Aspira­zionale.</span></div></div>
   </div>
-  <div class="rec-card">
-    <div class="rec-card-hdr">
-      <div class="rec-gap-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg></div>
-      <div><div class="rec-name">Niche entry-level</div><div class="rec-why">La tua collezione è quasi tutta designer. Un niche accessibile eleverebbe la qualità percepita e introdurrebbe note rare.</div></div>
-    </div>
-    <div class="rec-picks">
-      <div class="rec-pick-row"><span class="rec-pick-name">Maison Margiela Replica Jazz Club</span><span class="rec-pick-detail">Rum, tabacco, vaniglia. Narrativo, perfetto per casa e serate informali. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Maison-Margiela/Replica-Jazz-Club-27553.html" target="_blank">Fragrantica →</a></span></div>
-      <div class="rec-pick-row"><span class="rec-pick-name">Diptyque Tam Dao EDP</span><span class="rec-pick-detail">Sandalo, cedro, cipresso. Puro legno meditativo, ottimo in casa e quotidiano invernale. <a class="rec-frag-link" href="https://www.fragrantica.com/perfume/Diptyque/Tam-Dao-Eau-de-Parfum-40888.html" target="_blank">Fragrantica →</a></span></div>
-    </div>
+
+  <div class="rec-group-title">Nicchie scoperte</div>
+
+  <div class="rec-card" id="rc4">
+    <div class="rec-hdr" onclick="toggleRec('rc4')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Niche entry-level</div><div class="rec-gap">La tua collezione è quasi tutta designer/orientale medio. Un niche accessibile aggiunge complessità e note non trovabili nel mainstream.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Maison Margiela Replica Jazz Club</span><span class="rec-pick-detail">Rum, tabacco Virginia, vaniglia, legni. Narrativo e avvolgente — perfetto per casa e serate informali. Complementa il tuo Helan Vetiver & Rum.</span></div><div class="rec-pick"><span class="rec-pick-name">Diptyque Tam Dao EDP</span><span class="rec-pick-detail">Sandalo, cedro, cipresso. Puro legno meditativo, ottimo da casa e quotidiano invernale. Minimalista di lusso.</span></div><div class="rec-pick"><span class="rec-pick-name">Maison Margiela Replica Sailing Day</span><span class="rec-pick-detail">Bergamotto, teak, muschio marino. Acquatico di qualità niche — scala sopra tutti i tuoi blu estivi.</span></div><div class="rec-pick"><span class="rec-pick-name">Initio Rehab (aspirazionale)</span><span class="rec-pick-detail">Rum, vaniglia, muschio. Bestia assoluta come sillage — pochi spray e duri tutto il giorno. Polarizzante nel senso migliore.</span></div></div>
+  </div>
+
+  <div class="rec-card" id="rc5">
+    <div class="rec-hdr" onclick="toggleRec('rc5')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2"12"/></svg></div><div><div class="rec-name">Fougère / Iris da ufficio formale</div><div class="rec-gap">Per le giornate di lavoro importanti ti manca qualcosa di sobrio e autorevole — non fresco, non dolce, solo elegante.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Bulgari Man Glacial Essence</span><span class="rec-pick-detail">Abete, muschio artico, legni. Freddo, preciso, board-room ready. Nessun dolce, zero frutta.</span></div><div class="rec-pick"><span class="rec-pick-name">Chanel Allure Homme Sport Eau Extrême</span><span class="rec-pick-detail">Agrumi + sandalo + muschio. Il punto di equilibrio perfetto tra fresco e formale.</span></div><div class="rec-pick"><span class="rec-pick-name">Givenchy Gentleman Cologne</span><span class="rec-pick-detail">Iris + bergamotto. Leggero, pulito, elegante — a differenza del tuo Réserve Privée #20, questo va bene anche di giorno in ufficio.</span></div></div>
+  </div>
+
+  <div class="rec-card" id="rc6">
+    <div class="rec-hdr" onclick="toggleRec('rc6')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Speziato caldo da weekend A/I</div><div class="rec-gap">Hai speziati da sera (Théorème, Eros Flame), ma manca qualcosa di speziato rilassato per il sabato mattina in autunno.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Dolce & Gabbana The One EDT</span><span class="rec-pick-detail">Tabacco, zenzero, cardamomo — più leggero dell'EDP che hai già. Ideale giorno casual in A/I.</span></div><div class="rec-pick"><span class="rec-pick-name">Valentino Uomo Born in Roma Intense</span><span class="rec-pick-detail">Vetiver fumé, vaniglia, spezie. Caldo ma non dolciastro. Weekend e uscite informali invernali.</span></div><div class="rec-pick"><span class="rec-pick-name">Mont Blanc Explorer Ultra Blue (alternativa)</span><span class="rec-pick-detail">Agrumi + note verdi + legno. Budget-friendly, fresco speziato da giorno A/I. Ottimo rapporto Q/P.</span></div></div>
+  </div>
+
+  <div class="rec-card" id="rc7">
+    <div class="rec-hdr" onclick="toggleRec('rc7')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Fumé / Affumicato</div><div class="rec-gap">Famiglia completamente assente — nessun profumo con note di fumo, incenso o whisky marcato (escluso il Givenchy).</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Tom Ford Tuscan Leather (aspirazionale)</span><span class="rec-pick-detail">Lampone, cuoio, zafferano — il tuo Rasasi La Yuqawam #23 è ispirato a questo. Se ti piace, considera l'originale per occasioni speciali.</span></div><div class="rec-pick"><span class="rec-pick-name">Lattafa Khamrah</span><span class="rec-pick-detail">Incenso, ambra, legni affumicati. Budget orientale di altissimo livello — ideale per capire se la direzione fumé fa per te.</span></div><div class="rec-pick"><span class="rec-pick-name">Parfums de Marly Herod</span><span class="rec-pick-detail">Tabacco, vaniglia, legni. Fumé dolce, molto elegante da sera. Complementa tutto il tuo lato orientale.</span></div></div>
+  </div>
+
+  <div class="rec-card" id="rc8">
+    <div class="rec-hdr" onclick="toggleRec('rc8')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Fresco marino da palestra / sport</div><div class="rec-gap">Solo 5 profumi adatti alla palestra — tutti abbastanza simili tra loro. Potresti aggiungere qualcosa di più specificamente sportivo.</div></div></div>
+    <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Nautica Voyage</span><span class="rec-pick-detail">Mela, cedro, muschio acquatico. Il classico ultra-accessibile, diverso da tutto quello che hai. Perfetto da palestra.</span></div><div class="rec-pick"><span class="rec-pick-name">Issey Miyake L'Eau d'Issey Pour Homme</span><span class="rec-pick-detail">Acqua, legni, muschio. Il pioniere degli acquatici, ancora imbattuto per leggerezza e freschezza reale.</span></div><div class="rec-pick"><span class="rec-pick-name">Hugo Boss Bottled Sport (budget)</span><span class="rec-pick-detail">Citrus, mela, muschio bianco. Fatto esattamente per questo uso — economico, funzionale, non stanca.</span></div></div>
   </div>
 </div>
 
 <div id="view-stats" class="view">
-  <div class="stats-kpi">
-    <div class="kpi"><div class="kpi-n">25</div><div class="kpi-lbl">Fragranze totali</div></div>
-    <div class="kpi"><div class="kpi-n">10</div><div class="kpi-lbl">Autunno / Inverno</div></div>
-    <div class="kpi"><div class="kpi-n">8</div><div class="kpi-lbl">Primavera / Estate</div></div>
-    <div class="kpi"><div class="kpi-n">7</div><div class="kpi-lbl">Tutto l'anno</div></div>
+  <a class="profile-link" href="https://www.fragrantica.it/members/74018" target="_blank">
+    <div class="profile-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <div class="profile-info"><div class="profile-label">Fragrantica.it</div><div class="profile-name">Il mio profilo →</div></div>
+    <svg class="profile-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg>
+  </a>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-n">25</div><div class="kpi-l">Fragranze</div></div>
+    <div class="kpi"><div class="kpi-n">10</div><div class="kpi-l">Autunno/Inverno</div></div>
+    <div class="kpi"><div class="kpi-n">8</div><div class="kpi-l">Primavera/Estate</div></div>
+    <div class="kpi"><div class="kpi-n">7</div><div class="kpi-l">Tutto l'anno</div></div>
   </div>
-  <div class="bar-section">
-    <div class="bar-section-title">Famiglia olfattiva</div>
-    <div class="bar-row"><div class="bar-lbl"><span>Rosso — orientali / intensi</span><span>11</span></div><div class="bar-track"><div class="bar-fill rosso" style="width:44%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Verde — aromatici / legnosi</span><span>8</span></div><div class="bar-track"><div class="bar-fill verde" style="width:32%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Blu — acquatici / freschi</span><span>6</span></div><div class="bar-track"><div class="bar-fill blu" style="width:24%"></div></div></div>
+  <div class="bsec"><div class="bsec-t">Famiglia olfattiva</div>
+    <div class="brow"><div class="blbl"><span>Rosso — orientali</span><span>11</span></div><div class="btrack"><div class="bfill rosso" style="width:44%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Verde — legnosi</span><span>8</span></div><div class="btrack"><div class="bfill verde" style="width:32%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Blu — acquatici</span><span>6</span></div><div class="btrack"><div class="bfill blu" style="width:24%"></div></div></div>
   </div>
-  <div class="bar-section">
-    <div class="bar-section-title">Per occasione d'uso</div>
-    <div class="bar-row"><div class="bar-lbl"><span>Uscite formali</span><span>18 — 72%</span></div><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Appuntamento</span><span>15 — 60%</span></div><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Quotidiano</span><span>15 — 60%</span></div><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Ufficio (incl. moderazione)</span><span>14 — 56%</span></div><div class="bar-track"><div class="bar-fill" style="width:56%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Festività</span><span>14 — 56%</span></div><div class="bar-track"><div class="bar-fill" style="width:56%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>In casa</span><span>13 — 52%</span></div><div class="bar-track"><div class="bar-fill" style="width:52%"></div></div></div>
-    <div class="bar-row"><div class="bar-lbl"><span>Palestra</span><span>5 — 20%</span></div><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div></div>
+  <div class="bsec"><div class="bsec-t">Occasione d'uso</div>
+    <div class="brow"><div class="blbl"><span>Formale</span><span>18 — 72%</span></div><div class="btrack"><div class="bfill" style="width:72%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Appuntamento</span><span>15 — 60%</span></div><div class="btrack"><div class="bfill" style="width:60%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Quotidiano</span><span>15 — 60%</span></div><div class="btrack"><div class="bfill" style="width:60%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Ufficio</span><span>14 — 56%</span></div><div class="btrack"><div class="bfill" style="width:56%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Festività</span><span>14 — 56%</span></div><div class="btrack"><div class="bfill" style="width:56%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>In casa</span><span>13 — 52%</span></div><div class="btrack"><div class="bfill" style="width:52%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Palestra</span><span>5 — 20%</span></div><div class="btrack"><div class="bfill" style="width:20%"></div></div></div>
+  </div>
+  <div class="bsec"><div class="bsec-t">Concentrazione</div>
+    <div class="brow"><div class="blbl"><span>EDP</span><span>14</span></div><div class="btrack"><div class="bfill" style="width:56%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>EDT</span><span>8</span></div><div class="btrack"><div class="bfill" style="width:32%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>Parfum</span><span>2</span></div><div class="btrack"><div class="bfill" style="width:8%"></div></div></div>
+    <div class="brow"><div class="blbl"><span>EDC</span><span>1</span></div><div class="btrack"><div class="bfill" style="width:4%"></div></div></div>
   </div>
 </div>
 
+<!-- SORT SHEET -->
 <div class="backdrop" id="sort-bd" onclick="closeSortBd(event)">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Ordina per</div>
-    <div class="sort-opt active" data-sort="alpha" onclick="setSort('alpha')"><span class="sort-opt-label">Nome A → Z</span><div class="sort-radio"><div class="sort-dot"></div></div></div>
-    <div class="sort-opt" data-sort="brand" onclick="setSort('brand')"><span class="sort-opt-label">Marchio A → Z</span><div class="sort-radio"><div class="sort-dot"></div></div></div>
-    <div class="sort-opt" data-sort="famiglia" onclick="setSort('famiglia')"><span class="sort-opt-label">Famiglia olfattiva</span><div class="sort-radio"><div class="sort-dot"></div></div></div>
-    <div class="sort-opt" data-sort="stagione" onclick="setSort('stagione')"><span class="sort-opt-label">Stagione</span><div class="sort-radio"><div class="sort-dot"></div></div></div>
-    <div class="sort-opt" data-sort="colore" onclick="setSort('colore')"><span class="sort-opt-label">Famiglia colore</span><div class="sort-radio"><div class="sort-dot"></div></div></div>
-    <div class="sort-opt" data-sort="id" onclick="setSort('id')"><span class="sort-opt-label">Ordine originale (#)</span><div class="sort-radio"><div class="sort-dot"></div></div></div>
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">Ordina per</div>
+    <div class="sopt active" data-sort="alpha" onclick="setSort('alpha')"><span class="sopt-lbl">Nome A → Z</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
+    <div class="sopt" data-sort="brand" onclick="setSort('brand')"><span class="sopt-lbl">Marchio A → Z</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
+    <div class="sopt" data-sort="famiglia" onclick="setSort('famiglia')"><span class="sopt-lbl">Famiglia olfattiva</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
+    <div class="sopt" data-sort="stagione" onclick="setSort('stagione')"><span class="sopt-lbl">Stagione</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
+    <div class="sopt" data-sort="colore" onclick="setSort('colore')"><span class="sopt-lbl">Famiglia colore</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
+    <div class="sopt" data-sort="id" onclick="setSort('id')"><span class="sopt-lbl">Ordine originale (#)</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
   </div>
 </div>
 
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-collezione" onclick="switchView('collezione')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <div class="nav-indicator"></div>Collezione
-  </button>
-  <button class="nav-btn" id="nav-guida" onclick="switchView('guida')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    <div class="nav-indicator"></div>Guida
-  </button>
-  <button class="nav-btn" id="nav-consigliati" onclick="switchView('consigliati')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-    <div class="nav-indicator"></div>Consigliati
-  </button>
-  <button class="nav-btn" id="nav-stats" onclick="switchView('stats')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-    <div class="nav-indicator"></div>Statistiche
-  </button>
+  <button class="nav-btn active" id="nav-collezione" onclick="switchView('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><div class="nav-dot"></div>Collezione</button>
+  <button class="nav-btn" id="nav-guida" onclick="switchView('guida')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div class="nav-dot"></div>Guida</button>
+  <button class="nav-btn" id="nav-consigliati" onclick="switchView('consigliati')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><div class="nav-dot"></div>Acquisti</button>
+  <button class="nav-btn" id="nav-stats" onclick="switchView('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg><div class="nav-dot"></div>Statistiche</button>
 </nav>
 
 <script>
 const profumi=[
-  {id:1,brand:"Helan",name:"Vetiver & Rum",conc:"EDP",note:"Vetiver, rum, spezie, legno",famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"si",desc:"Aromatico caldo; ottimo per tempo libero e festività.",url:"https://www.fragrantica.com/perfume/Helan/Vetiver-Rum-41639.html"},
-  {id:2,brand:"Hermès",name:"Terre d'Hermès Eau Givrée",conc:"EDP",note:"Citron, ginepro, pepe Timut, note legnose/minerali",famiglia:"Agrumato aromatico",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco ed etereo. Versione estiva del classico Terre d'Hermès.",url:"https://www.fragrantica.com/perfume/Hermes/Terre-d-Hermes-Eau-Givree-72439.html"},
-  {id:3,brand:"Giorgio Armani",name:"Acqua di Giò",conc:"EDP",note:"Agrumi, note marine, legni",famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Versatilissimo; ideale per ufficio e tutti i giorni.",url:"https://www.fragrantica.com/perfume/Giorgio-Armani/Acqua-di-Gio-Eau-de-Parfum-53229.html"},
-  {id:4,brand:"Gucci",name:"Guilty Cologne Pour Homme",conc:"EDC",note:"Agrumi, erbe, legni leggeri",famiglia:"Aromatico fresco",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco e pulito; perfetto per lavoro e giornate calde.",url:"https://www.fragrantica.com/perfume/Gucci/Guilty-Cologne-Pour-Homme-21547.html"},
-  {id:5,brand:"Armaf",name:"Club de Nuit Sillage",conc:"EDP",note:"Agrumi, tè, muschio bianco, ambra",famiglia:"Fresco muschiato",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Pulito e persistente; adatto anche a palestra e uscite informali.",url:"https://www.fragrantica.com/perfume/Armaf/Club-de-Nuit-Sillage-26714.html"},
-  {id:6,brand:"Rasasi",name:"Hawas for Him",conc:"EDP",note:"Agrumi, menta, note acquatiche, muschio",famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Giovane e frizzante; ottimo per appuntamenti estivi.",url:"https://www.fragrantica.com/perfume/Rasasi/Hawas-for-Him-41218.html"},
-  {id:7,brand:"Rue Broca",name:"Théorème Homme",conc:"EDP",note:"Spezie, ambra, vaniglia, legni orientali",famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Speziato e intenso; ideale per serate fredde.",url:"https://www.fragrantica.com/perfume/Rue-Broca/Theoreme-Homme-55889.html"},
-  {id:8,brand:"Davidoff",name:"Adventure",conc:"EDT",note:"Legni, agrumi, note verdi, spezie",famiglia:"Aromatico legnoso",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco e naturale; perfetto per outdoor e tempo libero.",url:"https://www.fragrantica.com/perfume/Davidoff/Adventure-3369.html"},
-  {id:9,brand:"Missoni",name:"Wave",conc:"EDT",note:"Agrumi, note marine, lavanda",famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Marino energizzante; ideale per mare, ufficio leggero.",url:"https://www.fragrantica.com/perfume/Missoni/Wave-46614.html"},
-  {id:10,brand:"Emporio Armani",name:"Stronger With You Absolutely",conc:"Parfum",note:"Rum, castagna, vaniglia, cardamomo",famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Dolce e avvolgente; top per appuntamenti.",url:"https://www.fragrantica.com/perfume/Emporio-Armani/Stronger-With-You-Absolutely-70016.html"},
-  {id:11,brand:"Giorgio Armani",name:"Acqua di Giò Profondo",conc:"EDP",note:"Note marine, agrumi, patchouli, muschio",famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Pulito e moderno; ottimo per appuntamenti e uscite serali.",url:"https://www.fragrantica.com/perfume/Giorgio-Armani/Acqua-di-Gio-Profondo-68016.html"},
-  {id:12,brand:"Dolce & Gabbana",name:"The One for Men",conc:"EDP",note:"Tabacco, ambra, spezie, cardamomo",famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Elegante e avvolgente; perfetto per cene e serate romantiche.",url:"https://www.fragrantica.com/perfume/Dolce-Gabbana/The-One-for-Men-EDP-49888.html"},
-  {id:13,brand:"L'Erbolario",name:"Ginepro Nero",conc:"EDT",note:"Ginepro, spezie, legni, resine",famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Naturale e aromatico; ottimo anche in casa.",url:"https://www.fragrantica.com/perfume/L-Erbolario/Ginepro-Nero-64929.html"},
-  {id:14,brand:"Versace",name:"Eros",conc:"EDT",note:"Menta, mela verde, tonka, vaniglia, cedro",famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",ufficio:"no",quotidiano:"no",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Dolce e seducente; ideale per serate vivaci e club.",url:"https://www.fragrantica.com/perfume/Versace/Eros-20153.html"},
-  {id:15,brand:"Versace",name:"Eros",conc:"EDP",note:"Limone, ambra, fava tonka, patchouli",famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Più maturo dell'EDT; perfetto per serate eleganti.",url:"https://www.fragrantica.com/perfume/Versace/Eros-Eau-de-Parfum-59822.html"},
-  {id:16,brand:"Versace",name:"Eros Flame",conc:"EDP",note:"Arancia rossa, agrumi speziati, pepe rosa, vaniglia",famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Speziato e passionale; ottimo in clima freddo.",url:"https://www.fragrantica.com/perfume/Versace/Eros-Flame-56408.html"},
-  {id:17,brand:"Armaf",name:"Club de Nuit Intense Man",conc:"EDT",note:"Limone, ananasso, betulla, muschio, ambra",famiglia:"Aromatico legnoso",colore:"rosso",stagione:"tutto",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Forte e deciso, ispirato a Bleu de Chanel.",url:"https://www.fragrantica.com/perfume/Armaf/Club-de-Nuit-Intense-Man-22039.html"},
-  {id:18,brand:"Davidoff",name:"Cool Water",conc:"EDT",note:"Lavanda, menta, note marine, muschio",famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Classico fresco; ideale per ufficio leggero, palestra e casa.",url:"https://www.fragrantica.com/perfume/Davidoff/Cool-Water-for-Men-265.html"},
-  {id:19,brand:"Gucci",name:"Guilty Pour Homme",conc:"Parfum",note:"Lavanda, fiori d'arancio, patchouli, cedro",famiglia:"Aromatico legnoso",colore:"verde",stagione:"tutto",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Più intenso del Cologne; elegante anche per serate e appuntamenti.",url:"https://www.fragrantica.com/perfume/Gucci/Guilty-Pour-Homme-Le-Parfum-86350.html"},
-  {id:20,brand:"Givenchy",name:"Gentleman EDP Réserve Privée",conc:"EDP",note:"Iris, whiskey, cedro, patchouli",famiglia:"Fougère legnoso",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Sofisticato e boozy; perfetto per cene e occasioni importanti.",url:"https://www.fragrantica.com/perfume/Givenchy/Gentleman-Eau-de-Parfum-Reserve-Privee-71060.html"},
-  {id:21,brand:"Salvatore Ferragamo",name:"Uomo Signature",conc:"EDP",note:"Caffè tostato, fava tonka, cardamomo, cuoio",famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Gourmand speziato; eccellente per serate e festività.",url:"https://www.fragrantica.com/perfume/Salvatore-Ferragamo/Uomo-Signature-47617.html"},
-  {id:22,brand:"Prada",name:"L'Homme Intense",conc:"EDP",note:"Iris, ambra, patchouli, fava tonka, cuoio, sandalo",famiglia:"Fougère orientale",colore:"rosso",stagione:"ai",momento:"entrambi",ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Raffinato e vellutato; giornate fredde e serate eleganti.",url:"https://www.fragrantica.com/perfume/Prada/L-Homme-Prada-Intense-38048.html"},
-  {id:23,brand:"Rasasi",name:"La Yuqawam Pour Homme",conc:"EDP",note:"Cuoio, lampone, zafferano, sandalo, ambra",famiglia:"Orientale cuoiato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Molto intenso, simile a Tuscan Leather di Tom Ford. Usare con moderazione.",url:"https://www.fragrantica.com/perfume/Rasasi/La-Yuqawam-Pour-Homme-30008.html"},
-  {id:24,brand:"Lalique",name:"Encre Noire",conc:"EDT",note:"Cipresso, vetiver (Haiti+Bourbon), muschio, cashmere wood",famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Classico moderno al vetiver. Oscuro, terroso, legnoso. Ottimo valore qualità-prezzo.",url:"https://www.fragrantica.com/perfume/Lalique/Encre-Noire-1834.html"},
-  {id:25,brand:"Lalique",name:"Encre Noire Sport",conc:"EDT",note:"Pompelmo, bergamotto, noce moscata, vetiver, legni acquatici",famiglia:"Aromatico acquatico",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Versione più fresca. Il pompelmo addolcisce il vetiver. Adatto anche a palestra.",url:"https://www.fragrantica.com/perfume/Lalique/Encre-Noire-Sport-21369.html"},
+  {id:1,brand:"Helan",name:"Vetiver & Rum",conc:"EDP",note:"Vetiver, rum, spezie, legno",famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"si",desc:"Aromatico caldo; ottimo per tempo libero e festività."},
+  {id:2,brand:"Hermès",name:"Terre d'Hermès Eau Givrée",conc:"EDP",note:"Citron, ginepro, pepe Timut, note legnose, minerali",famiglia:"Agrumato aromatico",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco ed etereo. Versione estiva del classico Terre d'Hermès."},
+  {id:3,brand:"Giorgio Armani",name:"Acqua di Giò",conc:"EDP",note:"Agrumi, note marine, legni",famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Versatilissimo; ideale per ufficio e tutti i giorni."},
+  {id:4,brand:"Gucci",name:"Guilty Cologne Pour Homme",conc:"EDC",note:"Agrumi, erbe, legni leggeri",famiglia:"Aromatico fresco",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco e pulito; perfetto per lavoro e giornate calde."},
+  {id:5,brand:"Armaf",name:"Club de Nuit Sillage",conc:"EDP",note:"Agrumi, tè, muschio bianco, ambra",famiglia:"Fresco muschiato",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Pulito e persistente; adatto anche a palestra e uscite informali."},
+  {id:6,brand:"Rasasi",name:"Hawas for Him",conc:"EDP",note:"Agrumi, menta, note acquatiche, muschio",famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Giovane e frizzante; ottimo per appuntamenti estivi."},
+  {id:7,brand:"Rue Broca",name:"Théorème Homme",conc:"EDP",note:"Spezie, ambra, vaniglia, legni orientali",famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Speziato e intenso; ideale per serate fredde."},
+  {id:8,brand:"Davidoff",name:"Adventure",conc:"EDT",note:"Legni, agrumi, note verdi, spezie",famiglia:"Aromatico legnoso",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco e naturale; perfetto per outdoor e tempo libero."},
+  {id:9,brand:"Missoni",name:"Wave",conc:"EDT",note:"Agrumi, note marine, lavanda",famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Marino energizzante; ideale per mare, ufficio leggero."},
+  {id:10,brand:"Emporio Armani",name:"Stronger With You Absolutely",conc:"Parfum",note:"Rum, castagna, vaniglia, cardamomo",famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Dolce e avvolgente; top per appuntamenti."},
+  {id:11,brand:"Giorgio Armani",name:"Acqua di Giò Profondo",conc:"EDP",note:"Note marine, agrumi, patchouli, muschio",famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Pulito e moderno; ottimo per appuntamenti e uscite serali."},
+  {id:12,brand:"Dolce & Gabbana",name:"The One for Men",conc:"EDP",note:"Tabacco, ambra, spezie, cardamomo",famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Elegante e avvolgente; perfetto per cene e serate romantiche."},
+  {id:13,brand:"L'Erbolario",name:"Ginepro Nero",conc:"EDT",note:"Ginepro, spezie, legni, resine",famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Naturale e aromatico; ottimo anche in casa."},
+  {id:14,brand:"Versace",name:"Eros",conc:"EDT",note:"Menta, mela verde, tonka, vaniglia, cedro",famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",ufficio:"no",quotidiano:"no",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Dolce e seducente; ideale per serate vivaci e club."},
+  {id:15,brand:"Versace",name:"Eros",conc:"EDP",note:"Limone, ambra, fava tonka, patchouli",famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Più maturo dell'EDT; perfetto per serate eleganti."},
+  {id:16,brand:"Versace",name:"Eros Flame",conc:"EDP",note:"Arancia rossa, agrumi speziati, pepe rosa, vaniglia",famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Speziato e passionale; ottimo in clima freddo."},
+  {id:17,brand:"Armaf",name:"Club de Nuit Intense Man",conc:"EDT",note:"Limone, ananasso, betulla, muschio, ambra",famiglia:"Aromatico legnoso",colore:"rosso",stagione:"tutto",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Forte e deciso, ispirato a Bleu de Chanel."},
+  {id:18,brand:"Davidoff",name:"Cool Water",conc:"EDT",note:"Lavanda, menta, note marine, muschio",famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Classico fresco; ideale per ufficio leggero, palestra e casa."},
+  {id:19,brand:"Gucci",name:"Guilty Pour Homme",conc:"Parfum",note:"Lavanda, fiori d'arancio, patchouli, cedro",famiglia:"Aromatico legnoso",colore:"verde",stagione:"tutto",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Più intenso del Cologne; elegante anche per serate e appuntamenti."},
+  {id:20,brand:"Givenchy",name:"Gentleman EDP Réserve Privée",conc:"EDP",note:"Iris, whiskey, cedro, patchouli",famiglia:"Fougère legnoso",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Sofisticato e boozy; perfetto per cene e occasioni importanti."},
+  {id:21,brand:"Salvatore Ferragamo",name:"Uomo Signature",conc:"EDP",note:"Caffè tostato, fava tonka, cardamomo, cuoio",famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Gourmand speziato; eccellente per serate e festività."},
+  {id:22,brand:"Prada",name:"L'Homme Intense",conc:"EDP",note:"Iris, ambra, patchouli, fava tonka, cuoio, sandalo",famiglia:"Fougère orientale",colore:"rosso",stagione:"ai",momento:"entrambi",ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Raffinato e vellutato; giornate fredde e serate eleganti."},
+  {id:23,brand:"Rasasi",name:"La Yuqawam Pour Homme",conc:"EDP",note:"Cuoio, lampone, zafferano, sandalo, ambra",famiglia:"Orientale cuoiato",colore:"rosso",stagione:"ai",momento:"sera",ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Molto intenso, simile a Tuscan Leather di Tom Ford. Usare con moderazione."},
+  {id:24,brand:"Lalique",name:"Encre Noire",conc:"EDT",note:"Cipresso, vetiver, muschio, cashmere wood",famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Classico moderno al vetiver. Oscuro, terroso, legnoso. Ottimo valore qualità-prezzo."},
+  {id:25,brand:"Lalique",name:"Encre Noire Sport",conc:"EDT",note:"Pompelmo, bergamotto, noce moscata, vetiver, legni acquatici",famiglia:"Aromatico acquatico",colore:"verde",stagione:"pe",momento:"giorno",ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Versione più fresca. Il pompelmo addolcisce il vetiver. Adatto anche a palestra."},
 ];
 const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",formale:"Formale",informale:"Informale",appuntamento:"Appuntamento",palestra:"Palestra",casa:"In casa",festivita:"Festività"};
 const colI={blu:"A",verde:"V",rosso:"R"};
-const flLabels={pe:"P/E",ai:"A/I",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Blu",verde:"Verde",rosso:"Rosso",sera:"Solo sera",giorno:"Solo giorno"};
+const flLabels={pe:"P/E",ai:"A/I",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Blu",verde:"Verde",rosso:"Rosso",sera:"Sera",giorno:"Giorno"};
 const sortKeys={alpha:p=>p.name.toLowerCase(),brand:p=>p.brand.toLowerCase()+p.name,famiglia:p=>p.famiglia.toLowerCase(),stagione:p=>({pe:0,tutto:1,ai:2}[p.stagione]??3),colore:p=>({blu:0,verde:1,rosso:2}[p.colore]??3),id:p=>p.id};
 const sortLabels={alpha:"A→Z",brand:"Marchio",famiglia:"Famiglia",stagione:"Stagione",colore:"Colore",id:"Originale"};
-let activeFilters=new Set(),searchVal='',currentSort='alpha';
+
+let activeFilters=new Set(), activeNote=new Set(), searchVal='', currentSort='alpha', filtersVisible=true;
+
+function toggleFilters(){
+  filtersVisible=!filtersVisible;
+  document.getElementById('filter-panel').classList.toggle('collapsed',!filtersVisible);
+  document.getElementById('filter-toggle-btn').classList.toggle('active',!filtersVisible);
+}
 
 function getFiltered(){
-  let list=profumi.filter(p=>{
+  return profumi.filter(p=>{
     const s=searchVal.toLowerCase();
     if(s&&!p.brand.toLowerCase().includes(s)&&!p.name.toLowerCase().includes(s)&&!p.note.toLowerCase().includes(s)&&!p.famiglia.toLowerCase().includes(s))return false;
     for(const f of activeFilters){
@@ -432,58 +496,76 @@ function getFiltered(){
       if(f==='sera'&&p.momento!=='sera')return false;
       if(f==='giorno'&&p.momento!=='giorno')return false;
     }
+    for(const n of activeNote){
+      if(!p.note.toLowerCase().includes(n))return false;
+    }
     return true;
-  });
-  const fn=sortKeys[currentSort];
-  list.sort((a,b)=>{const va=fn(a),vb=fn(b);return typeof va==='number'?va-vb:va<vb?-1:va>vb?1:0});
-  return list;
+  }).sort((a,b)=>{const fn=sortKeys[currentSort];const va=fn(a),vb=fn(b);return typeof va==='number'?va-vb:va<vb?-1:va>vb?1:0});
+}
+
+function highlightNote(text){
+  if(!activeNote.size)return text;
+  let out=text;
+  activeNote.forEach(n=>{const re=new RegExp(n,'gi');out=out.replace(re,m=>`<mark>${m}</mark>`);});
+  return out;
 }
 
 function buildCard(p){
-  const usoHtml=Object.keys(usoLabels).map(k=>{const v=p[k];const cls=v==='si'?'si':v==='si-mod'?'si-mod':'no';return`<div class="uso-item"><div class="uso-dot ${cls}"></div><span class="uso-label ${cls}">${usoLabels[k]}</span></div>`;}).join('');
+  const usoHtml=Object.keys(usoLabels).map(k=>{const v=p[k];const cls=v==='si'?'si':v==='si-mod'?'mod':'no';return`<div class="uso-item"><div class="uso-dot ${cls}"></div><span class="uso-lbl ${cls}">${usoLabels[k]}</span></div>`;}).join('');
   const stagLbl=p.stagione==='pe'?"P / Estate":p.stagione==='ai'?"A / Inverno":"Tutto l'anno";
   const momLbl=p.momento==='entrambi'?"Giorno & sera":p.momento==='sera'?"Sera":"Giorno";
-  const fragLink=p.url?`<a class="fragrantica-link" href="${p.url}" target="_blank" onclick="event.stopPropagation()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Fragrantica</a>`:'';
   return`<div class="card ${p.colore}" id="card-${p.id}" onclick="toggleCard(${p.id})">
     <div class="card-top"><div class="num">${p.id}</div><div class="card-info"><div class="card-brand">${p.brand}</div><div class="card-name">${p.name}</div><div class="card-conc">${p.conc}</div></div><div class="gem ${p.colore}">${colI[p.colore]}</div></div>
-    <div class="card-notes">${p.note}</div>
+    <div class="card-notes">${highlightNote(p.note)}</div>
     <div class="card-tags"><span class="tag stagione">${stagLbl}</span><span class="tag">${momLbl}</span><span class="tag">${p.famiglia}</span></div>
-    <div class="card-expand"><div class="expand-label">Occasioni d'uso</div><div class="uso-grid">${usoHtml}</div><div class="card-desc">${p.desc}</div>${fragLink}</div>
+    <div class="card-expand"><div class="expand-lbl">Occasioni d'uso</div><div class="uso-grid">${usoHtml}</div><div class="card-desc">${p.desc}</div></div>
   </div>`;
 }
 
 function render(){
   const list=getFiltered();
   document.getElementById('view-collezione').innerHTML=list.length?list.map(buildCard).join(''):'<div class="empty">Nessun profumo trovato</div>';
-  document.getElementById('count-pill').textContent=list.length===profumi.length?`${profumi.length} fragranze`:`${list.length} / ${profumi.length}`;
+  const tot=profumi.length;
+  document.getElementById('count-pill').textContent=list.length===tot?`${tot}`:` ${list.length}/${tot}`;
   renderActiveBar();
 }
 
 function renderActiveBar(){
   const el=document.getElementById('active-bar');
-  if(!activeFilters.size){el.classList.remove('show');el.innerHTML='';return}
+  const allActive=[...activeFilters].concat([...activeNote]);
+  if(!allActive.length){el.classList.remove('show');el.innerHTML='';return;}
   el.classList.add('show');
-  el.innerHTML=[...activeFilters].map(f=>`<div class="af-tag" onclick="removeFilter('${f}')">${flLabels[f]||f}<span class="af-remove">✕</span></div>`).join('')+`<div class="af-tag af-clear" onclick="clearFilters()">Azzera<span class="af-remove">✕</span></div>`;
+  const tags=[...activeFilters].map(f=>`<div class="af-tag" onclick="removeFilter('${f}')">${flLabels[f]||f}<span class="af-x">✕</span></div>`);
+  const ntags=[...activeNote].map(n=>`<div class="af-tag" style="background:rgba(180,140,220,0.1);border-color:rgba(180,140,220,0.3);color:#d4b8f0" onclick="removeNota('${n}')">${n}<span class="af-x">✕</span></div>`);
+  el.innerHTML=tags.join('')+ntags.join('')+`<div class="af-tag af-clear" onclick="clearAll()">Azzera<span class="af-x">✕</span></div>`;
 }
 
-function removeFilter(f){activeFilters.delete(f);document.querySelector(`.chip[data-filter="${f}"]`)?.classList.remove('active');render()}
-function clearFilters(){activeFilters.clear();document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));render()}
-function toggleCard(id){document.getElementById('card-'+id)?.classList.toggle('open')}
+function removeFilter(f){activeFilters.delete(f);document.querySelector(`.chip[data-filter="${f}"]`)?.classList.remove('active');render();}
+function removeNota(n){activeNote.delete(n);document.querySelector(`.chip[data-nota="${n}"]`)?.classList.remove('active');render();}
+function clearAll(){activeFilters.clear();activeNote.clear();document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));render();}
+function toggleCard(id){document.getElementById('card-'+id)?.classList.toggle('open');}
 
-document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+// filter chips
+document.querySelectorAll('.chip[data-filter]').forEach(c=>c.addEventListener('click',()=>{
   const f=c.dataset.filter;
-  if(activeFilters.has(f)){activeFilters.delete(f);c.classList.remove('active')}else{activeFilters.add(f);c.classList.add('active')}
+  if(activeFilters.has(f)){activeFilters.delete(f);c.classList.remove('active');}else{activeFilters.add(f);c.classList.add('active');}
   render();
 }));
-document.getElementById('search').addEventListener('input',e=>{searchVal=e.target.value;render()});
+// note chips
+document.querySelectorAll('.chip[data-nota]').forEach(c=>c.addEventListener('click',()=>{
+  const n=c.dataset.nota;
+  if(activeNote.has(n)){activeNote.delete(n);c.classList.remove('active');}else{activeNote.add(n);c.classList.add('active');}
+  render();
+}));
 
-function openSort(){document.getElementById('sort-bd').classList.add('open')}
-function closeSortBd(e){if(e.target===document.getElementById('sort-bd'))document.getElementById('sort-bd').classList.remove('open')}
+document.getElementById('search').addEventListener('input',e=>{searchVal=e.target.value;render();});
+
+function openSort(){document.getElementById('sort-bd').classList.add('open');}
+function closeSortBd(e){if(e.target===document.getElementById('sort-bd'))document.getElementById('sort-bd').classList.remove('open');}
 function setSort(s){
   currentSort=s;
-  document.querySelectorAll('.sort-opt').forEach(o=>o.classList.toggle('active',o.dataset.sort===s));
-  document.getElementById('sort-btn').classList.toggle('has-sort',s!=='alpha');
-  document.getElementById('sort-label').textContent=sortLabels[s];
+  document.querySelectorAll('.sopt').forEach(o=>o.classList.toggle('active',o.dataset.sort===s));
+  document.getElementById('sort-btn').classList.toggle('active',s!=='alpha');
   document.getElementById('sort-bd').classList.remove('open');
   render();
 }
@@ -495,7 +577,8 @@ function switchView(v){
   });
   document.getElementById('app-header').style.display=v==='collezione'?'block':'none';
 }
-function tg(id){document.getElementById(id).classList.toggle('open')}
+function tg(id){document.getElementById(id).classList.toggle('open');}
+function toggleRec(id){document.getElementById(id).classList.toggle('open');}
 
 switchView('collezione');render();
 </script>
