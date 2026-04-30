@@ -195,6 +195,56 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .bfill{height:100%;border-radius:2px;background:var(--gold)}
 .bfill.blu{background:var(--blu)}.bfill.verde{background:var(--verde)}.bfill.rosso{background:var(--rosso)}
 
+/* COMPARE BUTTON on card */
+.cmp-btn{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--glass3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);transition:all .2s;z-index:2;flex-shrink:0}
+.cmp-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cmp-btn.selected{background:var(--gold);border-color:var(--gold);color:#08080c}
+.cmp-btn svg{width:13px;height:13px}
+.card.cmp-selected{border-color:rgba(201,169,110,0.5);background:rgba(201,169,110,0.05)}
+.card.cmp-selected::before{opacity:1}
+
+/* COMPARE TRAY (sticky bar above bottom nav) */
+.cmp-tray{display:none;position:fixed;bottom:calc(max(6px,env(safe-area-inset-bottom)) + 54px);left:12px;right:12px;z-index:99;background:rgba(14,14,12,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(201,169,110,0.35);border-radius:var(--radius);padding:10px 12px;flex-direction:row;align-items:center;gap:10px;animation:slideUp .2s cubic-bezier(.32,.72,0,1)}
+.cmp-tray.show{display:flex}
+.cmp-slots{display:flex;gap:8px;flex:1;min-width:0}
+.cmp-slot{width:36px;height:42px;border-radius:8px;border:1px dashed var(--border2);flex-shrink:0;overflow:hidden;background:var(--glass)}
+.cmp-slot img{width:100%;height:100%;object-fit:contain}
+.cmp-slot.empty{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:16px}
+.cmp-tray-label{font-size:12px;color:var(--text2);flex:1;min-width:0}
+.cmp-tray-label strong{display:block;color:var(--gold);font-size:11px;font-weight:500;margin-bottom:1px}
+.cmp-go-btn{flex-shrink:0;background:var(--gold);color:#08080c;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.cmp-go-btn:disabled{background:var(--glass3);color:var(--text3)}
+.cmp-clear-btn{flex-shrink:0;background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;display:flex;align-items:center}
+.cmp-clear-btn svg{width:14px;height:14px}
+
+/* COMPARE VIEW */
+.cmp-view-empty{text-align:center;padding:60px 20px;color:var(--text3);font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic}
+.cmp-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmp-grid{display:grid;min-width:0}
+.cmp-grid.cols-1{grid-template-columns:140px 1fr}
+.cmp-grid.cols-2{grid-template-columns:140px 1fr 1fr}
+.cmp-grid.cols-3{grid-template-columns:140px 1fr 1fr 1fr}
+.cmp-header-cell{padding:10px 10px 16px;text-align:center;border-bottom:1px solid var(--border2)}
+.cmp-header-img{width:60px;height:72px;margin:0 auto 8px;border-radius:8px;overflow:hidden;background:var(--glass2)}
+.cmp-header-img img{width:100%;height:100%;object-fit:contain}
+.cmp-header-brand{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.cmp-header-name{font-family:'Cormorant Garamond',serif;font-size:13px;line-height:1.2;color:var(--text)}
+.cmp-header-conc{font-size:10px;color:var(--text3);background:var(--glass3);border-radius:4px;padding:1px 5px;display:inline-block;margin-top:4px}
+.cmp-row-label{padding:10px 10px;font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--text3);border-bottom:1px solid var(--border);display:flex;align-items:center;background:var(--glass);position:sticky;left:0;z-index:1}
+.cmp-cell{padding:10px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);text-align:center;line-height:1.5;display:flex;align-items:center;justify-content:center}
+.cmp-cell.highlight{color:var(--gold2);font-weight:500}
+.cmp-uso-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin:0 auto}
+.cmp-uso-dot.si{background:var(--verde)}.cmp-uso-dot.mod{background:var(--gold)}.cmp-uso-dot.no{background:var(--glass3);border:1px solid var(--border2)}
+.cmp-stars{color:var(--gold);font-size:13px}
+.cmp-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--border);margin:2px}
+.cmp-tag.stagione{border-color:rgba(201,169,110,.25);color:var(--gold)}
+.cmp-tag.famiglia{border-color:var(--border2);color:var(--text2)}
+.cmp-section-header{grid-column:1/-1;padding:8px 10px;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);background:var(--bg);border-bottom:1px solid var(--border2)}
+.cmp-accordo{font-size:11px;padding:1px 0}
+.cmp-remove{width:20px;height:20px;border-radius:50%;background:var(--glass3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);margin:0 auto 6px;transition:all .15s}
+.cmp-remove:hover{background:var(--rosso-bg);border-color:var(--rosso);color:var(--rosso)}
+.cmp-remove svg{width:10px;height:10px}
+
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,8,12,0.9);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom))}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;cursor:pointer;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:400;transition:color .15s}
@@ -202,6 +252,8 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .nav-btn svg{width:19px;height:19px}
 .nav-dot{width:3px;height:3px;border-radius:50%;background:var(--gold);display:none;margin-top:1px}
 .nav-btn.active .nav-dot{display:block}
+.nav-badge{min-width:14px;height:14px;border-radius:7px;background:var(--gold);color:#08080c;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;margin-top:1px}
+.nav-badge.show{display:flex}
 </style>
 </head>
 <body>
@@ -481,6 +533,26 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   </div>
 </div>
 
+<!-- COMPARE TRAY -->
+<div class="cmp-tray" id="cmp-tray">
+  <div class="cmp-slots" id="cmp-slots"></div>
+  <div class="cmp-tray-label"><strong id="cmp-tray-count">0 / 3 selezionati</strong><span>Seleziona fino a 3</span></div>
+  <button class="cmp-go-btn" id="cmp-go-btn" onclick="switchView('confronta')" disabled>Confronta</button>
+  <button class="cmp-clear-btn" onclick="clearCompare()" title="Svuota selezione">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<!-- COMPARE VIEW -->
+<div id="view-confronta" class="view">
+  <div class="cmp-view-empty" id="cmp-empty" style="display:none">
+    <div style="font-size:32px;margin-bottom:12px;opacity:.3">⊕</div>
+    Nessun profumo selezionato.<br>
+    <span style="font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text3)">Torna alla collezione e usa l'icona + sulle card.</span>
+  </div>
+  <div id="cmp-content"></div>
+</div>
+
 <!-- SORT SHEET -->
 <div class="backdrop" id="sort-bd" onclick="closeSortBd(event)">
   <div class="bsheet">
@@ -499,6 +571,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-collezione" onclick="switchView('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><div class="nav-dot"></div>Collezione</button>
+  <button class="nav-btn" id="nav-confronta" onclick="switchView('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg><div class="nav-badge" id="cmp-badge"></div>Confronta</button>
   <button class="nav-btn" id="nav-layering" onclick="switchView('layering')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><div class="nav-dot"></div>Layering</button>
   <button class="nav-btn" id="nav-guida" onclick="switchView('guida')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div class="nav-dot"></div>Guida</button>
   <button class="nav-btn" id="nav-consigliati" onclick="switchView('consigliati')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><div class="nav-dot"></div>Acquisti</button>
@@ -625,7 +698,12 @@ function buildCard(p){
   const stagLbl=p.stagione==='pe'?"P / Estate":p.stagione==='ai'?"A / Inverno":"Tutto l'anno";
   const momLbl=p.momento==='entrambi'?"Giorno & sera":p.momento==='sera'?"Sera":"Giorno";
   const accordHtml=p.accordi.slice(0,3).map((a,i)=>`<div style="font-size:10px;color:${accordColors[i]};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30%">${a}</div>`).join('');
-  return`<div class="card ${p.colore}" id="card-${p.id}" onclick="toggleCard(${p.id})">
+  const isSel=compareSet.has(p.id);
+  const cmpIcon=isSel
+    ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>`
+    :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>`;
+  return`<div class="card ${p.colore}${isSel?' cmp-selected':''}" id="card-${p.id}" onclick="toggleCard(${p.id})">
+    <button class="cmp-btn${isSel?' selected':''}" id="cmpbtn-${p.id}" onclick="event.stopPropagation();toggleCompare(${p.id})" title="${isSel?'Rimuovi dal confronto':'Aggiungi al confronto'}">${cmpIcon}</button>
     <div class="card-body">
       <div class="card-top">
         <div class="card-img-wrap">${img}</div>
@@ -654,6 +732,198 @@ function buildCard(p){
       </div>
     </div>
   </div>`;
+}
+
+// ── COMPARE LOGIC ────────────────────────────────────────────────────────
+let compareSet = new Set(); // max 3 ids
+
+function toggleCompare(id){
+  if(compareSet.has(id)){
+    compareSet.delete(id);
+  } else {
+    if(compareSet.size>=3){
+      // shake the tray to signal max reached
+      const tray=document.getElementById('cmp-tray');
+      tray.style.animation='none';
+      requestAnimationFrame(()=>{tray.style.animation='';tray.classList.add('shake');setTimeout(()=>tray.classList.remove('shake'),400);});
+      return;
+    }
+    compareSet.add(id);
+  }
+  updateCompareUI();
+  // re-render just this card's button to avoid full re-render
+  const card=document.getElementById('card-'+id);
+  if(card){
+    const isSel=compareSet.has(id);
+    card.classList.toggle('cmp-selected',isSel);
+    const btn=document.getElementById('cmpbtn-'+id);
+    if(btn){
+      btn.classList.toggle('selected',isSel);
+      btn.innerHTML=isSel
+        ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>`
+        :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>`;
+      btn.title=isSel?'Rimuovi dal confronto':'Aggiungi al confronto';
+    }
+  }
+}
+
+function clearCompare(){
+  compareSet.clear();
+  updateCompareUI();
+  // reset all card buttons
+  document.querySelectorAll('.cmp-btn').forEach(b=>{
+    b.classList.remove('selected');
+    b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>`;
+    b.title='Aggiungi al confronto';
+  });
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('cmp-selected'));
+}
+
+function updateCompareUI(){
+  const n=compareSet.size;
+  const ids=[...compareSet];
+  // tray
+  const tray=document.getElementById('cmp-tray');
+  tray.classList.toggle('show',n>0);
+  // slots
+  const slots=document.getElementById('cmp-slots');
+  slots.innerHTML='';
+  for(let i=0;i<3;i++){
+    const id=ids[i];
+    const p=id?profumi.find(x=>x.id===id):null;
+    const div=document.createElement('div');
+    div.className='cmp-slot'+(p?'':' empty');
+    div.innerHTML=p
+      ?(IMGS[p.id]?`<img src="${IMGS[p.id]}" alt="${p.name}">`:`<span style="font-size:16px;color:var(--text3)">${colI[p.colore]}</span>`)
+      :'<span>+</span>';
+    slots.appendChild(div);
+  }
+  // count
+  document.getElementById('cmp-tray-count').textContent=`${n} / 3 selezionati`;
+  // go button
+  document.getElementById('cmp-go-btn').disabled=n<2;
+  // badge on nav
+  const badge=document.getElementById('cmp-badge');
+  badge.textContent=n||'';
+  badge.classList.toggle('show',n>0);
+  // if on confronta view, refresh it
+  if(document.getElementById('view-confronta').classList.contains('active')) renderCompare();
+}
+
+function renderCompare(){
+  const ids=[...compareSet];
+  const content=document.getElementById('cmp-content');
+  const empty=document.getElementById('cmp-empty');
+  if(ids.length<2){
+    content.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+  const list=ids.map(id=>profumi.find(p=>p.id===id)).filter(Boolean);
+  const n=list.length;
+
+  const usoKeys=Object.keys(usoLabels);
+  const stagLbl=s=>s==='pe'?"Primavera / Estate":s==='ai'?"Autunno / Inverno":"Tutto l'anno";
+  const momLbl=m=>m==='entrambi'?"Giorno & sera":m==='sera'?"Sera":"Giorno";
+  const renderUsoDot=v=>{const cls=v==='si'?'si':v==='si-mod'?'mod':'no';return`<div class="cmp-uso-dot ${cls}"></div>`;};
+
+  // find best in numeric fields
+  const bestRating=Math.max(...list.map(p=>p.rating));
+  const bestLongevita=Math.max(...list.map(p=>p.longevita));
+
+  let html=`<div class="cmp-table"><div class="cmp-grid cols-${n}">`;
+
+  // Row 0: label col header (empty) + profile headers
+  html+=`<div class="cmp-row-label" style="background:var(--bg);border-bottom:1px solid var(--border2)"></div>`;
+  list.forEach(p=>{
+    const img=IMGS[p.id]?`<img src="${IMGS[p.id]}" alt="${p.name}">`:'';
+    html+=`<div class="cmp-header-cell">
+      <div class="cmp-remove" onclick="removeFromCompare(${p.id})" title="Rimuovi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </div>
+      <div class="cmp-header-img">${img}</div>
+      <div class="cmp-header-brand">${p.brand}</div>
+      <div class="cmp-header-name">${p.name}</div>
+      <span class="cmp-header-conc">${p.conc}</span>
+    </div>`;
+  });
+
+  // Section: Profilo
+  html+=`<div class="cmp-section-header">Profilo</div>`;
+
+  // Rating
+  html+=`<div class="cmp-row-label">Rating ★</div>`;
+  list.forEach(p=>{
+    const best=p.rating===bestRating;
+    html+=`<div class="cmp-cell${best?' highlight':''}"><span class="cmp-stars">★</span> ${p.rating}</div>`;
+  });
+
+  // Longevità
+  html+=`<div class="cmp-row-label">Longevità</div>`;
+  list.forEach(p=>{
+    const best=p.longevita===bestLongevita;
+    html+=`<div class="cmp-cell${best?' highlight':''}">${p.longevita}h</div>`;
+  });
+
+  // Stagione
+  html+=`<div class="cmp-row-label">Stagione</div>`;
+  list.forEach(p=>{html+=`<div class="cmp-cell"><span class="cmp-tag stagione">${stagLbl(p.stagione)}</span></div>`;});
+
+  // Momento
+  html+=`<div class="cmp-row-label">Momento</div>`;
+  list.forEach(p=>{html+=`<div class="cmp-cell" style="font-size:11px">${momLbl(p.momento)}</div>`;});
+
+  // Famiglia
+  html+=`<div class="cmp-row-label">Famiglia</div>`;
+  list.forEach(p=>{html+=`<div class="cmp-cell"><span class="cmp-tag famiglia">${p.famiglia}</span></div>`;});
+
+  // Accordi principali
+  html+=`<div class="cmp-section-header">Accordi principali</div>`;
+  html+=`<div class="cmp-row-label">Top accordi</div>`;
+  list.forEach(p=>{
+    html+=`<div class="cmp-cell" style="flex-direction:column;gap:3px">${p.accordi.slice(0,4).map((a,i)=>`<div class="cmp-accordo" style="color:${accordColors[i]}">${a}</div>`).join('')}</div>`;
+  });
+
+  // Note
+  html+=`<div class="cmp-row-label" style="align-items:flex-start;padding-top:12px">Note</div>`;
+  list.forEach(p=>{html+=`<div class="cmp-cell" style="font-size:11px;text-align:left;line-height:1.6;align-items:flex-start">${p.note}</div>`;});
+
+  // Section: Occasioni
+  html+=`<div class="cmp-section-header">Occasioni d'uso</div>`;
+  usoKeys.forEach(k=>{
+    html+=`<div class="cmp-row-label">${usoLabels[k]}</div>`;
+    list.forEach(p=>{
+      const v=p[k];
+      const lbl=v==='si'?'Sì':v==='si-mod'?'Mod.':'No';
+      html+=`<div class="cmp-cell" style="gap:5px">${renderUsoDot(v)}<span style="font-size:11px">${lbl}</span></div>`;
+    });
+  });
+
+  html+=`</div></div>`;
+
+  // Add profumo button if slots < 3
+  if(list.length<3){
+    html+=`<div style="text-align:center;padding:14px 0"><button onclick="switchView('collezione')" style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-family:DM Sans,sans-serif;font-size:12px;padding:8px 16px;cursor:pointer">+ Aggiungi un profumo</button></div>`;
+  }
+
+  content.innerHTML=html;
+}
+
+function removeFromCompare(id){
+  compareSet.delete(id);
+  updateCompareUI();
+  // update card in collezione if visible
+  const card=document.getElementById('card-'+id);
+  if(card){
+    card.classList.remove('cmp-selected');
+    const btn=document.getElementById('cmpbtn-'+id);
+    if(btn){
+      btn.classList.remove('selected');
+      btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>`;
+      btn.title='Aggiungi al confronto';
+    }
+  }
 }
 
 function render(){
@@ -702,11 +972,16 @@ function setSort(s){
 }
 
 function switchView(v){
-  ['collezione','guida','layering','consigliati','stats'].forEach(n=>{
+  ['collezione','guida','layering','confronta','consigliati','stats'].forEach(n=>{
     document.getElementById('view-'+n).classList.toggle('active',n===v);
-    document.getElementById('nav-'+n).classList.toggle('active',n===v);
+    const nb=document.getElementById('nav-'+n);
+    if(nb)nb.classList.toggle('active',n===v);
   });
   document.getElementById('app-header').style.display=v==='collezione'?'block':'none';
+  // show compare tray only on collezione
+  const tray=document.getElementById('cmp-tray');
+  if(compareSet.size>0) tray.classList.toggle('show',v==='collezione');
+  if(v==='confronta') renderCompare();
 }
 function tg(id){document.getElementById(id).classList.toggle('open');}
 function toggleRec(id){document.getElementById(id).classList.toggle('open');}
