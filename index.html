@@ -196,7 +196,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .bfill.blu{background:var(--blu)}.bfill.verde{background:var(--verde)}.bfill.rosso{background:var(--rosso)}
 
 /* COMPARE BUTTON on card */
-.cmp-btn{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--glass3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);transition:all .2s;z-index:2;flex-shrink:0}
+.cmp-btn{position:absolute;bottom:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--glass3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);transition:all .2s;z-index:2;flex-shrink:0}
 .cmp-btn:hover{border-color:var(--gold);color:var(--gold)}
 .cmp-btn.selected{background:var(--gold);border-color:var(--gold);color:#08080c}
 .cmp-btn svg{width:13px;height:13px}
@@ -703,7 +703,6 @@ function buildCard(p){
     ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>`
     :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>`;
   return`<div class="card ${p.colore}${isSel?' cmp-selected':''}" id="card-${p.id}" onclick="toggleCard(${p.id})">
-    <button class="cmp-btn${isSel?' selected':''}" id="cmpbtn-${p.id}" onclick="event.stopPropagation();toggleCompare(${p.id})" title="${isSel?'Rimuovi dal confronto':'Aggiungi al confronto'}">${cmpIcon}</button>
     <div class="card-body">
       <div class="card-top">
         <div class="card-img-wrap">${img}</div>
@@ -731,6 +730,7 @@ function buildCard(p){
         <div class="card-desc">${p.desc}</div>
       </div>
     </div>
+	<button class="cmp-btn${isSel?' selected':''}" id="cmpbtn-${p.id}" onclick="event.stopPropagation();toggleCompare(${p.id})" title="${isSel?'Rimuovi dal confronto':'Aggiungi al confronto'}">${cmpIcon}</button>
   </div>`;
 }
 
