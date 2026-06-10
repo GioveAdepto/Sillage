@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sillage">
@@ -205,6 +205,8 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 
 /* COMPARE TRAY (sticky bar above bottom nav) */
 .cmp-tray{display:none;position:fixed;bottom:calc(max(6px,env(safe-area-inset-bottom)) + 54px);left:12px;right:12px;z-index:99;background:rgba(14,14,12,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(201,169,110,0.35);border-radius:var(--radius);padding:10px 12px;flex-direction:row;align-items:center;gap:10px;animation:slideUp .2s cubic-bezier(.32,.72,0,1)}
+	@keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.cmp-tray.shake{animation:shakeX .35s ease}
 .cmp-tray.show{display:flex}
 .cmp-slots{display:flex;gap:8px;flex:1;min-width:0}
 .cmp-slot{width:36px;height:42px;border-radius:8px;border:1px dashed var(--border2);flex-shrink:0;overflow:hidden;background:var(--glass)}
@@ -222,8 +224,8 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .cmp-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .cmp-grid{display:grid;min-width:0}
 .cmp-grid.cols-1{grid-template-columns:140px 1fr}
-.cmp-grid.cols-2{grid-template-columns:140px 1fr 1fr}
-.cmp-grid.cols-3{grid-template-columns:140px 1fr 1fr 1fr}
+.cmp-grid.cols-2{grid-template-columns:140px 1fr 1fr; min-width:480px}
+.cmp-grid.cols-3{grid-template-columns:140px 1fr 1fr 1fr; min-width:640px}
 .cmp-header-cell{padding:10px 10px 16px;text-align:center;border-bottom:1px solid var(--border2)}
 .cmp-header-img{width:60px;height:72px;margin:0 auto 8px;border-radius:8px;overflow:hidden;background:var(--glass2)}
 .cmp-header-img img{width:100%;height:100%;object-fit:contain}
@@ -254,6 +256,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .nav-btn.active .nav-dot{display:block}
 .nav-badge{min-width:14px;height:14px;border-radius:7px;background:var(--gold);color:#08080c;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;margin-top:1px}
 .nav-badge.show{display:flex}
+	@media(min-width:900px){.view{max-width:840px;margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -262,7 +265,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   <div class="hdr-main">
     <span class="app-title"><span class="title-dot"></span>Sillage</span>
     <div class="hdr-actions">
-      <span class="count-pill" id="count-pill">25</span>
+      <span class="count-pill" id="count-pill">27</span>
       <div class="icon-btn" id="filter-toggle-btn" onclick="toggleFilters()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
       </div>
@@ -293,6 +296,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
           <div class="chip occ" data-filter="ufficio">Ufficio</div>
           <div class="chip occ" data-filter="appuntamento">Appuntamento</div>
           <div class="chip occ" data-filter="quotidiano">Quotidiano</div>
+          <div class="chip occ" data-filter="informale">Informale</div>
           <div class="chip occ" data-filter="formale">Formale</div>
           <div class="chip occ" data-filter="palestra">Palestra</div>
           <div class="chip occ" data-filter="casa">In casa</div>
@@ -348,6 +352,8 @@ input[type=search]::-webkit-search-cancel-button{display:none}
           <div class="chip nota" data-nota="marine">Marine</div>
           <div class="chip nota" data-nota="lampone">Lampone</div>
           <div class="chip nota" data-nota="whisky">Whisky</div>
+          <div class="chip nota" data-nota="melone">Melone</div>
+          <div class="chip nota" data-nota="sale">Sale</div>
         </div>
       </div>
     </div>
@@ -416,7 +422,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray Profondo (base marina persistente, aquozone) → 1 spray Gucci Guilty EDP su polsi. La rosa e il pimento del Guilty si aprono sopra il fondo marino del Profondo.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Marino-floreale speziato. La rosa e il pimento del Guilty portano calore e sensualità che il Profondo non ha; il Profondo porta la freschezza marina che impedisce al Guilty di risultare troppo pesante.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Cedro e note fresche in comune. Il Profondo è la base acquatica; il Guilty EDP porta la componente floreale-speziata calda. Equilibrio insolito e molto personale.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Appuntamento estivo serale, cena, uscita versatile.</span></div></div></div>
 
 <div class="rec-card" id="l7"><div class="rec-hdr" onclick="toggleRec('l7')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#d4726a" stroke-width="1.5" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div><div class="rec-name">Hawas → Versace Eros Flame</div><div class="rec-gap">#6 prima · #16 sopra · Fruttato-speziato caldo · P/E sera</div></div></div>
-<div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray Hawas (ambra grigia + muschio + patchouli, base persistente) → 1 spray Eros Flame su polsi. Il mandarino e il pepe del Flame si aprono sopra il fondo fruttato-acquatico del Hawas.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Speziato-fruttato caldo e sensuale. Prugna, mela, pepe del Madagascar, mandarino e vaniglia insieme — quasi un niche orientale. Il rosmarino del Flame porta una nota erbacea sorprendente.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Ambra grigia e patchouli in common. Il Hawas è la base fruttata-acquatica; il Flame porta la componente speziata secca che il Hawas non ha. Basi vaniliate compatibili.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Appuntamento primaverile-estivo serale, cena romantica.</span></div></div></div>
+<div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray Hawas (ambra grigia + muschio + patchouli, base persistente) → 1 spray Eros Flame su polsi. Il mandarino e il pepe del Flame si aprono sopra il fondo fruttato-acquatico del Hawas.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Speziato-fruttato caldo e sensuale. Prugna, mela, pepe del Madagascar, mandarino e vaniglia insieme — quasi un niche orientale. Il rosmarino del Flame porta una nota erbacea sorprendente.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Ambra grigia e patchouli in comune. Il Hawas è la base fruttata-acquatica; il Flame porta la componente speziata secca che il Hawas non ha. Basi vaniliate compatibili.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Appuntamento primaverile-estivo serale, cena romantica.</span></div></div></div>
 
 <div class="rec-card" id="l8"><div class="rec-hdr" onclick="toggleRec('l8')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#d4726a" stroke-width="1.5" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div><div class="rec-name">CDN Intense Man → Versace Eros EDT</div><div class="rec-gap">#17 prima · #14 sopra · Ananas-fruttato dolce · tutto anno sera</div></div></div>
 <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray CDNI su petto e collo (base betulla-muschio-ambra grigia, 8h longevità) → 1 spray Eros EDT su polsi. L'Eros porta la sua dolcezza mentolata-vanigliata che ammorbidisce l'apertura graffiante del CDNI.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Ananas fumé con apertura dolce-mentolata. Si risolve il problema principale del CDNI (apertura acida nei primi 15 minuti). La mela verde e la tonka dell'Eros creano un ponte morbido prima che arrivi la betulla.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Ribes nero in entrambi. Il CDNI ha struttura e sillage eccezionale; l'Eros porta dolcezza. Coprono tutto lo spettro della piramide in modo complementare.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Club, serata vivace, uscita notturna informale.</span></div></div></div>
@@ -427,7 +433,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray SWY Absolutely (rum + castagna + vaniglia + elemi, base densa 8h) → 1 spray Eros Flame su polsi. Il mandarino e il pepe del Flame portano l'apertura brillante che all'Absolutely manca.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Gourmand speziato con apertura luminosa. L'Absolutely da solo tende a essere subito pesante (rum denso nei primi minuti); il mandarino e il rosmarino del Flame creano una transizione elegante prima di scendere al fondo gourmand.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Vaniglia e fava tonka in entrambi. Il Flame porta oakmoss, sandalo e cedro che si abbinano perfettamente al rum e alla castagna. Il pepe del Flame bilancia la dolcezza dell'Absolutely.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Cena romantica invernale, appuntamento speciale, capodanno.</span></div></div></div>
 
 <div class="rec-card" id="l10"><div class="rec-hdr" onclick="toggleRec('l10')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div><div class="rec-name">D&G The One → Théorème Homme</div><div class="rec-gap">#12 prima · #7 sopra · Tabaccoso-citrico · A/I sera elegante</div></div></div>
-<div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray D&G The One (tabacco + ambra + cardamomo, base orientale solida) → 1 spray Théorème su polsi. Gli agrumi brillanti del Théorème aprono sopra il tabacco caldo del The One.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Tabacco-pompelmo sofisticato. Il Théorème risolve la mancanza di apertura del The One (che tende a essere subito denso); la nota citrica e il muschio del Théorème bilanciano l'ambra e il cardamomo.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Patchouli e note legnose in common. Il The One è la base orientale; il Théorème è l'apertura citrico-fresca che mancava. Insieme coprono l'intera piramide.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Cena elegante, evento formale serale, teatro.</span></div></div></div>
+<div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray D&G The One (tabacco + ambra + cardamomo, base orientale solida) → 1 spray Théorème su polsi. Gli agrumi brillanti del Théorème aprono sopra il tabacco caldo del The One.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Tabacco-pompelmo sofisticato. Il Théorème risolve la mancanza di apertura del The One (che tende a essere subito denso); la nota citrica e il muschio del Théorème bilanciano l'ambra e il cardamomo.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Patchouli e note legnose in comune. Il The One è la base orientale; il Théorème è l'apertura citrico-fresca che mancava. Insieme coprono l'intera piramide.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Cena elegante, evento formale serale, teatro.</span></div></div></div>
 
 <div class="rec-card" id="l11"><div class="rec-hdr" onclick="toggleRec('l11')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div><div class="rec-name">Prada L'Homme Intense → Théorème Homme</div><div class="rec-gap">#22 prima · #7 sopra · Iris-citrico orientale · A/I sera</div></div></div>
 <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Come si fa</span><span class="rec-pick-detail">2 spray Prada (iris + ambra + cuoio + sandalo, base vellutata) → 1 spray Théorème su polsi. Il pompelmo e gli agrumi del Théorème aprono nitidi sopra la densità del Prada.</span></div><div class="rec-pick"><span class="rec-pick-name">Risultato olfattivo</span><span class="rec-pick-detail">Iris con testa citrica brillante. Il Théorème porta l'apertura luminosa che al Prada manca; il Prada porta profondità e longevità che al Théorème mancano. Si completano perfettamente su tutta la piramide.</span></div><div class="rec-pick"><span class="rec-pick-name">Perché funziona</span><span class="rec-pick-detail">Patchouli e muschio in comune. Struttura complementare: il Prada è tutto cuore/fondo; il Théorème è testa/corpo. Raramente due profumi coprono i tre stadi così bene.</span></div><div class="rec-pick"><span class="rec-pick-name">Quando</span><span class="rec-pick-detail">Cena elegante, appuntamento formale, occasione importante.</span></div></div></div>
@@ -486,7 +492,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   <div class="rec-card" id="rc4"><div class="rec-hdr" onclick="toggleRec('rc4')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Niche entry-level</div><div class="rec-gap">La collezione è quasi tutta designer. Un niche accessibile eleva la qualità e introduce note non trovabili nel mainstream.</div></div></div>
   <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Maison Margiela Replica Jazz Club</span><span class="rec-pick-detail">Rum, tabacco Virginia, vaniglia, legni. Narrativo e avvolgente — perfetto per casa e serate informali. Complementa il tuo Helan Vetiver & Rum in chiave più sofisticata.</span></div><div class="rec-pick"><span class="rec-pick-name">Diptyque Tam Dao EDP</span><span class="rec-pick-detail">Sandalo, cedro, cipresso. Puro legno meditativo — ottimo in casa e quotidiano invernale. Il sandalo che manca alla tua collezione (hai il Rasasi che l'ha in base ma non è il protagonista).</span></div><div class="rec-pick"><span class="rec-pick-name">Parfums de Marly Herod</span><span class="rec-pick-detail">Tabacco, vaniglia, legni. Fumé dolce, molto elegante da sera. Complementa tutto il lato orientale — porta la nota tabaccosa che hai solo nel D&G.</span></div></div></div>
   <div class="rec-card" id="rc5"><div class="rec-hdr" onclick="toggleRec('rc5')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Budget niche — Lattafa</div><div class="rec-gap">Il tuo punto di forza attuale: espandere la collezione con profumi orientali di qualità a prezzo molto basso.</div></div></div>
-  <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Lattafa Asad</span><span class="rec-pick-detail">Ispirato a Nishane Hacivat. Profilo woody-fresco tropicale — gap reale nella tua collezione. Stagione P/E, molto versatile. Prezzo sotto €30.</span></div><div class="rec-pick"><span class="rec-pick-name">Lattafa Khamrah</span><span class="rec-pick-detail">Incenso, ambra, legni affumicati. Fumé orientale budget-friendly — ideale per capire se la direzione fumé fa per te prima di investire in Parfums de Marly.</span></div><div class="rec-pick"><span class="rec-pick-name">Lattafa Atlas</span><span class="rec-pick-detail">Ispirato a Orto Parisi Megamare. Marine niche — se vuoi esplorare il marino di fascia alta senza spendere €200. Valuta rispetto ai marine che già hai.</span></div></div></div>
+  <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">Lattafa Asad</span><span class="rec-pick-detail">Ispirato a Nishane Hacivat. Profilo woody-fresco tropicale — gap reale nella tua collezione. Stagione P/E, molto versatile. Prezzo sotto €30.</span></div><div class="rec-pick"><span class="rec-pick-name">Lattafa Khamrah</span><span class="rec-pick-detail">Incenso, ambra, legni affumicati. Fumé orientale budget-friendly — ideale per capire se la direzione fumé fa per te prima di investire in Parfums de Marly.</span></div><div class="rec-pick"><span class="rec-pick-name">Lattafa Fakhar Black</span><span class="rec-pick-detail">Ispirato a YSL Y EDP — copre direttamente il gap fougère fresca segnalato sopra, sotto i 30€. Mela, cedro, ambroxan.</span></div></div></div>
   <div class="rec-card" id="rc6"><div class="rec-hdr" onclick="toggleRec('rc6')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Speziato caldo da weekend A/I</div><div class="rec-gap">Hai speziati da sera elegante (Théorème, Eros Flame) ma manca qualcosa di speziato rilassato per il sabato mattina d'autunno.</div></div></div>
   <div class="rec-body"><div class="rec-pick"><span class="rec-pick-name">D&G The One EDT</span><span class="rec-pick-detail">Tabacco, zenzero, cardamomo — più leggero dell'EDP che hai già. Ideale giorno casual A/I: stesso DNA The One ma versione mattutina.</span></div><div class="rec-pick"><span class="rec-pick-name">Valentino Uomo Born in Roma Intense</span><span class="rec-pick-detail">Vetiver fumé, vaniglia, spezie. Caldo ma non dolciastro. Weekend e uscite informali invernali — diverso da tutto quello che hai.</span></div></div></div>
   <div class="rec-card" id="rc7"><div class="rec-hdr" onclick="toggleRec('rc7')"><div class="rec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="rec-name">Fresco marino da palestra</div><div class="rec-gap">Solo 5 profumi adatti alla palestra, tutti simili tra loro. Potresti aggiungere qualcosa di più specificamente sportivo.</div></div></div>
@@ -499,38 +505,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
     <div class="profile-info"><div class="profile-label">Fragrantica.it</div><div class="profile-name">Il mio profilo →</div></div>
     <svg class="profile-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg>
   </a>
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-n">26</div><div class="kpi-l">Fragranze</div></div>
-    <div class="kpi"><div class="kpi-n">10</div><div class="kpi-l">Autunno/Inverno</div></div>
-    <div class="kpi"><div class="kpi-n">8</div><div class="kpi-l">Primavera/Estate</div></div>
-    <div class="kpi"><div class="kpi-n">7</div><div class="kpi-l">Tutto l'anno</div></div>
-  </div>
-  <div class="bsec"><div class="bsec-t">Rating medio Fragrantica</div>
-    <div class="brow"><div class="blbl"><span>D&G The One / TdH Eau Givrée / Givenchy</span><span>4.4–4.5 ★</span></div><div class="btrack"><div class="bfill" style="width:90%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Prada / Missoni / Rasasi Hawas / Helan</span><span>4.3 ★</span></div><div class="btrack"><div class="bfill" style="width:86%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>ADG Profondo / Eros Flame / Versace EDP</span><span>4.3 ★</span></div><div class="btrack"><div class="bfill" style="width:86%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>ADG EDP / Gucci Guilty EDP / Armaf CDNI</span><span>4.1 ★</span></div><div class="btrack"><div class="bfill" style="width:82%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Gucci Guilty Cologne</span><span>3.7 ★</span></div><div class="btrack"><div class="bfill" style="width:74%"></div></div></div>
-  </div>
-  <div class="bsec"><div class="bsec-t">Famiglia olfattiva</div>
-    <div class="brow"><div class="blbl"><span>Rosso — orientali / intensi</span><span>11</span></div><div class="btrack"><div class="bfill rosso" style="width:44%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Verde — aromatici / legnosi</span><span>8</span></div><div class="btrack"><div class="bfill verde" style="width:32%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Blu — acquatici / freschi</span><span>6</span></div><div class="btrack"><div class="bfill blu" style="width:24%"></div></div></div>
-  </div>
-  <div class="bsec"><div class="bsec-t">Occasione d'uso</div>
-    <div class="brow"><div class="blbl"><span>Formale</span><span>18 — 72%</span></div><div class="btrack"><div class="bfill" style="width:72%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Appuntamento</span><span>15 — 60%</span></div><div class="btrack"><div class="bfill" style="width:60%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Quotidiano</span><span>15 — 60%</span></div><div class="btrack"><div class="bfill" style="width:60%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Ufficio</span><span>14 — 56%</span></div><div class="btrack"><div class="bfill" style="width:56%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Festività</span><span>14 — 56%</span></div><div class="btrack"><div class="bfill" style="width:56%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>In casa</span><span>13 — 52%</span></div><div class="btrack"><div class="bfill" style="width:52%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>Palestra</span><span>5 — 20%</span></div><div class="btrack"><div class="bfill" style="width:20%"></div></div></div>
-  </div>
-  <div class="bsec"><div class="bsec-t">Longevità media</div>
-    <div class="brow"><div class="blbl"><span>8h (Parfum/EDP intensi)</span><span>CDNI, SWY, Prada, La Yuqawam</span></div><div class="btrack"><div class="bfill" style="width:100%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>7h (EDP standard)</span><span>Helan, Hawas, Théorème, Wave, CDN Sillage...</span></div><div class="btrack"><div class="bfill" style="width:87%"></div></div></div>
-    <div class="brow"><div class="blbl"><span>6h (EDP leggeri / EDT)</span><span>ADG EDP, ADG Profondo, TdH Givrée...</span></div><div class="btrack"><div class="bfill" style="width:75%"></div></div></div>
-  </div>
+  <div id="stats-dynamic"></div>
 </div>
 
 <!-- COMPARE TRAY -->
@@ -607,6 +582,7 @@ const IMGS={
   24:"data:image/webp;base64,UklGRpYEAABXRUJQVlA4IIoEAADwGQCdASpuAIIAPp1EnUmlo6KhLbJqcLATiWcAzG0Rrty3f9hRrv7FxqrSZWZNHL6MejcAKEYxjYJ4M/9680Qp/xChtUbBc8/o/fHm5M1LIC/w+jKbIlaIAfwmuAUqzHXPi3vaiVuAFy1fdgHUCErF4ZCulvMY4is/bRdEIMcVxp7SUbJXNJrD8Ub1sKu2CrNkCNSg15FaymX8os1y+6QlQATYQX3v5PjogBIm1zwUpZnxoBbV4O9SXm4HXb+2QaxRsbfruhGy/Pu9UedHP9osPhHjLmhJLQAA/vdGmb0EzKoHlbKnFasR95WnwfSFwVbznGvdQLXF4NiF15q4p7tAGsJTraX3dq8WfPTfBZ2WnfMMCVvEPnM/Fbgz7Tfo8Odxfn7Ary3ZYIzmGynVgBkpFxXpqvW1szp2r+Z/qNO+Fc7KW6BTcKhxLh20t/A1s/9F7a8+TGFM0tcyiCue2dNV5mk5Z3Z5cUx702FJNzHELIBDRccQUKCQT95KJ/XsXlb/MJ2sPCRb4cIlbxVKcAUcqiWGpRVjLKcFr2OC0fRNxWaogw87zQzqrNt7Qr1GQ2eo0VFzYBmS2BpEzmqtHOC23n59K3SYGco9ixRnX1es9FXFevJBa8WZVi+QA8J7N2jyuKMtWqHu6Srs4xEwKIk0ty+3xhM4acvX755+xMsNK2KK7D79pH9Dl4T5H1Sz7VV6r9UjjPDcldKSRuEH4T3R4KIiJ/yCycB7c0pVush6uTFN95eOocE4kZrSDpFN2XmPRM14q2cJmbEXIUsOaTUL5Avd0airOyojywW1pD/XRfLukgrvBZC4jBywYImje6hZxGCzEDnUaJ56a7E5e1x6w2qudBnUtAEXlcryIviJNNQTucRsS1sEwcSw06gAqBbcG4hKW0a5u3vIJcyvUI9PG3LuS7266G3ijfRxIn89Dhb+jbPiuJhz44Js5hchcJxH2m90++Bcg6HmgSvWICPU4mFSe6HDYeGibxe3PrNgBhjcG+y8Z0bLESwu1mBx3GkdVnwV87UJoixKZo6r4iNRvnXVOtpGgIupU4tafJXY35k8tuGZSsVJp2qjM/xEXNqI1TUM/0PP7jpj9nZG2SmqhKK4Gn+esKIj77MZMQoq+qag2io/6F2wYm7BSSXAs7TmgFIT2k880vFem3AMh7gC2InGzXtff7VQwU6ZyrK6+BA0fR/fTfQiyCVejgR6sKhMAfZRcBNqJoaTk7p1B52v0TBr9to12SZJ/jO17aNSUI8l/AASvulOckeHaLX1wW56IH65eUqLQ3dU8JaqHZZpWZsZWO4l+HLmNV/d9Lyd81UzHcMPsIgEplK1UtQdBj0O0Ws93itvNy4/2bYmds2UnCPsiaZugV42Dr7ucG06rkzGz8d3wirjgdUGKxWeT30POXue3tcEKta0L3brsbr3Y2+VztLJW+8ePVNAtU9FGtCjN5VH6PEmWXbAGaD5Ech4nUG0rgD3+z6chaHa1M/4PR5pYAgCi6MjtzTX2ycq2/1nyUTHizl8+j+X7n2rr2xtuH3EQXOxKAAA",
   25:"data:image/webp;base64,UklGRlQFAABXRUJQVlA4IEgFAACQHACdASpuAIIAPp1CnUklpCMhLbObiLATiWUYfCd143Er7ug9ADpgGlz7YZrv6rzn43vGJxE/mUZXge+1RHt5rxKWuUgEVlQlo8Anqf9DdGuNIyIbL3+qHyAomPIuLw4Dyw75l2ShLG94P/5OaLbvInGMvZr9VGrl4q/3K02/CykPGgMBtS0x7euG7mt6Kb0hbhLsERsMHtaPL4XqYTkkNRnu5gDcr14Xd/PAu7QOAuX1H1nahatG5CgbI5cc1elwTOvUg/OV0SLNW1HJw0P67Mm/c2rx6/yAlrEapvC6I+CZugYS93axZUB7GgAA/vdGkF2m1U3fY/0o6+3ioLgAQfw4cOD1NwCOX8Z1NZVB/fAxjNQIbSttExwJoyso/1yWqlT9rMoBKPbuOQbWXCAYu+YRr2UVG7+u2hDXs8VrCHiRVWOpcLV77FsmosN8ZTQSjVvyNuYN0iTzNpglO/tvEED01NjexxzxP9MgruXXjebWjZ94d3wnplg2T44RHzBrEB3Geai0PrNMjttvQG7D/zFPNJlYSX7WpTu9jt3ogKfWDi24oQVH29OvT/jQZn7aTSydPD5GcFYAhwHyXNqWCslV8Bn4TNPrtjvMHlUdEWa2riTTlHzpHzfX8HfCJZQumLQoujXOSGp/3MZIBv2DbMEC7cJHm+K6CKsijwiZ0rkUP+R2APa6OnHGpEeY6pn7K2/PFsax3fm2fYs4lTfFQ2ZLqUMcGeDKDtBYJ95+CLpDClhPKDCii/hCAQl2mw9ep3DLPRxr7n+cdIrfGazsckOowkJhZvtmawuiUHuOmd2jrNL7FRAGqJ2AczYYPhJtCk5ZVCaySFtVZ60Kakef8FyUGYWZ4Pft4hpXdc4NMM1ry8U5/sQFop4x5fwSD6XW8K4uZOSQ97AQOag2MLGn8OegQ1LvWw12n+WAswwB42dHKhHyLXRxmQkdS6W4NrS+FffUa/McCSx+3GcWy3lHvQxw78kp8rHTj/KXomajPQjfSo808eI+lA3hyIf/DaWfo78DoIQCBe/eDYjFLdJOwkMgNYCA7prwPJHTz+h1ckTYkpPFwB5NfAniH5qU0niuwpqQAqpkub5XpnPoFbeaEWqqDRYnQSXsmTC1CPn4Lo/FD5roxvHGrOIDWnxYvffe+f1xTcXUJYkEpP3I0sejxL9lr0/sqAH/t6Yv8YXmZkErD9BVNYCLGHYjSvNvJFnLYZeHfUyMs3Utm3/Essrvxtf1gV/Xw5KCSc2FrnsxeJd0JHykFqy/fz4wXW0bb/2XRaHaI1ZMT30xfMBw1iWWMZFgf3CEY46XDmQ7tc8s/TWiFHkqrELL7wXy4DutX5ChZIpWS/FUe7hidAQBO/fr+HBT3yjgOTJyunAOcm3/4gAfdPUUGlZRHp/NTOxFlVLZh4LjN7Pgx4htcWMQFvwcAkAw0ExcEw5maPqEoqbRnzYciIG2qI2OqS7lYATyVxSwmj+/HtHOp7JBf9C9Cju1AtS+Z3ANyIEOpQfj5XYDgkW4EeyZoSVKdzXvbtq3qsCYVrSKP/Ib1nOOrGt4+G85e/rEdeszYw5XDnGM6ZdorhNZcRNhHB9xIY+EhsBF6bqMTIPtVW90xB8oHxT/ZS2JaweIEq5IZXI8sS1TWorA9k0QZAyQGKNuxDW9c79h72+bQ1xaI0k895eyHBY9cFj44KG5rC4M0c7vuQdvMYbN371KECsCO+H8+CP70LDWFj/AR9v7Bctz1XetgCCS2gK15bT4IEkaihANATryqkaSQJFIyKWDC/divMRNQ8CADdsCOaI2lVwAAA==",
   26:"data:image/webp;base64,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",
+  27:"data:image/webp;base64,UklGRrgIAABXRUJQVlA4IKwIAAAQJACdASpuAIIAPjEWikMiISEVGZ00IAMEspOxKAAMctk9RMqm/t6YQbbi/0Xq6+6Pf7+ab9lvV89Ku80c+zMOWFXFziTd6f63ivmxoAPrHxO6k/9f8r//S9WnR29W+wcYUZMFP/GY0NzBOziDDm+lVM9oA/TBBelMUhwtprJl3ykcf6ZJp1r4ytvkEGfC9D3bpBLdVqVoWyyBvMGUZXLq2lgcHWyJ6CnwWqAg0h3EzNjdzMVh+unk/NKSX0quVLVY+VDz7SufaMLghzVMdnnIq5UsximC+CLJHNBaOKyzpsqvDsGBWcyBc315WpuGAdh2FMwe3nCCa+AjUQsu/MXbrT+gwhepvNB0Tvt7IyZWj+YCqvwVZ7+JYnEIJw/EJ0vVQcX4l+0KBeAA/uG7zuQDY2z//w934bfty0y/Bhx3pu+cty/RGpdh9Z1dhjzyhtCfitYFbufPs2sJIg7+5oQ/A0b7EvKNCUFD1kh21Hie9EPSxKP9/wdx9xIdWnvBFmmkSl9diUusqyOH9JcKd6ifef92OnHNeIbjLM1sUhpKXh9dnfgWGHeo7HNUZkk7r5hchHHyE/jaEt/Yy+TjCnyKQqaGz4vIoZPiT6Rdmkf/8K2VQ0TGM61d2pf4ReryxYnUC+tytQARq78zLbAD3jAB3EfKyhb4oM+vWioA1L+gklrpbVmWEH7jn8D0wD2fcFtOhu7EGzgaMFqR45FkeoHzzKc5P37T25V5SYFfYGzgFpwl9sQZju6JQN0PQcNLoZ6w29f9RbDrnzyQuN89g6slDvQgKaiza9MGlwd3UGKimBQkDHb705DLMlWcdW9DrfNjeQcTMVexTvFtikv/KapKc22IB+XGyaiRqMAMekG0/wz90H7Dm956F2ltNznJIZLP/TXcN3Z8jkGpzrlZv0aVlgidpnShtL8lexQnpEn9KbogG7pjN0fPAvCPJj0Fuhne+jKOVsrvccPsAOaNcvf3m7xz+qppF5ozBShm6Cx/BuPZjjfFUwsg1Nt6TqwdDOu0wz0j4p7sY6Ln63D21odcrAHjPk/gxtCeUYRyYJL5aAYjHQmcxHh8eFyCsMiSvm8XzIJHkDnMscbX4F6ZyqMMrRoLuowPkK638VoGHJ5r4/sE5rtfordYSmxJknZb+t1BXKPmRm80t+FVuDfBV/xbDt4qsMh2mtJDSdnr3YMrdR5RMB5f9N8qCn7VJR7etiS0oIjZDnLyGpdSqKf8FZ5EdzhVeJvTkDtEwHtbJD9qAf3ebkucb6jiKTI4RECxvfx7R3hj8VVLb//oWgwSIS2X4WBUW3/m0Bg2azFHMXWXlpM58+CzBxXWrU32sxa6l48ZFn+vGBNAehaIDrSf1l6VYtsxF5ELka09uVdk6LP7VbTwfWxwbrtXbkpMZl0kyHHee8pye0NLZXBUQo4VixgzlQajcIrDYjDV8THkK69BV2cM22GSv7Z9/3e5cAM3IHEFiCBWh+lpzPOTwymAXrpZ8CHyhaaDlngBh44d4B8AEFH5NFf5Fzsfd5fgDx1Tf6PxtM5xfULUiuJjOxJS3DrkaLP8iXXSUOIUxMLfYgQLUrUy1ax2gTIeTDCeGD21b3Az7MFG9mr1ioXD6wLD6M6oKJojt6gBAycxDVLztFddGSMNbsghJYPyV6hX+PRiaEB1TVAVkwnu6CDDbf2dyXOU1EP3OqrBT4eayhbkO/3+Qer3v7XtRSZ7ayRkFTJbOA+6BoWGTQ607sVbSv2fqJ9IGBQDDsvnJzkbmYi1tl8jfNFjBYW6RSiv55B5cSQFLMZN+gOOUMbURaP21YLbS1Pvn0u1mFLf0mV7XMR77IZ2VEG9VDxlAoAsqGpG1IG92MFF5fe3qguD3OrWwSLv+0TWPZDeElIsFDIq4V9YmerdGs8QNtK6zW5s4NsqeazsrU/ik8G3ydilJlHUrbRo+F/Lh1rVkVMEMi2ODQhUTPqbB3pb7PHZglttYD3RjYaLdn6qOKWfwjrsFw8xqnv08gAY+6i2vh9OHE491FyGXCpb4Wfjt6fnkfOUOJM/L8+StkTmnIjA1hXW+aMVoCzsY0ait9XRsQoZUmVEB1/yJ/0HPKiALrxBp/TGW8wJkLTsXL/TnPiQe8j38yiOyO2gz9uPEKJp57GQ43Xt8w+23bUZ+2124Gqae3eaPGAFFkKI/QNRPoJuuGPileb9z7qd12fQhNiZ1TsmBXI/xiO8EJaL4TM4d0+stKu1hrLn7Dq02TSI+gPvx1mfvEFWN0XhCWMYjmWxNfv607iKGn93xbv+Ad+P1F2+L7Hfh4DydPdL2uu1VyEN1RYUMXZx5qUlEXb4Rs7rULjmciKJ2/lV/XyBMWKSJrfsf71fHajJcpR24r/8FwbtnjwPkL+mT/7/MvwfzH1zPG+A7I39/k9lruHlbAgfh2SElA2UgV84oQ1WaiBL0BZOL8oLPAi+3viWjGPEBJ5J7uozXakjUYTgLVdXNPlo9cPoVBdp4okJR5huFylK026nua5DtXXnLxffPj9beMNjMynXV7ESu1faQIUWUe7es518qm6374Y1yaMV9LSudDxUsSoFRBdFojWUidlHNRcHwA3bKQahsk38trpgsDT6YNqeCf915VBaIeRrd590YsQ8fJeFj7iPGwtv/Dz2Qtlz7TrPGVGRpJIvasfCOB9pWK2K9ALnjwldRbsxwwVz3y+1rxJDqS4c/ZsXvaP4JEky1QZplgJ4hieHeJXUAOrMCTCXvuc34qTtiflJXbWVK4nZdHtirDF4J2+qXScp/PFv+bkWicvDCta5F5O2NU/wyCz6qyh/C0WYOtMBrPaWryGNY0vhj0OlorJe8cjf20MjrEZmS+DshdKAueGMOcqaB+u+BC/gTMFg0i0f0bOKVNNI9Ca202sKT565r22vOLe7yOClH2mzoi9V5kovzsg5B8wx7IMuFJgBeADApauea4IuXJhKeVSSAAA=",
 };
 // ── PROFUMI DATA (corrected from Fragrantica images) ──────────────────────
 const profumi=[
@@ -635,10 +611,11 @@ const profumi=[
   {id:23,brand:"Rasasi",name:"La Yuqawam Pour Homme",conc:"EDP",note:"Cuoio, lampone, pelle scamosciata, note legnose, zafferano, olibano",accordi:["Cuoiato","Fruttato","Dolce","Animalico","Ambra"],famiglia:"Orientale cuoiato",colore:"rosso",stagione:"ai",momento:"sera",longevita:8,rating:4.4,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Rating 4.4. Simile a Tuscan Leather di Tom Ford — cuoio, zafferano, lampone. 8h longevità potente. Usare con moderazione."},
   {id:24,brand:"Lalique",name:"Encre Noire",conc:"EDT",note:"Cipresso, vetiver haitiano, vetiver bourbon, muschio, cashmere wood",accordi:["Legnoso","Aromatico","Terroso","Muschiato","Speziato Fresco"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",longevita:7,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Vetiver oscuro e terroso con cipresso. Classico moderno polarizzante — amato o odiato. Ottimo valore qualità-prezzo. Rating 4.1 su 24.246 recensioni."},
   {id:25,brand:"Lalique",name:"Encre Noire Sport",conc:"EDT",note:"Vetiver, cipresso, pompelmo, bergamotto, acqua, legno di cashmere, noce moscata",accordi:["Legnoso","Aromatico","Agrumato","Speziato Fresco","Terroso"],famiglia:"Aromatico acquatico",colore:"verde",stagione:"pe",momento:"giorno",longevita:7,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Versione P/E dell'Encre Noire. Pompelmo e bergamotto schiariscono il vetiver — più fresco e accessibile dell'originale. Adatto anche a palestra."},
-{id:26,brand:"Lattafa Perfumes",name:"Atlas",conc:"EDP",note:"Acqua di mare, sale, ambra grigia, muschio di quercia, limone, sandalo",accordi:["Marino","Salato","Aromatico","Ambra","Muschio Vegetale"],famiglia:"Marino salato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:9,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Marino salato con ambra grigia e sandalo. Scia enorme (9h). Clone ispirato a Orto Parisi Megamare. Unisex."},
+  {id:26,brand:"Lattafa Perfumes",name:"Atlas",conc:"EDP",note:"Acqua di mare, sale, ambra grigia, muschio di quercia, limone, sandalo",accordi:["Marino","Salato","Aromatico","Ambra","Muschio Vegetale"],famiglia:"Marino salato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:9,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Marino salato con ambra grigia e sandalo. Scia enorme (9h). Clone ispirato a Orto Parisi Megamare. Unisex."},
+  {id:27,brand:"Al Haramain",name:"Amber Oud Gold Edition",conc:"EDP",note:"Bergamotto, note verdi, melone, ananas, ambra, accordo gourmand, vaniglia, muschio, note legnose",accordi:["Dolce","Fruttato","Ozonico","Talcato","Vanigliato"],famiglia:"Orientale fruttato",colore:"rosso",stagione:"tutto",momento:"entrambi",longevita:8,rating:4.3,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",desc:"*Con moderazione in ufficio. Clone di Xerjoff Erba Pura. Melone e ananas su ambra e vaniglia cremosa, apertura verde-ozonica. Unisex, scia forte, 8h. Voti stagionali bilanciati: versatile tutto l'anno. Rating 4.3 su 5.415 recensioni."},
 ];
 
-const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",formale:"Formale",informale:"Informale",appuntamento:"Appuntamento",palestra:"Palestra",casa:"In casa",festivita:"Festività"};
+const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",informale:"Informale",appuntamento:"Appuntamento",palestra:"Palestra",casa:"In casa",festivita:"Festività"};
 const colI={blu:"A",verde:"V",rosso:"R"};
 const flLabels={pe:"P/E",ai:"A/I",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Blu",verde:"Verde",rosso:"Rosso",sera:"Sera",giorno:"Giorno"};
 const sortFns={
@@ -671,6 +648,7 @@ function getFiltered(){
       if(f==='ufficio'&&p.ufficio!=='si'&&p.ufficio!=='si-mod')return false;
       if(f==='appuntamento'&&p.appuntamento!=='si')return false;
       if(f==='quotidiano'&&p.quotidiano!=='si')return false;
+      if(f==='informale'&&p.informale!=='si')return false;
       if(f==='formale'&&p.formale!=='si')return false;
       if(f==='palestra'&&p.palestra!=='si')return false;
       if(f==='casa'&&p.casa!=='si')return false;
@@ -973,6 +951,53 @@ function setSort(s){
   render();
 }
 
+function renderStats(){
+  const tot=profumi.length;
+  const nS=k=>profumi.filter(p=>p.stagione===k).length;
+  let h=`<div class="kpi-grid">
+    <div class="kpi"><div class="kpi-n">${tot}</div><div class="kpi-l">Fragranze</div></div>
+    <div class="kpi"><div class="kpi-n">${nS('ai')}</div><div class="kpi-l">Autunno/Inverno</div></div>
+    <div class="kpi"><div class="kpi-n">${nS('pe')}</div><div class="kpi-l">Primavera/Estate</div></div>
+    <div class="kpi"><div class="kpi-n">${nS('tutto')}</div><div class="kpi-l">Tutto l'anno</div></div>
+  </div>`;
+  // Rating
+  const byR={};
+  profumi.forEach(p=>{(byR[p.rating]=byR[p.rating]||[]).push(p)});
+  h+=`<div class="bsec"><div class="bsec-t">Rating Fragrantica</div>`;
+  Object.keys(byR).sort((a,b)=>b-a).forEach(r=>{
+    const names=byR[r].map(p=>p.name).join(' · ');
+    h+=`<div class="brow"><div class="blbl"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:72%">${names}</span><span>${r} ★</span></div><div class="btrack"><div class="bfill" style="width:${r/5*100}%"></div></div></div>`;
+  });
+  h+=`</div>`;
+  // Famiglia
+  const fam=[['rosso','Rosso — orientali / intensi'],['verde','Verde — aromatici / legnosi'],['blu','Blu — acquatici / freschi']];
+  h+=`<div class="bsec"><div class="bsec-t">Famiglia olfattiva</div>`;
+  fam.forEach(([c,lbl])=>{
+    const n=profumi.filter(p=>p.colore===c).length;
+    h+=`<div class="brow"><div class="blbl"><span>${lbl}</span><span>${n}</span></div><div class="btrack"><div class="bfill ${c}" style="width:${Math.round(n/tot*100)}%"></div></div></div>`;
+  });
+  h+=`</div>`;
+  // Occasioni
+  h+=`<div class="bsec"><div class="bsec-t">Occasione d'uso</div>`;
+  Object.keys(usoLabels).forEach(k=>{
+    const n=profumi.filter(p=>p[k]==='si'||p[k]==='si-mod').length;
+    const pct=Math.round(n/tot*100);
+    h+=`<div class="brow"><div class="blbl"><span>${usoLabels[k]}</span><span>${n} — ${pct}%</span></div><div class="btrack"><div class="bfill" style="width:${pct}%"></div></div></div>`;
+  });
+  h+=`</div>`;
+  // Longevità
+  const byL={};
+  profumi.forEach(p=>{(byL[p.longevita]=byL[p.longevita]||[]).push(p)});
+  const maxL=Math.max(...profumi.map(p=>p.longevita));
+  h+=`<div class="bsec"><div class="bsec-t">Longevità</div>`;
+  Object.keys(byL).sort((a,b)=>b-a).forEach(l=>{
+    const ns=byL[l].map(p=>p.name);
+    h+=`<div class="brow"><div class="blbl"><span>${l}h — ${ns.length} profumi</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${ns.slice(0,4).join(', ')}${ns.length>4?'…':''}</span></div><div class="btrack"><div class="bfill blu" style="width:${l/maxL*100}%"></div></div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById('stats-dynamic').innerHTML=h;
+}
+
 function switchView(v){
   ['collezione','guida','layering','confronta','consigliati','stats'].forEach(n=>{
     document.getElementById('view-'+n).classList.toggle('active',n===v);
@@ -988,7 +1013,7 @@ function switchView(v){
 function tg(id){document.getElementById(id).classList.toggle('open');}
 function toggleRec(id){document.getElementById(id).classList.toggle('open');}
 
-switchView('collezione');render();
+switchView('collezione');render();renderStats();
 </script>
 </body>
 </html>
