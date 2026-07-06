@@ -53,8 +53,17 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .filter-group{margin-bottom:9px}
 .filter-group:last-child{margin-bottom:0}
 .fg-label{font-size:9px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-left:1px}
-.chips-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
-.chips-row::-webkit-scrollbar{display:none}
+.chips-wrap{position:relative}
+.chips-wrap::after{content:'';position:absolute;top:0;right:0;bottom:0;width:28px;pointer-events:none;
+  background:linear-gradient(90deg,rgba(8,8,12,0) 0%,rgba(8,8,12,0.85) 70%,var(--bg) 100%);
+  opacity:0;transition:opacity .2s;border-radius:0 6px 6px 0}
+.chips-wrap.has-overflow::after{opacity:1}
+.chips-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;
+  scrollbar-width:thin;scrollbar-color:rgba(201,169,110,0.35) transparent}
+.chips-row::-webkit-scrollbar{height:4px}
+.chips-row::-webkit-scrollbar-track{background:transparent}
+.chips-row::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.35);border-radius:4px}
+.chips-row::-webkit-scrollbar-thumb:hover{background:rgba(201,169,110,0.6)}
 .chip{flex-shrink:0;font-size:11.5px;font-weight:400;color:var(--text2);background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap}
 .chip:active{transform:scale(.97)}
 .chip.active{font-weight:500}
@@ -632,7 +641,7 @@ const profumi=[
   {id:25,brand:"Lalique",name:"Encre Noire Sport",conc:"EDT",note:"Testa: pompelmo, bergamotto, note acquatiche · Cuore: cipresso, vetiver, noce moscata · Fondo: legno di cashmere, muschio",accordi:["Legnoso","Aromatico","Agrumato","Speziato Fresco","Terroso"],famiglia:"Aromatico acquatico",colore:"verde",stagione:"pe",momento:"giorno",longevita:7,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Versione P/E dell'Encre Noire. Pompelmo e bergamotto schiariscono il vetiver — più fresco e accessibile dell'originale. Adatto anche a palestra."},
   {id:26,brand:"Lattafa Perfumes",name:"Atlas",conc:"EDP",note:"Testa: note marine, sale, limone · Cuore: ambra grigia, note aromatiche · Fondo: muschio di quercia, sandalo, ambra, muschio vegetale",accordi:["Marino","Salato","Aromatico","Ambra","Muschio Vegetale"],famiglia:"Marino salato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:9,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",dupe:"Orto Parisi Megamare",desc:"Marino salato con ambra grigia e sandalo. Scia enorme (9h). Clone ispirato a Orto Parisi Megamare. Unisex."},
   {id:27,brand:"Al Haramain",name:"Amber Oud Gold Edition",conc:"EDP",note:"Testa: bergamotto, note verdi, melone, ananas · Cuore: accordo gourmand, note fruttate · Fondo: ambra, vaniglia, muschio, note legnose",accordi:["Dolce","Fruttato","Ozonico","Talcato","Vanigliato"],famiglia:"Orientale fruttato",colore:"rosso",stagione:"tutto",momento:"entrambi",longevita:8,rating:4.3,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",dupe:"Xerjoff Erba Pura",desc:"*Con moderazione in ufficio. Clone di Xerjoff Erba Pura. Melone e ananas su ambra e vaniglia cremosa, apertura verde-ozonica. Unisex, scia forte, 8h. Voti stagionali bilanciati: versatile tutto l'anno. Rating 4.3 su 5.415 recensioni."},
-  {id:28,brand:"Zara",name:"Sunrise on the Red Sand Dunes Intense",conc:"EDP",note:"Testa: mandarino, zenzero, bergamotto · Cuore: fiore d'arancio, ribes nero · Fondo: ambra, balsamo di abete, labdano, incenso, tonka, muschio",accordi:["Agrumato","Speziato Fresco","Fruttato","Floreale Bianco","Ambra"],famiglia:"Ambrato agrumato",colore:"rosso",stagione:"ai",momento:"giorno",longevita:7,rating:4.4,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",dupe:"LV Imagination (interpretazione calda ~75-85%)",desc:"*Con moderazione in ufficio. Interpretazione calda di LV Imagination — più autunnale e resinosa dell'originale ariosa. Zenzero e agrumi in apertura, ambra e abete balsamico in fondo. La community lo avvicina anche a LV L'Immensité. Cloni più fedeli di Imagination: Lattafa Aqua Dubai e Marwa. Rating 4.4 su 1.573 recensioni."},
+  {id:28,brand:"Zara",name:"Sunrise on the Red Sand Dunes Intense",conc:"EDP",note:"Testa: mandarino, zenzero, bergamotto · Cuore: fiore d'arancio, ribes nero · Fondo: ambra",accordi:["Agrumato","Speziato Fresco","Fruttato","Floreale Bianco","Ambra"],famiglia:"Agrumato fresco",colore:"blu",stagione:"pe",momento:"giorno",longevita:7,rating:4.4,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",dupe:"LV Imagination (interpretazione calda ~75-85%)",desc:"Agrumato-fresco estivo: mandarino, zenzero e bergamotto brillanti su fondo ambrato morbido, con fiore d'arancio e ribes nero nel cuore. Fragrantica lo classifica citrusy-fresh; la community lo porta in primavera/estate anche in giornate molto calde, da giorno ma indossabile la sera. Versione Intense più calda dell'originale ariosa, ma resta un fresco. Ispirato a LV Imagination (~75-85%, alcuni lo avvicinano a L'Immensité). Cloni più fedeli di Imagination: Aqua Dubai e Marwa. Rating 4.4 su 1.573 recensioni."},
 ];
 
 const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",informale:"Informale",appuntamento:"Appuntamento",palestra:"Palestra",casa:"In casa",festivita:"Festività"};
@@ -1098,6 +1107,37 @@ function tg(id){document.getElementById(id).classList.toggle('open');}
 function toggleRec(id){document.getElementById(id).classList.toggle('open');}
 
 switchView('collezione');render();renderStats();
+
+// ── Scroll orizzontale filtri: wrap, rotella mouse, indicatore overflow ──
+(function initChipScroll(){
+  document.querySelectorAll('.chips-row').forEach(row=>{
+    // avvolge la row in un contenitore per la sfumatura (se non già fatto)
+    let wrap=row.parentElement;
+    if(!wrap.classList.contains('chips-wrap')){
+      wrap=document.createElement('div');
+      wrap.className='chips-wrap';
+      row.parentNode.insertBefore(wrap,row);
+      wrap.appendChild(row);
+    }
+    // rotella verticale del mouse -> scroll orizzontale (desktop)
+    row.addEventListener('wheel',e=>{
+      if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
+        row.scrollLeft+=e.deltaY;
+        e.preventDefault();
+      }
+    },{passive:false});
+    // mostra/nasconde la sfumatura in base allo scroll
+    const upd=()=>{
+      const more = row.scrollWidth - row.clientWidth - row.scrollLeft > 4;
+      wrap.classList.toggle('has-overflow', more);
+    };
+    row.addEventListener('scroll',upd,{passive:true});
+    window.addEventListener('resize',upd);
+    upd();
+    // ricontrolla dopo il primo layout (font/immagini)
+    setTimeout(upd,150);
+  });
+})();
 </script>
 </body>
 </html>
