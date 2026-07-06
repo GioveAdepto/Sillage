@@ -258,6 +258,11 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .nav-badge.show{display:flex}
 	@media(min-width:900px){.view{max-width:840px;margin-left:auto;margin-right:auto}}
 .card-dupe{font-size:10px;color:var(--gold2);background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.3);border-radius:var(--radius-xs);padding:1px 7px;letter-spacing:.02em}
+.chip.dupe-chip.active{background:rgba(201,169,110,0.2);border-color:rgba(201,169,110,0.5);color:var(--gold2)}
+.chip-n{margin-left:6px;font-size:9.5px;opacity:.55;font-weight:500}
+.chip.active .chip-n{opacity:.85}
+.chip.chip-zero{opacity:.32;filter:saturate(.4)}
+.chip.chip-zero .chip-n{opacity:.5}
 </style>
 </head>
 <body>
@@ -312,49 +317,61 @@ input[type=search]::-webkit-search-cancel-button{display:none}
           <div class="chip c-rosso" data-filter="rosso">Rosso — Orientali</div>
           <div class="chip mom" data-filter="giorno">Solo giorno</div>
           <div class="chip mom" data-filter="sera">Solo sera</div>
+          <div class="chip dupe-chip" data-filter="dupe">Solo cloni/dupe</div>
         </div>
       </div>
       <div class="filter-group">
         <div class="fg-label">Note olfattive</div>
         <div class="chips-row">
-          <div class="chip nota" data-nota="vetiver">Vetiver</div>
-          <div class="chip nota" data-nota="rum">Rum</div>
-          <div class="chip nota" data-nota="lavanda">Lavanda</div>
-          <div class="chip nota" data-nota="patchouli">Patchouli</div>
           <div class="chip nota" data-nota="muschio">Muschio</div>
-          <div class="chip nota" data-nota="geranio">Geranio</div>
-          <div class="chip nota" data-nota="ambra">Ambra</div>
-          <div class="chip nota" data-nota="sandalo">Sandalo</div>
-          <div class="chip nota" data-nota="iris">Iris</div>
-          <div class="chip nota" data-nota="cedro">Cedro</div>
           <div class="chip nota" data-nota="bergamotto">Bergamotto</div>
-          <div class="chip nota" data-nota="ginepro">Ginepro</div>
-          <div class="chip nota" data-nota="vaniglia">Vaniglia</div>
-          <div class="chip nota" data-nota="tonka">Tonka</div>
-          <div class="chip nota" data-nota="cuoio">Cuoio</div>
-          <div class="chip nota" data-nota="tabacco">Tabacco</div>
-          <div class="chip nota" data-nota="zafferano">Zafferano</div>
-          <div class="chip nota" data-nota="pepe">Pepe</div>
+          <div class="chip nota" data-nota="ambra">Ambra</div>
+          <div class="chip nota" data-nota="cedro">Cedro</div>
+          <div class="chip nota" data-nota="patchouli">Patchouli</div>
           <div class="chip nota" data-nota="limone">Limone</div>
+          <div class="chip nota" data-nota="geranio">Geranio</div>
           <div class="chip nota" data-nota="mandarino">Mandarino</div>
-          <div class="chip nota" data-nota="pompelmo">Pompelmo</div>
-          <div class="chip nota" data-nota="menta">Menta</div>
+          <div class="chip nota" data-nota="vaniglia">Vaniglia</div>
+          <div class="chip nota" data-nota="vetiver">Vetiver</div>
+          <div class="chip nota" data-nota="pepe">Pepe</div>
           <div class="chip nota" data-nota="rosa">Rosa</div>
-          <div class="chip nota" data-nota="ananas">Ananas</div>
-          <div class="chip nota" data-nota="ribes">Ribes Nero</div>
-          <div class="chip nota" data-nota="betulla">Betulla</div>
-          <div class="chip nota" data-nota="cipresso">Cipresso</div>
+          <div class="chip nota" data-nota="tonka">Tonka</div>
+          <div class="chip nota" data-nota="lavanda">Lavanda</div>
           <div class="chip nota" data-nota="rosmarino">Rosmarino</div>
-          <div class="chip nota" data-nota="caffè">Caffè</div>
-          <div class="chip nota" data-nota="castagna">Castagna</div>
-          <div class="chip nota" data-nota="noce moscata">Noce moscata</div>
-          <div class="chip nota" data-nota="cannella">Cannella</div>
+          <div class="chip nota" data-nota="rum">Rum</div>
+          <div class="chip nota" data-nota="sandalo">Sandalo</div>
+          <div class="chip nota" data-nota="cipresso">Cipresso</div>
+          <div class="chip nota" data-nota="marine">Note marine</div>
+          <div class="chip nota" data-nota="pompelmo">Pompelmo</div>
+          <div class="chip nota" data-nota="salvia">Salvia</div>
           <div class="chip nota" data-nota="cardamomo">Cardamomo</div>
-          <div class="chip nota" data-nota="marine">Marine</div>
+          <div class="chip nota" data-nota="cuoio">Cuoio</div>
+          <div class="chip nota" data-nota="fiore d'arancio">Fiore d'arancio</div>
+          <div class="chip nota" data-nota="gelsomino">Gelsomino</div>
+          <div class="chip nota" data-nota="ginepro">Ginepro</div>
+          <div class="chip nota" data-nota="incenso">Incenso</div>
+          <div class="chip nota" data-nota="menta">Menta</div>
+          <div class="chip nota" data-nota="neroli">Neroli</div>
+          <div class="chip nota" data-nota="ribes">Ribes nero</div>
+          <div class="chip nota" data-nota="zenzero">Zenzero</div>
+          <div class="chip nota" data-nota="ananas">Ananas</div>
+          <div class="chip nota" data-nota="castagna">Castagna</div>
+          <div class="chip nota" data-nota="elemi">Elemi</div>
+          <div class="chip nota" data-nota="iris">Iris</div>
+          <div class="chip nota" data-nota="pepe rosa">Pepe rosa</div>
+          <div class="chip nota" data-nota="tabacco">Tabacco</div>
+          <div class="chip nota" data-nota="benzoino">Benzoino</div>
+          <div class="chip nota" data-nota="betulla">Betulla</div>
+          <div class="chip nota" data-nota="caffè">Caffè</div>
+          <div class="chip nota" data-nota="cannella">Cannella</div>
+          <div class="chip nota" data-nota="chinotto">Chinotto</div>
           <div class="chip nota" data-nota="lampone">Lampone</div>
-          <div class="chip nota" data-nota="whisky">Whisky</div>
           <div class="chip nota" data-nota="melone">Melone</div>
+          <div class="chip nota" data-nota="mimosa">Mimosa</div>
+          <div class="chip nota" data-nota="noce moscata">Noce moscata</div>
           <div class="chip nota" data-nota="sale">Sale</div>
+          <div class="chip nota" data-nota="whisky">Whisky</div>
+          <div class="chip nota" data-nota="zafferano">Zafferano</div>
         </div>
       </div>
     </div>
@@ -588,34 +605,34 @@ const IMGS={
 };
 // ── PROFUMI DATA (corrected from Fragrantica images) ──────────────────────
 const profumi=[
-  {id:1,brand:"Helan",name:"Vetiver & Rum",conc:"EDT",note:"Vetiver, rum, limone, lavanda, geranio, mimosa, muschio di quercia",accordi:["Aromatico","Legnoso","Terroso","Speziato Fresco","Agrumato"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",longevita:7,rating:4.3,ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"si",desc:"Vetiver soapy con rum caldo. Aromatico e avvolgente. Ottimo per tempo libero e festività."},
-  {id:2,brand:"Hermès",name:"Terre d'Hermès Eau Givrée",conc:"EDP",note:"Cedro, bacche di ginepro, note minerali, note legnose, pepe Timur",accordi:["Agrumato","Legnoso","Speziato Fresco","Aromatico","Minerale"],famiglia:"Agrumato aromatico",colore:"verde",stagione:"pe",momento:"giorno",longevita:6,rating:4.4,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco ed etereo, ispirato al ghiaccio. Versione estiva di Terre d'Hermès. Longevità bassa da solo — meglio in layering."},
-  {id:3,brand:"Giorgio Armani",name:"Acqua di Giò",conc:"EDP",note:"Acqua di mare, note minerali, mandarino, salvia sclarea, lavanda, geranio",accordi:["Aromatico","Marino","Minerale","Agrumato","Speziato Fresco"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"giorno",longevita:6,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Il classico marino per eccellenza. Versatilissimo — ufficio, formale, quotidiano. Rating 4.1 su 3.680 recensioni."},
-  {id:4,brand:"Gucci",name:"Guilty Cologne Pour Homme",conc:"EDC",note:"Bacche di ginepro, cipresso, rosmarino, violetta, eliotropio, muschio",accordi:["Aromatico","Legnoso","Speziato Fresco","Talcato","Violetta"],famiglia:"Aromatico floreale",colore:"verde",stagione:"pe",momento:"entrambi",longevita:6,rating:3.7,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Aromatico floreale insolito — non citrico come si pensa. Ginepro, cipresso e rosmarino lo rendono botanico-fresco. Rating 3.7 (il più basso della collezione)."},
-  {id:5,brand:"Armaf",name:"Club de Nuit Sillage",conc:"EDP",note:"Bergamotto, limone, lime, ambroxan, muschio, ribes nero",accordi:["Agrumato","Muschiato","Legnoso","Speziato Fresco","Talcato"],famiglia:"Citrico muschiato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:7,rating:3.9,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",dupe:"Creed Silver Mountain Water",desc:"Clone di Creed Silver Mountain Water. Citrico-muschiato pulito con ambroxan potente. Proiezione eccellente. Nota: unisex."},
-  {id:6,brand:"Rasasi",name:"Hawas for Him",conc:"EDP",note:"Acqua, prugna, mela, bergamotto, ambra grigia, limone, muschio, patchouli",accordi:["Fruttato","Agrumato","Acquatico","Fresco","Speziato Caldo"],famiglia:"Fruttato acquatico",colore:"blu",stagione:"pe",momento:"giorno",longevita:7,rating:4.3,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Fruttato-acquatico con prugna e mela dominanti. Ottimo per appuntamenti estivi. Nessuna menta — più dolce e fruttato di quanto si pensi."},
-  {id:7,brand:"Rue Broca",name:"Théorème Homme",conc:"EDP",note:"Agrumi, muschio, ambra, note legnose, note speziate, patchouli",accordi:["Agrumato","Legnoso","Muschiato","Fresco","Ambra"],famiglia:"Agrumato ambrato",colore:"rosso",stagione:"ai",momento:"entrambi",longevita:7,rating:4.5,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",dupe:"Bvlgari Tygar",desc:"Rating 4.5 — il più alto della collezione. Clone di Bvlgari Tygar. Agrumato brillante con base ambrata. Ottima apertura per layering invernale."},
-  {id:8,brand:"Davidoff",name:"Adventure",conc:"EDT",note:"Mandarino, pepe, limone, bergamotto, foglia di tè, maté, pimento, sesamo, vetiver, cedro, muschio bianco",accordi:["Agrumato","Speziato Fresco","Aromatico","Legnoso","Speziato Caldo"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"pe",momento:"giorno",longevita:6,rating:3.9,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Speziato verde con maté e sesamo — note rare nella tua collezione. Perfetto per outdoor e tempo libero."},
-  {id:9,brand:"Missoni",name:"Wave",conc:"EDT",note:"Acqua di mare, agrumi, mandarino siciliano, lavanda, salvia sclarea, rosmarino, geranio, orchidea vanigliata, vetiver haitiano, patchouli, muschio di quercia",accordi:["Aromatico","Agrumato","Marino","Speziato Fresco","Lavanda"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",longevita:6,rating:4.3,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Marino cremoso ispirato al Mediterraneo. Orchidea vanigliata in base — insolita per un marino. Simile a Chanel Allure Homme Sport."},
-  {id:10,brand:"Emporio Armani",name:"Stronger With You Absolutely",conc:"Parfum",note:"Rum, elemi, bergamotto, lavanda, davana, vaniglia, castagna, cedro, patchouli",accordi:["Vanigliato","Legnoso","Balsamico","Rum","Aromatico"],famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",longevita:8,rating:4.5,ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Rum e castagna avvolgenti. Rating 4.5. 8h longevità. Il più gourmand della collezione."},
-  {id:11,brand:"Giorgio Armani",name:"Acqua di Giò Profondo",conc:"EDP",note:"Acqua di mare, aquozone, note minerali, bergamotto, mandarino, rosmarino, lavanda, cipresso",accordi:["Marino","Aromatico","Agrumato","Speziato Fresco","Fresco"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"entrambi",longevita:6,rating:4.3,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"ADG più marino e moderno con cipresso e aquozone. Più scuro e profondo dell'EDP originale. Ottimo per appuntamenti e uscite serali."},
-  {id:12,brand:"Dolce & Gabbana",name:"The One for Men",conc:"EDP",note:"Pompelmo, coriandolo, basilico, zenzero, cardamomo, fiore d'arancio, ambra, tabacco, cedro",accordi:["Ambra","Tabacco","Speziato Fresco","Agrumato","Aromatico"],famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",longevita:6,rating:4.5,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Rating 4.5. Tabaccoso elegante con apertura di pompelmo e cardamomo. Perfetto per cene romantiche invernali."},
-  {id:13,brand:"L'Erbolario",name:"Ginepro Nero",conc:"EDT",note:"Ginepro, spezie, note legnose, resine",accordi:["Aromatico","Legnoso","Agrumato","Speziato Fresco","Terroso"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"giorno",longevita:6,rating:4.2,ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Botanico e naturale. Ginepro protagonista assoluto con resine. Ottimo anche in casa. Note ufficiali non dettagliate."},
-  {id:14,brand:"Versace",name:"Eros",conc:"EDT",note:"Menta, mela verde, limone, vaniglia, fava tonka, ambra, geranio, cedro, muschio di quercia",accordi:["Vanigliato","Aromatico","Verde","Speziato Fresco","Ambra"],famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",longevita:7,rating:4.1,ufficio:"no",quotidiano:"no",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Dolce e mentolato. L'Eros originale — vivace e seducente. Ideale per serate vivaci e club."},
-  {id:15,brand:"Versace",name:"Eros",conc:"EDP",note:"Menta, mela, limone, mandarino, ambroxan, geranio, fava tonka, muschio, ambra",accordi:["Agrumato","Aromatico","Verde","Vanigliato","Legnoso"],famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",longevita:7,rating:4.3,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Più maturo e meno dolce dell'EDT. Meno verde, più ambroxan — perfetto per serate eleganti."},
-  {id:16,brand:"Versace",name:"Eros Flame",conc:"EDP",note:"Mandarino, pepe del Madagascar, limone, chinotto, rosmarino, geranio, rosa, vaniglia, fava tonka, sandalo, cedro, patchouli, muschio di quercia",accordi:["Agrumato","Speziato Fresco","Vanigliato","Aromatico","Legnoso"],famiglia:"Legnoso speziato",colore:"rosso",stagione:"ai",momento:"sera",longevita:7,rating:4.3,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Speziato e passionale con cuore di rosa. Mandarino e pepe aprono, sandalo e vaniglia chiudono. Ottimo in clima freddo."},
-  {id:17,brand:"Armaf",name:"Club de Nuit Intense Man",conc:"EDT",note:"Limone, betulla, ananas, bergamotto, muschio, ribes nero",accordi:["Agrumato","Fruttato","Cuoiato","Fumoso","Legnoso"],famiglia:"Fruttato cuoiato",colore:"rosso",stagione:"tutto",momento:"sera",longevita:8,rating:4.1,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",dupe:"Creed Aventus",desc:"Clone di Creed Aventus. Ananas fumé con betulla e ribes nero. 8h longevità. Sillage potente. Rating 4.1 su 26.520 recensioni."},
-  {id:18,brand:"Davidoff",name:"Cool Water",conc:"EDT",note:"Menta, lavanda, coriandolo, rosmarino, geranio, neroli, gelsomino, sandalo, cedro, muschio, ambra",accordi:["Aromatico","Verde","Marino","Speziato Fresco","Lavanda"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",longevita:6,rating:3.9,ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Il pioniere degli acquatici moderni. Lavanda, menta e rosmarino — classico senza tempo. Ottimo da palestra e casa."},
-  {id:19,brand:"Gucci",name:"Guilty Eau de Parfum",conc:"EDP",note:"Rosa, lavanda, pimento, aceto balsamico, fiore d'arancio, legno di cedro",accordi:["Rosa","Speziato Caldo","Floreale Bianco","Legnoso","Lavanda"],famiglia:"Floreale speziato",colore:"verde",stagione:"tutto",momento:"entrambi",longevita:6,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Guilty Pour Homme Eau de Parfum — diverso dal Cologne. Rosa, pimento e aceto balsamico lo rendono più speziato-floreale. Versatile giorno e sera."},
-  {id:20,brand:"Givenchy",name:"Gentleman EDP Réserve Privée",conc:"EDP",note:"Iris, whisky, cedro, patchouli, ambra, castagna, bergamotto",accordi:["Legnoso","Iris","Whisky","Talcato","Ambra"],famiglia:"Fougère legnoso",colore:"rosso",stagione:"ai",momento:"sera",longevita:7,rating:4.4,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Rating 4.4. Iris-whisky sofisticato e boozy. Perfetto per cene e occasioni importanti. Nota: prevalentemente Notte."},
-  {id:21,brand:"Salvatore Ferragamo",name:"Uomo Signature",conc:"EDP",note:"Fava tonka, cuoio, caffè tostato, cannella, cardamomo, mandarino",accordi:["Speziato Caldo","Cuoiato","Aromatico","Caffè","Vanigliato"],famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",longevita:7,rating:4.3,ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Caffè tostato e cuoio dominanti con cardamomo. Gourmand speziato raffinato. Eccellente per serate e festività."},
-  {id:22,brand:"Prada",name:"L'Homme Intense",conc:"EDP",note:"Iris, fava tonka, cuoio, ambra, patchouli, sandalo",accordi:["Iris","Talcato","Ambra","Legnoso","Terroso"],famiglia:"Fougère orientale",colore:"rosso",stagione:"ai",momento:"entrambi",longevita:8,rating:4.5,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Rating 4.5. Iris e ambra vellutata — elegante in ogni occasione fredda. 8h longevità."},
-  {id:23,brand:"Rasasi",name:"La Yuqawam Pour Homme",conc:"EDP",note:"Cuoio, lampone, pelle scamosciata, note legnose, zafferano, olibano",accordi:["Cuoiato","Fruttato","Dolce","Animalico","Ambra"],famiglia:"Orientale cuoiato",colore:"rosso",stagione:"ai",momento:"sera",longevita:8,rating:4.4,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",dupe:"Tom Ford Tuscan Leather",desc:"Rating 4.4. Simile a Tuscan Leather di Tom Ford — cuoio, zafferano, lampone. 8h longevità potente. Usare con moderazione."},
-  {id:24,brand:"Lalique",name:"Encre Noire",conc:"EDT",note:"Cipresso, vetiver haitiano, vetiver bourbon, muschio, cashmere wood",accordi:["Legnoso","Aromatico","Terroso","Muschiato","Speziato Fresco"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",longevita:7,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Vetiver oscuro e terroso con cipresso. Classico moderno polarizzante — amato o odiato. Ottimo valore qualità-prezzo. Rating 4.1 su 24.246 recensioni."},
-  {id:25,brand:"Lalique",name:"Encre Noire Sport",conc:"EDT",note:"Vetiver, cipresso, pompelmo, bergamotto, acqua, legno di cashmere, noce moscata",accordi:["Legnoso","Aromatico","Agrumato","Speziato Fresco","Terroso"],famiglia:"Aromatico acquatico",colore:"verde",stagione:"pe",momento:"giorno",longevita:7,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Versione P/E dell'Encre Noire. Pompelmo e bergamotto schiariscono il vetiver — più fresco e accessibile dell'originale. Adatto anche a palestra."},
-  {id:26,brand:"Lattafa Perfumes",name:"Atlas",conc:"EDP",note:"Acqua di mare, sale, ambra grigia, muschio di quercia, limone, sandalo",accordi:["Marino","Salato","Aromatico","Ambra","Muschio Vegetale"],famiglia:"Marino salato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:9,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",dupe:"Orto Parisi Megamare",desc:"Marino salato con ambra grigia e sandalo. Scia enorme (9h). Clone ispirato a Orto Parisi Megamare. Unisex."},
-  {id:27,brand:"Al Haramain",name:"Amber Oud Gold Edition",conc:"EDP",note:"Bergamotto, note verdi, melone, ananas, ambra, accordo gourmand, vaniglia, muschio, note legnose",accordi:["Dolce","Fruttato","Ozonico","Talcato","Vanigliato"],famiglia:"Orientale fruttato",colore:"rosso",stagione:"tutto",momento:"entrambi",longevita:8,rating:4.3,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",dupe:"Xerjoff Erba Pura",desc:"*Con moderazione in ufficio. Clone di Xerjoff Erba Pura. Melone e ananas su ambra e vaniglia cremosa, apertura verde-ozonica. Unisex, scia forte, 8h. Voti stagionali bilanciati: versatile tutto l'anno. Rating 4.3 su 5.415 recensioni."},
-  {id:28,brand:"Zara",name:"Sunrise on the Red Sand Dunes Intense",conc:"EDP",note:"Mandarino, zenzero, bergamotto, fiore d'arancio, ambra, ribes nero, balsamo di abete, labdano, incenso, tonka, muschio",accordi:["Agrumato","Speziato Fresco","Fruttato","Floreale Bianco","Ambra"],famiglia:"Ambrato agrumato",colore:"rosso",stagione:"ai",momento:"giorno",longevita:7,rating:4.4,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",dupe:"LV Imagination (interpretazione calda ~75-85%)",desc:"*Con moderazione in ufficio. Interpretazione calda di LV Imagination — più autunnale e resinosa dell'originale ariosa. Zenzero e agrumi in apertura, ambra e abete balsamico in fondo. La community lo avvicina anche a LV L'Immensité. Cloni più fedeli di Imagination: Lattafa Aqua Dubai e Marwa. Rating 4.4 su 1.573 recensioni."},
+  {id:1,brand:"Helan",name:"Vetiver & Rum",conc:"EDT",note:"Testa: lavanda, limone, bergamotto · Cuore: geranio, mimosa, note aromatiche · Fondo: vetiver, rum, muschio di quercia, muschio",accordi:["Aromatico","Legnoso","Terroso","Speziato Fresco","Agrumato"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",longevita:7,rating:4.3,ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"si",desc:"Vetiver soapy con rum caldo. Aromatico e avvolgente. Ottimo per tempo libero e festività."},
+  {id:2,brand:"Hermès",name:"Terre d'Hermès Eau Givrée",conc:"EDP",note:"Testa: cedro (agrume), bacche di ginepro, pepe Timur · Cuore: note minerali, note aromatiche · Fondo: note legnose, vetiver",accordi:["Agrumato","Legnoso","Speziato Fresco","Aromatico","Minerale"],famiglia:"Agrumato aromatico",colore:"verde",stagione:"pe",momento:"giorno",longevita:6,rating:4.4,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Fresco ed etereo, ispirato al ghiaccio. Versione estiva di Terre d'Hermès. Longevità bassa da solo — meglio in layering."},
+  {id:3,brand:"Giorgio Armani",name:"Acqua di Giò",conc:"EDP",note:"Testa: bergamotto, mandarino, note marine, salvia sclarea · Cuore: note minerali, geranio, rosa, freesia · Fondo: muschio, patchouli, incenso, legno di cashmere",accordi:["Aromatico","Marino","Minerale","Agrumato","Speziato Fresco"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"giorno",longevita:6,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Il classico marino per eccellenza. Versatilissimo — ufficio, formale, quotidiano. Rating 4.1 su 3.680 recensioni."},
+  {id:4,brand:"Gucci",name:"Guilty Cologne Pour Homme",conc:"EDC",note:"Testa: bacche di ginepro, cipresso, bergamotto, limone · Cuore: rosmarino, violetta, eliotropio, coriandolo · Fondo: muschio, cedro, legni",accordi:["Aromatico","Legnoso","Speziato Fresco","Talcato","Violetta"],famiglia:"Aromatico floreale",colore:"verde",stagione:"pe",momento:"entrambi",longevita:6,rating:3.7,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Aromatico floreale insolito — non citrico come si pensa. Ginepro, cipresso e rosmarino lo rendono botanico-fresco. Rating 3.7 (il più basso della collezione)."},
+  {id:5,brand:"Armaf",name:"Club de Nuit Sillage",conc:"EDP",note:"Testa: bergamotto, limone, lime · Cuore: note fresche speziate · Fondo: ambroxan, muschio, ribes nero, legni",accordi:["Agrumato","Muschiato","Legnoso","Speziato Fresco","Talcato"],famiglia:"Citrico muschiato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:7,rating:3.9,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",dupe:"Creed Silver Mountain Water",desc:"Clone di Creed Silver Mountain Water. Citrico-muschiato pulito con ambroxan potente. Proiezione eccellente. Nota: unisex."},
+  {id:6,brand:"Rasasi",name:"Hawas for Him",conc:"EDP",note:"Testa: acqua, bergamotto, limone, mela verde · Cuore: prugna, gelsomino, note fruttate · Fondo: ambra grigia, muschio, patchouli",accordi:["Fruttato","Agrumato","Acquatico","Fresco","Speziato Caldo"],famiglia:"Fruttato acquatico",colore:"blu",stagione:"pe",momento:"giorno",longevita:7,rating:4.3,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Fruttato-acquatico con prugna e mela dominanti. Ottimo per appuntamenti estivi. Nessuna menta — più dolce e fruttato di quanto si pensi."},
+  {id:7,brand:"Rue Broca",name:"Théorème Homme",conc:"EDP",note:"Testa: agrumi (pompelmo), zenzero · Cuore: ambra, note legnose · Fondo: muschio, spezie, patchouli",accordi:["Agrumato","Legnoso","Muschiato","Fresco","Ambra"],famiglia:"Agrumato ambrato",colore:"rosso",stagione:"ai",momento:"entrambi",longevita:7,rating:4.5,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",dupe:"Bvlgari Tygar",desc:"Rating 4.5 — il più alto della collezione. Clone di Bvlgari Tygar. Agrumato brillante con base ambrata. Ottima apertura per layering invernale."},
+  {id:8,brand:"Davidoff",name:"Adventure",conc:"EDT",note:"Testa: mandarino, pepe, limone, bergamotto, foglia di tè, maté · Cuore: pimento, sesamo, cardamomo · Fondo: vetiver, cedro, muschio bianco",accordi:["Agrumato","Speziato Fresco","Aromatico","Legnoso","Speziato Caldo"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"pe",momento:"giorno",longevita:6,rating:3.9,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Speziato verde con maté e sesamo — note rare nella tua collezione. Perfetto per outdoor e tempo libero."},
+  {id:9,brand:"Missoni",name:"Wave",conc:"EDT",note:"Testa: note marine, agrumi, mandarino siciliano, bergamotto · Cuore: lavanda, salvia sclarea, rosmarino, geranio · Fondo: orchidea vanigliata, vetiver haitiano, patchouli, muschio di quercia",accordi:["Aromatico","Agrumato","Marino","Speziato Fresco","Lavanda"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",longevita:6,rating:4.3,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Marino cremoso ispirato al Mediterraneo. Orchidea vanigliata in base — insolita per un marino. Simile a Chanel Allure Homme Sport."},
+  {id:10,brand:"Emporio Armani",name:"Stronger With You Absolutely",conc:"Parfum",note:"Testa: bergamotto, davana · Cuore: rum, lavanda, salvia, castagna · Fondo: vaniglia, elemi, cedro, patchouli",accordi:["Vanigliato","Legnoso","Balsamico","Rum","Aromatico"],famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",longevita:8,rating:4.5,ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Rum e castagna avvolgenti. Rating 4.5. 8h longevità. Il più gourmand della collezione."},
+  {id:11,brand:"Giorgio Armani",name:"Acqua di Giò Profondo",conc:"EDP",note:"Testa: note marine, bergamotto, mandarino · Cuore: aquozone, rosmarino, note minerali · Fondo: patchouli, cipresso, legni",accordi:["Marino","Aromatico","Agrumato","Speziato Fresco","Fresco"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"tutto",momento:"entrambi",longevita:6,rating:4.3,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"ADG più marino e moderno con cipresso e aquozone. Più scuro e profondo dell'EDP originale. Ottimo per appuntamenti e uscite serali."},
+  {id:12,brand:"Dolce & Gabbana",name:"The One for Men",conc:"EDP",note:"Testa: pompelmo, coriandolo, basilico · Cuore: zenzero, cardamomo, fiore d'arancio, neroli · Fondo: tabacco, ambra, cedro",accordi:["Ambra","Tabacco","Speziato Fresco","Agrumato","Aromatico"],famiglia:"Orientale speziato",colore:"rosso",stagione:"ai",momento:"sera",longevita:6,rating:4.5,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Rating 4.5. Tabaccoso elegante con apertura di pompelmo e cardamomo. Perfetto per cene romantiche invernali."},
+  {id:13,brand:"L'Erbolario",name:"Ginepro Nero",conc:"EDT",note:"Testa: arancia amara, elemi, bergamotto, pompelmo · Cuore: bacche di ginepro, pepe rosa, legno di cedro · Fondo: vetiver, muschio di quercia, benzoino, patchouli",accordi:["Aromatico","Legnoso","Agrumato","Speziato Fresco","Terroso"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"giorno",longevita:6,rating:4.2,ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"no",casa:"si",festivita:"no",desc:"Botanico e naturale. Ginepro protagonista assoluto con resine. Ottimo anche in casa. Note ufficiali non dettagliate."},
+  {id:14,brand:"Versace",name:"Eros",conc:"EDT",note:"Testa: menta, mela verde, limone · Cuore: fava tonka, ambroxan, geranio · Fondo: vaniglia, cedro, vetiver, muschio di quercia, ambra",accordi:["Vanigliato","Aromatico","Verde","Speziato Fresco","Ambra"],famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",longevita:7,rating:4.1,ufficio:"no",quotidiano:"no",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Dolce e mentolato. L'Eros originale — vivace e seducente. Ideale per serate vivaci e club."},
+  {id:15,brand:"Versace",name:"Eros",conc:"EDP",note:"Testa: menta, mela, limone, mandarino, bergamotto · Cuore: ambroxan, geranio, fava tonka, salvia · Fondo: vaniglia, cedro, muschio, ambra, patchouli",accordi:["Agrumato","Aromatico","Verde","Vanigliato","Legnoso"],famiglia:"Orientale fougère",colore:"rosso",stagione:"tutto",momento:"sera",longevita:7,rating:4.3,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Più maturo e meno dolce dell'EDT. Meno verde, più ambroxan — perfetto per serate eleganti."},
+  {id:16,brand:"Versace",name:"Eros Flame",conc:"EDP",note:"Testa: mandarino, pepe del Madagascar, limone, chinotto · Cuore: rosmarino, geranio, rosa, pepe rosa · Fondo: vaniglia, fava tonka, sandalo, cedro, patchouli, muschio di quercia",accordi:["Agrumato","Speziato Fresco","Vanigliato","Aromatico","Legnoso"],famiglia:"Legnoso speziato",colore:"rosso",stagione:"ai",momento:"sera",longevita:7,rating:4.3,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Speziato e passionale con cuore di rosa. Mandarino e pepe aprono, sandalo e vaniglia chiudono. Ottimo in clima freddo."},
+  {id:17,brand:"Armaf",name:"Club de Nuit Intense Man",conc:"EDT",note:"Testa: limone, bergamotto, mela, bacche di ribes nero, ananas, bergamotto · Cuore: betulla, gelsomino, rosa · Fondo: muschio, ambra grigia, vaniglia, legni",accordi:["Agrumato","Fruttato","Cuoiato","Fumoso","Legnoso"],famiglia:"Fruttato cuoiato",colore:"rosso",stagione:"tutto",momento:"sera",longevita:8,rating:4.1,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",dupe:"Creed Aventus",desc:"Clone di Creed Aventus. Ananas fumé con betulla e ribes nero. 8h longevità. Sillage potente. Rating 4.1 su 26.520 recensioni."},
+  {id:18,brand:"Davidoff",name:"Cool Water",conc:"EDT",note:"Testa: menta, lavanda, coriandolo, rosmarino, bergamotto · Cuore: geranio, neroli, gelsomino, sandalo, legno di cedro · Fondo: muschio, ambra, tabacco, legno di quercia",accordi:["Aromatico","Verde","Marino","Speziato Fresco","Lavanda"],famiglia:"Aromatico acquatico",colore:"blu",stagione:"pe",momento:"giorno",longevita:6,rating:3.9,ufficio:"si",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Il pioniere degli acquatici moderni. Lavanda, menta e rosmarino — classico senza tempo. Ottimo da palestra e casa."},
+  {id:19,brand:"Gucci",name:"Guilty Eau de Parfum",conc:"EDP",note:"Testa: pimento, lavanda, fiore d'arancio · Cuore: rosa, geranio, aceto balsamico · Fondo: legno di cedro, patchouli, ambra",accordi:["Rosa","Speziato Caldo","Floreale Bianco","Legnoso","Lavanda"],famiglia:"Floreale speziato",colore:"verde",stagione:"tutto",momento:"entrambi",longevita:6,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Guilty Pour Homme Eau de Parfum — diverso dal Cologne. Rosa, pimento e aceto balsamico lo rendono più speziato-floreale. Versatile giorno e sera."},
+  {id:20,brand:"Givenchy",name:"Gentleman EDP Réserve Privée",conc:"EDP",note:"Testa: bergamotto · Cuore: iris, whisky, castagna · Fondo: cedro, patchouli, ambra, vaniglia",accordi:["Legnoso","Iris","Whisky","Talcato","Ambra"],famiglia:"Fougère legnoso",colore:"rosso",stagione:"ai",momento:"sera",longevita:7,rating:4.4,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"Rating 4.4. Iris-whisky sofisticato e boozy. Perfetto per cene e occasioni importanti. Nota: prevalentemente Notte."},
+  {id:21,brand:"Salvatore Ferragamo",name:"Uomo Signature",conc:"EDP",note:"Testa: mandarino, cardamomo, pepe nero · Cuore: cannella, caffè tostato · Fondo: fava tonka, cuoio, ambra, sandalo",accordi:["Speziato Caldo","Cuoiato","Aromatico","Caffè","Vanigliato"],famiglia:"Orientale gourmand",colore:"rosso",stagione:"ai",momento:"sera",longevita:7,rating:4.3,ufficio:"si-mod",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Caffè tostato e cuoio dominanti con cardamomo. Gourmand speziato raffinato. Eccellente per serate e festività."},
+  {id:22,brand:"Prada",name:"L'Homme Intense",conc:"EDP",note:"Testa: mandarino, neroli, pepe nero · Cuore: iris, ambra, patchouli, geranio · Fondo: cuoio, fava tonka, sandalo, ambra, cedro",accordi:["Iris","Talcato","Ambra","Legnoso","Terroso"],famiglia:"Fougère orientale",colore:"rosso",stagione:"ai",momento:"entrambi",longevita:8,rating:4.5,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",desc:"*Con moderazione in ufficio. Rating 4.5. Iris e ambra vellutata — elegante in ogni occasione fredda. 8h longevità."},
+  {id:23,brand:"Rasasi",name:"La Yuqawam Pour Homme",conc:"EDP",note:"Testa: zafferano, note fruttate, lampone · Cuore: rosa, cuoio, pelle scamosciata · Fondo: olibano (incenso), note legnose, ambra, muschio",accordi:["Cuoiato","Fruttato","Dolce","Animalico","Ambra"],famiglia:"Orientale cuoiato",colore:"rosso",stagione:"ai",momento:"sera",longevita:8,rating:4.4,ufficio:"no",quotidiano:"no",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"no",festivita:"si",dupe:"Tom Ford Tuscan Leather",desc:"Rating 4.4. Simile a Tuscan Leather di Tom Ford — cuoio, zafferano, lampone. 8h longevità potente. Usare con moderazione."},
+  {id:24,brand:"Lalique",name:"Encre Noire",conc:"EDT",note:"Testa: cipresso · Cuore: vetiver haitiano, vetiver bourbon · Fondo: muschio, cashmere wood",accordi:["Legnoso","Aromatico","Terroso","Muschiato","Speziato Fresco"],famiglia:"Aromatico legnoso",colore:"verde",stagione:"ai",momento:"entrambi",longevita:7,rating:4.1,ufficio:"si",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",desc:"Vetiver oscuro e terroso con cipresso. Classico moderno polarizzante — amato o odiato. Ottimo valore qualità-prezzo. Rating 4.1 su 24.246 recensioni."},
+  {id:25,brand:"Lalique",name:"Encre Noire Sport",conc:"EDT",note:"Testa: pompelmo, bergamotto, note acquatiche · Cuore: cipresso, vetiver, noce moscata · Fondo: legno di cashmere, muschio",accordi:["Legnoso","Aromatico","Agrumato","Speziato Fresco","Terroso"],famiglia:"Aromatico acquatico",colore:"verde",stagione:"pe",momento:"giorno",longevita:7,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"no",palestra:"si",casa:"si",festivita:"no",desc:"Versione P/E dell'Encre Noire. Pompelmo e bergamotto schiariscono il vetiver — più fresco e accessibile dell'originale. Adatto anche a palestra."},
+  {id:26,brand:"Lattafa Perfumes",name:"Atlas",conc:"EDP",note:"Testa: note marine, sale, limone · Cuore: ambra grigia, note aromatiche · Fondo: muschio di quercia, sandalo, ambra, muschio vegetale",accordi:["Marino","Salato","Aromatico","Ambra","Muschio Vegetale"],famiglia:"Marino salato",colore:"blu",stagione:"pe",momento:"entrambi",longevita:9,rating:4.2,ufficio:"no",quotidiano:"si",formale:"no",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"no",dupe:"Orto Parisi Megamare",desc:"Marino salato con ambra grigia e sandalo. Scia enorme (9h). Clone ispirato a Orto Parisi Megamare. Unisex."},
+  {id:27,brand:"Al Haramain",name:"Amber Oud Gold Edition",conc:"EDP",note:"Testa: bergamotto, note verdi, melone, ananas · Cuore: accordo gourmand, note fruttate · Fondo: ambra, vaniglia, muschio, note legnose",accordi:["Dolce","Fruttato","Ozonico","Talcato","Vanigliato"],famiglia:"Orientale fruttato",colore:"rosso",stagione:"tutto",momento:"entrambi",longevita:8,rating:4.3,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",dupe:"Xerjoff Erba Pura",desc:"*Con moderazione in ufficio. Clone di Xerjoff Erba Pura. Melone e ananas su ambra e vaniglia cremosa, apertura verde-ozonica. Unisex, scia forte, 8h. Voti stagionali bilanciati: versatile tutto l'anno. Rating 4.3 su 5.415 recensioni."},
+  {id:28,brand:"Zara",name:"Sunrise on the Red Sand Dunes Intense",conc:"EDP",note:"Testa: mandarino, zenzero, bergamotto · Cuore: fiore d'arancio, ribes nero · Fondo: ambra, balsamo di abete, labdano, incenso, tonka, muschio",accordi:["Agrumato","Speziato Fresco","Fruttato","Floreale Bianco","Ambra"],famiglia:"Ambrato agrumato",colore:"rosso",stagione:"ai",momento:"giorno",longevita:7,rating:4.4,ufficio:"si-mod",quotidiano:"si",formale:"si",informale:"si",appuntamento:"si",palestra:"no",casa:"si",festivita:"si",dupe:"LV Imagination (interpretazione calda ~75-85%)",desc:"*Con moderazione in ufficio. Interpretazione calda di LV Imagination — più autunnale e resinosa dell'originale ariosa. Zenzero e agrumi in apertura, ambra e abete balsamico in fondo. La community lo avvicina anche a LV L'Immensité. Cloni più fedeli di Imagination: Lattafa Aqua Dubai e Marwa. Rating 4.4 su 1.573 recensioni."},
 ];
 
 const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",informale:"Informale",appuntamento:"Appuntamento",palestra:"Palestra",casa:"In casa",festivita:"Festività"};
@@ -658,9 +675,13 @@ function getFiltered(){
       if(f==='festivita'&&p.festivita!=='si')return false;
       if(f==='sera'&&p.momento!=='sera')return false;
       if(f==='giorno'&&p.momento!=='giorno')return false;
+      if(f==='dupe'&&!p.dupe)return false;
     }
-    for(const n of activeNote){
-      if(!p.note.toLowerCase().includes(n))return false;
+    if(activeNote.size){
+      // logica OR: almeno una delle note selezionate
+      let match=false;
+      for(const n of activeNote){ if(p.note.toLowerCase().includes(n)){match=true;break;} }
+      if(!match)return false;
     }
     return true;
   }).sort((a,b)=>{const fn=sortFns[currentSort];const va=fn(a),vb=fn(b);return typeof va==='number'?va-vb:va<vb?-1:va>vb?1:0});
@@ -920,6 +941,61 @@ function render(){
   const tot=profumi.length;
   document.getElementById('count-pill').textContent=list.length===tot?`${tot}`:` ${list.length}/${tot}`;
   renderActiveBar();
+  updateChipCounts();
+}
+
+// Conta quanti profumi resterebbero attivando/mantenendo ciascun filtro (feedback live)
+function countWith(testFilters,testNote){
+  return profumi.filter(p=>{
+    const s=searchVal.toLowerCase();
+    if(s&&!p.brand.toLowerCase().includes(s)&&!p.name.toLowerCase().includes(s)&&!p.note.toLowerCase().includes(s)&&!p.famiglia.toLowerCase().includes(s)&&!p.accordi.join(' ').toLowerCase().includes(s))return false;
+    for(const f of testFilters){
+      if(f==='pe'&&p.stagione!=='pe'&&p.stagione!=='tutto')return false;
+      if(f==='ai'&&p.stagione!=='ai'&&p.stagione!=='tutto')return false;
+      if(f==='tutto'&&p.stagione!=='tutto')return false;
+      if((f==='blu'||f==='verde'||f==='rosso')&&p.colore!==f)return false;
+      if(f==='ufficio'&&p.ufficio!=='si'&&p.ufficio!=='si-mod')return false;
+      if(f==='appuntamento'&&p.appuntamento!=='si')return false;
+      if(f==='quotidiano'&&p.quotidiano!=='si')return false;
+      if(f==='informale'&&p.informale!=='si')return false;
+      if(f==='formale'&&p.formale!=='si')return false;
+      if(f==='palestra'&&p.palestra!=='si')return false;
+      if(f==='casa'&&p.casa!=='si')return false;
+      if(f==='festivita'&&p.festivita!=='si')return false;
+      if(f==='sera'&&p.momento!=='sera')return false;
+      if(f==='giorno'&&p.momento!=='giorno')return false;
+      if(f==='dupe'&&!p.dupe)return false;
+    }
+    if(testNote.size){let m=false;for(const n of testNote){if(p.note.toLowerCase().includes(n)){m=true;break;}}if(!m)return false;}
+    return true;
+  }).length;
+}
+
+function updateChipCounts(){
+  // chip filtri (stagione/occasione/famiglia/momento/dupe)
+  document.querySelectorAll('.chip[data-filter]').forEach(c=>{
+    const f=c.dataset.filter;
+    const tf=new Set(activeFilters);
+    let n;
+    if(activeFilters.has(f)){ n=countWith(tf,activeNote); }        // già attivo: mostra risultato corrente
+    else { tf.add(f); n=countWith(tf,activeNote); }                 // ipotetico: aggiungendolo
+    let badge=c.querySelector('.chip-n');
+    if(!badge){badge=document.createElement('span');badge.className='chip-n';c.appendChild(badge);}
+    badge.textContent=n;
+    c.classList.toggle('chip-zero', n===0 && !activeFilters.has(f));
+  });
+  // chip note (OR)
+  document.querySelectorAll('.chip[data-nota]').forEach(c=>{
+    const nkey=c.dataset.nota;
+    const tn=new Set(activeNote);
+    let n;
+    if(activeNote.has(nkey)){ n=countWith(activeFilters,tn); }
+    else { tn.add(nkey); n=countWith(activeFilters,tn); }
+    let badge=c.querySelector('.chip-n');
+    if(!badge){badge=document.createElement('span');badge.className='chip-n';c.appendChild(badge);}
+    badge.textContent=n;
+    c.classList.toggle('chip-zero', n===0 && !activeNote.has(nkey));
+  });
 }
 
 function renderActiveBar(){
