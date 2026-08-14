@@ -6,426 +6,451 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sillage">
-<meta name="theme-color" content="#07070b">
-<title>Sillage — la collezione</title>
+<meta name="theme-color" content="#12100d">
+<title>Sillage — collezione privata</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#07070b;
-  --case:rgba(255,255,255,0.035);
-  --case2:rgba(255,255,255,0.06);
-  --case3:rgba(255,255,255,0.10);
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.15);
-  --border3:rgba(255,255,255,0.25);
-  --gold:#c9a96e;
-  --gold2:#e8c98a;
-  --gold3:rgba(201,169,110,0.16);
-  --gold4:rgba(201,169,110,0.07);
-  --text:#efeae1;
-  --text2:#9d968c;
-  --text3:#57534d;
-  --blu:#6ba0d8;--verde:#79bd88;--rosso:#d97a70;
-  --blu-bg:rgba(107,160,216,0.11);--verde-bg:rgba(121,189,136,0.11);--rosso-bg:rgba(217,122,112,0.11);
-  --r:18px;--r-sm:11px;--r-xs:7px;
-  --vetro:linear-gradient(160deg,rgba(255,255,255,0.075) 0%,rgba(255,255,255,0.015) 38%,rgba(255,255,255,0.045) 100%);
+  /* la vetrina: lacca scura, noce, ottone, luce calda */
+  --lacca:#12100d;
+  --noce:#1a1611;
+  --noce-2:#221d16;
+  --vetro:rgba(255,255,255,.045);
+  --vetro-2:rgba(255,255,255,.075);
+  --filo:rgba(232,214,176,.10);
+  --filo-2:rgba(232,214,176,.20);
+  --filo-3:rgba(232,214,176,.34);
+  --ottone:#c8a35e;
+  --ottone-chiaro:#f0d9a4;
+  --ottone-scuro:#8a6f3c;
+  --ottone-velo:rgba(200,163,94,.12);
+  --luce:#fff3d8;
+  /* testi: carta d'etichetta */
+  --carta:#f3ede1;
+  --carta-2:#b9b0a0;
+  --carta-3:#8d8474;
+  /* vetri colorati delle tre famiglie */
+  --acqua:#7fa8cf;
+  --bosco:#93b98a;
+  --ambra:#d9906f;
+  --acqua-velo:rgba(127,168,207,.13);
+  --bosco-velo:rgba(147,185,138,.13);
+  --ambra-velo:rgba(217,144,111,.13);
+  --r:14px;--r-s:10px;--r-xs:7px;
+  --lastra:linear-gradient(168deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.012) 42%,rgba(255,255,255,.035) 100%);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:var(--ink)}
+html{background:var(--lacca)}
 body{
-  font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text);background:var(--ink);
-  min-height:100dvh;overflow-x:hidden;
+  font-family:'Manrope',system-ui,sans-serif;font-weight:400;font-size:16px;
+  color:var(--carta);background:var(--lacca);min-height:100dvh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
   background-image:
-    radial-gradient(ellipse 120% 46% at 50% -6%,rgba(232,201,138,0.075) 0%,transparent 62%),
-    radial-gradient(ellipse 80% 40% at 50% 108%,rgba(120,150,200,0.05) 0%,transparent 70%);
+    radial-gradient(ellipse 140% 40% at 50% -8%,rgba(255,238,205,.085) 0%,transparent 62%),
+    radial-gradient(ellipse 90% 44% at 50% 104%,rgba(120,146,190,.045) 0%,transparent 72%);
   background-attachment:fixed;
 }
-:focus-visible{outline:1px solid var(--gold);outline-offset:2px;border-radius:4px}
+:focus-visible{outline:2px solid var(--ottone);outline-offset:2px;border-radius:6px}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}}
 
-/* ─────────── HEADER ─────────── */
-.app-header{position:sticky;top:0;z-index:100;background:rgba(7,7,11,0.88);backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);border-bottom:1px solid var(--border)}
-.app-header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,0.35),transparent)}
-.hdr-main{padding:13px 15px 10px;display:flex;align-items:center;gap:8px}
-.wordmark{flex:1;display:flex;align-items:baseline;gap:9px;min-width:0}
-.wordmark h1{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;letter-spacing:.1em;line-height:1;background:linear-gradient(115deg,var(--gold2) 20%,#f5e3ba 42%,var(--gold) 70%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.wordmark .sub{font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
-.hdr-actions{display:flex;align-items:center;gap:6px}
-.count-pill{font-size:10.5px;letter-spacing:.06em;color:var(--gold);background:var(--gold4);border:1px solid rgba(201,169,110,0.22);border-radius:20px;padding:3px 10px;white-space:nowrap}
-.icon-btn{width:34px;height:34px;border-radius:var(--r-xs);background:var(--case);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:border-color .2s,color .2s,background .2s;flex-shrink:0}
-.icon-btn:hover{border-color:var(--border2);color:var(--text)}
-.icon-btn.active{border-color:rgba(201,169,110,0.5);color:var(--gold);background:var(--gold4)}
-.icon-btn svg{width:15px;height:15px}
-.search-row{padding:0 15px 10px}
-.search-wrap{position:relative}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
-input[type=search]{width:100%;background:var(--case);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;padding:10px 10px 10px 34px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s,background .2s}
-input[type=search]::placeholder{color:var(--text3)}
-input[type=search]:focus{border-color:rgba(201,169,110,0.4);background:var(--case2)}
+/* etichette incise, usate in tutta l'app */
+.incisa{font-family:'Manrope',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--carta-3)}
+
+/* ─────────── TESTATA ─────────── */
+.testata{padding:22px 18px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.marca-app h1{font-family:'Marcellus',serif;font-size:30px;font-weight:400;letter-spacing:.14em;line-height:1;color:var(--ottone-chiaro);text-shadow:0 1px 0 rgba(0,0,0,.6),0 0 22px rgba(240,217,164,.18)}
+.marca-app p{margin-top:6px}
+.conteggio{font-family:'Marcellus',serif;font-size:13px;letter-spacing:.06em;color:var(--carta-3);white-space:nowrap;padding-bottom:3px;font-variant-numeric:tabular-nums}
+.conteggio b{color:var(--ottone);font-weight:400;font-size:16px}
+
+/* ─────────── BARRA STRUMENTI (sticky) ─────────── */
+.strumenti{position:sticky;top:0;z-index:60;padding:8px 14px 10px;
+  background:linear-gradient(var(--lacca) 72%,rgba(18,16,13,.94));
+  backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  border-bottom:1px solid var(--filo)}
+.strumenti::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--filo-3),transparent)}
+.riga-cerca{display:flex;gap:8px;align-items:center}
+.cerca{position:relative;flex:1;min-width:0}
+.cerca svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--carta-3);pointer-events:none}
+input[type=search]{width:100%;height:46px;background:var(--vetro);border:1px solid var(--filo-2);border-radius:var(--r-s);
+  color:var(--carta);font-family:'Manrope',sans-serif;font-size:15px;font-weight:400;padding:0 12px 0 38px;
+  outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s,background .2s}
+input[type=search]::placeholder{color:var(--carta-3)}
+input[type=search]:focus{border-color:var(--filo-3);background:var(--vetro-2)}
 input[type=search]::-webkit-search-cancel-button{display:none}
+.btn-filtri{height:46px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 15px;cursor:pointer;
+  background:var(--vetro);border:1px solid var(--filo-2);border-radius:var(--r-s);color:var(--carta);
+  font-family:'Manrope',sans-serif;font-size:14px;font-weight:500;letter-spacing:.02em;transition:all .2s}
+.btn-filtri svg{width:16px;height:16px}
+.btn-filtri:hover{border-color:var(--filo-3)}
+.btn-filtri.acceso{background:var(--ottone-velo);border-color:rgba(200,163,94,.45);color:var(--ottone-chiaro)}
+.bollo{min-width:19px;height:19px;border-radius:10px;background:var(--ottone);color:#17130b;
+  font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 5px;font-variant-numeric:tabular-nums}
+.bollo.mostra{display:flex}
 
-/* ─────────── FILTRI ─────────── */
-.filter-panel{overflow:hidden;transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .25s;max-height:440px;opacity:1}
-.filter-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
-.filter-inner{padding:0 15px 12px}
-.filter-group{margin-bottom:10px}
-.filter-group:last-child{margin-bottom:0}
-.fg-label{font-size:8.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;display:flex;align-items:center;gap:8px}
-.fg-label::after{content:'';flex:1;height:1px;background:var(--border)}
-.chips-wrap{position:relative}
-.chips-wrap::after{content:'';position:absolute;top:0;right:0;bottom:0;width:30px;pointer-events:none;background:linear-gradient(90deg,rgba(7,7,11,0) 0%,rgba(7,7,11,.85) 70%,var(--ink) 100%);opacity:0;transition:opacity .2s}
-.chips-wrap.has-overflow::after{opacity:1}
-.chips-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:rgba(201,169,110,0.3) transparent}
-.chips-row::-webkit-scrollbar{height:3px}
-.chips-row::-webkit-scrollbar-track{background:transparent}
-.chips-row::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.3);border-radius:4px}
-.chip{flex-shrink:0;font-size:11.5px;font-weight:400;color:var(--text2);background:var(--case);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap}
-.chip:hover{border-color:var(--border2)}
-.chip:active{transform:scale(.97)}
-.chip.active{font-weight:500}
-.chip.stag.active{background:rgba(107,160,216,0.18);border-color:rgba(107,160,216,0.42);color:#a3c6e6}
-.chip.occ.active{background:var(--gold3);border-color:rgba(201,169,110,0.48);color:var(--gold2)}
-.chip.c-blu.active{background:rgba(107,160,216,0.2);border-color:rgba(107,160,216,0.45);color:#a3c6e6}
-.chip.c-verde.active{background:rgba(121,189,136,0.2);border-color:rgba(121,189,136,0.45);color:#a3dcb1}
-.chip.c-rosso.active{background:rgba(217,122,112,0.2);border-color:rgba(217,122,112,0.45);color:#eaa79f}
-.chip.mom.active{background:var(--case3);border-color:var(--border2);color:var(--text)}
-.chip.nota.active{background:rgba(180,140,220,0.18);border-color:rgba(180,140,220,0.4);color:#d4b8f0}
-.chip.dupe-chip.active{background:var(--gold3);border-color:rgba(201,169,110,0.5);color:var(--gold2)}
-.chip-n{margin-left:6px;font-size:9.5px;opacity:.5;font-weight:500;font-variant-numeric:tabular-nums}
-.chip.active .chip-n{opacity:.85}
-.chip.chip-zero{opacity:.3;filter:saturate(.35)}
-.active-bar{display:none;flex-wrap:wrap;gap:5px;padding:8px 15px 10px;border-top:1px solid var(--border)}
-.active-bar.show{display:flex}
-.af-tag{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--gold4);border:1px solid rgba(201,169,110,0.28);color:var(--gold);display:flex;align-items:center;gap:6px;cursor:pointer}
-.af-tag.nota-tag{background:rgba(180,140,220,0.1);border-color:rgba(180,140,220,0.3);color:#d4b8f0}
-.af-x{font-size:9px;opacity:.6}
-.af-clear{background:rgba(217,122,112,0.09);border-color:rgba(217,122,112,0.3);color:var(--rosso)}
+.rapidi{display:flex;gap:7px;overflow-x:auto;margin-top:9px;padding-bottom:2px;scrollbar-width:none}
+.rapidi::-webkit-scrollbar{display:none}
+.scelta{flex-shrink:0;height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;cursor:pointer;user-select:none;
+  background:var(--vetro);border:1px solid var(--filo);border-radius:99px;color:var(--carta-2);
+  font-size:13.5px;font-weight:500;white-space:nowrap;transition:all .16s}
+.scelta:hover{border-color:var(--filo-2);color:var(--carta)}
+.scelta:active{transform:scale(.97)}
+.scelta.on{background:var(--ottone-velo);border-color:rgba(200,163,94,.5);color:var(--ottone-chiaro)}
+.scelta.ora.on{background:rgba(240,217,164,.16);border-color:var(--ottone);color:var(--luce)}
+.scelta .q{font-size:11.5px;font-weight:600;opacity:.55;font-variant-numeric:tabular-nums}
+.scelta.on .q{opacity:.9}
+.scelta.zero{opacity:.32}
 
-/* ─────────── VIEWS ─────────── */
-.view{display:none;padding:15px 13px 104px}
-.view.active{display:block}
-@media(min-width:900px){.view{max-width:880px;margin:0 auto}}
-#view-collezione{display:none;padding:15px 13px 104px}
-#view-collezione.active{display:grid;grid-template-columns:1fr;gap:11px}
-@media(min-width:560px){#view-collezione.active{grid-template-columns:1fr 1fr}}
-@media(min-width:900px){#view-collezione.active{grid-template-columns:1fr 1fr 1fr;max-width:1100px;margin:0 auto;padding:20px 20px 104px}}
+.attivi{display:none;flex-wrap:wrap;gap:6px;margin-top:9px}
+.attivi.mostra{display:flex}
+.tolgo{height:30px;display:inline-flex;align-items:center;gap:7px;padding:0 11px;cursor:pointer;
+  background:var(--ottone-velo);border:1px solid rgba(200,163,94,.3);border-radius:99px;
+  color:var(--ottone-chiaro);font-size:12.5px;font-weight:500;font-family:'Manrope',sans-serif}
+.tolgo.nota{background:rgba(190,150,220,.1);border-color:rgba(190,150,220,.28);color:#d9c0f0}
+.tolgo .x{font-size:14px;line-height:1;opacity:.65;margin-top:-1px}
+.tolgo.pulisci{background:transparent;border-color:rgba(217,144,111,.35);color:var(--ambra)}
 
-/* ─────────── LA TECA (card) ─────────── */
-.teca{position:relative;border:1px solid var(--border);border-radius:var(--r);background:var(--vetro);cursor:pointer;overflow:hidden;transition:border-color .25s,transform .25s,box-shadow .25s;animation:sorge .45s cubic-bezier(.22,1,.36,1) backwards}
-@keyframes sorge{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.teca::before{content:'';position:absolute;top:0;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.45),transparent);opacity:.5;transition:opacity .3s}
-.teca:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 14px 36px -18px rgba(0,0,0,.92)}
-.teca.open{background:linear-gradient(160deg,rgba(255,255,255,0.09) 0%,rgba(255,255,255,0.02) 45%,rgba(255,255,255,0.05) 100%);border-color:rgba(201,169,110,0.28);transform:none}
-.teca.open::before{opacity:1}
-.teca.blu::before{background:linear-gradient(90deg,transparent,var(--blu),transparent)}
-.teca.verde::before{background:linear-gradient(90deg,transparent,var(--verde),transparent)}
-.teca.rosso::before{background:linear-gradient(90deg,transparent,var(--rosso),transparent)}
-.teca-body{padding:15px 14px 14px;position:relative;z-index:1}
-.teca-top{display:flex;align-items:flex-start;gap:13px}
+/* ─────────── VISTE ─────────── */
+.vista{display:none;padding:16px 14px 108px}
+.vista.attiva{display:block}
+@media(min-width:900px){
+  .testata,.strumenti,.vista{max-width:1120px;margin-left:auto;margin-right:auto}
+  .strumenti{border-radius:0 0 var(--r) var(--r)}
+}
+#vista-collezione{display:none;padding:16px 14px 108px}
+#vista-collezione.attiva{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:680px){#vista-collezione.attiva{grid-template-columns:1fr 1fr}}
+@media(min-width:1040px){#vista-collezione.attiva{grid-template-columns:1fr 1fr 1fr;max-width:1120px;margin:0 auto;padding:18px 18px 108px}}
 
-/* la lastra: il flacone esposto dietro il vetro — la firma della vetrina */
-.vetrinetta{flex:0 0 96px;width:96px;display:flex;flex-direction:column;align-items:center;gap:6px}
-.lastra{position:relative;width:96px;height:116px;border-radius:12px;overflow:hidden;background:#101018;border:1px solid rgba(201,169,110,.26);box-shadow:0 10px 22px -12px rgba(0,0,0,.95)}
-.lastra img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .55s cubic-bezier(.22,1,.36,1)}
-.teca:hover .lastra img,.teca.open .lastra img{transform:scale(1.06)}
-.lastra::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
-  background:linear-gradient(148deg,rgba(255,255,255,.32) 0%,rgba(255,255,255,.07) 24%,transparent 46%),
-             linear-gradient(0deg,rgba(7,7,11,.32),transparent 40%);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.lastra.vuota{display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--text3)}
-.mensola{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.5) 28%,rgba(232,201,138,.75) 50%,rgba(201,169,110,.5) 72%,transparent)}
+/* ─────────── LA TECA ─────────── */
+.teca{position:relative;border:1px solid var(--filo);border-radius:var(--r);background:var(--lastra);
+  cursor:pointer;overflow:hidden;transition:border-color .25s,transform .25s,box-shadow .25s;
+  animation:sale .5s cubic-bezier(.22,1,.36,1) backwards}
+@keyframes sale{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* il filo di luce sul bordo alto del cristallo */
+.teca::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--filo-3),transparent);opacity:.6;transition:opacity .3s}
+.teca:hover{border-color:var(--filo-2);transform:translateY(-3px);box-shadow:0 18px 40px -22px #000}
+.teca.aperta{background:linear-gradient(168deg,rgba(255,255,255,.09) 0%,rgba(255,255,255,.02) 48%,rgba(255,255,255,.045) 100%);
+  border-color:rgba(200,163,94,.32);transform:none}
+.teca.aperta::before{opacity:1}
+.teca.acqua::before{background:linear-gradient(90deg,transparent,var(--acqua),transparent)}
+.teca.bosco::before{background:linear-gradient(90deg,transparent,var(--bosco),transparent)}
+.teca.ambra::before{background:linear-gradient(90deg,transparent,var(--ambra),transparent)}
+.corpo{padding:15px 15px 14px;position:relative;z-index:1}
+.esposizione{display:flex;align-items:flex-start;gap:14px}
 
-.teca-info{flex:1;min-width:0}
-.cartellino{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px}
-.marca{font-size:9px;font-weight:500;letter-spacing:.19em;text-transform:uppercase;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.numero{font-size:9px;letter-spacing:.08em;color:var(--text3);font-variant-numeric:tabular-nums;flex-shrink:0}
-.nome{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;line-height:1.1;color:var(--text);margin-bottom:7px}
-.meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:9px}
-.pill{font-size:10px;border-radius:var(--r-xs);padding:2px 7px;letter-spacing:.04em;white-space:nowrap}
-.pill.conc{color:var(--text2);background:var(--case2);border:1px solid var(--border)}
-.pill.voto{color:var(--gold);background:var(--gold4);border:1px solid rgba(201,169,110,0.22);font-variant-numeric:tabular-nums}
-.pill.gemella{color:var(--gold2);background:var(--gold3);border:1px solid rgba(201,169,110,0.34)}
-.pill.nuovo{color:#0d0b06;background:linear-gradient(115deg,var(--gold2),var(--gold));border:1px solid var(--gold);font-weight:500;letter-spacing:.08em}
-.note-testo{font-size:11.5px;color:var(--text2);line-height:1.6;margin-bottom:10px}
-.note-testo mark{background:rgba(180,140,220,0.22);color:#d4b8f0;border-radius:3px;padding:0 2px}
-.accordi{display:flex;gap:5px;margin-bottom:9px;flex-wrap:wrap}
-.accordo{font-size:9.5px;letter-spacing:.05em;padding:2px 7px;border-radius:20px;border:1px solid currentColor;opacity:.85}
-.etichette{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text3);white-space:nowrap}
-.tag.stagione{border-color:rgba(201,169,110,.22);color:rgba(201,169,110,.8)}
-.tag.durata{border-color:rgba(107,160,216,.22);color:rgba(107,160,216,.8)}
-.gemma{width:25px;height:25px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;position:relative;overflow:hidden;align-self:flex-start;margin-top:2px}
-.gemma::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,0.24) 0%,transparent 62%)}
-.gemma.blu{background:var(--blu-bg);border:1px solid rgba(107,160,216,0.3);color:var(--blu)}
-.gemma.verde{background:var(--verde-bg);border:1px solid rgba(121,189,136,0.3);color:var(--verde)}
-.gemma.rosso{background:var(--rosso-bg);border:1px solid rgba(217,122,112,0.3);color:var(--rosso)}
-.dettaglio{display:none;margin-top:13px;padding-top:13px;border-top:1px solid var(--border)}
-.teca.open .dettaglio{display:block;animation:apri .3s ease}
-@keyframes apri{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.dett-lbl{font-size:8.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.uso-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
-.uso-item{display:flex;align-items:center;gap:7px;font-size:11.5px}
-.uso-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.uso-dot.si{background:var(--verde)}.uso-dot.mod{background:var(--gold)}.uso-dot.no{background:var(--case3);border:1px solid var(--border2)}
-.uso-lbl.si{color:var(--text2)}.uso-lbl.mod{color:var(--gold)}.uso-lbl.no{color:var(--text3)}
-.desc{font-family:'Cormorant Garamond',serif;font-size:14.5px;font-style:italic;color:var(--text2);line-height:1.65;border-left:1px solid rgba(201,169,110,.4);padding-left:12px}
-.vuoto{grid-column:1/-1;text-align:center;padding:64px 20px;color:var(--text3);font-family:'Cormorant Garamond',serif;font-size:21px;font-style:italic}
-.vuoto span{display:block;font-family:'DM Sans',sans-serif;font-size:12.5px;font-style:normal;margin-top:8px}
-.cmp-btn{position:absolute;bottom:11px;right:11px;width:26px;height:26px;border-radius:50%;background:var(--case2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);transition:all .2s;z-index:2}
-.cmp-btn:hover{border-color:var(--gold);color:var(--gold)}
-.cmp-btn.selected{background:var(--gold);border-color:var(--gold);color:#07070b}
-.cmp-btn svg{width:13px;height:13px}
-.teca.cmp-selected{border-color:rgba(201,169,110,0.5)}
-.teca.cmp-selected::before{opacity:1}
+/* la nicchia illuminata: firma della vetrina */
+.nicchia{flex:0 0 98px;width:98px}
+.faretto{position:relative;width:98px;height:120px;border-radius:10px;overflow:hidden;background:#0c0a08;
+  border:1px solid rgba(200,163,94,.26);box-shadow:0 12px 24px -14px #000,inset 0 0 26px rgba(255,238,205,.07)}
+.faretto img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.teca:hover .faretto img,.teca.aperta .faretto img{transform:scale(1.05)}
+/* cono di luce dall'alto + vetro anteriore */
+.faretto::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 90% 42% at 50% -6%,rgba(255,243,216,.30) 0%,transparent 70%),
+    linear-gradient(152deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.05) 26%,transparent 48%),
+    linear-gradient(0deg,rgba(12,10,8,.42),transparent 42%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.faretto.vuoto{display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:30px;color:var(--carta-3)}
+/* il riflesso sul ripiano */
+.specchio{position:relative;height:22px;overflow:hidden;border-radius:0 0 8px 8px;
+  -webkit-mask-image:linear-gradient(#000,transparent 86%);mask-image:linear-gradient(#000,transparent 86%)}
+.specchio img{display:block;width:100%;height:120px;object-fit:cover;transform:scaleY(-1);opacity:.3;filter:blur(.4px)}
+.ripiano{height:1px;margin-top:1px;background:linear-gradient(90deg,transparent,rgba(200,163,94,.45) 22%,rgba(240,217,164,.8) 50%,rgba(200,163,94,.45) 78%,transparent)}
 
-/* ─────────── SEZIONI TESTUALI ─────────── */
-.intro{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:var(--text2);line-height:1.7;padding:16px 17px;background:var(--vetro);border:1px solid var(--border);border-radius:var(--r);margin-bottom:13px;position:relative;overflow:hidden}
-.intro::before{content:'';position:absolute;top:0;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.45),transparent)}
-.sez-titolo{font-size:8.5px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin:20px 2px 9px;display:flex;align-items:center;gap:9px}
-.sez-titolo::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
-.pannello{background:var(--vetro);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
-.pannello-hdr{padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
-.pannello-hdr:hover{background:rgba(255,255,255,0.02)}
-.ph-left{display:flex;align-items:center;gap:11px;min-width:0}
-.ph-icon{width:31px;height:31px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border)}
-.ph-icon svg{width:15px;height:15px}
-.ph-titolo{font-family:'Cormorant Garamond',serif;font-size:18px;line-height:1.2}
-.ph-sub{font-size:11px;color:var(--text3);margin-top:1px}
-.chev{color:var(--text3);transition:transform .25s;flex-shrink:0}
-.pannello.open .chev{transform:rotate(180deg)}
-.pannello-body{display:none;padding:0 16px 14px;border-top:1px solid var(--border)}
-.pannello.open .pannello-body{display:block}
-.riga{padding:10px 0;border-bottom:1px solid var(--border)}
-.riga:last-child{border-bottom:none}
-.riga-lbl{font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.85;margin-bottom:6px}
-.riga-val{font-size:13px;color:var(--text2);line-height:1.75}
-.riga-val .n{color:var(--text3);font-size:10.5px;font-variant-numeric:tabular-nums}
-.riga-val .sep{color:var(--text3);margin:0 5px}
-.riga-nota{font-size:12px;color:var(--text3);line-height:1.6;font-style:italic}
+/* il cartellino */
+.cartellino{flex:1;min-width:0}
+.riga-marca{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+.marca{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--carta-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.catalogo{font-family:'Marcellus',serif;font-size:12px;letter-spacing:.06em;color:var(--ottone-scuro);flex-shrink:0;font-variant-numeric:tabular-nums}
+.nome{font-family:'Marcellus',serif;font-size:22px;font-weight:400;line-height:1.14;color:var(--carta);margin-bottom:9px;letter-spacing:.005em}
+.targhette{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.targa{font-size:11.5px;font-weight:500;border-radius:var(--r-xs);padding:3px 8px;letter-spacing:.02em;white-space:nowrap;line-height:1.35}
+.targa.grado{color:var(--carta-2);background:var(--vetro-2);border:1px solid var(--filo)}
+.targa.voto{color:var(--ottone-chiaro);background:var(--ottone-velo);border:1px solid rgba(200,163,94,.26);font-variant-numeric:tabular-nums}
+.targa.copia{color:var(--ottone-chiaro);background:rgba(200,163,94,.15);border:1px solid rgba(200,163,94,.34)}
+.targa.nuovo{color:#17130b;background:linear-gradient(115deg,var(--ottone-chiaro),var(--ottone));border:1px solid var(--ottone);font-weight:700;letter-spacing:.08em}
+.note-riga{font-size:13.5px;line-height:1.6;color:var(--carta-2);margin-bottom:11px}
+.note-riga mark{background:rgba(190,150,220,.24);color:#e2cdf5;border-radius:3px;padding:0 3px}
+.accordi{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.accordo{font-size:11px;font-weight:500;letter-spacing:.03em;padding:3px 9px;border-radius:99px;border:1px solid currentColor;opacity:.9}
+.contrassegni{display:flex;flex-wrap:wrap;gap:5px}
+.segno{font-size:11.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--filo);color:var(--carta-3);white-space:nowrap}
+.segno.stag{border-color:rgba(200,163,94,.24);color:rgba(200,163,94,.92)}
+.segno.ore{border-color:rgba(127,168,207,.26);color:rgba(127,168,207,.92)}
+/* la gemma: vetro colorato della famiglia */
+.gemma{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Marcellus',serif;font-size:11px;position:relative;overflow:hidden;align-self:flex-start;margin-top:2px}
+.gemma::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 34% 26%,rgba(255,255,255,.28) 0%,transparent 60%)}
+.gemma.acqua{background:var(--acqua-velo);border:1px solid rgba(127,168,207,.34);color:var(--acqua)}
+.gemma.bosco{background:var(--bosco-velo);border:1px solid rgba(147,185,138,.34);color:var(--bosco)}
+.gemma.ambra{background:var(--ambra-velo);border:1px solid rgba(217,144,111,.34);color:var(--ambra)}
 
-/* ricette layering / consigli acquisto */
-.scheda{background:var(--vetro);border:1px solid var(--border);border-radius:var(--r);margin-bottom:9px;overflow:hidden}
-.scheda-hdr{padding:15px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer}
-.scheda-hdr:hover{background:rgba(255,255,255,0.02)}
-.scheda-badge{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:var(--gold4);border:1px solid rgba(201,169,110,.22);display:flex;align-items:center;justify-content:center;margin-top:1px}
-.scheda-badge svg{width:14px;height:14px}
-.scheda-nome{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold2);margin-bottom:3px;line-height:1.2}
-.scheda-gap{font-size:12px;color:var(--text2);line-height:1.55}
-.scheda-body{display:none;padding:0 16px 14px;border-top:1px solid var(--border)}
-.scheda.open .scheda-body{display:block}
-.voce{padding:10px 0;border-bottom:1px solid var(--border)}
+.scheda-int{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--filo)}
+.teca.aperta .scheda-int{display:block;animation:apri .32s ease}
+@keyframes apri{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.usi{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0 14px}
+.uso{display:flex;align-items:center;gap:8px;font-size:13px}
+.punto{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.punto.si{background:var(--bosco)}.punto.forse{background:var(--ottone)}.punto.no{background:rgba(255,255,255,.12);border:1px solid var(--filo-2)}
+.uso.si{color:var(--carta-2)}.uso.forse{color:var(--ottone)}.uso.no{color:var(--carta-3)}
+.racconto{font-family:'Marcellus',serif;font-size:15.5px;color:var(--carta-2);line-height:1.62;
+  border-left:2px solid rgba(200,163,94,.45);padding-left:14px}
+.deserto{grid-column:1/-1;text-align:center;padding:70px 22px;color:var(--carta-2);
+  font-family:'Marcellus',serif;font-size:22px;line-height:1.4}
+.deserto span{display:block;font-family:'Manrope',sans-serif;font-size:14px;color:var(--carta-3);margin-top:10px}
+.btn-affianca{position:absolute;bottom:12px;right:12px;width:32px;height:32px;border-radius:50%;
+  background:rgba(20,17,13,.75);border:1px solid var(--filo-2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--carta-3);transition:all .2s;z-index:2}
+.btn-affianca:hover{border-color:var(--ottone);color:var(--ottone)}
+.btn-affianca.presa{background:var(--ottone);border-color:var(--ottone);color:#17130b}
+.btn-affianca svg{width:15px;height:15px}
+.teca.presa{border-color:rgba(200,163,94,.5)}
+.teca.presa::before{opacity:1}
+
+/* ─────────── PANNELLI TESTUALI ─────────── */
+.premessa{font-family:'Marcellus',serif;font-size:17px;color:var(--carta-2);line-height:1.65;padding:18px 19px;
+  background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);margin-bottom:14px;position:relative;overflow:hidden}
+.premessa::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--filo-3),transparent)}
+.divisorio{margin:24px 2px 10px;display:flex;align-items:center;gap:10px}
+.divisorio::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--filo-2),transparent)}
+.cassetto{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.cassetto-testa{padding:16px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+.cassetto-testa:hover{background:rgba(255,255,255,.02)}
+.ct-sx{display:flex;align-items:center;gap:13px;min-width:0}
+.ct-icona{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--filo)}
+.ct-icona svg{width:17px;height:17px}
+.ct-titolo{font-family:'Marcellus',serif;font-size:19px;line-height:1.2;color:var(--carta)}
+.ct-sotto{font-size:12.5px;color:var(--carta-3);margin-top:3px;line-height:1.45}
+.freccia{color:var(--carta-3);transition:transform .25s;flex-shrink:0}
+.cassetto.aperto .freccia{transform:rotate(180deg)}
+.cassetto-corpo{display:none;padding:0 17px 15px;border-top:1px solid var(--filo)}
+.cassetto.aperto .cassetto-corpo{display:block}
+.voce{padding:12px 0;border-bottom:1px solid var(--filo)}
 .voce:last-child{border-bottom:none}
-.voce-nome{font-size:12.5px;color:var(--text);display:block;margin-bottom:4px}
-.voce-testo{font-size:12px;color:var(--text3);line-height:1.6}
+.voce-eti{margin-bottom:7px;color:var(--ottone);opacity:.9}
+.voce-testo{font-size:14px;color:var(--carta-2);line-height:1.65}
+.voce-testo .n{color:var(--carta-3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.voce-testo .sep{color:var(--carta-3);margin:0 6px}
+.voce-nota{font-size:13px;color:var(--carta-3);line-height:1.6;font-style:italic}
+.ricetta{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.ricetta-testa{padding:16px 17px;display:flex;align-items:flex-start;gap:13px;cursor:pointer}
+.ricetta-testa:hover{background:rgba(255,255,255,.02)}
+.ricetta-bollo{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--ottone-velo);
+  border:1px solid rgba(200,163,94,.24);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ricetta-bollo svg{width:16px;height:16px}
+.ricetta-nome{font-family:'Marcellus',serif;font-size:18px;color:var(--ottone-chiaro);margin-bottom:4px;line-height:1.22}
+.ricetta-sotto{font-size:13px;color:var(--carta-2);line-height:1.5}
+.ricetta-corpo{display:none;padding:0 17px 15px;border-top:1px solid var(--filo)}
+.ricetta.aperta .ricetta-corpo{display:block}
+.passo{padding:12px 0;border-bottom:1px solid var(--filo)}
+.passo:last-child{border-bottom:none}
+.passo-nome{font-size:13px;font-weight:600;color:var(--carta);display:block;margin-bottom:5px}
+.passo-testo{font-size:13.5px;color:var(--carta-2);line-height:1.65}
 
-/* profilo */
-.profilo{display:flex;align-items:center;gap:11px;background:var(--vetro);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;text-decoration:none;color:var(--text2);margin-bottom:13px}
-.profilo:hover{border-color:var(--border2)}
-.profilo-av{width:36px;height:36px;border-radius:50%;background:var(--gold4);border:1px solid rgba(201,169,110,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.profilo-av svg{width:18px;height:18px;color:var(--gold)}
-.profilo-lbl{font-size:8.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
-.profilo-nome{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold2)}
+.profilo{display:flex;align-items:center;gap:13px;background:var(--lastra);border:1px solid var(--filo);
+  border-radius:var(--r);padding:16px 17px;text-decoration:none;color:var(--carta-2);margin-bottom:14px}
+.profilo:hover{border-color:var(--filo-2)}
+.profilo-tondo{width:40px;height:40px;border-radius:50%;background:var(--ottone-velo);border:1px solid rgba(200,163,94,.32);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.profilo-tondo svg{width:19px;height:19px;color:var(--ottone)}
+.profilo-nome{font-family:'Marcellus',serif;font-size:18px;color:var(--ottone-chiaro);margin-top:3px}
 
-/* statistiche */
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
-.kpi{background:var(--vetro);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
-.kpi::before{content:'';position:absolute;top:0;left:16%;right:16%;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.35),transparent)}
-.kpi-n{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:var(--gold2);line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
-.kpi-l{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
-.blocco{background:var(--vetro);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
-.blocco-t{font-size:8.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
-.barra{margin-bottom:13px}.barra:last-child{margin-bottom:0}
-.barra-lbl{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--text2);margin-bottom:6px}
-.barra-lbl span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.barra-lbl span:last-child{flex-shrink:0;color:var(--text3);font-variant-numeric:tabular-nums}
-.track{height:2px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
-.fill{height:100%;border-radius:2px;background:linear-gradient(90deg,rgba(201,169,110,.5),var(--gold))}
-.fill.blu{background:linear-gradient(90deg,rgba(107,160,216,.4),var(--blu))}
-.fill.verde{background:linear-gradient(90deg,rgba(121,189,136,.4),var(--verde))}
-.fill.rosso{background:linear-gradient(90deg,rgba(217,122,112,.4),var(--rosso))}
+.numeri{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+@media(min-width:680px){.numeri{grid-template-columns:repeat(3,1fr)}}
+.numero{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);padding:17px;position:relative;overflow:hidden}
+.numero::before{content:'';position:absolute;top:0;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,var(--filo-3),transparent)}
+.numero-n{font-family:'Marcellus',serif;font-size:40px;color:var(--ottone-chiaro);line-height:1;margin-bottom:7px;font-variant-numeric:tabular-nums}
+.numero-l{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--carta-3);line-height:1.35}
+.tavola{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);padding:17px;margin-bottom:10px}
+.tavola-t{margin-bottom:16px}
+.asta{margin-bottom:15px}.asta:last-child{margin-bottom:0}
+.asta-eti{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;color:var(--carta-2);margin-bottom:7px}
+.asta-eti span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asta-eti span:last-child{flex-shrink:0;color:var(--carta-3);font-variant-numeric:tabular-nums}
+.binario{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.riempio{height:100%;border-radius:2px;background:linear-gradient(90deg,rgba(200,163,94,.45),var(--ottone))}
+.riempio.acqua{background:linear-gradient(90deg,rgba(127,168,207,.4),var(--acqua))}
+.riempio.bosco{background:linear-gradient(90deg,rgba(147,185,138,.4),var(--bosco))}
+.riempio.ambra{background:linear-gradient(90deg,rgba(217,144,111,.4),var(--ambra))}
 
 /* ─────────── CONFRONTO ─────────── */
-.cmp-tray{display:none;position:fixed;bottom:calc(max(6px,env(safe-area-inset-bottom)) + 56px);left:12px;right:12px;z-index:99;background:rgba(12,12,17,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(201,169,110,0.34);border-radius:var(--r);padding:10px 12px;align-items:center;gap:10px;box-shadow:0 16px 40px -20px #000}
-@media(min-width:900px){.cmp-tray{max-width:600px;margin:0 auto}}
-.cmp-tray.show{display:flex}
+.vassoio{display:none;position:fixed;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 62px);left:12px;right:12px;z-index:59;
+  background:rgba(24,20,16,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(200,163,94,.36);border-radius:var(--r);padding:11px 13px;align-items:center;gap:11px;box-shadow:0 20px 44px -22px #000}
+@media(min-width:900px){.vassoio{max-width:620px;margin:0 auto}}
+.vassoio.mostra{display:flex}
 @keyframes scossa{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.cmp-tray.shake{animation:scossa .35s ease}
-.cmp-slots{display:flex;gap:7px;flex-shrink:0}
-.cmp-slot{width:34px;height:42px;border-radius:8px;border:1px dashed var(--border2);overflow:hidden;background:var(--case);display:flex;align-items:center;justify-content:center}
-.cmp-slot img{width:100%;height:100%;object-fit:cover}
-.cmp-slot.empty{color:var(--text3);font-size:15px}
-.cmp-tray-label{flex:1;min-width:0;font-size:11px;color:var(--text3)}
-.cmp-tray-label strong{display:block;color:var(--gold);font-size:11px;font-weight:500;margin-bottom:1px;font-variant-numeric:tabular-nums}
-.cmp-go{flex-shrink:0;background:var(--gold);color:#07070b;border:none;border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:8px 15px;cursor:pointer;white-space:nowrap;letter-spacing:.02em}
-.cmp-go:disabled{background:var(--case3);color:var(--text3);cursor:default}
-.cmp-clear{flex-shrink:0;background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;display:flex;align-items:center}
-.cmp-clear svg{width:14px;height:14px}
-.cmp-vuoto{text-align:center;padding:60px 20px;color:var(--text3);font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic}
-.cmp-vuoto span{display:block;font-family:'DM Sans',sans-serif;font-size:13px;font-style:normal;margin-top:10px}
-.cmp-table{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--r);background:var(--vetro)}
-.cmp-grid{display:grid}
-.cmp-grid.cols-2{grid-template-columns:132px 1fr 1fr;min-width:470px}
-.cmp-grid.cols-3{grid-template-columns:132px 1fr 1fr 1fr;min-width:640px}
-.cmp-head{padding:14px 10px 16px;text-align:center;border-bottom:1px solid var(--border2)}
-.cmp-head-img{width:68px;height:82px;margin:0 auto 10px;border-radius:9px;overflow:hidden;border:1px solid rgba(201,169,110,.24);background:#101018}
-.cmp-head-img img{width:100%;height:100%;object-fit:cover}
-.cmp-head-brand{font-size:8.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
-.cmp-head-nome{font-family:'Cormorant Garamond',serif;font-size:14px;line-height:1.2;color:var(--text)}
-.cmp-head-conc{font-size:9.5px;color:var(--text3);background:var(--case2);border-radius:4px;padding:1px 6px;display:inline-block;margin-top:5px}
-.cmp-lbl{padding:11px 12px;font-size:11px;font-weight:400;letter-spacing:.05em;color:var(--text3);border-bottom:1px solid var(--border);display:flex;align-items:center;background:rgba(10,10,14,.92);position:sticky;left:0;z-index:1}
-.cmp-cell{padding:11px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);text-align:center;line-height:1.5;display:flex;align-items:center;justify-content:center;gap:6px}
-.cmp-cell.best{color:var(--gold2)}
-.cmp-sez{grid-column:1/-1;padding:9px 12px;font-size:8.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);background:rgba(255,255,255,0.025);border-bottom:1px solid var(--border2)}
-.cmp-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);margin:2px}
-.cmp-tag.stagione{border-color:rgba(201,169,110,.25);color:var(--gold)}
-.cmp-x{width:20px;height:20px;border-radius:50%;background:var(--case2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);margin:0 auto 8px;transition:all .15s}
-.cmp-x:hover{background:var(--rosso-bg);border-color:var(--rosso);color:var(--rosso)}
-.cmp-x svg{width:10px;height:10px}
-.btn-ghost{background:var(--case);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;padding:9px 17px;cursor:pointer}
-.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.vassoio.scossa{animation:scossa .35s ease}
+.caselle{display:flex;gap:7px;flex-shrink:0}
+.casella{width:34px;height:42px;border-radius:7px;border:1px dashed var(--filo-2);overflow:hidden;background:var(--vetro);
+  display:flex;align-items:center;justify-content:center;color:var(--carta-3);font-size:16px}
+.casella img{width:100%;height:100%;object-fit:cover}
+.vassoio-testo{flex:1;min-width:0;font-size:12px;color:var(--carta-3);line-height:1.35}
+.vassoio-testo strong{display:block;color:var(--ottone);font-size:12.5px;font-weight:600;margin-bottom:1px;font-variant-numeric:tabular-nums}
+.btn-oro{flex-shrink:0;background:var(--ottone);color:#17130b;border:none;border-radius:var(--r-s);
+  font-family:'Manrope',sans-serif;font-size:13.5px;font-weight:600;padding:11px 16px;cursor:pointer;white-space:nowrap}
+.btn-oro:disabled{background:rgba(255,255,255,.09);color:var(--carta-3);cursor:default}
+.btn-nudo{flex-shrink:0;background:none;border:none;color:var(--carta-3);cursor:pointer;padding:6px;display:flex;align-items:center}
+.btn-nudo svg{width:16px;height:16px}
+.cf-vuoto{text-align:center;padding:66px 22px;color:var(--carta-2);font-family:'Marcellus',serif;font-size:21px;line-height:1.4}
+.cf-vuoto span{display:block;font-family:'Manrope',sans-serif;font-size:14px;color:var(--carta-3);margin-top:11px}
+.cf-tabella{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--filo);border-radius:var(--r);background:var(--lastra)}
+.cf-griglia{display:grid}
+.cf-griglia.col2{grid-template-columns:136px 1fr 1fr;min-width:480px}
+.cf-griglia.col3{grid-template-columns:136px 1fr 1fr 1fr;min-width:660px}
+.cf-testa{padding:15px 11px 17px;text-align:center;border-bottom:1px solid var(--filo-2)}
+.cf-foto{width:72px;height:86px;margin:0 auto 11px;border-radius:8px;overflow:hidden;border:1px solid rgba(200,163,94,.26);background:#0c0a08}
+.cf-foto img{width:100%;height:100%;object-fit:cover}
+.cf-marca{font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--carta-3);margin-bottom:4px}
+.cf-nome{font-family:'Marcellus',serif;font-size:15px;line-height:1.2;color:var(--carta)}
+.cf-grado{font-size:10.5px;color:var(--carta-3);background:var(--vetro-2);border-radius:4px;padding:2px 7px;display:inline-block;margin-top:6px}
+.cf-eti{padding:12px 13px;font-size:12.5px;color:var(--carta-3);border-bottom:1px solid var(--filo);display:flex;align-items:center;
+  background:rgba(16,14,11,.94);position:sticky;left:0;z-index:1}
+.cf-cella{padding:12px 11px;font-size:13px;color:var(--carta-2);border-bottom:1px solid var(--filo);text-align:center;
+  line-height:1.5;display:flex;align-items:center;justify-content:center;gap:7px}
+.cf-cella.meglio{color:var(--ottone-chiaro)}
+.cf-sez{grid-column:1/-1;padding:10px 13px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--filo-2)}
+.cf-segno{display:inline-block;font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--filo);margin:2px}
+.cf-segno.stag{border-color:rgba(200,163,94,.28);color:var(--ottone)}
+.cf-x{width:22px;height:22px;border-radius:50%;background:var(--vetro-2);border:1px solid var(--filo);display:flex;
+  align-items:center;justify-content:center;cursor:pointer;color:var(--carta-3);margin:0 auto 9px}
+.cf-x:hover{background:var(--ambra-velo);border-color:var(--ambra);color:var(--ambra)}
+.cf-x svg{width:11px;height:11px}
+.btn-ombra{background:var(--vetro);border:1px solid var(--filo-2);border-radius:var(--r-s);color:var(--carta-2);
+  font-family:'Manrope',sans-serif;font-size:13.5px;padding:11px 19px;cursor:pointer}
+.btn-ombra:hover{border-color:var(--filo-3);color:var(--carta)}
 
-/* ─────────── SHEET ORDINAMENTO ─────────── */
-.backdrop{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.66);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end}
-.backdrop.open{display:flex}
-.sheet{width:100%;background:rgba(13,13,18,0.98);border-radius:22px 22px 0 0;border:1px solid var(--border2);border-bottom:none;padding:0 0 max(20px,env(safe-area-inset-bottom));animation:sale .24s cubic-bezier(.32,.72,0,1)}
-@media(min-width:900px){.sheet{max-width:520px;margin:0 auto}}
-@keyframes sale{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet-handle{width:34px;height:3px;border-radius:2px;background:var(--border3);margin:13px auto 16px}
-.sheet-titolo{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:400;color:var(--gold2);padding:0 20px 13px;border-bottom:1px solid var(--border)}
-.sopt{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;border-bottom:1px solid var(--border)}
-.sopt:last-child{border-bottom:none}
-.sopt:active{background:var(--case2)}
-.sopt-lbl{font-size:14px;color:var(--text2)}
-.sopt.active .sopt-lbl{color:var(--gold);font-weight:500}
-.sopt-radio{width:18px;height:18px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center}
-.sopt.active .sopt-radio{background:var(--gold);border-color:var(--gold)}
-.sopt-dot{width:6px;height:6px;border-radius:50%;background:#07070b;display:none}
-.sopt.active .sopt-dot{display:block}
+/* ─────────── CASSETTO FILTRI (bottom sheet) ─────────── */
+.fondale{display:none;position:fixed;inset:0;z-index:200;background:rgba(6,5,4,.72);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:flex-end;justify-content:center}
+.fondale.aperto{display:flex;animation:vela .2s ease}
+@keyframes vela{from{opacity:0}to{opacity:1}}
+.foglio{width:100%;max-height:88dvh;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--noce-2),var(--noce) 30%);
+  border-radius:20px 20px 0 0;border:1px solid var(--filo-2);border-bottom:none;
+  animation:sorgi .3s cubic-bezier(.32,.72,0,1);overflow:hidden}
+@media(min-width:900px){.foglio{max-width:640px;max-height:82dvh;border-radius:18px;margin-bottom:0;align-self:center}
+  .fondale.aperto{align-items:center}}
+@keyframes sorgi{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.foglio-testa{padding:14px 20px 13px;border-bottom:1px solid var(--filo);flex-shrink:0;position:relative}
+.maniglia{width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);margin:0 auto 13px}
+@media(min-width:900px){.maniglia{display:none}}
+.foglio-titolo{font-family:'Marcellus',serif;font-size:22px;color:var(--ottone-chiaro);letter-spacing:.02em}
+.foglio-sotto{font-size:13px;color:var(--carta-3);margin-top:4px}
+.foglio-chiudi{position:absolute;right:14px;top:12px;width:34px;height:34px;border-radius:50%;background:var(--vetro);
+  border:1px solid var(--filo);color:var(--carta-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+@media(max-width:899px){.foglio-chiudi{top:22px}}
+.foglio-chiudi svg{width:15px;height:15px}
+.foglio-corpo{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 20px 18px;flex:1}
+.gruppo{padding:17px 0;border-bottom:1px solid var(--filo)}
+.gruppo:last-child{border-bottom:none}
+.gruppo-eti{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.gruppo-eti::after{content:'';flex:1;height:1px;background:var(--filo)}
+.ventaglio{display:flex;flex-wrap:wrap;gap:8px}
+.ventaglio.chiuso .oltre{display:none}
+.altro{margin-top:11px;background:none;border:none;color:var(--ottone);font-family:'Manrope',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;padding:6px 0;letter-spacing:.02em}
+.altro:hover{color:var(--ottone-chiaro)}
+.foglio-piede{flex-shrink:0;display:flex;gap:10px;padding:14px 20px calc(14px + max(6px,env(safe-area-inset-bottom)));
+  border-top:1px solid var(--filo);background:rgba(18,15,12,.96)}
+.foglio-piede .btn-ombra{flex:0 0 auto}
+.foglio-piede .btn-oro{flex:1;padding:14px 16px;font-size:14.5px}
 
-/* ─────────── NAV ─────────── */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(7,7,11,0.93);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-top:1px solid var(--border);display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom))}
-.bottom-nav::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.3),transparent)}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 4px;cursor:pointer;border:none;background:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:.05em;transition:color .18s;position:relative}
-.nav-btn.active{color:var(--gold)}
-.nav-btn svg{width:18px;height:18px}
-.nav-mark{width:14px;height:1px;background:var(--gold);opacity:0;transition:opacity .2s;margin-top:2px}
-.nav-btn.active .nav-mark{opacity:1}
-.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);min-width:14px;height:14px;border-radius:7px;background:var(--gold);color:#07070b;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px}
-.nav-badge.show{display:flex}
+/* ─────────── NAVIGAZIONE ─────────── */
+.timone{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;
+  background:rgba(15,13,10,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--filo);padding:5px 0 max(5px,env(safe-area-inset-bottom))}
+.timone::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--filo-3),transparent)}
+.remo{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 5px;cursor:pointer;border:none;
+  background:none;color:var(--carta-3);font-family:'Manrope',sans-serif;font-size:10px;font-weight:500;letter-spacing:.02em;
+  transition:color .18s;position:relative;min-height:52px}
+.remo.attivo{color:var(--ottone)}
+.remo svg{width:20px;height:20px}
+.tacca{width:16px;height:2px;border-radius:2px;background:var(--ottone);opacity:0;transition:opacity .2s}
+.remo.attivo .tacca{opacity:1}
+.pallino{position:absolute;top:3px;right:calc(50% - 20px);min-width:16px;height:16px;border-radius:8px;background:var(--ottone);
+  color:#17130b;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px}
+.pallino.mostra{display:flex}
 </style>
 </head>
 <body>
 
-<header class="app-header" id="app-header">
-  <div class="hdr-main">
-    <div class="wordmark">
-      <h1>Sillage</h1>
-      <span class="sub">la collezione</span>
-    </div>
-    <div class="hdr-actions">
-      <span class="count-pill" id="count-pill">—</span>
-      <button class="icon-btn" id="filter-toggle-btn" onclick="toggleFilters()" aria-label="Mostra o nascondi i filtri">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-      </button>
-      <button class="icon-btn" id="sort-btn" onclick="openSort()" aria-label="Ordina la collezione">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-      </button>
-    </div>
+<header class="testata" id="testata">
+  <div class="marca-app">
+    <h1>Sillage</h1>
+    <p class="incisa">collezione privata</p>
   </div>
-  <div class="search-row">
-    <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 3.5 3.5"/></svg>
-      <input type="search" id="search" placeholder="Cerca marca, nota, famiglia…" autocomplete="off" aria-label="Cerca nella collezione">
-    </div>
-  </div>
-  <div class="filter-panel" id="filter-panel">
-    <div class="filter-inner">
-      <div class="filter-group">
-        <div class="fg-label">Stagione</div>
-        <div class="chips-row">
-          <div class="chip stag" data-filter="pe">Primavera / Estate</div>
-          <div class="chip stag" data-filter="ai">Autunno / Inverno</div>
-          <div class="chip stag" data-filter="tutto">Tutto l'anno</div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <div class="fg-label">Occasione</div>
-        <div class="chips-row">
-          <div class="chip occ" data-filter="ufficio">Ufficio</div>
-          <div class="chip occ" data-filter="appuntamento">Appuntamento</div>
-          <div class="chip occ" data-filter="quotidiano">Quotidiano</div>
-          <div class="chip occ" data-filter="informale">Informale</div>
-          <div class="chip occ" data-filter="formale">Formale</div>
-          <div class="chip occ" data-filter="palestra">Palestra</div>
-          <div class="chip occ" data-filter="casa">In casa</div>
-          <div class="chip occ" data-filter="festivita">Festività</div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <div class="fg-label">Famiglia · Momento</div>
-        <div class="chips-row">
-          <div class="chip c-blu" data-filter="blu">Blu — Acquatici</div>
-          <div class="chip c-verde" data-filter="verde">Verde — Legnosi</div>
-          <div class="chip c-rosso" data-filter="rosso">Rosso — Orientali</div>
-          <div class="chip mom" data-filter="giorno">Solo giorno</div>
-          <div class="chip mom" data-filter="sera">Solo sera</div>
-          <div class="chip dupe-chip" data-filter="dupe">Solo cloni / dupe</div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <div class="fg-label">Note olfattive</div>
-        <div class="chips-row" id="note-chips"></div>
-      </div>
-    </div>
-  </div>
-  <div class="active-bar" id="active-bar"></div>
+  <div class="conteggio" id="conteggio">—</div>
 </header>
 
-<main id="view-collezione"></main>
-<section id="view-confronta" class="view">
-  <div class="cmp-vuoto" id="cmp-empty" style="display:none">
-    Nessun profumo selezionato.
-    <span>Torna alla collezione e tocca il + su una teca per aggiungerlo al confronto.</span>
+<div class="strumenti" id="strumenti">
+  <div class="riga-cerca">
+    <div class="cerca">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 3.8 3.8"/></svg>
+      <input type="search" id="cerca" placeholder="Cerca marca, nota, famiglia…" autocomplete="off" aria-label="Cerca nella collezione">
+    </div>
+    <button class="btn-filtri" id="btn-filtri" onclick="apriFiltri()" aria-label="Apri filtri e ordinamento">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+      Filtri<span class="bollo" id="bollo-filtri"></span>
+    </button>
   </div>
-  <div id="cmp-content"></div>
-</section>
-<section id="view-layering" class="view"></section>
-<section id="view-guida" class="view"></section>
-<section id="view-consigliati" class="view"></section>
-<section id="view-stats" class="view"></section>
+  <div class="rapidi" id="rapidi"></div>
+  <div class="attivi" id="attivi"></div>
+</div>
 
-<div class="cmp-tray" id="cmp-tray">
-  <div class="cmp-slots" id="cmp-slots"></div>
-  <div class="cmp-tray-label"><strong id="cmp-tray-count">0 / 3</strong><span>Seleziona fino a 3 profumi</span></div>
-  <button class="cmp-go" id="cmp-go-btn" onclick="switchView('confronta')" disabled>Confronta</button>
-  <button class="cmp-clear" onclick="clearCompare()" aria-label="Svuota la selezione">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+<main id="vista-collezione"></main>
+<section id="vista-confronta" class="vista">
+  <div class="cf-vuoto" id="cf-vuoto" style="display:none">
+    Il tavolo del confronto è vuoto.
+    <span>Torna alla collezione e tocca il + su una teca per portarla qui.</span>
+  </div>
+  <div id="cf-contenuto"></div>
+</section>
+<section id="vista-layering" class="vista"></section>
+<section id="vista-guida" class="vista"></section>
+<section id="vista-acquisti" class="vista"></section>
+<section id="vista-numeri" class="vista"></section>
+
+<div class="vassoio" id="vassoio">
+  <div class="caselle" id="caselle"></div>
+  <div class="vassoio-testo"><strong id="vassoio-conto">0 / 3</strong><span>Fino a tre per volta</span></div>
+  <button class="btn-oro" id="btn-confronta" onclick="cambiaVista('confronta')" disabled>Confronta</button>
+  <button class="btn-nudo" onclick="svuotaConfronto()" aria-label="Svuota il confronto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
 </div>
 
-<div class="backdrop" id="sort-bd" onclick="closeSortBd(event)">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-titolo">Ordina per</div>
-    <div class="sopt active" data-sort="alpha" onclick="setSort('alpha')"><span class="sopt-lbl">Nome A → Z</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
-    <div class="sopt" data-sort="brand" onclick="setSort('brand')"><span class="sopt-lbl">Marchio A → Z</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
-    <div class="sopt" data-sort="rating" onclick="setSort('rating')"><span class="sopt-lbl">Rating Fragrantica</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
-    <div class="sopt" data-sort="famiglia" onclick="setSort('famiglia')"><span class="sopt-lbl">Famiglia olfattiva</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
-    <div class="sopt" data-sort="stagione" onclick="setSort('stagione')"><span class="sopt-lbl">Stagione</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
-    <div class="sopt" data-sort="longevita" onclick="setSort('longevita')"><span class="sopt-lbl">Longevità (ore)</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
-    <div class="sopt" data-sort="id" onclick="setSort('id')"><span class="sopt-lbl">Numero di catalogo</span><div class="sopt-radio"><div class="sopt-dot"></div></div></div>
+<div class="fondale" id="fondale-filtri" onclick="chiudiFondale(event)">
+  <div class="foglio" role="dialog" aria-modal="true" aria-label="Filtri e ordinamento">
+    <div class="foglio-testa">
+      <div class="maniglia"></div>
+      <div class="foglio-titolo">Filtri e ordinamento</div>
+      <div class="foglio-sotto" id="foglio-sotto">Tutta la collezione</div>
+      <button class="foglio-chiudi" onclick="chiudiFiltri()" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="foglio-corpo" id="foglio-corpo"></div>
+    <div class="foglio-piede">
+      <button class="btn-ombra" onclick="azzeraTutto()">Azzera</button>
+      <button class="btn-oro" onclick="chiudiFiltri()" id="btn-mostra">Mostra la collezione</button>
+    </div>
   </div>
 </div>
 
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-collezione" onclick="switchView('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Collezione<div class="nav-mark"></div></button>
-  <button class="nav-btn" id="nav-confronta" onclick="switchView('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>Confronta<div class="nav-badge" id="cmp-badge"></div><div class="nav-mark"></div></button>
-  <button class="nav-btn" id="nav-layering" onclick="switchView('layering')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 3 7l9 5 9-5-9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg>Layering<div class="nav-mark"></div></button>
-  <button class="nav-btn" id="nav-guida" onclick="switchView('guida')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Guida<div class="nav-mark"></div></button>
-  <button class="nav-btn" id="nav-consigliati" onclick="switchView('consigliati')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Acquisti<div class="nav-mark"></div></button>
-  <button class="nav-btn" id="nav-stats" onclick="switchView('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Statistiche<div class="nav-mark"></div></button>
+<nav class="timone">
+  <button class="remo attivo" id="remo-collezione" onclick="cambiaVista('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Collezione<div class="tacca"></div></button>
+  <button class="remo" id="remo-confronta" onclick="cambiaVista('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>Confronta<div class="pallino" id="pallino"></div><div class="tacca"></div></button>
+  <button class="remo" id="remo-layering" onclick="cambiaVista('layering')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 3 7l9 5 9-5-9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg>Layering<div class="tacca"></div></button>
+  <button class="remo" id="remo-guida" onclick="cambiaVista('guida')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Guida<div class="tacca"></div></button>
+  <button class="remo" id="remo-acquisti" onclick="cambiaVista('acquisti')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v4.5M12 16h.01"/></svg>Acquisti<div class="tacca"></div></button>
+  <button class="remo" id="remo-numeri" onclick="cambiaVista('numeri')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Numeri<div class="tacca"></div></button>
 </nav>
 
 <script>
@@ -646,39 +671,47 @@ const consigli=[
 ];
 
 
-// ── ETICHETTE E UTILITY ───────────────────────────────────────────────────
+
+
+// ── ETICHETTE E UTILITÀ ───────────────────────────────────────────────────
 const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",appuntamento:"Appuntamento",palestra:"Palestra",casa:"In casa",festivita:"Festività"};
-const colI={blu:"A",verde:"V",rosso:"R"};
-const colNome={blu:"Blu — acquatici e freschi",verde:"Verde — aromatici e legnosi",rosso:"Rosso — orientali e intensi"};
-const flLabels={pe:"Primavera / Estate",ai:"Autunno / Inverno",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Blu",verde:"Verde",rosso:"Rosso",sera:"Solo sera",giorno:"Solo giorno",dupe:"Cloni / dupe"};
+const vetroClasse={blu:"acqua",verde:"bosco",rosso:"ambra"};
+const vetroLettera={blu:"A",verde:"V",rosso:"O"};
+const vetroNome={blu:"Acquatici e freschi",verde:"Aromatici e legnosi",rosso:"Orientali e intensi"};
+const etichetteFiltro={pe:"Primavera / Estate",ai:"Autunno / Inverno",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Acquatici",verde:"Legnosi",rosso:"Orientali",sera:"Solo sera",giorno:"Solo giorno",dupe:"Cloni e dupe",adesso:"Adatti adesso"};
 const stagLbl=s=>s==="pe"?"Primavera / Estate":s==="ai"?"Autunno / Inverno":"Tutto l'anno";
 const stagBreve=s=>s==="pe"?"P/E":s==="ai"?"A/I":"tutto l'anno";
 const momLbl=m=>m==="entrambi"?"Giorno e sera":m==="sera"?"Sera":"Giorno";
-const accordColors=["#d97a70","#79bd88","#6ba0d8","#c9a96e","#b08fd0"];
-const sortFns={
-  alpha:p=>p.name.toLowerCase(),
-  brand:p=>p.brand.toLowerCase()+p.name,
-  rating:p=>-(p.rating||0),
-  famiglia:p=>p.famiglia.toLowerCase(),
-  stagione:p=>({pe:0,tutto:1,ai:2}[p.stagione]??3),
-  longevita:p=>-p.longevita,
-  id:p=>p.id
+const coloriAccordo=["#d9906f","#93b98a","#7fa8cf","#c8a35e","#bd96dc"];
+const ordinamenti={
+  alpha:{lbl:"Nome A → Z",fn:p=>p.name.toLowerCase()},
+  brand:{lbl:"Marchio A → Z",fn:p=>p.brand.toLowerCase()+p.name},
+  rating:{lbl:"Rating più alto",fn:p=>-(p.rating||0)},
+  famiglia:{lbl:"Famiglia olfattiva",fn:p=>p.famiglia.toLowerCase()},
+  stagione:{lbl:"Stagione",fn:p=>({pe:0,tutto:1,ai:2}[p.stagione]??3)},
+  longevita:{lbl:"Longevità più lunga",fn:p=>-p.longevita},
+  id:{lbl:"Numero di catalogo",fn:p=>p.id}
 };
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-let activeFilters=new Set(), activeNote=new Set(), searchVal="", currentSort="alpha", filtersVisible=true;
+let filtriAttivi=new Set(), noteAttive=new Set(), testoCerca="", ordine="alpha", noteEspanse=false;
 
-// ── FILTRI ────────────────────────────────────────────────────────────────
-function toggleFilters(){
-  filtersVisible=!filtersVisible;
-  document.getElementById("filter-panel").classList.toggle("collapsed",!filtersVisible);
-  document.getElementById("filter-toggle-btn").classList.toggle("active",!filtersVisible);
-}
+// stagione e momento correnti, per il filtro "Adesso"
+const stagioneOra=()=>{const m=new Date().getMonth();return (m>=3&&m<=8)?"pe":"ai"};
+const moment0Ora=()=>{const h=new Date().getHours();return (h>=7&&h<18)?"giorno":"sera"};
 
+// ── FILTRAGGIO ────────────────────────────────────────────────────────────
 function passa(p,filtri,note){
-  const s=searchVal.toLowerCase();
-  if(s&&!p.brand.toLowerCase().includes(s)&&!p.name.toLowerCase().includes(s)&&!p.note.toLowerCase().includes(s)&&!p.famiglia.toLowerCase().includes(s)&&!p.accordi.join(" ").toLowerCase().includes(s)&&!(p.dupe||"").toLowerCase().includes(s))return false;
+  const s=testoCerca.toLowerCase();
+  if(s&&!p.brand.toLowerCase().includes(s)&&!p.name.toLowerCase().includes(s)&&!p.note.toLowerCase().includes(s)
+    &&!p.famiglia.toLowerCase().includes(s)&&!p.accordi.join(" ").toLowerCase().includes(s)&&!(p.dupe||"").toLowerCase().includes(s))return false;
   for(const f of filtri){
+    if(f==="adesso"){
+      const st=stagioneOra(),mo=moment0Ora();
+      if(p.stagione!==st&&p.stagione!=="tutto")return false;
+      if(p.momento!==mo&&p.momento!=="entrambi")return false;
+      continue;
+    }
     if(f==="pe"&&p.stagione!=="pe"&&p.stagione!=="tutto")return false;
     if(f==="ai"&&p.stagione!=="ai"&&p.stagione!=="tutto")return false;
     if(f==="tutto"&&p.stagione!=="tutto")return false;
@@ -696,211 +729,275 @@ function passa(p,filtri,note){
     if(f==="dupe"&&!p.dupe)return false;
   }
   if(note.size){
-    let match=false;
-    for(const n of note){if(p.note.toLowerCase().includes(n)||p.accordi.join(" ").toLowerCase().includes(n)){match=true;break;}}
-    if(!match)return false;
+    let trovata=false;
+    for(const n of note){if(p.note.toLowerCase().includes(n)||p.accordi.join(" ").toLowerCase().includes(n)){trovata=true;break}}
+    if(!trovata)return false;
   }
   return true;
 }
+const selezione=()=>profumi.filter(p=>passa(p,filtriAttivi,noteAttive))
+  .sort((a,b)=>{const fn=ordinamenti[ordine].fn,va=fn(a),vb=fn(b);return typeof va==="number"?va-vb:va<vb?-1:va>vb?1:0});
+const quanti=(f,n)=>profumi.filter(p=>passa(p,f,n)).length;
 
-const getFiltered=()=>profumi.filter(p=>passa(p,activeFilters,activeNote))
-  .sort((a,b)=>{const fn=sortFns[currentSort],va=fn(a),vb=fn(b);return typeof va==="number"?va-vb:va<vb?-1:va>vb?1:0});
-
-const countWith=(f,n)=>profumi.filter(p=>passa(p,f,n)).length;
-
-function hlNote(text){
-  if(!activeNote.size)return esc(text);
-  let o=esc(text);
-  activeNote.forEach(n=>{o=o.replace(new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),m=>"<mark>"+m+"</mark>")});
+function evidenzia(testo){
+  if(!noteAttive.size)return esc(testo);
+  let o=esc(testo);
+  noteAttive.forEach(n=>{o=o.replace(new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),m=>"<mark>"+m+"</mark>")});
   return o;
 }
 
 // ── LA TECA ───────────────────────────────────────────────────────────────
-function buildTeca(p,i){
-  const src=IMGS[p.id];
-  const lastra=src
-    ?`<div class="lastra"><img src="${src}" alt="Flacone di ${esc(p.brand)} ${esc(p.name)}" loading="lazy" decoding="async"></div>`
-    :`<div class="lastra vuota">${colI[p.colore]}</div>`;
-  const uso=Object.keys(usoLabels).map(k=>{
-    const v=p[k],cls=v==="si"?"si":v==="si-mod"?"mod":"no";
-    return `<div class="uso-item"><span class="uso-dot ${cls}"></span><span class="uso-lbl ${cls}">${usoLabels[k]}</span></div>`;
+const piu='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+const spunta='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>';
+
+function costruisciTeca(p,i){
+  const src=IMGS[p.id],cl=vetroClasse[p.colore];
+  const nicchia=src
+    ?`<div class="faretto"><img src="${src}" alt="Flacone di ${esc(p.brand)} ${esc(p.name)}" loading="lazy" decoding="async"></div>
+      <div class="specchio" aria-hidden="true"><img src="${src}" alt=""></div>`
+    :`<div class="faretto vuoto">${vetroLettera[p.colore]}</div><div class="specchio"></div>`;
+  const usi=Object.keys(usoLabels).map(k=>{
+    const v=p[k],c=v==="si"?"si":v==="si-mod"?"forse":"no";
+    return `<div class="uso ${c}"><span class="punto ${c}"></span>${usoLabels[k]}</div>`;
   }).join("");
-  const accordi=p.accordi.slice(0,3).map((a,j)=>`<span class="accordo" style="color:${accordColors[j]}">${a}</span>`).join("");
-  const sel=compareSet.has(p.id);
-  return `<article class="teca ${p.colore}${sel?" cmp-selected":""}" id="card-${p.id}" style="animation-delay:${Math.min(i*28,340)}ms" tabindex="0" role="button" aria-expanded="false" onclick="toggleCard(${p.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCard(${p.id})}">
-    <div class="teca-body">
-      <div class="teca-top">
-        <div class="vetrinetta">${lastra}<div class="mensola"></div></div>
-        <div class="teca-info">
-          <div class="cartellino"><span class="marca">${esc(p.brand)}</span><span class="numero">№ ${p.id}</span></div>
+  const accordi=p.accordi.slice(0,3).map((a,j)=>`<span class="accordo" style="color:${coloriAccordo[j]}">${a}</span>`).join("");
+  const presa=insiemeConfronto.has(p.id);
+  return `<article class="teca ${cl}${presa?" presa":""}" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
+    tabindex="0" role="button" aria-expanded="false" onclick="apriTeca(${p.id})"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();apriTeca(${p.id})}">
+    <div class="corpo">
+      <div class="esposizione">
+        <div class="nicchia">${nicchia}<div class="ripiano"></div></div>
+        <div class="cartellino">
+          <div class="riga-marca"><span class="marca">${esc(p.brand)}</span><span class="catalogo">№ ${p.id}</span></div>
           <h2 class="nome">${esc(p.name)}</h2>
-          <div class="meta">
-            ${p.nuovo?`<span class="pill nuovo">Nuovo</span>`:""}
-            <span class="pill conc">${p.conc}</span>
-            <span class="pill voto">${p.rating?`★ ${p.rating}`:"★ n.d."}</span>
-            ${p.dupe?`<span class="pill gemella">Clone di ${esc(p.dupe.split(" (")[0])}</span>`:""}
+          <div class="targhette">
+            ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
+            <span class="targa grado">${p.conc}</span>
+            <span class="targa voto">${p.rating?`★ ${p.rating}`:"★ n.d."}</span>
+            ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
           </div>
         </div>
-        <div class="gemma ${p.colore}" title="${colNome[p.colore]}">${colI[p.colore]}</div>
+        <div class="gemma ${cl}" title="${vetroNome[p.colore]}">${vetroLettera[p.colore]}</div>
       </div>
-      <p class="note-testo">${hlNote(p.note)}</p>
+      <p class="note-riga">${evidenzia(p.note)}</p>
       <div class="accordi">${accordi}</div>
-      <div class="etichette">
-        <span class="tag stagione">${stagLbl(p.stagione)}</span>
-        <span class="tag">${momLbl(p.momento)}</span>
-        <span class="tag durata">${p.longevita}h</span>
-        <span class="tag">${p.famiglia}</span>
+      <div class="contrassegni">
+        <span class="segno stag">${stagLbl(p.stagione)}</span>
+        <span class="segno">${momLbl(p.momento)}</span>
+        <span class="segno ore">${p.longevita}h</span>
+        <span class="segno">${p.famiglia}</span>
       </div>
-      <div class="dettaglio">
-        <div class="dett-lbl">Occasioni d'uso</div>
-        <div class="uso-grid">${uso}</div>
-        <p class="desc">${esc(p.desc)}</p>
+      <div class="scheda-int">
+        <div class="incisa">Quando indossarlo</div>
+        <div class="usi">${usi}</div>
+        <p class="racconto">${esc(p.desc)}</p>
       </div>
     </div>
-    <button class="cmp-btn${sel?" selected":""}" id="cmpbtn-${p.id}" onclick="event.stopPropagation();toggleCompare(${p.id})" aria-label="${sel?"Togli dal confronto":"Aggiungi al confronto"}">${sel?iconCheck:iconPlus}</button>
+    <button class="btn-affianca${presa?" presa":""}" id="affianca-${p.id}"
+      onclick="event.stopPropagation();aggiungiAlConfronto(${p.id})"
+      aria-label="${presa?"Togli dal confronto":"Aggiungi al confronto"}">${presa?spunta:piu}</button>
   </article>`;
 }
-const iconPlus='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
-const iconCheck='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>';
 
-function toggleCard(id){
-  const c=document.getElementById("card-"+id);
+function apriTeca(id){
+  const c=document.getElementById("teca-"+id);
   if(!c)return;
-  const open=c.classList.toggle("open");
-  c.setAttribute("aria-expanded",open?"true":"false");
+  const aperta=c.classList.toggle("aperta");
+  c.setAttribute("aria-expanded",aperta?"true":"false");
 }
 
-function render(){
-  const list=getFiltered();
-  document.getElementById("view-collezione").innerHTML=list.length
-    ? list.map(buildTeca).join("")
-    : `<div class="vuoto">Nessun profumo corrisponde ai filtri.<span>Togli un filtro dalla barra in alto per ampliare la ricerca.</span></div>`;
+function disegna(){
+  const lista=selezione();
+  document.getElementById("vista-collezione").innerHTML=lista.length
+    ? lista.map(costruisciTeca).join("")
+    : `<div class="deserto">Nessuna boccetta con questi filtri.<span>Togli un filtro per allargare la ricerca.</span></div>`;
   const tot=profumi.length;
-  document.getElementById("count-pill").textContent=list.length===tot?tot+" profumi":list.length+" / "+tot;
-  renderActiveBar();
-  updateChipCounts();
+  document.getElementById("conteggio").innerHTML=lista.length===tot
+    ? `<b>${tot}</b> boccette`
+    : `<b>${lista.length}</b> di ${tot}`;
+  const n=filtriAttivi.size+noteAttive.size;
+  const bollo=document.getElementById("bollo-filtri");
+  bollo.textContent=n||"";bollo.classList.toggle("mostra",n>0);
+  document.getElementById("btn-filtri").classList.toggle("acceso",n>0);
+  document.getElementById("btn-mostra").textContent=lista.length===tot?"Mostra la collezione":`Mostra ${lista.length} ${lista.length===1?"boccetta":"boccette"}`;
+  document.getElementById("foglio-sotto").textContent=n===0?"Tutta la collezione":`${lista.length} di ${tot} boccette`;
+  disegnaAttivi();disegnaRapidi();aggiornaConteggiFoglio();
 }
 
-function updateChipCounts(){
-  document.querySelectorAll(".chip[data-filter]").forEach(c=>{
-    const f=c.dataset.filter,tf=new Set(activeFilters);
-    if(!activeFilters.has(f))tf.add(f);
-    const n=countWith(tf,activeNote);
-    let b=c.querySelector(".chip-n");
-    if(!b){b=document.createElement("span");b.className="chip-n";c.appendChild(b)}
-    b.textContent=n;
-    c.classList.toggle("chip-zero",n===0&&!activeFilters.has(f));
-  });
-  document.querySelectorAll(".chip[data-nota]").forEach(c=>{
-    const k=c.dataset.nota,tn=new Set(activeNote);
-    if(!activeNote.has(k))tn.add(k);
-    const n=countWith(activeFilters,tn);
-    let b=c.querySelector(".chip-n");
-    if(!b){b=document.createElement("span");b.className="chip-n";c.appendChild(b)}
-    b.textContent=n;
-    c.classList.toggle("chip-zero",n===0&&!activeNote.has(k));
-  });
+// ── SCELTE RAPIDE E FILTRI ATTIVI ─────────────────────────────────────────
+function scelta(f,extra,etichetta){
+  const insieme=new Set(filtriAttivi);
+  if(!filtriAttivi.has(f))insieme.add(f);
+  const n=quanti(insieme,noteAttive);
+  const on=filtriAttivi.has(f);
+  return `<button class="scelta ${extra}${on?" on":""}${(n===0&&!on)?" zero":""}" onclick="commutaFiltro('${f}')" aria-pressed="${on}">
+    ${etichetta}<span class="q">${n}</span></button>`;
 }
+function disegnaRapidi(){
+  const st=stagioneOra()==="pe"?"estate":"inverno",mo=moment0Ora();
+  document.getElementById("rapidi").innerHTML=
+    scelta("adesso","ora",`Adesso · ${st}, ${mo}`)+
+    scelta("ufficio","","Ufficio")+
+    scelta("appuntamento","","Appuntamento")+
+    scelta("sera","","Sera")+
+    scelta("dupe","","Cloni");
+}
+function disegnaAttivi(){
+  const el=document.getElementById("attivi");
+  if(!filtriAttivi.size&&!noteAttive.size){el.classList.remove("mostra");el.innerHTML="";return}
+  el.classList.add("mostra");
+  const a=[...filtriAttivi].map(f=>`<button class="tolgo" onclick="commutaFiltro('${f}')">${etichetteFiltro[f]||f}<span class="x">×</span></button>`);
+  const b=[...noteAttive].map(n=>`<button class="tolgo nota" onclick="commutaNota(&quot;${n}&quot;)">${n}<span class="x">×</span></button>`);
+  el.innerHTML=a.join("")+b.join("")+`<button class="tolgo pulisci" onclick="azzeraTutto()">Azzera tutto<span class="x">×</span></button>`;
+}
+function commutaFiltro(f){
+  filtriAttivi.has(f)?filtriAttivi.delete(f):filtriAttivi.add(f);
+  disegna();
+}
+function commutaNota(n){
+  noteAttive.has(n)?noteAttive.delete(n):noteAttive.add(n);
+  disegna();
+}
+function azzeraTutto(){filtriAttivi.clear();noteAttive.clear();disegna()}
 
-function renderActiveBar(){
-  const el=document.getElementById("active-bar");
-  if(!activeFilters.size&&!activeNote.size){el.classList.remove("show");el.innerHTML="";return}
-  el.classList.add("show");
-  const a=[...activeFilters].map(f=>`<button class="af-tag" onclick="removeFilter('${f}')">${flLabels[f]||f}<span class="af-x">✕</span></button>`);
-  const b=[...activeNote].map(n=>`<button class="af-tag nota-tag" onclick="removeNota(&quot;${n}&quot;)">${n}<span class="af-x">✕</span></button>`);
-  el.innerHTML=a.join("")+b.join("")+`<button class="af-tag af-clear" onclick="clearAll()">Azzera tutto<span class="af-x">✕</span></button>`;
+// ── IL CASSETTO DEI FILTRI ────────────────────────────────────────────────
+const gruppiFiltro=[
+  {t:"Stagione",v:[["pe","Primavera / Estate"],["ai","Autunno / Inverno"],["tutto","Tutto l'anno"]]},
+  {t:"Occasione",v:[["ufficio","Ufficio"],["appuntamento","Appuntamento"],["quotidiano","Quotidiano"],["informale","Informale"],["formale","Formale"],["palestra","Palestra"],["casa","In casa"],["festivita","Festività"]]},
+  {t:"Famiglia",v:[["blu","Acquatici e freschi"],["verde","Aromatici e legnosi"],["rosso","Orientali e intensi"]]},
+  {t:"Momento",v:[["giorno","Solo giorno"],["sera","Solo sera"],["adesso","Adatti adesso"]]},
+  {t:"Provenienza",v:[["dupe","Cloni e dupe"]]}
+];
+function costruisciFoglio(){
+  let h="";
+  gruppiFiltro.forEach(g=>{
+    h+=`<div class="gruppo"><div class="gruppo-eti incisa">${g.t}</div><div class="ventaglio">`;
+    g.v.forEach(([f,lbl])=>{h+=`<button class="scelta" data-f="${f}" onclick="commutaFiltro('${f}')">${lbl}<span class="q"></span></button>`});
+    h+=`</div></div>`;
+  });
+  h+=`<div class="gruppo"><div class="gruppo-eti incisa">Note olfattive</div>
+      <div class="ventaglio ${noteEspanse?"":"chiuso"}" id="ventaglio-note">`;
+  noteChips.forEach((n,i)=>{
+    h+=`<button class="scelta${i>=16?" oltre":""}" data-n="${n}" onclick="commutaNota(&quot;${n}&quot;)">${n.charAt(0).toUpperCase()+n.slice(1)}<span class="q"></span></button>`;
+  });
+  h+=`</div><button class="altro" id="btn-altre-note" onclick="commutaNote()">${noteEspanse?"Mostra meno note":`Mostra tutte le ${noteChips.length} note`}</button></div>`;
+  h+=`<div class="gruppo"><div class="gruppo-eti incisa">Ordina per</div><div class="ventaglio">`;
+  Object.entries(ordinamenti).forEach(([k,o])=>{
+    h+=`<button class="scelta ord" data-o="${k}" onclick="impostaOrdine('${k}')">${o.lbl}</button>`;
+  });
+  h+=`</div></div>`;
+  document.getElementById("foglio-corpo").innerHTML=h;
 }
-function removeFilter(f){activeFilters.delete(f);document.querySelector(`.chip[data-filter="${f}"]`)?.classList.remove("active");render()}
-function removeNota(n){activeNote.delete(n);document.querySelector(`.chip[data-nota="${n}"]`)?.classList.remove("active");render()}
-function clearAll(){activeFilters.clear();activeNote.clear();document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));render()}
+function commutaNote(){
+  noteEspanse=!noteEspanse;
+  document.getElementById("ventaglio-note").classList.toggle("chiuso",!noteEspanse);
+  document.getElementById("btn-altre-note").textContent=noteEspanse?"Mostra meno note":`Mostra tutte le ${noteChips.length} note`;
+}
+function aggiornaConteggiFoglio(){
+  document.querySelectorAll(".foglio-corpo .scelta[data-f]").forEach(b=>{
+    const f=b.dataset.f,on=filtriAttivi.has(f),ins=new Set(filtriAttivi);
+    if(!on)ins.add(f);
+    const n=quanti(ins,noteAttive);
+    b.classList.toggle("on",on);b.classList.toggle("zero",n===0&&!on);
+    b.querySelector(".q").textContent=n;
+  });
+  document.querySelectorAll(".foglio-corpo .scelta[data-n]").forEach(b=>{
+    const k=b.dataset.n,on=noteAttive.has(k),ins=new Set(noteAttive);
+    if(!on)ins.add(k);
+    const n=quanti(filtriAttivi,ins);
+    b.classList.toggle("on",on);b.classList.toggle("zero",n===0&&!on);
+    b.querySelector(".q").textContent=n;
+  });
+  document.querySelectorAll(".foglio-corpo .scelta[data-o]").forEach(b=>b.classList.toggle("on",b.dataset.o===ordine));
+}
+function impostaOrdine(o){ordine=o;disegna()}
+function apriFiltri(){document.getElementById("fondale-filtri").classList.add("aperto");aggiornaConteggiFoglio()}
+function chiudiFiltri(){document.getElementById("fondale-filtri").classList.remove("aperto")}
+function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"))chiudiFiltri()}
 
 // ── CONFRONTO ─────────────────────────────────────────────────────────────
-let compareSet=new Set();
-
-function toggleCompare(id){
-  if(compareSet.has(id))compareSet.delete(id);
+let insiemeConfronto=new Set();
+function aggiungiAlConfronto(id){
+  if(insiemeConfronto.has(id))insiemeConfronto.delete(id);
   else{
-    if(compareSet.size>=3){
-      const t=document.getElementById("cmp-tray");
-      t.classList.remove("shake");void t.offsetWidth;t.classList.add("shake");
-      setTimeout(()=>t.classList.remove("shake"),400);
+    if(insiemeConfronto.size>=3){
+      const v=document.getElementById("vassoio");
+      v.classList.remove("scossa");void v.offsetWidth;v.classList.add("scossa");
+      setTimeout(()=>v.classList.remove("scossa"),400);
       return;
     }
-    compareSet.add(id);
+    insiemeConfronto.add(id);
   }
-  aggiornaBottone(id);
-  updateCompareUI();
+  aggiornaPulsante(id);aggiornaVassoio();
 }
-function aggiornaBottone(id){
-  const card=document.getElementById("card-"+id),btn=document.getElementById("cmpbtn-"+id);
-  const sel=compareSet.has(id);
-  if(card)card.classList.toggle("cmp-selected",sel);
-  if(btn){btn.classList.toggle("selected",sel);btn.innerHTML=sel?iconCheck:iconPlus;btn.setAttribute("aria-label",sel?"Togli dal confronto":"Aggiungi al confronto")}
+function aggiornaPulsante(id){
+  const card=document.getElementById("teca-"+id),btn=document.getElementById("affianca-"+id);
+  const presa=insiemeConfronto.has(id);
+  if(card)card.classList.toggle("presa",presa);
+  if(btn){btn.classList.toggle("presa",presa);btn.innerHTML=presa?spunta:piu;
+    btn.setAttribute("aria-label",presa?"Togli dal confronto":"Aggiungi al confronto")}
 }
-function clearCompare(){const ids=[...compareSet];compareSet.clear();ids.forEach(aggiornaBottone);updateCompareUI()}
-function removeFromCompare(id){compareSet.delete(id);aggiornaBottone(id);updateCompareUI()}
-
-function updateCompareUI(){
-  const ids=[...compareSet],n=ids.length;
-  document.getElementById("cmp-tray").classList.toggle("show",n>0&&document.getElementById("view-collezione").classList.contains("active"));
-  const slots=document.getElementById("cmp-slots");
-  slots.innerHTML="";
+function svuotaConfronto(){const ids=[...insiemeConfronto];insiemeConfronto.clear();ids.forEach(aggiornaPulsante);aggiornaVassoio()}
+function togliDalConfronto(id){insiemeConfronto.delete(id);aggiornaPulsante(id);aggiornaVassoio()}
+function aggiornaVassoio(){
+  const ids=[...insiemeConfronto],n=ids.length;
+  document.getElementById("vassoio").classList.toggle("mostra",n>0&&document.getElementById("vista-collezione").classList.contains("attiva"));
+  const c=document.getElementById("caselle");c.innerHTML="";
   for(let i=0;i<3;i++){
     const p=ids[i]?profumi.find(x=>x.id===ids[i]):null;
-    const d=document.createElement("div");
-    d.className="cmp-slot"+(p?"":" empty");
-    d.innerHTML=p?(IMGS[p.id]?`<img src="${IMGS[p.id]}" alt="${esc(p.name)}">`:colI[p.colore]):"+";
-    slots.appendChild(d);
+    const d=document.createElement("div");d.className="casella";
+    d.innerHTML=p?(IMGS[p.id]?`<img src="${IMGS[p.id]}" alt="${esc(p.name)}">`:vetroLettera[p.colore]):"+";
+    c.appendChild(d);
   }
-  document.getElementById("cmp-tray-count").textContent=n+" / 3";
-  document.getElementById("cmp-go-btn").disabled=n<2;
-  const badge=document.getElementById("cmp-badge");
-  badge.textContent=n||"";badge.classList.toggle("show",n>0);
-  if(document.getElementById("view-confronta").classList.contains("active"))renderCompare();
+  document.getElementById("vassoio-conto").textContent=n+" / 3";
+  document.getElementById("btn-confronta").disabled=n<2;
+  const pal=document.getElementById("pallino");
+  pal.textContent=n||"";pal.classList.toggle("mostra",n>0);
+  if(document.getElementById("vista-confronta").classList.contains("attiva"))disegnaConfronto();
 }
-
-function renderCompare(){
-  const ids=[...compareSet],content=document.getElementById("cmp-content"),empty=document.getElementById("cmp-empty");
-  if(ids.length<2){content.innerHTML="";empty.style.display="block";return}
-  empty.style.display="none";
-  const list=ids.map(id=>profumi.find(p=>p.id===id)).filter(Boolean);
-  const rated=list.filter(p=>p.rating);
-  const bestR=rated.length?Math.max(...rated.map(p=>p.rating)):null,bestL=Math.max(...list.map(p=>p.longevita));
-  let h=`<div class="cmp-table"><div class="cmp-grid cols-${list.length}">`;
-  h+=`<div class="cmp-lbl" style="border-bottom:1px solid var(--border2)"></div>`;
-  list.forEach(p=>{
-    h+=`<div class="cmp-head">
-      <div class="cmp-x" onclick="removeFromCompare(${p.id})" title="Togli dal confronto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
-      <div class="cmp-head-img">${IMGS[p.id]?`<img src="${IMGS[p.id]}" alt="${esc(p.name)}">`:""}</div>
-      <div class="cmp-head-brand">${esc(p.brand)}</div>
-      <div class="cmp-head-nome">${esc(p.name)}</div>
-      <span class="cmp-head-conc">${p.conc} · № ${p.id}</span>
+function disegnaConfronto(){
+  const ids=[...insiemeConfronto],cont=document.getElementById("cf-contenuto"),vuoto=document.getElementById("cf-vuoto");
+  if(ids.length<2){cont.innerHTML="";vuoto.style.display="block";return}
+  vuoto.style.display="none";
+  const lista=ids.map(id=>profumi.find(p=>p.id===id)).filter(Boolean);
+  const votati=lista.filter(p=>p.rating);
+  const megR=votati.length?Math.max(...votati.map(p=>p.rating)):null,megL=Math.max(...lista.map(p=>p.longevita));
+  let h=`<div class="cf-tabella"><div class="cf-griglia col${lista.length}">`;
+  h+=`<div class="cf-eti" style="border-bottom:1px solid var(--filo-2)"></div>`;
+  lista.forEach(p=>{
+    h+=`<div class="cf-testa">
+      <div class="cf-x" onclick="togliDalConfronto(${p.id})" title="Togli dal confronto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+      <div class="cf-foto">${IMGS[p.id]?`<img src="${IMGS[p.id]}" alt="${esc(p.name)}">`:""}</div>
+      <div class="cf-marca">${esc(p.brand)}</div>
+      <div class="cf-nome">${esc(p.name)}</div>
+      <span class="cf-grado">${p.conc} · № ${p.id}</span>
     </div>`;
   });
-  const riga=(lbl,fn)=>{h+=`<div class="cmp-lbl">${lbl}</div>`;list.forEach(p=>{h+=fn(p)})};
-  h+=`<div class="cmp-sez">Profilo</div>`;
-  riga("Rating",p=>`<div class="cmp-cell${p.rating&&p.rating===bestR?" best":""}">${p.rating?`★ ${p.rating}`:"n.d."}</div>`);
-  riga("Longevità",p=>`<div class="cmp-cell${p.longevita===bestL?" best":""}">${p.longevita}h</div>`);
-  riga("Stagione",p=>`<div class="cmp-cell"><span class="cmp-tag stagione">${stagLbl(p.stagione)}</span></div>`);
-  riga("Momento",p=>`<div class="cmp-cell" style="font-size:11px">${momLbl(p.momento)}</div>`);
-  riga("Famiglia",p=>`<div class="cmp-cell"><span class="cmp-tag">${p.famiglia}</span></div>`);
-  riga("Clone di",p=>`<div class="cmp-cell" style="font-size:11px">${p.dupe?esc(p.dupe.split(" (")[0]):"—"}</div>`);
-  h+=`<div class="cmp-sez">Accordi principali</div>`;
-  riga("Top accordi",p=>`<div class="cmp-cell" style="flex-direction:column;gap:3px">${p.accordi.slice(0,4).map((a,j)=>`<span style="font-size:11px;color:${accordColors[j]}">${a}</span>`).join("")}</div>`);
-  riga("Note",p=>`<div class="cmp-cell" style="font-size:11px;text-align:left;line-height:1.6;align-items:flex-start">${esc(p.note)}</div>`);
-  h+=`<div class="cmp-sez">Occasioni d'uso</div>`;
+  const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
+  h+=`<div class="cf-sez incisa">Profilo</div>`;
+  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${p.rating}`:"n.d."}</div>`);
+  riga("Longevità",p=>`<div class="cf-cella${p.longevita===megL?" meglio":""}">${p.longevita}h</div>`);
+  riga("Stagione",p=>`<div class="cf-cella"><span class="cf-segno stag">${stagLbl(p.stagione)}</span></div>`);
+  riga("Momento",p=>`<div class="cf-cella" style="font-size:12px">${momLbl(p.momento)}</div>`);
+  riga("Famiglia",p=>`<div class="cf-cella"><span class="cf-segno">${p.famiglia}</span></div>`);
+  riga("Copia di",p=>`<div class="cf-cella" style="font-size:12px">${p.dupe?esc(p.dupe.split(" (")[0]):"—"}</div>`);
+  h+=`<div class="cf-sez incisa">Accordi principali</div>`;
+  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map((a,j)=>`<span style="font-size:12px;color:${coloriAccordo[j]}">${a}</span>`).join("")}</div>`);
+  riga("Note",p=>`<div class="cf-cella" style="font-size:12px;text-align:left;line-height:1.6;align-items:flex-start">${esc(p.note)}</div>`);
+  h+=`<div class="cf-sez incisa">Quando indossarlo</div>`;
   Object.keys(usoLabels).forEach(k=>{
     riga(usoLabels[k],p=>{
-      const v=p[k],cls=v==="si"?"si":v==="si-mod"?"mod":"no",lab=v==="si"?"Sì":v==="si-mod"?"Con moderazione":"No";
-      return `<div class="cmp-cell"><span class="uso-dot ${cls}"></span><span style="font-size:11px">${lab}</span></div>`;
+      const v=p[k],c=v==="si"?"si":v==="si-mod"?"forse":"no",lab=v==="si"?"Sì":v==="si-mod"?"Con moderazione":"No";
+      return `<div class="cf-cella"><span class="punto ${c}"></span><span style="font-size:12px">${lab}</span></div>`;
     });
   });
   h+=`</div></div>`;
-  if(list.length<3)h+=`<div style="text-align:center;padding:16px 0"><button class="btn-ghost" onclick="switchView('collezione')">Aggiungi un terzo profumo</button></div>`;
-  content.innerHTML=h;
+  if(lista.length<3)h+=`<div style="text-align:center;padding:18px 0"><button class="btn-ombra" onclick="cambiaVista('collezione')">Aggiungi un terzo profumo</button></div>`;
+  cont.innerHTML=h;
 }
 
-// ── GUIDA (generata dalla collezione) ─────────────────────────────────────
+// ── GUIDA ─────────────────────────────────────────────────────────────────
 const ic={
   ufficio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
   cuore:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
@@ -910,204 +1007,166 @@ const ic={
   stella:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
   casa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
 };
-const tint={blu:"#6ba0d8",verde:"#79bd88",rosso:"#d97a70",oro:"#c9a96e"};
-const guidaSezioni=[
-  {k:"ufficio",t:"Ufficio e lavoro",sub:"Spazi chiusi condivisi: 2 spray, sul petto e non sul collo",i:ic.ufficio,c:"blu",nota:"Gli orientali e i gourmand della collezione restano fuori: in una stanza chiusa la scia diventa invadente entro un'ora."},
-  {k:"appuntamento",t:"Appuntamento e serata",sub:"Dove la scia è un vantaggio",i:ic.cuore,c:"rosso"},
-  {k:"quotidiano",t:"Quotidiano e casual",sub:"Il guardaroba di tutti i giorni",i:ic.sole,c:"verde"},
+const tinta={acqua:"#7fa8cf",bosco:"#93b98a",ambra:"#d9906f",oro:"#c8a35e"};
+const sezioniGuida=[
+  {k:"ufficio",t:"Ufficio e lavoro",sub:"Spazi chiusi condivisi: due spray, sul petto e non sul collo",i:ic.ufficio,c:"acqua",nota:"Gli orientali e i gourmand restano fuori: in una stanza chiusa la scia diventa invadente entro un'ora."},
+  {k:"appuntamento",t:"Appuntamento e serata",sub:"Dove la scia è un vantaggio",i:ic.cuore,c:"ambra"},
+  {k:"quotidiano",t:"Quotidiano e casual",sub:"Il guardaroba di tutti i giorni",i:ic.sole,c:"bosco"},
   {k:"formale",t:"Formale e cerimonia",sub:"Eleganza misurata, mai dolciastra",i:ic.calice,c:"oro"},
-  {k:"palestra",t:"Palestra e sport",sub:"Leggeri, puliti, senza dolcezza",i:ic.fulmine,c:"blu",nota:"Da evitare: orientali, gourmand e cuoiati. Con il calore corporeo diventano nauseanti."},
+  {k:"palestra",t:"Palestra e sport",sub:"Leggeri, puliti, senza dolcezza",i:ic.fulmine,c:"acqua",nota:"Da evitare: orientali, gourmand e cuoiati. Con il calore corporeo diventano nauseanti."},
   {k:"festivita",t:"Festività e inverno",sub:"Avvolgenti, per le sere più fredde",i:ic.stella,c:"oro"},
-  {k:"casa",t:"In casa e relax",sub:"Per il piacere di sentirli addosso",i:ic.casa,c:"verde"}
+  {k:"casa",t:"In casa e relax",sub:"Per il piacere di sentirli addosso",i:ic.casa,c:"bosco"}
 ];
-function voceProfumo(p){return `${esc(p.name)} <span class="n">${p.conc} · № ${p.id}</span>`}
-function renderGuida(){
-  let h=`<div class="intro">Ogni sezione è ricavata dalla collezione reale: aggiungi un profumo e compare qui da solo, nella stagione giusta. I numeri sono quelli di catalogo che trovi sulle teche.</div>`;
-  guidaSezioni.forEach((s,idx)=>{
+const vocePr=p=>`${esc(p.name)} <span class="n">${p.conc} · № ${p.id}</span>`;
+function disegnaGuida(){
+  let h=`<div class="premessa">Ogni sezione nasce dalla collezione reale: aggiungi una boccetta e compare qui da sola, nella stagione giusta. I numeri sono quelli incisi sui cartellini.</div>`;
+  sezioniGuida.forEach((s,idx)=>{
     const si=profumi.filter(p=>p[s.k]==="si"), mod=profumi.filter(p=>p[s.k]==="si-mod");
-    let body="";
+    let corpo="";
     [["tutto","Tutto l'anno"],["pe","Primavera / Estate"],["ai","Autunno / Inverno"]].forEach(([st,lbl])=>{
       const l=si.filter(p=>p.stagione===st);
-      if(l.length)body+=`<div class="riga"><div class="riga-lbl">${lbl}</div><div class="riga-val">${l.map(voceProfumo).join('<span class="sep">·</span>')}</div></div>`;
+      if(l.length)corpo+=`<div class="voce"><div class="voce-eti incisa">${lbl}</div><div class="voce-testo">${l.map(vocePr).join('<span class="sep">·</span>')}</div></div>`;
     });
-    if(mod.length)body+=`<div class="riga"><div class="riga-lbl">Con moderazione</div><div class="riga-val">${mod.map(p=>voceProfumo(p)+` <span class="n">(${stagBreve(p.stagione)})</span>`).join('<span class="sep">·</span>')}</div></div>`;
-    if(!si.length&&!mod.length)body+=`<div class="riga"><div class="riga-nota">Nessun profumo in collezione adatto a questa occasione.</div></div>`;
-    if(s.nota)body+=`<div class="riga"><div class="riga-nota">${s.nota}</div></div>`;
+    if(mod.length)corpo+=`<div class="voce"><div class="voce-eti incisa">Con moderazione</div><div class="voce-testo">${mod.map(p=>vocePr(p)+` <span class="n">(${stagBreve(p.stagione)})</span>`).join('<span class="sep">·</span>')}</div></div>`;
+    if(!si.length&&!mod.length)corpo+=`<div class="voce"><div class="voce-nota">Nessuna boccetta in collezione per questa occasione.</div></div>`;
+    if(s.nota)corpo+=`<div class="voce"><div class="voce-nota">${s.nota}</div></div>`;
     const n=si.length+mod.length;
-    h+=`<section class="pannello${idx===0?" open":""}" id="g-${s.k}">
-      <div class="pannello-hdr" onclick="tg('g-${s.k}')">
-        <div class="ph-left">
-          <div class="ph-icon" style="background:${tint[s.c]}1a;border-color:${tint[s.c]}33;color:${tint[s.c]}">${s.i}</div>
-          <div><div class="ph-titolo">${s.t}</div><div class="ph-sub">${n} profumi · ${s.sub}</div></div>
+    h+=`<section class="cassetto${idx===0?" aperto":""}" id="g-${s.k}">
+      <div class="cassetto-testa" onclick="commuta('g-${s.k}')">
+        <div class="ct-sx">
+          <div class="ct-icona" style="background:${tinta[s.c]}1a;border-color:${tinta[s.c]}33;color:${tinta[s.c]}">${s.i}</div>
+          <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} boccette · ${s.sub}</div></div>
         </div>
-        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        <svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
       </div>
-      <div class="pannello-body">${body}</div>
+      <div class="cassetto-corpo">${corpo}</div>
     </section>`;
   });
-  document.getElementById("view-guida").innerHTML=h;
+  document.getElementById("vista-guida").innerHTML=h;
 }
 
 // ── LAYERING ──────────────────────────────────────────────────────────────
-const badgeIcon={uff:ic.ufficio,app:ic.cuore,sera:ic.stella,casa:ic.casa,lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v7.5L4.5 19A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3L14 9.5V2M9 2h6M7.5 15h9"/></svg>'};
-function renderLayering(){
-  let h=`<div class="intro">Prima il più intenso e persistente, poi il più leggero sopra: il denso fa da fondamenta, il leggero porta l'apertura. Regola di partenza: 2 spray del primo, 1 del secondo, e dieci minuti di pazienza prima di giudicare.</div>
-  <div class="blocco"><div class="blocco-t">Le quattro regole</div>
+const bolloIcona={uff:ic.ufficio,app:ic.cuore,sera:ic.stella,casa:ic.casa,lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v7.5L4.5 19A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3L14 9.5V2M9 2h6M7.5 15h9"/></svg>'};
+function disegnaLayering(){
+  let h=`<div class="premessa">Prima il più intenso e persistente, poi il più leggero sopra: il denso fa da fondamenta, il leggero porta l'apertura. Punto di partenza: due spray del primo, uno del secondo, e dieci minuti di pazienza prima di giudicare.</div>
+  <div class="tavola"><div class="tavola-t incisa">Le quattro regole</div>
     ${[["Prima il più denso","Legnoso, ambrato o gourmand sotto; acquatico, agrumato o floreale sopra. Il pesante dura di più e regge la struttura."],
-       ["Dosi asimmetriche","Non serve la stessa quantità per entrambi. 2+1 è quasi sempre il punto di equilibrio."],
+       ["Dosi asimmetriche","Non serve la stessa quantità per entrambi. Due più uno è quasi sempre il punto di equilibrio."],
        ["Aspetta prima di giudicare","I profumi cambiano sulla pelle: quello che stona nei primi minuti spesso si armonizza quando le note di testa evaporano."],
        ["Almeno uno monocorda","Due profumi molto strutturati litigano. Meglio che uno sia centrato su una nota dominante."]]
-      .map(([t,d])=>`<div class="barra"><div style="color:var(--gold);font-size:12px;margin-bottom:4px">${t}</div><div style="font-size:12px;color:var(--text2);line-height:1.65">${d}</div></div>`).join("")}
+      .map(([t,d])=>`<div class="asta"><div style="color:var(--ottone);font-size:13.5px;font-weight:600;margin-bottom:5px">${t}</div><div style="font-size:13.5px;color:var(--carta-2);line-height:1.62">${d}</div></div>`).join("")}
   </div>`;
   let gruppo="";
   layering.forEach((l,i)=>{
-    if(l.g!==gruppo){gruppo=l.g;h+=`<div class="sez-titolo">${gruppo}</div>`}
-    h+=`<article class="scheda" id="lay-${i}">
-      <div class="scheda-hdr" onclick="tg('lay-${i}')">
-        <div class="scheda-badge" style="color:${l.t==="app"?tint.rosso:l.t==="uff"?tint.verde:l.t==="lab"?"#b08fd0":tint.oro}">${badgeIcon[l.t]}</div>
-        <div><div class="scheda-nome">${l.n}</div><div class="scheda-gap">${l.s}</div></div>
+    if(l.g!==gruppo){gruppo=l.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
+    h+=`<article class="ricetta" id="lay-${i}">
+      <div class="ricetta-testa" onclick="commuta('lay-${i}')">
+        <div class="ricetta-bollo" style="color:${l.t==="app"?tinta.ambra:l.t==="uff"?tinta.bosco:l.t==="lab"?"#bd96dc":tinta.oro}">${bolloIcona[l.t]}</div>
+        <div><div class="ricetta-nome">${l.n}</div><div class="ricetta-sotto">${l.s}</div></div>
       </div>
-      <div class="scheda-body">
-        <div class="voce"><span class="voce-nome">Come si fa</span><span class="voce-testo">${l.come}</span></div>
-        <div class="voce"><span class="voce-nome">Risultato olfattivo</span><span class="voce-testo">${l.ris}</span></div>
-        <div class="voce"><span class="voce-nome">Perché funziona</span><span class="voce-testo">${l.perche}</span></div>
-        <div class="voce"><span class="voce-nome">Quando</span><span class="voce-testo">${l.quando}</span></div>
+      <div class="ricetta-corpo">
+        <div class="passo"><span class="passo-nome">Come si fa</span><span class="passo-testo">${l.come}</span></div>
+        <div class="passo"><span class="passo-nome">Risultato olfattivo</span><span class="passo-testo">${l.ris}</span></div>
+        <div class="passo"><span class="passo-nome">Perché funziona</span><span class="passo-testo">${l.perche}</span></div>
+        <div class="passo"><span class="passo-nome">Quando</span><span class="passo-testo">${l.quando}</span></div>
       </div>
     </article>`;
   });
-  document.getElementById("view-layering").innerHTML=h;
+  document.getElementById("vista-layering").innerHTML=h;
 }
 
 // ── ACQUISTI ──────────────────────────────────────────────────────────────
-const profiloLink=`<a class="profilo" href="https://www.fragrantica.it/members/74018" target="_blank" rel="noopener">
-  <div class="profilo-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-  <div style="flex:1"><div class="profilo-lbl">Fragrantica.it</div><div class="profilo-nome">Il mio profilo →</div></div>
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text3)"><path d="m9 18 6-6-6-6"/></svg>
+const collegamentoProfilo=`<a class="profilo" href="https://www.fragrantica.it/members/74018" target="_blank" rel="noopener">
+  <div class="profilo-tondo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+  <div style="flex:1"><div class="incisa">Fragrantica.it</div><div class="profilo-nome">Il mio profilo →</div></div>
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--carta-3)"><path d="m9 18 6-6-6-6"/></svg>
 </a>`;
-function renderConsigli(){
-  let h=profiloLink+`<div class="intro">Le famiglie assenti o poco coperte, lette sulla collezione com'è oggi: ${profumi.length} profumi. In fondo, quello che gli ultimi acquisti hanno già risolto.</div>`;
+function disegnaAcquisti(){
+  let h=collegamentoProfilo+`<div class="premessa">Le famiglie assenti o poco coperte, lette sulla collezione com'è oggi: ${profumi.length} boccette. In fondo, quello che gli ultimi acquisti hanno già risolto.</div>`;
   let gruppo="";
   consigli.forEach((c,i)=>{
-    if(c.g!==gruppo){gruppo=c.g;h+=`<div class="sez-titolo">${gruppo}</div>`}
-    h+=`<article class="scheda" id="acq-${i}">
-      <div class="scheda-hdr" onclick="tg('acq-${i}')">
-        <div class="scheda-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
-        <div><div class="scheda-nome">${c.n}</div><div class="scheda-gap">${c.gap}</div></div>
+    if(c.g!==gruppo){gruppo=c.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
+    h+=`<article class="ricetta" id="acq-${i}">
+      <div class="ricetta-testa" onclick="commuta('acq-${i}')">
+        <div class="ricetta-bollo" style="color:var(--ottone)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
+        <div><div class="ricetta-nome">${c.n}</div><div class="ricetta-sotto">${c.gap}</div></div>
       </div>
-      <div class="scheda-body">${c.voci.map(v=>`<div class="voce"><span class="voce-nome">${v.t}</span><span class="voce-testo">${v.d}</span></div>`).join("")}</div>
+      <div class="ricetta-corpo">${c.voci.map(v=>`<div class="passo"><span class="passo-nome">${v.t}</span><span class="passo-testo">${v.d}</span></div>`).join("")}</div>
     </article>`;
   });
-  document.getElementById("view-consigliati").innerHTML=h;
+  document.getElementById("vista-acquisti").innerHTML=h;
 }
 
-// ── STATISTICHE ───────────────────────────────────────────────────────────
-function renderStats(){
-  const tot=profumi.length,nS=k=>profumi.filter(p=>p.stagione===k).length;
-  const rated=profumi.filter(p=>p.rating);
-  const mediaR=(rated.reduce((a,p)=>a+p.rating,0)/rated.length).toFixed(2);
+// ── NUMERI ────────────────────────────────────────────────────────────────
+function disegnaNumeri(){
+  const tot=profumi.length,perStag=k=>profumi.filter(p=>p.stagione===k).length;
+  const votati=profumi.filter(p=>p.rating);
+  const mediaR=(votati.reduce((a,p)=>a+p.rating,0)/votati.length).toFixed(2);
   const mediaL=(profumi.reduce((a,p)=>a+p.longevita,0)/tot).toFixed(1);
-  let h=profiloLink+`<div class="kpi-grid">
-    <div class="kpi"><div class="kpi-n">${tot}</div><div class="kpi-l">Fragranze</div></div>
-    <div class="kpi"><div class="kpi-n">${profumi.filter(p=>p.dupe).length}</div><div class="kpi-l">Cloni e dupe</div></div>
-    <div class="kpi"><div class="kpi-n">${nS("pe")}</div><div class="kpi-l">Primavera / Estate</div></div>
-    <div class="kpi"><div class="kpi-n">${nS("ai")}</div><div class="kpi-l">Autunno / Inverno</div></div>
-    <div class="kpi"><div class="kpi-n">${mediaR}</div><div class="kpi-l">Rating medio (${rated.length} valutati)</div></div>
-    <div class="kpi"><div class="kpi-n">${mediaL}h</div><div class="kpi-l">Longevità media</div></div>
+  let h=collegamentoProfilo+`<div class="numeri">
+    <div class="numero"><div class="numero-n">${tot}</div><div class="numero-l">Boccette</div></div>
+    <div class="numero"><div class="numero-n">${profumi.filter(p=>p.dupe).length}</div><div class="numero-l">Cloni e dupe</div></div>
+    <div class="numero"><div class="numero-n">${perStag("pe")}</div><div class="numero-l">Primavera / Estate</div></div>
+    <div class="numero"><div class="numero-n">${perStag("ai")}</div><div class="numero-l">Autunno / Inverno</div></div>
+    <div class="numero"><div class="numero-n">${mediaR}</div><div class="numero-l">Rating medio · ${votati.length} valutati</div></div>
+    <div class="numero"><div class="numero-n">${mediaL}h</div><div class="numero-l">Longevità media</div></div>
   </div>`;
-  h+=`<div class="blocco"><div class="blocco-t">Famiglia olfattiva</div>`;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Famiglia olfattiva</div>`;
   ["rosso","verde","blu"].forEach(c=>{
     const n=profumi.filter(p=>p.colore===c).length;
-    h+=`<div class="barra"><div class="barra-lbl"><span>${colNome[c]}</span><span>${n}</span></div><div class="track"><div class="fill ${c}" style="width:${Math.round(n/tot*100)}%"></div></div></div>`;
+    h+=`<div class="asta"><div class="asta-eti"><span>${vetroNome[c]}</span><span>${n}</span></div><div class="binario"><div class="riempio ${vetroClasse[c]}" style="width:${Math.round(n/tot*100)}%"></div></div></div>`;
   });
-  h+=`</div><div class="blocco"><div class="blocco-t">Occasione d'uso</div>`;
+  h+=`</div><div class="tavola"><div class="tavola-t incisa">Occasione d'uso</div>`;
   Object.keys(usoLabels).forEach(k=>{
     const n=profumi.filter(p=>p[k]==="si"||p[k]==="si-mod").length,pct=Math.round(n/tot*100);
-    h+=`<div class="barra"><div class="barra-lbl"><span>${usoLabels[k]}</span><span>${n} · ${pct}%</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div></div>`;
+    h+=`<div class="asta"><div class="asta-eti"><span>${usoLabels[k]}</span><span>${n} · ${pct}%</span></div><div class="binario"><div class="riempio" style="width:${pct}%"></div></div></div>`;
   });
   h+=`</div>`;
-  const byR={};rated.forEach(p=>{(byR[p.rating]=byR[p.rating]||[]).push(p)});
-  h+=`<div class="blocco"><div class="blocco-t">Rating Fragrantica</div>`;
-  Object.keys(byR).sort((a,b)=>b-a).forEach(r=>{
-    h+=`<div class="barra"><div class="barra-lbl"><span>${byR[r].map(p=>p.name).join(" · ")}</span><span>★ ${r}</span></div><div class="track"><div class="fill" style="width:${r/5*100}%"></div></div></div>`;
+  const perR={};votati.forEach(p=>{(perR[p.rating]=perR[p.rating]||[]).push(p)});
+  h+=`<div class="tavola"><div class="tavola-t incisa">Rating Fragrantica</div>`;
+  Object.keys(perR).sort((a,b)=>b-a).forEach(r=>{
+    h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${r}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
   });
-  const nr=profumi.filter(p=>!p.rating);
-  if(nr.length)h+=`<div class="barra"><div class="barra-lbl"><span>${nr.map(p=>p.name).join(" · ")}</span><span>n.d.</span></div><div class="track"><div class="fill" style="width:0%"></div></div></div>`;
+  const senza=profumi.filter(p=>!p.rating);
+  if(senza.length)h+=`<div class="asta"><div class="asta-eti"><span>${senza.map(p=>p.name).join(" · ")}</span><span>n.d.</span></div><div class="binario"></div></div>`;
   h+=`</div>`;
-  const byL={};profumi.forEach(p=>{(byL[p.longevita]=byL[p.longevita]||[]).push(p)});
+  const perL={};profumi.forEach(p=>{(perL[p.longevita]=perL[p.longevita]||[]).push(p)});
   const maxL=Math.max(...profumi.map(p=>p.longevita));
-  h+=`<div class="blocco"><div class="blocco-t">Longevità dichiarata</div>`;
-  Object.keys(byL).sort((a,b)=>b-a).forEach(l=>{
-    const ns=byL[l].map(p=>p.name);
-    h+=`<div class="barra"><div class="barra-lbl"><span>${ns.slice(0,4).join(", ")}${ns.length>4?"…":""}</span><span>${l}h · ${ns.length}</span></div><div class="track"><div class="fill blu" style="width:${l/maxL*100}%"></div></div></div>`;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Longevità dichiarata</div>`;
+  Object.keys(perL).sort((a,b)=>b-a).forEach(l=>{
+    const ns=perL[l].map(p=>p.name);
+    h+=`<div class="asta"><div class="asta-eti"><span>${ns.slice(0,4).join(", ")}${ns.length>4?"…":""}</span><span>${l}h · ${ns.length}</span></div><div class="binario"><div class="riempio acqua" style="width:${l/maxL*100}%"></div></div></div>`;
   });
   h+=`</div>`;
-  const dupes=profumi.filter(p=>p.dupe);
-  h+=`<div class="blocco"><div class="blocco-t">Di quale profumo sono la copia</div>`;
-  dupes.forEach(p=>{
-    h+=`<div class="barra" style="margin-bottom:11px"><div class="barra-lbl"><span style="color:var(--text)">${esc(p.name)} <span style="color:var(--text3);font-size:10.5px">№ ${p.id}</span></span></div><div style="font-size:12px;color:var(--gold);line-height:1.5">→ ${esc(p.dupe)}</div></div>`;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Di quale profumo sono la copia</div>`;
+  profumi.filter(p=>p.dupe).forEach(p=>{
+    h+=`<div class="asta" style="margin-bottom:13px"><div class="asta-eti"><span style="color:var(--carta)">${esc(p.name)} <span style="color:var(--carta-3);font-size:11.5px">№ ${p.id}</span></span></div>
+      <div style="font-size:13px;color:var(--ottone);line-height:1.5">→ ${esc(p.dupe)}</div></div>`;
   });
   h+=`</div>`;
-  document.getElementById("view-stats").innerHTML=h;
+  document.getElementById("vista-numeri").innerHTML=h;
 }
 
 // ── NAVIGAZIONE ───────────────────────────────────────────────────────────
-function switchView(v){
-  ["collezione","confronta","layering","guida","consigliati","stats"].forEach(n=>{
-    document.getElementById("view-"+n).classList.toggle("active",n===v);
-    document.getElementById("nav-"+n)?.classList.toggle("active",n===v);
+function cambiaVista(v){
+  ["collezione","confronta","layering","guida","acquisti","numeri"].forEach(n=>{
+    document.getElementById("vista-"+n).classList.toggle("attiva",n===v);
+    document.getElementById("remo-"+n)?.classList.toggle("attivo",n===v);
   });
-  document.getElementById("app-header").style.display=v==="collezione"?"block":"none";
-  document.getElementById("cmp-tray").classList.toggle("show",compareSet.size>0&&v==="collezione");
-  if(v==="confronta")renderCompare();
+  const inCollezione=v==="collezione";
+  document.getElementById("testata").style.display=inCollezione?"flex":"none";
+  document.getElementById("strumenti").style.display=inCollezione?"block":"none";
+  document.getElementById("vassoio").classList.toggle("mostra",insiemeConfronto.size>0&&inCollezione);
+  if(v==="confronta")disegnaConfronto();
   window.scrollTo({top:0,behavior:"instant"});
 }
-function tg(id){document.getElementById(id)?.classList.toggle("open")}
-function openSort(){document.getElementById("sort-bd").classList.add("open")}
-function closeSortBd(e){if(e.target===document.getElementById("sort-bd"))document.getElementById("sort-bd").classList.remove("open")}
-function setSort(s){
-  currentSort=s;
-  document.querySelectorAll(".sopt").forEach(o=>o.classList.toggle("active",o.dataset.sort===s));
-  document.getElementById("sort-btn").classList.toggle("active",s!=="alpha");
-  document.getElementById("sort-bd").classList.remove("open");
-  render();
-}
+function commuta(id){document.getElementById(id)?.classList.toggle("aperto")}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")chiudiFiltri()});
 
 // ── AVVIO ─────────────────────────────────────────────────────────────────
-document.getElementById("note-chips").innerHTML=noteChips
-  .map(n=>`<div class="chip nota" data-nota="${n}">${n.charAt(0).toUpperCase()+n.slice(1)}</div>`).join("");
-
-document.querySelectorAll(".chip[data-filter]").forEach(c=>c.addEventListener("click",()=>{
-  const f=c.dataset.filter;
-  if(activeFilters.has(f)){activeFilters.delete(f);c.classList.remove("active")}
-  else{activeFilters.add(f);c.classList.add("active")}
-  render();
-}));
-document.querySelectorAll(".chip[data-nota]").forEach(c=>c.addEventListener("click",()=>{
-  const n=c.dataset.nota;
-  if(activeNote.has(n)){activeNote.delete(n);c.classList.remove("active")}
-  else{activeNote.add(n);c.classList.add("active")}
-  render();
-}));
-document.getElementById("search").addEventListener("input",e=>{searchVal=e.target.value;render()});
-
-render();renderGuida();renderLayering();renderConsigli();renderStats();switchView("collezione");
-
-(function initChipScroll(){
-  document.querySelectorAll(".chips-row").forEach(row=>{
-    let wrap=row.parentElement;
-    if(!wrap.classList.contains("chips-wrap")){
-      wrap=document.createElement("div");wrap.className="chips-wrap";
-      row.parentNode.insertBefore(wrap,row);wrap.appendChild(row);
-    }
-    row.addEventListener("wheel",e=>{
-      if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){row.scrollLeft+=e.deltaY;e.preventDefault()}
-    },{passive:false});
-    const upd=()=>wrap.classList.toggle("has-overflow",row.scrollWidth-row.clientWidth-row.scrollLeft>4);
-    row.addEventListener("scroll",upd,{passive:true});
-    window.addEventListener("resize",upd);
-    upd();setTimeout(upd,180);
-  });
-})();
+document.getElementById("cerca").addEventListener("input",e=>{testoCerca=e.target.value;disegna()});
+costruisciFoglio();
+disegna();disegnaGuida();disegnaLayering();disegnaAcquisti();disegnaNumeri();cambiaVista("collezione");
 </script>
 </body>
 </html>
