@@ -4,3 +4,8 @@
 !.dev.vars.example
 .env*
 !.env.example
+
+# materiale di lavoro locale, non serve al sito
+SchedeProfumiFragrantica/
+sillage-profumi.csv
+sillage-placeholder.svg
