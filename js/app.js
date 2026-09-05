@@ -18,6 +18,15 @@ const CHIAVE_CACHE = "sillage:dati";
 let profumi = [], noteChips = [], layering = [], consigli = [];
 let origineDati = "locale";
 
+/* Da dove arrivano i dati che sono a schermo adesso. Finisce su <body> per
+   poterlo leggere dalla console senza strumenti: foglio, cache, locale,
+   locale-ripiego. Va aggiornato anche quando il foglio conferma la cache e
+   quindi non si ridisegna niente. */
+function segnaOrigine(v) {
+  origineDati = v;
+  try { document.body.dataset.origine = v; } catch (e) {}
+}
+
 function applicaDati(d) {
   if (!Array.isArray(d.profumi) || !d.profumi.length) throw new Error("dati senza profumi");
   profumi   = d.profumi;
@@ -61,27 +70,48 @@ function leggiCache() {
   } catch (e) { return null; }
 }
 
+/* Impronta dei soli dati: `aggiornato` cambia a ogni risposta e falserebbe
+   il confronto fra quello che è a schermo e quello che è appena arrivato. */
+function impronta(d) {
+  return JSON.stringify([d.profumi, d.note, d.layering, d.consigli]);
+}
+
 /* Ordine di preferenza: foglio Google → ultima copia in cache → JSON del repo.
-   Il ripiego locale è sempre presente, quindi la pagina non resta mai vuota. */
-async function caricaDati() {
+   Il ripiego locale è sempre presente, quindi la pagina non resta mai vuota.
+
+   `mostra` viene chiamata appena c'è qualcosa da disegnare: se in cache c'è
+   già una collezione, va a schermo subito e il foglio la aggiorna dopo, in
+   sottofondo. Il secondo disegno scatta solo se il foglio porta qualcosa di
+   diverso, così una schermata già a posto non si ricostruisce sotto le mani. */
+async function caricaDati(mostra) {
+  let aSchermo = null;
+
   if (ORIGINE_DATI.appsScript) {
+    const cache = leggiCache();
+    if (cache) {
+      try {
+        applicaDati(cache);
+        segnaOrigine("cache");
+        aSchermo = impronta(cache);
+        mostra();
+      } catch (e) { aSchermo = null; /* cache corrotta: si prosegue */ }
+    }
     try {
       const d = await leggiRemoto();
       applicaDati(d);
-      origineDati = "foglio";
+      segnaOrigine("foglio");
       scriviCache(d);
+      if (impronta(d) !== aSchermo) mostra();
       return;
     } catch (err) {
       console.warn("Sillage: foglio non raggiungibile —", err.message);
-      const cache = leggiCache();
-      if (cache) {
-        try { applicaDati(cache); origineDati = "cache"; return; }
-        catch (e) { /* cache corrotta: si prosegue con i JSON locali */ }
-      }
+      if (aSchermo) return;              // la cache è già a schermo, basta così
     }
   }
+
   applicaDati(await leggiLocale());
-  origineDati = ORIGINE_DATI.appsScript ? "locale-ripiego" : "locale";
+  segnaOrigine(ORIGINE_DATI.appsScript ? "locale-ripiego" : "locale");
+  mostra();
 }
 
 // ── ETICHETTE E UTILITÀ ───────────────────────────────────────────────────
@@ -93,6 +123,8 @@ const etichetteFiltro={pe:"Primavera / Estate",ai:"Autunno / Inverno",tutto:"Tut
 const stagLbl=s=>s==="pe"?"Primavera / Estate":s==="ai"?"Autunno / Inverno":"Tutto l'anno";
 const stagBreve=s=>s==="pe"?"P/E":s==="ai"?"A/I":"tutto l'anno";
 const momLbl=m=>m==="entrambi"?"Giorno e sera":m==="sera"?"Sera":"Giorno";
+// il foglio scrive 4 dove gli altri hanno 4.3: a schermo vanno tutti a una cifra
+const voto=r=>Number(r).toFixed(1);
 const coloriAccordo=["#d9906f","#93b98a","#7fa8cf","#c8a35e","#bd96dc"];
 const ordinamenti={
   alpha:{lbl:"Nome A → Z",fn:p=>p.name.toLowerCase()},
@@ -185,7 +217,7 @@ function costruisciTeca(p,i){
           <div class="targhette">
             ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
             <span class="targa grado">${p.conc}</span>
-            <span class="targa voto">${p.rating?`★ ${p.rating}`:"★ n.d."}</span>
+            <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
           </div>
         </div>
@@ -387,7 +419,7 @@ function disegnaConfronto(){
   });
   const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
   h+=`<div class="cf-sez incisa">Profilo</div>`;
-  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${p.rating}`:"n.d."}</div>`);
+  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${voto(p.rating)}`:"n.d."}</div>`);
   riga("Longevità",p=>`<div class="cf-cella${p.longevita===megL?" meglio":""}">${p.longevita}h</div>`);
   riga("Stagione",p=>`<div class="cf-cella"><span class="cf-segno stag">${stagLbl(p.stagione)}</span></div>`);
   riga("Momento",p=>`<div class="cf-cella" style="font-size:12px">${momLbl(p.momento)}</div>`);
@@ -536,7 +568,7 @@ function disegnaNumeri(){
   const perR={};votati.forEach(p=>{(perR[p.rating]=perR[p.rating]||[]).push(p)});
   h+=`<div class="tavola"><div class="tavola-t incisa">Rating Fragrantica</div>`;
   Object.keys(perR).sort((a,b)=>b-a).forEach(r=>{
-    h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${r}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
+    h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${voto(r)}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
   });
   const senza=profumi.filter(p=>!p.rating);
   if(senza.length)h+=`<div class="asta"><div class="asta-eti"><span>${senza.map(p=>p.name).join(" · ")}</span><span>n.d.</span></div><div class="binario"></div></div>`;
@@ -577,8 +609,14 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")chiudiFiltri()});
 // ── AVVIO ─────────────────────────────────────────────────────────────────
 async function avvia() {
   document.getElementById("cerca").addEventListener("input", e => { testoCerca = e.target.value; disegna() });
+  let primo = true;
+  const mostra = () => {
+    costruisciFoglio();
+    disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
+    if (primo) { cambiaVista("collezione"); primo = false; }
+  };
   try {
-    await caricaDati();
+    await caricaDati(mostra);
   } catch (err) {
     console.error("Sillage:", err);
     document.getElementById("vista-collezione").innerHTML =
@@ -586,9 +624,5 @@ async function avvia() {
     document.getElementById("conteggio").textContent = "—";
     return;
   }
-  document.body.dataset.origine = origineDati;
-  costruisciFoglio();
-  disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
-  cambiaVista("collezione");
 }
 avvia();
