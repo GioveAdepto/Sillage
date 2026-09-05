@@ -16,7 +16,37 @@ var CORREZIONI = [
     id: 26, colonna: 'ufficio', da: 'moderazione', a: 'no',
     perche: 'Atlas ha scia Enorme: in uno spazio chiuso condiviso non e nemmeno ' +
             'un forse. Con "moderazione" rientrava nel filtro Ufficio.'
-  }
+  },
+
+  /* Asad (#30) era entrato nella collezione senza flag d'uso: l'HTML da cui
+     sono stati importati gli altri non aveva quella riga, quindi installa()
+     ha messo "no" ovunque e la scheda usciva con tutti i pallini spenti.
+     I valori qui sotto seguono il gruppo a cui appartiene — ambrati speziati
+     da sera A/I con ufficio "moderazione": Stronger With You Absolutely (#10)
+     e Uomo Signature (#21) hanno esattamente questa combinazione. */
+  { id: 30, colonna: 'formale',      da: 'no', a: 'si',
+    perche: 'ambrato speziato da sera: come SWY Absolutely e Uomo Signature' },
+  { id: 30, colonna: 'informale',    da: 'no', a: 'si',
+    perche: 'stesso gruppo' },
+  { id: 30, colonna: 'appuntamento', da: 'no', a: 'si',
+    perche: 'scia forte e fondo caldo: e il suo terreno' },
+  { id: 30, colonna: 'festivita',    da: 'no', a: 'si',
+    perche: 'boozy speziato invernale' },
+
+  /* La piramide di Asad mancava: nella cella c'era l'elenco piatto delle note,
+     che sembrava una piramide senza esserlo. Questi valori vengono dalla scheda
+     Fragrantica del profumo, controllata il 2026-09-05. */
+  { id: 30, colonna: 'piramide',
+    da: 'Pepe · Vaniglia · Ambra · Tabacco · Legno Secco · Patchouli',
+    a:  'Testa: pepe nero, tabacco, ananas · Cuore: patchouli, caffè, iris ' +
+        '· Fondo: vaniglia, ambra, legno secco, benzoino, labdano',
+    perche: 'piramide reale dalla scheda Fragrantica' },
+  { id: 30, colonna: 'note',
+    da: 'Pepe|Vaniglia|Ambra|Tabacco|Legno Secco|Patchouli',
+    a:  'Pepe Nero|Tabacco|Ananas|Patchouli|Caffè|Iris|Vaniglia|Ambra|Legno Secco|Benzoino|Labdano',
+    perche: 'mancavano ananas, caffe, iris, benzoino e labdano' }
+  /* restano "no": quotidiano (troppo pieno per tutti i giorni), palestra
+     (orientale caldo) e casa — come tutto il gruppo di riferimento. */
 ];
 
 function correggi(soloProva) {
