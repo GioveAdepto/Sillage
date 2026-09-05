@@ -84,23 +84,42 @@ PY
 ## Correzioni puntuali
 
 Chi lavora al repo non ha modo di scrivere nel foglio: `correggi()` è quel
-canale. In cima a `Correzioni.gs` c'è l'elenco `CORREZIONI`, e ogni voce dichiara
-il valore che si aspetta di trovare e quello che vuole mettere:
+canale. L'elenco delle correzioni **non sta nel codice**, sta in
+[`data/correzioni.json`](../data/correzioni.json) e viene scaricato a ogni
+lancio. Quindi `Correzioni.gs` si incolla nell'editor una volta sola e non va
+più toccato: le correzioni nuove arrivano da sole.
 
-```js
-{ id: 26, colonna: 'ufficio', da: 'moderazione', a: 'no', perche: '…' }
+Ogni voce dichiara dove intervenire e cosa si aspetta di trovare:
+
+```json
+{ "tab": "Layering", "chiave": "nome", "valore": "Atlas → TdH Eau Givrée",
+  "colonna": "perche", "da": "…testo attuale…", "a": "…testo nuovo…",
+  "perche": "motivo della correzione" }
 ```
+
+`tab` e `chiave` sono facoltativi: senza, valgono `Profumi` e `id`, e basta
+mettere `"id": 26`.
 
 Scrive **solo** se la cella contiene ancora `da`. Se nel frattempo l'hai
 cambiata tu, la salta e lo scrive nel log: le modifiche fatte a mano nel foglio
 vincono sempre. Rilanciarla non fa danni — le voci già applicate risultano
 «già a posto».
 
-`correggi(true)` è una prova a vuoto: dice cosa farebbe senza toccare niente.
+| | |
+|---|---|
+| `correggi()` | applica quello che c'è in coda |
+| `correggi(true)` | prova a vuoto: dice cosa farebbe senza toccare nulla |
+| `attivaAutomatismo()` | le applica da sé, una volta al giorno verso le 4 |
+| `fermaAutomatismo()` | e smette |
 
-In coda ora c'è una sola voce: **Atlas, `ufficio` da `moderazione` a `no`**. Con
-scia Enorme in uno spazio chiuso condiviso non è nemmeno un forse, e con
-`moderazione` rientrava nel filtro Ufficio.
+Con l'automatismo attivo non devi lanciare più niente: quello che finisce in
+`data/correzioni.json` arriva nel foglio da solo entro un giorno. La guardia
+`da` resta in piedi, quindi una voce può cambiare solo una cella che contiene
+ancora esattamente il valore che si aspettava. Il resoconto di ogni esecuzione
+è in **Esecuzioni**, nell'editor.
+
+Se preferisci vedere prima cosa arriverebbe, tieni l'automatismo spento e lancia
+`correggi(true)` quando ti va.
 
 ## Colonne del foglio che l'app non disegna (ancora)
 
