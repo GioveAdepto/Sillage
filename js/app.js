@@ -7,7 +7,7 @@
 // appsScript: l'URL .../exec del Web App (istruzioni in apps-script/LEGGIMI.md).
 //             Se resta vuoto, l'app legge soltanto i JSON del repo.
 const ORIGINE_DATI = {
-  appsScript: "",
+  appsScript: "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
   locale: "data/",
   attesaMax: 8000            // ms oltre i quali si rinuncia al backend remoto
 };
