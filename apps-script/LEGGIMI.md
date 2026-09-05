@@ -44,15 +44,22 @@ const ORIGINE_DATI = {
 
 ## Come l'app usa il backend
 
-`caricaDati()` prova in quest'ordine:
+`caricaDati()` disegna il prima possibile e corregge il tiro dopo:
 
-1. **foglio** — `fetch` verso `/exec`, con 8 s di pazienza;
-2. **cache** — l'ultima risposta buona, in `localStorage`;
-3. **`data/*.json` del repo** — sempre presenti.
+1. se in **cache** (`localStorage`) c'è già una collezione, va a schermo subito;
+2. intanto parte la richiesta al **foglio**. Se risponde entro `attesaMax` (8 s)
+   vince lei;
+3. se tarda, si disegna quello che c'è — la cache, o i **`data/*.json` del
+   repo** — e **la richiesta prosegue lo stesso**: quando arriva, il foglio ha
+   comunque l'ultima parola. Non viene mai interrotta.
+
+Il secondo disegno scatta solo se il foglio porta qualcosa di diverso da quello
+che si vede già, così una schermata a posto non si ricostruisce sotto le mani.
 
 Quindi un Apps Script lento, in quota o non ancora configurato non lascia mai la
-pagina vuota. `document.body.dataset.origine` dice quale delle tre ha vinto
-(`foglio`, `cache`, `locale`, `locale-ripiego`).
+pagina vuota. `document.body.dataset.origine` dice da dove arriva quello che è a
+schermo adesso (`foglio`, `cache`, `locale`, `locale-ripiego`) e si aggiorna
+anche quando il foglio arriva in ritardo.
 
 `doGet` tiene il JSON in `CacheService` per 5 minuti. Per vedere subito una
 modifica al foglio: `…/exec?fresco=1`.

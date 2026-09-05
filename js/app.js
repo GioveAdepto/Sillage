@@ -45,16 +45,15 @@ async function leggiLocale() {
   return Object.fromEntries(nomi.map((n, i) => [n, parti[i]]));
 }
 
-async function leggiRemoto() {
-  const freno = new AbortController();
-  const scadenza = setTimeout(() => freno.abort(), ORIGINE_DATI.attesaMax);
-  try {
-    const r = await fetch(ORIGINE_DATI.appsScript, { signal: freno.signal, redirect: "follow" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return await r.json();
-  } finally {
-    clearTimeout(scadenza);
-  }
+/* Nessun AbortController: la richiesta non si interrompe. `attesaMax` decide
+   solo quanto si sta fermi ad aspettarla prima di disegnare qualcos'altro;
+   se il foglio arriva dopo, arriva lo stesso e ha comunque l'ultima parola. */
+function chiediAlFoglio() {
+  return fetch(ORIGINE_DATI.appsScript, { redirect: "follow" })
+    .then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    });
 }
 
 function scriviCache(d) {
@@ -84,7 +83,8 @@ function impronta(d) {
    sottofondo. Il secondo disegno scatta solo se il foglio porta qualcosa di
    diverso, così una schermata già a posto non si ricostruisce sotto le mani. */
 async function caricaDati(mostra) {
-  let aSchermo = null;
+  let aSchermo = null;        // impronta di quello che è disegnato adesso
+  let foglioVinto = false;    // il foglio ha risposto: nessuno lo sovrascrive più
 
   if (ORIGINE_DATI.appsScript) {
     const cache = leggiCache();
@@ -96,20 +96,40 @@ async function caricaDati(mostra) {
         mostra();
       } catch (e) { aSchermo = null; /* cache corrotta: si prosegue */ }
     }
-    try {
-      const d = await leggiRemoto();
-      applicaDati(d);
+
+    const dalFoglio = chiediAlFoglio();
+    const arrivato = d => {
+      try {
+        applicaDati(d);
+      } catch (e) {
+        console.warn("Sillage: risposta del foglio inutilizzabile —", e.message);
+        return;
+      }
+      foglioVinto = true;
       segnaOrigine("foglio");
       scriviCache(d);
-      if (impronta(d) !== aSchermo) mostra();
-      return;
-    } catch (err) {
-      console.warn("Sillage: foglio non raggiungibile —", err.message);
-      if (aSchermo) return;              // la cache è già a schermo, basta così
-    }
+      // si ridisegna solo se porta qualcosa di diverso da quello che si vede
+      if (impronta(d) !== aSchermo) { aSchermo = impronta(d); mostra(); }
+    };
+    const perso = err => console.warn("Sillage: foglio non raggiungibile —", err.message);
+
+    // si aspetta il foglio, ma non all'infinito: passata l'attesa si disegna
+    // quello che c'è e la richiesta prosegue per conto suo
+    const esito = await Promise.race([
+      dalFoglio.then(d => ({ d }), err => ({ err })),
+      new Promise(r => setTimeout(() => r(null), ORIGINE_DATI.attesaMax))
+    ]);
+
+    if (esito && esito.d) { arrivato(esito.d); return; }
+    if (esito && esito.err) perso(esito.err);
+    else dalFoglio.then(arrivato, perso);   // in ritardo, non perduto
+    if (aSchermo) return;                   // la cache è già a schermo, basta così
   }
 
-  applicaDati(await leggiLocale());
+  const locali = await leggiLocale();
+  if (foglioVinto) return;   // il foglio è arrivato mentre si leggeva il repo
+  applicaDati(locali);
+  aSchermo = impronta(locali);   // così il foglio, se poi conferma, non ridisegna
   segnaOrigine(ORIGINE_DATI.appsScript ? "locale-ripiego" : "locale");
   mostra();
 }
