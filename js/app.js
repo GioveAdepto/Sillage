@@ -125,7 +125,26 @@ const stagBreve=s=>s==="pe"?"P/E":s==="ai"?"A/I":"tutto l'anno";
 const momLbl=m=>m==="entrambi"?"Giorno e sera":m==="sera"?"Sera":"Giorno";
 // il foglio scrive 4 dove gli altri hanno 4.3: a schermo vanno tutti a una cifra
 const voto=r=>Number(r).toFixed(1);
-const coloriAccordo=["#d9906f","#93b98a","#7fa8cf","#c8a35e","#bd96dc"];
+/* Il colore dell'accordo segue l'accordo, non la sua posizione nell'elenco:
+   prima "Marino" era arancione se primo e verde se secondo, quindi il colore
+   sembrava una categoria senza esserlo. Sette famiglie, tinte fisse. */
+const famigliaAccordo={
+  acqua: ["Marino","Acquatico","Minerale","Salato","Ozonico","Fresco"],
+  bosco: ["Aromatico","Legnoso","Verde","Terroso","Lavanda","Muschiato","Muschio Vegetale"],
+  agrume:["Agrumato","Fruttato"],
+  spezia:["Speziato Fresco","Speziato Caldo","Ambra","Cannella","Balsamico"],
+  cipria:["Talcato","Iris","Violetta","Rosa","Floreale Bianco"],
+  dolce: ["Vanigliato","Dolce","Cocco","Caffè","Rum","Whisky"],
+  fumo:  ["Cuoiato","Fumoso","Animalico","Tabacco"]
+};
+const tintaAccordo={acqua:"#7fa8cf",bosco:"#93b98a",agrume:"#ddc76b",
+                    spezia:"#d9906f",cipria:"#bd96dc",dolce:"#c8a35e",fumo:"#9aa0a8"};
+const coloreAccordo=(()=>{
+  const m={};
+  for(const f in famigliaAccordo)famigliaAccordo[f].forEach(a=>m[a.toLowerCase()]=tintaAccordo[f]);
+  // un accordo nuovo aggiunto nel foglio resta neutro invece di sparire
+  return a=>m[String(a).toLowerCase()]||"#8b8375";
+})();
 const ordinamenti={
   alpha:{lbl:"Nome A → Z",fn:p=>p.name.toLowerCase()},
   brand:{lbl:"Marchio A → Z",fn:p=>p.brand.toLowerCase()+p.name},
@@ -203,7 +222,7 @@ function costruisciTeca(p,i){
     const v=p[k],c=v==="si"?"si":v==="si-mod"?"forse":"no";
     return `<div class="uso ${c}"><span class="punto ${c}"></span>${usoLabels[k]}</div>`;
   }).join("");
-  const accordi=p.accordi.slice(0,3).map((a,j)=>`<span class="accordo" style="color:${coloriAccordo[j]}">${a}</span>`).join("");
+  const accordi=p.accordi.slice(0,3).map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("");
   const presa=insiemeConfronto.has(p.id);
   return `<article class="teca ${cl}${presa?" presa":""}" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
     tabindex="0" role="button" aria-expanded="false" onclick="apriTeca(${p.id})"
@@ -426,7 +445,7 @@ function disegnaConfronto(){
   riga("Famiglia",p=>`<div class="cf-cella"><span class="cf-segno">${p.famiglia}</span></div>`);
   riga("Copia di",p=>`<div class="cf-cella" style="font-size:12px">${p.dupe?esc(p.dupe.split(" (")[0]):"—"}</div>`);
   h+=`<div class="cf-sez incisa">Accordi principali</div>`;
-  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map((a,j)=>`<span style="font-size:12px;color:${coloriAccordo[j]}">${a}</span>`).join("")}</div>`);
+  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map(a=>`<span style="font-size:12px;color:${coloreAccordo(a)}">${a}</span>`).join("")}</div>`);
   riga("Note",p=>`<div class="cf-cella" style="font-size:12px;text-align:left;line-height:1.6;align-items:flex-start">${esc(p.note)}</div>`);
   h+=`<div class="cf-sez incisa">Quando indossarlo</div>`;
   Object.keys(usoLabels).forEach(k=>{
@@ -473,12 +492,14 @@ function disegnaGuida(){
     if(mod.length)corpo+=`<div class="voce"><div class="voce-eti incisa">Con moderazione</div><div class="voce-testo">${mod.map(p=>vocePr(p)+` <span class="n">(${stagBreve(p.stagione)})</span>`).join('<span class="sep">·</span>')}</div></div>`;
     if(!si.length&&!mod.length)corpo+=`<div class="voce"><div class="voce-nota">Nessuna boccetta in collezione per questa occasione.</div></div>`;
     if(s.nota)corpo+=`<div class="voce"><div class="voce-nota">${s.nota}</div></div>`;
-    const n=si.length+mod.length;
+    // il filtro rapido conta solo i "si": qui si dice lo stesso numero, e i
+    // "con moderazione" si dichiarano invece di sparire dentro il totale
+    const n=`${si.length} boccette`+(mod.length?` · ${mod.length} con moderazione`:"");
     h+=`<section class="cassetto${idx===0?" aperto":""}" id="g-${s.k}">
       <div class="cassetto-testa" onclick="commuta('g-${s.k}')">
         <div class="ct-sx">
           <div class="ct-icona" style="background:${tinta[s.c]}1a;border-color:${tinta[s.c]}33;color:${tinta[s.c]}">${s.i}</div>
-          <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} boccette · ${s.sub}</div></div>
+          <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} · ${s.sub}</div></div>
         </div>
         <svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
       </div>
