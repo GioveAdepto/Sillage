@@ -127,7 +127,7 @@ function passa(p,filtri,note){
     if(f==="ai"&&p.stagione!=="ai"&&p.stagione!=="tutto")return false;
     if(f==="tutto"&&p.stagione!=="tutto")return false;
     if((f==="blu"||f==="verde"||f==="rosso")&&p.colore!==f)return false;
-    if(f==="ufficio"&&p.ufficio!=="si"&&p.ufficio!=="si-mod")return false;
+    if(f==="ufficio"&&p.ufficio!=="si")return false;
     if(f==="appuntamento"&&p.appuntamento!=="si")return false;
     if(f==="quotidiano"&&p.quotidiano!=="si")return false;
     if(f==="informale"&&p.informale!=="si")return false;
