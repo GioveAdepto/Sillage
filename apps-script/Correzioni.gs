@@ -12,190 +12,200 @@
  * Per una prova a vuoto: `correggi(true)` dice cosa farebbe senza toccare nulla.
  */
 var CORREZIONI = [
-  {
-    id: 26, colonna: 'ufficio', da: 'moderazione', a: 'no',
-    perche: 'Atlas ha scia Enorme: in uno spazio chiuso condiviso non e nemmeno ' +
-            'un forse. Con "moderazione" rientrava nel filtro Ufficio.'
-  },
+  /* ── LAYERING E ACQUISTI, RIVISTI SULLE PIRAMIDI CORRETTE ────────────────
+     Le ricette di layering spiegavano l'abbinamento con le note in comune fra
+     i due profumi, ma quelle note venivano dalle piramidi sbagliate: su 26
+     ricette, 21 citavano ingredienti che i due non condividono. Qui sotto le
+     stesse frasi con le note vere, calcolate sull'intersezione delle piramidi
+     dopo il controllo su Fragrantica.
 
-  /* Asad (#30) era entrato nella collezione senza flag d'uso: l'HTML da cui
-     sono stati importati gli altri non aveva quella riga, quindi installa()
-     ha messo "no" ovunque e la scheda usciva con tutti i pallini spenti.
-     I valori qui sotto seguono il gruppo a cui appartiene — ambrati speziati
-     da sera A/I con ufficio "moderazione": Stronger With You Absolutely (#10)
-     e Uomo Signature (#21) hanno esattamente questa combinazione. */
-  { id: 30, colonna: 'formale',      da: 'no', a: 'si',
-    perche: 'ambrato speziato da sera: come SWY Absolutely e Uomo Signature' },
-  { id: 30, colonna: 'informale',    da: 'no', a: 'si',
-    perche: 'stesso gruppo' },
-  { id: 30, colonna: 'appuntamento', da: 'no', a: 'si',
-    perche: 'scia forte e fondo caldo: e il suo terreno' },
-  { id: 30, colonna: 'festivita',    da: 'no', a: 'si',
-    perche: 'boozy speziato invernale' },
+     Due riferimenti puntavano al numero sbagliato: il foglio ha inserito Asad
+     al № 30 e ANGELSEAR e' passato al № 31, quindi "№ 30 sotto" mandava a un
+     profumo diverso da quello nominato nella ricetta.
 
-  /* La piramide di Asad mancava: nella cella c'era l'elenco piatto delle note,
-     che sembrava una piramide senza esserlo. Questi valori vengono dalla scheda
-     Fragrantica del profumo, controllata il 2026-09-05. */
-  { id: 30, colonna: 'piramide',
-    da: 'Pepe · Vaniglia · Ambra · Tabacco · Legno Secco · Patchouli',
-    a:  'Testa: pepe nero, tabacco, ananas · Cuore: patchouli, caffè, iris ' +
-        '· Fondo: vaniglia, ambra, legno secco, benzoino, labdano',
-    perche: 'piramide reale dalla scheda Fragrantica' },
-  { id: 30, colonna: 'note',
-    da: 'Pepe|Vaniglia|Ambra|Tabacco|Legno Secco|Patchouli',
-    a:  'Pepe Nero|Tabacco|Ananas|Patchouli|Caffè|Iris|Vaniglia|Ambra|Legno Secco|Benzoino|Labdano',
-    perche: 'mancavano ananas, caffe, iris, benzoino e labdano' },
+     Negli Acquisti, Lattafa Asad era ancora fra le cose da comprare: nel
+     frattempo e' entrato in collezione. E tre lacune poggiavano su conti che
+     ora tornano diversi. */
 
-  /* Encre Noire Sport aveva ufficio "no" mentre l'originale, che la sua stessa
-     scheda chiama polarizzante, era "si". Ha il profilo identico a Cool Water
-     (P/E, da giorno, quotidiano, informale, palestra, casa), che e' ufficio. */
-  { id: 25, colonna: 'ufficio', da: 'no', a: 'si',
-    perche: 'stesso profilo di Cool Water, ed e piu accessibile dell Encre Noire' },
-
-  /* ── PIRAMIDI RISCRITTE DA FRAGRANTICA ────────────────────────────────────
-     Controllo del 2026-09-05 su 30 schede. Qui ci sono le 27 che cambiano nella
-     sostanza. Fuori restano: Sunrise on the Red Sand Dunes (gia identica),
-     Ginepro Nero (stesse note, solo in ordine diverso), Asad (gia in coda
-     sopra) e ANGELSEAR, che su Fragrantica non esiste.
-
-     Attenzione: qualche piramide si accorcia. Prada L'Homme Intense perde 53
-     caratteri perche' meta' delle note che aveva erano del L'Homme normale, non
-     dell'Intense; Encre Noire perde la distinzione fra vetiver haitiano e
-     bourbon, che Fragrantica non fa. Il testo che vince e' quello della scheda. */
-
-  { id: 1, colonna: 'piramide',
-    da: "Testa: lavanda, limone, bergamotto \u00b7 Cuore: geranio, mimosa, note aromatiche \u00b7 Fondo: vetiver, rum, muschio di quercia, muschio",
-    a:  "Testa: rum, limone, fiore d'arancio \u00b7 Cuore: lavanda, mimosa, chiodi di garofano, noce moscata, geranio bourbon, pepe nero \u00b7 Fondo: vetiver, muschio di quercia, patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Helan Vetiver & Rum EDT' },
-  { id: 2, colonna: 'piramide',
-    da: "Testa: cedro (agrume), bacche di ginepro, pepe Timur \u00b7 Cuore: note minerali, note aromatiche \u00b7 Fondo: note legnose, vetiver",
-    a:  "Testa: cedro \u00b7 Cuore: bacche di ginepro, pepe timut \u00b7 Fondo: note minerali, note legnose",
-    perche: 'piramide dalla scheda Fragrantica di Hermès Terre d Hermès Eau Givrée EDP' },
-  { id: 3, colonna: 'piramide',
-    da: "Testa: bergamotto, mandarino, note marine, salvia sclarea \u00b7 Cuore: note minerali, geranio, rosa, freesia \u00b7 Fondo: muschio, patchouli, incenso, legno di cashmere",
-    a:  "Testa: note marine, mandarino verde \u00b7 Cuore: salvia sclarea, lavanda, geranio \u00b7 Fondo: note minerali, vetiver, patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Giorgio Armani Acqua di Giò EDP' },
-  { id: 4, colonna: 'piramide',
-    da: "Testa: bacche di ginepro, cipresso, bergamotto, limone \u00b7 Cuore: rosmarino, violetta, eliotropio, coriandolo \u00b7 Fondo: muschio, cedro, legni",
-    a:  "Testa: bacche di ginepro, rosmarino, bergamotto di calabria \u00b7 Cuore: cipresso, violetta, eliotropio \u00b7 Fondo: muschio bianco, legno di cedro, foglia di patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Gucci Guilty Cologne Pour Homme EDT' },
-  { id: 5, colonna: 'piramide',
-    da: "Testa: bergamotto, limone, lime \u00b7 Cuore: note fresche speziate \u00b7 Fondo: ambroxan, muschio, ribes nero, legni",
-    a:  "Testa: bergamotto, limone, lime, ribes nero, foglia di violetta, zenzero \u00b7 Cuore: rosa, iris, gelsomino \u00b7 Fondo: ambroxan, muschio, sandalo, legno di cedro",
-    perche: 'piramide dalla scheda Fragrantica di Armaf Club de Nuit Sillage EDP' },
-  { id: 6, colonna: 'piramide',
-    da: "Testa: acqua, bergamotto, limone, mela verde \u00b7 Cuore: prugna, gelsomino, note fruttate \u00b7 Fondo: ambra grigia, muschio, patchouli",
-    a:  "Testa: mela, bergamotto, limone, cannella \u00b7 Cuore: note acquatiche, prugna, fiore d'arancio, cardamomo \u00b7 Fondo: ambra grigia, muschio, patchouli, legno marino",
-    perche: 'piramide dalla scheda Fragrantica di Rasasi Hawas for Him EDP' },
-  { id: 7, colonna: 'piramide',
-    da: "Testa: agrumi (pompelmo), zenzero \u00b7 Cuore: ambra, note legnose \u00b7 Fondo: muschio, spezie, patchouli",
-    a:  "Testa: agrumi \u00b7 Cuore: note legnose, ambra \u00b7 Fondo: muschio, spezie, patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Rue Broca Théorème Homme EDP' },
-  { id: 8, colonna: 'piramide',
-    da: "Testa: mandarino, pepe, limone, bergamotto, foglia di t\u00e8, mat\u00e9 \u00b7 Cuore: pimento, sesamo, cardamomo \u00b7 Fondo: vetiver, cedro, muschio bianco",
-    a:  "Testa: mandarino, pepe, limone, bergamotto, foglia di t\u00e8, erba mate \u00b7 Cuore: pimento, sesamo \u00b7 Fondo: vetiver, legno di cedro, muschio bianco",
-    perche: 'piramide dalla scheda Fragrantica di Davidoff Adventure EDT' },
-  { id: 9, colonna: 'piramide',
-    da: "Testa: note marine, agrumi, mandarino siciliano, bergamotto \u00b7 Cuore: lavanda, salvia sclarea, rosmarino, geranio \u00b7 Fondo: orchidea vanigliata, vetiver haitiano, patchouli, muschio di quercia",
-    a:  "Testa: note marine, agrumi, mandarino di sicilia \u00b7 Cuore: lavanda, salvia sclarea, rosmarino, pelargonio egiziano \u00b7 Fondo: orchidea vaniglia, vetiver di haiti, patchouli, muschio di quercia",
-    perche: 'piramide dalla scheda Fragrantica di Missoni Wave EDT' },
-  { id: 10, colonna: 'piramide',
-    da: "Testa: bergamotto, davana \u00b7 Cuore: rum, lavanda, salvia, castagna \u00b7 Fondo: vaniglia, elemi, cedro, patchouli",
-    a:  "Testa: rum, elemi, bergamotto \u00b7 Cuore: lavanda, davana \u00b7 Fondo: vaniglia del madagascar, castagna, legno di cedro, patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Emporio Armani Stronger With You Absolutely Parfum' },
-  { id: 11, colonna: 'piramide',
-    da: "Testa: note marine, bergamotto, mandarino \u00b7 Cuore: aquozone, rosmarino, note minerali \u00b7 Fondo: patchouli, cipresso, legni",
-    a:  "Testa: note marine, aquozone, bergamotto, mandarino verde \u00b7 Cuore: rosmarino, lavanda, cipresso, mastice o lentisco \u00b7 Fondo: note minerali, muschio, patchouli, ambra",
-    perche: 'piramide dalla scheda Fragrantica di Giorgio Armani Acqua di Giò Profondo EDP' },
-  { id: 12, colonna: 'piramide',
-    da: "Testa: pompelmo, coriandolo, basilico \u00b7 Cuore: zenzero, cardamomo, fiore d'arancio, neroli \u00b7 Fondo: tabacco, ambra, cedro",
-    a:  "Testa: pompelmo, coriandolo, basilico \u00b7 Cuore: cardamomo, zenzero, fiore d'arancio \u00b7 Fondo: ambra, tabacco, legno di cedro",
-    perche: 'piramide dalla scheda Fragrantica di Dolce & Gabbana The One for Men EDP' },
-  { id: 14, colonna: 'piramide',
-    da: "Testa: menta, mela verde, limone \u00b7 Cuore: fava tonka, ambroxan, geranio \u00b7 Fondo: vaniglia, cedro, vetiver, muschio di quercia, ambra",
-    a:  "Testa: menta, mela verde, limone \u00b7 Cuore: fava tonka, ambroxan, geranio \u00b7 Fondo: vaniglia del madagascar, cedro della virginia, cedro dell'atlante, vetiver, muschio di quercia",
-    perche: 'piramide dalla scheda Fragrantica di Versace Eros EDT' },
-  { id: 15, colonna: 'piramide',
-    da: "Testa: menta, mela, limone, mandarino, bergamotto \u00b7 Cuore: ambroxan, geranio, fava tonka, salvia \u00b7 Fondo: vaniglia, cedro, muschio, ambra, patchouli",
-    a:  "Testa: menta, mela caramellata, limone, mandarino \u00b7 Cuore: ambroxan, geranio, salvia sclarea \u00b7 Fondo: vaniglia, legno di cedro, sandalo, arancia amara, patchouli, cuoio",
-    perche: 'piramide dalla scheda Fragrantica di Versace Eros EDP' },
-  { id: 16, colonna: 'piramide',
-    da: "Testa: mandarino, pepe del Madagascar, limone, chinotto \u00b7 Cuore: rosmarino, geranio, rosa, pepe rosa \u00b7 Fondo: vaniglia, fava tonka, sandalo, cedro, patchouli, muschio di quercia",
-    a:  "Testa: mandarino, pepe del madagascar, limone, chinotto, rosmarino \u00b7 Cuore: geranio, rosa, pepperwood \u00b7 Fondo: vaniglia, fava tonka, sandalo, cedro del texas, patchouli, muschio di quercia",
-    perche: 'piramide dalla scheda Fragrantica di Versace Eros Flame EDP' },
-  { id: 17, colonna: 'piramide',
-    da: "Testa: limone, bergamotto, mela, ribes nero, ananas \u00b7 Cuore: betulla, gelsomino, rosa \u00b7 Fondo: muschio, ambra grigia, vaniglia, legni",
-    a:  "Testa: limone, ananas, bergamotto, ribes nero, mela \u00b7 Cuore: betulla, gelsomino, rosa \u00b7 Fondo: muschio, ambra grigia, patchouli, vaniglia",
-    perche: 'piramide dalla scheda Fragrantica di Armaf Club de Nuit Intense Man EDT' },
-  { id: 18, colonna: 'piramide',
-    da: "Testa: menta, lavanda, coriandolo, rosmarino, bergamotto \u00b7 Cuore: geranio, neroli, gelsomino, sandalo, legno di cedro \u00b7 Fondo: muschio, ambra, tabacco, legno di quercia",
-    a:  "Testa: acqua di mare, lavanda, menta, note verdi, rosmarino, calone, coriandolo \u00b7 Cuore: sandalo, neroli, geranio, gelsomino \u00b7 Fondo: muschio, muschio di quercia, legno di cedro, tabacco, ambra grigia",
-    perche: 'piramide dalla scheda Fragrantica di Davidoff Cool Water EDT' },
-  { id: 19, colonna: 'piramide',
-    da: "Testa: pimento, lavanda, fiore d'arancio \u00b7 Cuore: rosa, geranio, aceto balsamico \u00b7 Fondo: legno di cedro, patchouli, ambra",
-    a:  "Testa: rosa, peperoncino rosso piccante, aceto balsamico, sale \u00b7 Cuore: lavanda, fiore d'arancio, neroli \u00b7 Fondo: legno di cedro, patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Gucci Guilty Pour Homme EDP' },
-  { id: 20, colonna: 'piramide',
-    da: "Testa: bergamotto \u00b7 Cuore: iris, whisky, castagna \u00b7 Fondo: cedro, patchouli, ambra, vaniglia",
-    a:  "Testa: bergamotto \u00b7 Cuore: iris, castagna \u00b7 Fondo: whisky, note boschive, ambra",
-    perche: 'piramide dalla scheda Fragrantica di Givenchy Gentleman Réserve Privée EDP' },
-  { id: 21, colonna: 'piramide',
-    da: "Testa: mandarino, cardamomo, pepe nero \u00b7 Cuore: cannella, caff\u00e8 tostato \u00b7 Fondo: fava tonka, cuoio, ambra, sandalo",
-    a:  "Testa: mandarino italiano, pepe rosa, pompelmo \u00b7 Cuore: cannella, cardamomo, cipresso \u00b7 Fondo: fava tonka, cuoio, grani di caff\u00e8 tostati, patchouli",
-    perche: 'piramide dalla scheda Fragrantica di Salvatore Ferragamo Uomo Signature EDP' },
-  { id: 22, colonna: 'piramide',
-    da: "Testa: mandarino, neroli, pepe nero \u00b7 Cuore: iris, ambra, patchouli, geranio \u00b7 Fondo: cuoio, fava tonka, sandalo, ambra, cedro",
-    a:  "Testa: iris \u00b7 Cuore: ambra, patchouli \u00b7 Fondo: fava tonka, cuoio, sandalo",
-    perche: 'piramide dalla scheda Fragrantica di Prada L Homme Intense EDP' },
-  { id: 23, colonna: 'piramide',
-    da: "Testa: zafferano, note fruttate, lampone \u00b7 Cuore: rosa, cuoio, pelle scamosciata \u00b7 Fondo: olibano (incenso), note legnose, ambra, muschio",
-    a:  "Testa: lampone, zafferano, timo \u00b7 Cuore: olibano, gelsomino, artemisia \u00b7 Fondo: cuoio, pelle scamosciata, note legnose, ambra",
-    perche: 'piramide dalla scheda Fragrantica di Rasasi La Yuqawam Pour Homme EDP' },
-  { id: 24, colonna: 'piramide',
-    da: "Testa: cipresso \u00b7 Cuore: vetiver haitiano, vetiver bourbon \u00b7 Fondo: muschio, legno di cashmere",
-    a:  "Testa: cipresso \u00b7 Cuore: vetiver \u00b7 Fondo: legno di cashmere, muschio",
-    perche: 'piramide dalla scheda Fragrantica di Lalique Encre Noire EDT' },
-  { id: 25, colonna: 'piramide',
-    da: "Testa: pompelmo, bergamotto, note acquatiche \u00b7 Cuore: cipresso, vetiver, noce moscata \u00b7 Fondo: legno di cashmere, muschio",
-    a:  "Testa: pompelmo, bergamotto, noce moscata \u00b7 Cuore: cipresso, note acquatiche, lavanda \u00b7 Fondo: vetiver bourbon, vetiver di haiti, legno di cashmere, muschio",
-    perche: 'piramide dalla scheda Fragrantica di Lalique Encre Noire Sport EDT' },
-  { id: 26, colonna: 'piramide',
-    da: "Testa: note marine, sale, limone \u00b7 Cuore: ambra grigia, note aromatiche \u00b7 Fondo: muschio di quercia, sandalo, ambra, muschio vegetale",
-    a:  "Testa: note marine, sale, limone \u00b7 Cuore: davana, iris \u00b7 Fondo: ambra grigia, muschio di quercia, sandalo",
-    perche: 'piramide dalla scheda Fragrantica di Lattafa Atlas EDP' },
-  { id: 27, colonna: 'piramide',
-    da: "Testa: bergamotto, note verdi, melone, ananas \u00b7 Cuore: accordo gourmand, note fruttate \u00b7 Fondo: ambra, vaniglia, muschio, note legnose",
-    a:  "Testa: bergamotto, note verdi \u00b7 Cuore: melone, ananas, ambra, accordo gourmand \u00b7 Fondo: vaniglia, muschio, note legnose",
-    perche: 'piramide dalla scheda Fragrantica di Al Haramain Amber Oud Gold Edition EDP' },
-  { id: 29, colonna: 'piramide',
-    da: "Testa: ananas, iris, zenzero, cipresso \u00b7 Cuore: cocco, note legnose \u00b7 Fondo: fava tonka, sandalo, ambra, ambra grigia",
-    a:  "Testa: ananas, iris, zenzero, cipresso \u00b7 Cuore: cocco, note boschive \u00b7 Fondo: fava tonka, sandalo, ambra, ambra grigia",
-    perche: 'piramide dalla scheda Fragrantica di Khadlaj Island EDP' },
-  /* restano "no": quotidiano (troppo pieno per tutti i giorni), palestra
-     (orientale caldo) e casa — come tutto il gruppo di riferimento. */
+  { tab: 'Layering', chiave: 'nome', valore: "Acqua di Gi\u00f2 EDP \u2192 TdH Eau Givr\u00e9e",
+    colonna: 'perche',
+    da: "Note minerali e geranio in comune. Stesso DNA verde-acquatico: si amplificano invece di scontrarsi. Usa la versione EDP, non il Profondo: il suo fondo patchouli-scuro confligge con il Givr\u00e9e.",
+    a:  "Note minerali in comune, pi\u00f9 gli accordi agrumato, aromatico e minerale. Stesso DNA verde-acquatico: si amplificano invece di scontrarsi. Usa la versione EDP, non il Profondo: il suo fondo patchouli-scuro confligge con il Givr\u00e9e.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "CDN Sillage \u2192 Missoni Wave",
+    colonna: 'perche',
+    da: "Muschio e ribes nero in comune. Il Sillage porta struttura e proiezione, il Wave calore e morbidezza: insieme coprono tutta la piramide.",
+    a:  "Nessuna nota in comune: a tenerli insieme sono gli accordi agrumato e speziato fresco. Il Sillage porta struttura e proiezione, il Wave calore e morbidezza: insieme coprono tutta la piramide.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Atlas \u2192 TdH Eau Givr\u00e9e",
+    colonna: 'perche',
+    da: "Note minerali e agrumate in comune. L'Atlas \u00e8 monocorda sul salato: base ideale. Il Givr\u00e9e aggiunge la testa che si spegne troppo presto se portato da solo.",
+    a:  "Nessuna nota in comune, solo il registro aromatico: \u00e8 un accostamento per contrasto, non per parentela. L'Atlas \u00e8 monocorda sul salato: base ideale. Il Givr\u00e9e aggiunge la testa che si spegne troppo presto se portato da solo.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Island \u2192 CDN Sillage",
+    colonna: 'perche',
+    da: "Ambroxan e ambra grigia si parlano bene. Il Sillage compensa anche la longevit\u00e0 irregolare dell'Island: la base muschiata resta quando il cocco si spegne.",
+    a:  "Iris, sandalo e zenzero in comune: \u00e8 la spina dorsale condivisa sotto due aperture opposte. Il Sillage compensa anche la longevit\u00e0 irregolare dell'Island: la base muschiata resta quando il cocco si spegne.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Acqua di Gi\u00f2 Profondo \u2192 Gucci Guilty EDP",
+    colonna: 'perche',
+    da: "Cedro e note fresche in comune. Equilibrio insolito e molto personale.",
+    a:  "Lavanda e patchouli in comune. Equilibrio insolito e molto personale.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Hawas \u2192 Versace Eros Flame",
+    colonna: 'perche',
+    da: "Ambra grigia e patchouli in comune. Il Flame porta la componente speziata secca che al Hawas manca; le basi vanigliate sono compatibili.",
+    a:  "Limone e patchouli in comune. Il Flame porta la componente speziata secca che al Hawas manca; l'ambra grigia dell'Hawas regge sotto la vaniglia del Flame.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Prada L'Homme Intense \u2192 Ginepro Nero",
+    colonna: 'perche',
+    da: "Entrambi legnoso-aromatici con resine in comune. Il Prada fa da fondamenta densa, il Ginepro porta la nota botanica che mancava.",
+    a:  "Patchouli in comune, e gli accordi legnoso e terroso condivisi. Il Prada fa da fondamenta densa, il Ginepro porta la nota botanica \u2014 ginepro e benzoino \u2014 che al Prada manca del tutto.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "SWY Absolutely \u2192 Eros Flame",
+    colonna: 'perche',
+    da: "Vaniglia e fava tonka in entrambi. Sandalo e cedro del Flame si abbinano a rum e castagna; il pepe bilancia la dolcezza.",
+    a:  "Vaniglia, cedro e patchouli in entrambi. La fava tonka la porta solo il Flame e si posa sulla castagna dell'Absolutely; il pepe bilancia la dolcezza.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "D&G The One \u2192 Th\u00e9or\u00e8me Homme",
+    colonna: 'perche',
+    da: "Patchouli e note legnose in comune. Il The One \u00e8 la base orientale, il Th\u00e9or\u00e8me l'apertura citrico-fresca che mancava.",
+    a:  "Ambra in comune, e lo stesso accordo agrumato-ambrato. Il The One \u00e8 la base orientale, il Th\u00e9or\u00e8me l'apertura citrica che mancava: il patchouli lo mette solo il Th\u00e9or\u00e8me, sopra il fondo di tabacco e cedro.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Prada L'Homme Intense \u2192 Th\u00e9or\u00e8me Homme",
+    colonna: 'perche',
+    da: "Patchouli e muschio in comune. Struttura complementare: il Prada \u00e8 tutto cuore e fondo, il Th\u00e9or\u00e8me testa e corpo. Raramente due profumi coprono i tre stadi cos\u00ec bene.",
+    a:  "Patchouli e ambra in comune. Struttura complementare: il Prada \u00e8 tutto cuore e fondo, il Th\u00e9or\u00e8me testa e corpo. Raramente due profumi coprono i tre stadi cos\u00ec bene.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Ferragamo Uomo Signature \u2192 Versace Eros EDP",
+    colonna: 'perche',
+    da: "Fava tonka in entrambi. Il contrasto si risolve nella base tonka-muschio condivisa. Una delle combinazioni pi\u00f9 originali della collezione.",
+    a:  "Cuoio, patchouli e mandarino in comune. Il contrasto fresco-caldo si risolve sul cuoio, che l'Eros EDP ha in fondo e il Ferragamo porta accanto al caff\u00e8. Una delle combinazioni pi\u00f9 originali della collezione.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Givenchy Gentleman RP \u2192 Th\u00e9or\u00e8me Homme",
+    colonna: 'perche',
+    da: "Patchouli e base legnosa in comune. Stessa logica di The One + Th\u00e9or\u00e8me: base pesante sotto, apertura leggera sopra.",
+    a:  "Ambra e note legnose in comune. Stessa logica di The One + Th\u00e9or\u00e8me: base pesante sotto, apertura leggera sopra.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "La Yuqawam \u2192 Eros Flame",
+    colonna: 'perche',
+    da: "Ambra in comune. Il La Yuqawam \u00e8 monocorda sul cuoio (base ideale), il Flame porta le componenti floreali e fruttate che mancano all'orientale puro.",
+    a:  "Non hanno nulla in comune, n\u00e9 note n\u00e9 accordi: \u00e8 il contrasto a reggere tutto. Il La Yuqawam \u00e8 monocorda sul cuoio (base ideale), il Flame porta le componenti agrumate e vanigliate che all'orientale puro mancano.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Helan Vetiver & Rum \u2192 Encre Noire Sport",
+    colonna: 'perche',
+    da: "Vetiver e muschio di quercia in entrambi. Stessa radice olfattiva: si amplificano invece di creare dissonanza.",
+    a:  "Vetiver, lavanda e noce moscata in entrambi, e tutti e cinque gli accordi in comune. Stessa radice olfattiva: si amplificano invece di creare dissonanza.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Gucci Guilty EDP \u2192 Gucci Guilty Cologne",
+    colonna: 'perche',
+    da: "Ginepro, cedro e lavanda condivisi \u2014 stesso DNA di maison. Si amplificano nel profilo comune e si differenziano nelle note peculiari.",
+    a:  "Cedro e patchouli condivisi \u2014 stesso DNA di maison. Il ginepro lo porta solo il Cologne, la lavanda solo l'EDP: si amplificano nel profilo comune e si differenziano nelle note peculiari.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Missoni Wave \u2192 Davidoff Adventure",
+    colonna: 'perche',
+    da: "Vetiver e muschio bianco in comune, stesso DNA outdoor. Il Wave \u00e8 cremoso e floreale, l'Adventure secco e speziato: si bilanciano.",
+    a:  "Vetiver e mandarino in comune, stesso DNA outdoor. Il Wave \u00e8 cremoso e floreale, l'Adventure secco e speziato: si bilanciano.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Encre Noire \u2192 Gucci Guilty EDP",
+    colonna: 'perche',
+    da: "Cipresso e cedro in comune. Botanicamente affini, non si scontrano.",
+    a:  "Cipresso nell'Encre, cedro nel Guilty: legni botanicamente affini, non note condivise. Non si scontrano.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Helan Vetiver & Rum \u2192 Acqua di Gi\u00f2 EDP",
+    colonna: 'perche',
+    da: "Vetiver, geranio e muschio in comune. L'Helan \u00e8 la versione calda del vetiver, l'ADG quella minerale: il contrasto crea interesse senza dissonanza.",
+    a:  "Vetiver, geranio, lavanda e patchouli in comune. L'Helan \u00e8 la versione calda del vetiver, l'ADG quella minerale: il contrasto crea interesse senza dissonanza.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "SWY Absolutely \u2192 CDN Sillage",
+    colonna: 'perche',
+    da: "Muschio e ambroxan in entrambi: la base comune lega profili molto diversi e il contrasto in testa \u00e8 deliberato.",
+    a:  "Bergamotto e cedro in entrambi: la base legnosa comune lega profili molto diversi e il contrasto in testa \u00e8 deliberato.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Encre Noire \u2192 Acqua di Gi\u00f2 EDP",
+    colonna: 'perche',
+    da: "Il vetiver \u00e8 presente in entrambi: l'Encre nella versione oscura (bourbon e Haiti), l'ADG in quella acquatica che schiarisce. Contrasto bilanciato.",
+    a:  "Il vetiver \u00e8 presente in entrambi: oscuro e terroso nell'Encre, acquatico e schiarito nell'ADG. Contrasto bilanciato.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Angelsear (DoDo's) \u2192 Helan Vetiver & Rum",
+    colonna: 'perche',
+    da: "Accordo boozy condiviso ma su registri opposti: cognac-dolce contro rum-saponoso. La quercia dell'Angelsear e il muschio di quercia dell'Helan sono la stessa base che li salda.",
+    a:  "Accordo boozy condiviso ma su registri opposti: cognac-dolce contro rum-saponoso. Nessuna nota davvero in comune: il legno di quercia dell'Angelsear e il muschio di quercia dell'Helan si somigliano pi\u00f9 nel nome che nella piramide, ma vanno d'accordo.",
+    perche: 'note in comune riviste sulle piramidi corrette' },
+  { tab: 'Layering', chiave: 'nome', valore: "Angelsear (DoDo's) \u2192 Th\u00e9or\u00e8me Homme",
+    colonna: 'sommario',
+    da: "\u2116 30 sotto \u00b7 \u2116 7 sopra \u2014 cognac citrico, sera A/I",
+    a:  "\u2116 31 sotto \u00b7 \u2116 7 sopra \u2014 cognac citrico, sera A/I",
+    perche: 'ANGELSEAR e il numero 31, non il 30 che ora e Asad' },
+  { tab: 'Layering', chiave: 'nome', valore: "Angelsear (DoDo's) \u2192 Helan Vetiver & Rum",
+    colonna: 'sommario',
+    da: "\u2116 30 sotto \u00b7 \u2116 1 sopra \u2014 doppio boozy, casa A/I",
+    a:  "\u2116 31 sotto \u00b7 \u2116 1 sopra \u2014 doppio boozy, casa A/I",
+    perche: 'ANGELSEAR e il numero 31, non il 30 che ora e Asad' },
+  { tab: 'ConsigliVoci', chiave: 'titolo', valore: "Boozy gourmand \u2192 Angelsear \u2116 30",
+    colonna: 'titolo',
+    da: "Boozy gourmand \u2192 Angelsear \u2116 30",
+    a:  "Boozy gourmand \u2192 Angelsear \u2116 31",
+    perche: 'ANGELSEAR e il numero 31, non il 30 che ora e Asad' },
+  { tab: 'ConsigliVoci', chiave: 'titolo', valore: "Lattafa Asad",
+    colonna: 'dettaglio',
+    da: "Ispirato a Nishane Hacivat. Woody-fresco tropicale, sotto i 30\u20ac. Attenzione: con Island e Zara in collezione, il registro fresco-fruttato inizia a essere affollato \u2014 valuta un decant prima.",
+    a:  "Non \u00e8 pi\u00f9 un consiglio: \u00e8 entrato in collezione al \u2116 30, campione da 12 ml. E non \u00e8 il woody-fresco tropicale che sembrava \u2014 la piramide reale \u00e8 pepe nero, tabacco e ananas in apertura, patchouli, caff\u00e8 e iris nel cuore, vaniglia, ambra e legno secco in fondo. Ambrato speziato da sera fredda, non un fresco.",
+    perche: 'Asad e in collezione: non si consiglia di comprare cio che si ha gia' },
+  { tab: 'Consigli', chiave: 'nome', valore: "Iris polveroso da ufficio diurno",
+    colonna: 'lacuna',
+    da: "L'iris in collezione c'\u00e8 solo nelle versioni dense e serali (Prada Intense, Gentleman RP, e in tracce nell'Island). Manca la stessa firma in versione leggera, da portare in ufficio alle nove del mattino.",
+    a:  "L'iris compare in sei profumi, ma quasi sempre come comprimario: denso e serale in Prada Intense, Gentleman RP e Asad, in traccia dentro profili che vanno da tutt'altra parte \u2014 il cocco dell'Island, il salino dell'Atlas, il citrico del CdN Sillage. Manca la stessa firma in versione leggera e cipriata, da portare in ufficio alle nove del mattino.",
+    perche: 'lacuna riscritta sui dati corretti' },
+  { tab: 'Consigli', chiave: 'nome', valore: "Fresco marino da palestra",
+    colonna: 'lacuna',
+    da: "I profumi adatti alla palestra sono pochi e molto simili tra loro: tutti sullo stesso asse acquatico-vetiver.",
+    a:  "I profumi adatti alla palestra sono sei e quasi tutti sullo stesso asse: quattro aromatici acquatici (Hawas, Wave, Acqua di Gi\u00f2 Profondo, Cool Water), pi\u00f9 il muschiato del CdN Sillage e il vetiver agrumato dell'Encre Noire Sport.",
+    perche: 'lacuna riscritta sui dati corretti' },
+  { tab: 'Consigli', chiave: 'nome', valore: "Foug\u00e8re barbershop \u2014 il grande assente",
+    colonna: 'lacuna',
+    da: "Non c'\u00e8 nessun foug\u00e8re classico: lavanda, cumarina, muschio. \u00c8 la famiglia che copre ufficio, casual e sera 365 giorni, e resta il buco pi\u00f9 evidente della collezione.",
+    a:  "I due Eros sono catalogati foug\u00e8re ambrati, ma il foug\u00e8re classico \u2014 lavanda, cumarina, muschio \u2014 non c'\u00e8. \u00c8 la famiglia che copre ufficio, casual e sera 365 giorni, e resta il buco pi\u00f9 evidente della collezione.",
+    perche: 'lacuna riscritta sui dati corretti' },
 ];
 
 function correggi(soloProva) {
-  var f = foglio_(TAB.profumi);
-  var griglia = f.getDataRange().getDisplayValues();
-  var testa = griglia[0].map(function (c) { return String(c).trim(); });
-  var colId = testa.indexOf('id');
-  if (colId < 0) throw new Error('la tab Profumi non ha una colonna "id"');
-
-  // id → numero di riga nel foglio (1-based, intestazione compresa)
-  var riga = {};
-  for (var i = 1; i < griglia.length; i++) {
-    var v = String(griglia[i][colId]).trim();
-    if (v) riga[v] = i + 1;
+  /* Ogni tab viene letta una volta sola e tenuta qui: le correzioni non sono
+     piu' solo sui profumi, toccano anche Layering e Consigli, dove la riga si
+     riconosce dal nome invece che da un id. */
+  var lette = {};
+  function tabella(nome) {
+    if (!lette[nome]) {
+      var f = foglio_(nome);
+      var g = f.getDataRange().getDisplayValues();
+      var testa = g[0].map(function (c) { return String(c).trim(); });
+      lette[nome] = { foglio: f, griglia: g, testa: testa };
+    }
+    return lette[nome];
   }
 
   var esiti = [];
   CORREZIONI.forEach(function (c) {
-    var etichetta = '#' + c.id + ' ' + c.colonna;
-    var r = riga[String(c.id)];
+    var nomeTab = c.tab || TAB.profumi;
+    var chiave = c.chiave || 'id';
+    var valore = c.valore !== undefined ? c.valore : c.id;
+    var etichetta = nomeTab + ' «' + String(valore).slice(0, 34) + '» ' + c.colonna;
+
+    var t;
+    try { t = tabella(nomeTab); }
+    catch (e) { esiti.push(etichetta + ': ' + e.message); return; }
+
+    var colChiave = t.testa.indexOf(chiave);
+    if (colChiave < 0) { esiti.push(etichetta + ': manca la colonna "' + chiave + '"'); return; }
+
+    var r = -1;
+    for (var i = 1; i < t.griglia.length; i++) {
+      if (String(t.griglia[i][colChiave]).trim() === String(valore).trim()) { r = i + 1; break; }
+    }
+    var griglia = t.griglia, testa = t.testa, f = t.foglio;
     var colonna = testa.indexOf(c.colonna);
 
-    if (!r) { esiti.push(etichetta + ': nessuna riga con questo id'); return; }
+    if (r < 0) { esiti.push(etichetta + ': nessuna riga con questa chiave'); return; }
     if (colonna < 0) { esiti.push(etichetta + ': colonna assente nel foglio'); return; }
 
     var attuale = String(griglia[r - 1][colonna]).trim();
