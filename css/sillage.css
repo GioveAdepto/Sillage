@@ -102,6 +102,12 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 
 /* ─────────── VISTE ─────────── */
 .vista{display:none;padding:16px 14px 108px}
+/* Guida, Layering e Acquisti sono testo continuo: a tutta larghezza fanno
+   righe da ~90 caratteri, oltre il limite in cui l'occhio ritrova il capo.
+   Confronto e Numeri restano larghi: sono tabelle e schede, non prosa. */
+@media(min-width:720px){
+  #vista-guida.attiva,#vista-layering.attiva,#vista-acquisti.attiva{max-width:560px;margin-inline:auto}
+}
 .vista.attiva{display:block}
 @media(min-width:900px){
   .testata,.strumenti,.vista{max-width:1120px;margin-left:auto;margin-right:auto}
@@ -110,7 +116,8 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 #vista-collezione{display:none;padding:16px 14px 108px}
 #vista-collezione.attiva{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:680px){#vista-collezione.attiva{grid-template-columns:1fr 1fr}}
-@media(min-width:1040px){#vista-collezione.attiva{grid-template-columns:1fr 1fr 1fr;max-width:1120px;margin:0 auto;padding:18px 18px 108px}}
+/* 980 e non 1040: l'iPad orizzontale e' 1024px e restava a due colonne */
+@media(min-width:980px){#vista-collezione.attiva{grid-template-columns:1fr 1fr 1fr;max-width:1120px;margin:0 auto;padding:18px 18px 108px}}
 
 /* ─────────── LA TECA ─────────── */
 .teca{position:relative;border:1px solid var(--filo);border-radius:var(--r);background:var(--lastra);
@@ -148,7 +155,50 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .specchio{position:relative;height:22px;overflow:hidden;border-radius:0 0 8px 8px;
   -webkit-mask-image:linear-gradient(#000,transparent 86%);mask-image:linear-gradient(#000,transparent 86%)}
 .specchio img{display:block;width:100%;height:120px;object-fit:cover;transform:scaleY(-1);opacity:.3;filter:blur(.4px)}
+/* Le miniature vengono da schede Fragrantica con fondi diversi — bianco, crema,
+   rosa — e nel buio sembravano adesivi incollati. Sfumarne i bordi le fa stare
+   dentro la nicchia. Il riflesso resta fuori: e' alto 22px e ha gia' la sua
+   sfumatura, una seconda maschera lo cancellerebbe. */
+.faretto img,.cf-foto img,.casella img{
+  -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%);
+  mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%)}
+.faretto img,.cf-foto img{filter:saturate(.84) contrast(1.04)}
+.faretto img{transition:transform .6s cubic-bezier(.22,1,.36,1),filter .5s ease}
+
 .ripiano{height:1px;margin-top:1px;background:linear-gradient(90deg,transparent,rgba(200,163,94,.45) 22%,rgba(240,217,164,.8) 50%,rgba(200,163,94,.45) 78%,transparent)}
+
+/* ─────────── IL FARETTO SI ACCENDE ─────────── */
+/* Scheda aperta, o mouse sopra: il cono di luce sale dall'alto, il bordo della
+   nicchia scalda, il ripiano riflette di piu' e la gemma si illumina. */
+.faretto::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  border-radius:inherit;opacity:0;transition:opacity .5s ease;mix-blend-mode:screen;
+  background:
+    radial-gradient(ellipse 135% 62% at 50% -16%,rgba(255,240,208,.82) 0%,rgba(255,228,174,.34) 38%,transparent 74%),
+    radial-gradient(ellipse 66% 34% at 50% 108%,rgba(255,212,146,.30) 0%,transparent 70%)}
+.faretto{transition:border-color .5s ease,box-shadow .5s ease}
+.specchio img{transition:opacity .5s ease}
+.ripiano{transition:filter .5s ease,box-shadow .5s ease}
+.gemma{transition:box-shadow .5s ease}
+
+.teca.aperta .faretto::before,.teca:focus-visible .faretto::before{opacity:1}
+.teca.aperta .faretto,.teca:focus-visible .faretto{border-color:rgba(243,223,175,.66);
+  box-shadow:0 12px 24px -14px #000,inset 0 0 30px rgba(255,238,205,.24),0 0 34px -6px rgba(255,214,146,.42)}
+.teca.aperta .faretto img,.teca:focus-visible .faretto img{filter:saturate(1.02) contrast(1.06) brightness(1.16)}
+.teca.aperta .specchio img,.teca:focus-visible .specchio img{opacity:.5}
+.teca.aperta .ripiano,.teca:focus-visible .ripiano{filter:brightness(2);box-shadow:0 0 20px 2px rgba(243,223,175,.5)}
+.teca.aperta .gemma,.teca:focus-visible .gemma{box-shadow:0 0 18px -3px currentColor}
+
+/* Il mouse accende solo dove il passaggio esiste davvero: sul telefono :hover
+   resta appiccicato dopo il tocco e la luce non si spegnerebbe piu'. */
+@media(hover:hover){
+  .teca:hover .faretto::before{opacity:1}
+  .teca:hover .faretto{border-color:rgba(243,223,175,.66);
+    box-shadow:0 12px 24px -14px #000,inset 0 0 30px rgba(255,238,205,.24),0 0 34px -6px rgba(255,214,146,.42)}
+  .teca:hover .faretto img{filter:saturate(1.02) contrast(1.06) brightness(1.16)}
+  .teca:hover .specchio img{opacity:.5}
+  .teca:hover .ripiano{filter:brightness(2);box-shadow:0 0 20px 2px rgba(243,223,175,.5)}
+  .teca:hover .gemma{box-shadow:0 0 18px -3px currentColor}
+}
 
 /* il cartellino */
 .cartellino{flex:1;min-width:0}
@@ -167,7 +217,9 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .note-riga mark{background:rgba(190,150,220,.24);color:#e2cdf5;border-radius:3px;padding:0 3px}
 .accordi{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .accordo{font-size:11px;font-weight:500;letter-spacing:.03em;padding:3px 9px;border-radius:99px;border:1px solid currentColor;opacity:.9}
-.contrassegni{display:flex;flex-wrap:wrap;gap:5px}
+/* 34px tenuti liberi a destra: sotto ci passa il bottone tondo del confronto,
+   che prima tagliava la famiglia olfattiva su 7 schede su 31 a 768px */
+.contrassegni{display:flex;flex-wrap:wrap;gap:5px;padding-right:34px}
 .segno{font-size:11.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--filo);color:var(--carta-3);white-space:nowrap}
 .segno.stag{border-color:rgba(200,163,94,.24);color:rgba(200,163,94,.92)}
 .segno.ore{border-color:rgba(127,168,207,.26);color:rgba(127,168,207,.92)}
@@ -187,8 +239,10 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .punto{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .punto.si{background:var(--bosco)}.punto.forse{background:var(--ottone)}.punto.no{background:rgba(255,255,255,.12);border:1px solid var(--filo-2)}
 .uso.si{color:var(--carta-2)}.uso.forse{color:var(--ottone)}.uso.no{color:var(--carta-3)}
+/* stesso spazio tenuto libero dei contrassegni: a scheda aperta il bottone
+   del confronto scende qui sopra e tagliava la fine del racconto */
 .racconto{font-family:'Marcellus',serif;font-size:15.5px;color:var(--carta-2);line-height:1.62;
-  border-left:2px solid rgba(200,163,94,.45);padding-left:14px}
+  border-left:2px solid rgba(200,163,94,.45);padding-left:14px;padding-right:34px}
 .deserto{grid-column:1/-1;text-align:center;padding:70px 22px;color:var(--carta-2);
   font-family:'Marcellus',serif;font-size:22px;line-height:1.4}
 .deserto span{display:block;font-family:'Manrope',sans-serif;font-size:14px;color:var(--carta-3);margin-top:10px}
@@ -365,3 +419,11 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .pallino{position:absolute;top:3px;right:calc(50% - 20px);min-width:16px;height:16px;border-radius:8px;background:var(--ottone);
   color:#17130b;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px}
 .pallino.mostra{display:flex}
+
+/* ─────────── MISURA DI LETTURA ─────────── */
+/* In fondo al foglio di proposito: a parita' di specificita' vince la regola
+   che viene dopo, e queste devono passare sopra i corpi definiti sopra. */
+@media(min-width:720px){
+  .passo-testo,.voce-testo{font-size:14.5px}
+  .ricetta-sotto,.voce-nota,.ct-sotto{font-size:14px}
+}

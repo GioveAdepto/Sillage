@@ -7,7 +7,7 @@
 // appsScript: l'URL .../exec del Web App (istruzioni in apps-script/LEGGIMI.md).
 //             Se resta vuoto, l'app legge soltanto i JSON del repo.
 const ORIGINE_DATI = {
-  appsScript: "",
+  appsScript: "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
   locale: "data/",
   attesaMax: 8000            // ms oltre i quali si rinuncia al backend remoto
 };
@@ -17,6 +17,15 @@ const CHIAVE_CACHE = "sillage:dati";
 // Riempiti all'avvio da caricaDati(). Prima di allora la collezione è vuota.
 let profumi = [], noteChips = [], layering = [], consigli = [];
 let origineDati = "locale";
+
+/* Da dove arrivano i dati che sono a schermo adesso. Finisce su <body> per
+   poterlo leggere dalla console senza strumenti: foglio, cache, locale,
+   locale-ripiego. Va aggiornato anche quando il foglio conferma la cache e
+   quindi non si ridisegna niente. */
+function segnaOrigine(v) {
+  origineDati = v;
+  try { document.body.dataset.origine = v; } catch (e) {}
+}
 
 function applicaDati(d) {
   if (!Array.isArray(d.profumi) || !d.profumi.length) throw new Error("dati senza profumi");
@@ -61,27 +70,48 @@ function leggiCache() {
   } catch (e) { return null; }
 }
 
+/* Impronta dei soli dati: `aggiornato` cambia a ogni risposta e falserebbe
+   il confronto fra quello che è a schermo e quello che è appena arrivato. */
+function impronta(d) {
+  return JSON.stringify([d.profumi, d.note, d.layering, d.consigli]);
+}
+
 /* Ordine di preferenza: foglio Google → ultima copia in cache → JSON del repo.
-   Il ripiego locale è sempre presente, quindi la pagina non resta mai vuota. */
-async function caricaDati() {
+   Il ripiego locale è sempre presente, quindi la pagina non resta mai vuota.
+
+   `mostra` viene chiamata appena c'è qualcosa da disegnare: se in cache c'è
+   già una collezione, va a schermo subito e il foglio la aggiorna dopo, in
+   sottofondo. Il secondo disegno scatta solo se il foglio porta qualcosa di
+   diverso, così una schermata già a posto non si ricostruisce sotto le mani. */
+async function caricaDati(mostra) {
+  let aSchermo = null;
+
   if (ORIGINE_DATI.appsScript) {
+    const cache = leggiCache();
+    if (cache) {
+      try {
+        applicaDati(cache);
+        segnaOrigine("cache");
+        aSchermo = impronta(cache);
+        mostra();
+      } catch (e) { aSchermo = null; /* cache corrotta: si prosegue */ }
+    }
     try {
       const d = await leggiRemoto();
       applicaDati(d);
-      origineDati = "foglio";
+      segnaOrigine("foglio");
       scriviCache(d);
+      if (impronta(d) !== aSchermo) mostra();
       return;
     } catch (err) {
       console.warn("Sillage: foglio non raggiungibile —", err.message);
-      const cache = leggiCache();
-      if (cache) {
-        try { applicaDati(cache); origineDati = "cache"; return; }
-        catch (e) { /* cache corrotta: si prosegue con i JSON locali */ }
-      }
+      if (aSchermo) return;              // la cache è già a schermo, basta così
     }
   }
+
   applicaDati(await leggiLocale());
-  origineDati = ORIGINE_DATI.appsScript ? "locale-ripiego" : "locale";
+  segnaOrigine(ORIGINE_DATI.appsScript ? "locale-ripiego" : "locale");
+  mostra();
 }
 
 // ── ETICHETTE E UTILITÀ ───────────────────────────────────────────────────
@@ -93,7 +123,28 @@ const etichetteFiltro={pe:"Primavera / Estate",ai:"Autunno / Inverno",tutto:"Tut
 const stagLbl=s=>s==="pe"?"Primavera / Estate":s==="ai"?"Autunno / Inverno":"Tutto l'anno";
 const stagBreve=s=>s==="pe"?"P/E":s==="ai"?"A/I":"tutto l'anno";
 const momLbl=m=>m==="entrambi"?"Giorno e sera":m==="sera"?"Sera":"Giorno";
-const coloriAccordo=["#d9906f","#93b98a","#7fa8cf","#c8a35e","#bd96dc"];
+// il foglio scrive 4 dove gli altri hanno 4.3: a schermo vanno tutti a una cifra
+const voto=r=>Number(r).toFixed(1);
+/* Il colore dell'accordo segue l'accordo, non la sua posizione nell'elenco:
+   prima "Marino" era arancione se primo e verde se secondo, quindi il colore
+   sembrava una categoria senza esserlo. Sette famiglie, tinte fisse. */
+const famigliaAccordo={
+  acqua: ["Marino","Acquatico","Minerale","Salato","Ozonico","Fresco"],
+  bosco: ["Aromatico","Legnoso","Verde","Terroso","Lavanda","Muschiato","Muschio Vegetale"],
+  agrume:["Agrumato","Fruttato"],
+  spezia:["Speziato Fresco","Speziato Caldo","Ambra","Cannella","Balsamico"],
+  cipria:["Talcato","Iris","Violetta","Rosa","Floreale Bianco"],
+  dolce: ["Vanigliato","Dolce","Cocco","Caffè","Rum","Whisky"],
+  fumo:  ["Cuoiato","Fumoso","Animalico","Tabacco"]
+};
+const tintaAccordo={acqua:"#7fa8cf",bosco:"#93b98a",agrume:"#ddc76b",
+                    spezia:"#d9906f",cipria:"#bd96dc",dolce:"#c8a35e",fumo:"#9aa0a8"};
+const coloreAccordo=(()=>{
+  const m={};
+  for(const f in famigliaAccordo)famigliaAccordo[f].forEach(a=>m[a.toLowerCase()]=tintaAccordo[f]);
+  // un accordo nuovo aggiunto nel foglio resta neutro invece di sparire
+  return a=>m[String(a).toLowerCase()]||"#8b8375";
+})();
 const ordinamenti={
   alpha:{lbl:"Nome A → Z",fn:p=>p.name.toLowerCase()},
   brand:{lbl:"Marchio A → Z",fn:p=>p.brand.toLowerCase()+p.name},
@@ -127,7 +178,7 @@ function passa(p,filtri,note){
     if(f==="ai"&&p.stagione!=="ai"&&p.stagione!=="tutto")return false;
     if(f==="tutto"&&p.stagione!=="tutto")return false;
     if((f==="blu"||f==="verde"||f==="rosso")&&p.colore!==f)return false;
-    if(f==="ufficio"&&p.ufficio!=="si"&&p.ufficio!=="si-mod")return false;
+    if(f==="ufficio"&&p.ufficio!=="si")return false;
     if(f==="appuntamento"&&p.appuntamento!=="si")return false;
     if(f==="quotidiano"&&p.quotidiano!=="si")return false;
     if(f==="informale"&&p.informale!=="si")return false;
@@ -171,7 +222,7 @@ function costruisciTeca(p,i){
     const v=p[k],c=v==="si"?"si":v==="si-mod"?"forse":"no";
     return `<div class="uso ${c}"><span class="punto ${c}"></span>${usoLabels[k]}</div>`;
   }).join("");
-  const accordi=p.accordi.slice(0,3).map((a,j)=>`<span class="accordo" style="color:${coloriAccordo[j]}">${a}</span>`).join("");
+  const accordi=p.accordi.slice(0,3).map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("");
   const presa=insiemeConfronto.has(p.id);
   return `<article class="teca ${cl}${presa?" presa":""}" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
     tabindex="0" role="button" aria-expanded="false" onclick="apriTeca(${p.id})"
@@ -185,7 +236,7 @@ function costruisciTeca(p,i){
           <div class="targhette">
             ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
             <span class="targa grado">${p.conc}</span>
-            <span class="targa voto">${p.rating?`★ ${p.rating}`:"★ n.d."}</span>
+            <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
           </div>
         </div>
@@ -387,14 +438,14 @@ function disegnaConfronto(){
   });
   const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
   h+=`<div class="cf-sez incisa">Profilo</div>`;
-  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${p.rating}`:"n.d."}</div>`);
+  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${voto(p.rating)}`:"n.d."}</div>`);
   riga("Longevità",p=>`<div class="cf-cella${p.longevita===megL?" meglio":""}">${p.longevita}h</div>`);
   riga("Stagione",p=>`<div class="cf-cella"><span class="cf-segno stag">${stagLbl(p.stagione)}</span></div>`);
   riga("Momento",p=>`<div class="cf-cella" style="font-size:12px">${momLbl(p.momento)}</div>`);
   riga("Famiglia",p=>`<div class="cf-cella"><span class="cf-segno">${p.famiglia}</span></div>`);
   riga("Copia di",p=>`<div class="cf-cella" style="font-size:12px">${p.dupe?esc(p.dupe.split(" (")[0]):"—"}</div>`);
   h+=`<div class="cf-sez incisa">Accordi principali</div>`;
-  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map((a,j)=>`<span style="font-size:12px;color:${coloriAccordo[j]}">${a}</span>`).join("")}</div>`);
+  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map(a=>`<span style="font-size:12px;color:${coloreAccordo(a)}">${a}</span>`).join("")}</div>`);
   riga("Note",p=>`<div class="cf-cella" style="font-size:12px;text-align:left;line-height:1.6;align-items:flex-start">${esc(p.note)}</div>`);
   h+=`<div class="cf-sez incisa">Quando indossarlo</div>`;
   Object.keys(usoLabels).forEach(k=>{
@@ -441,12 +492,14 @@ function disegnaGuida(){
     if(mod.length)corpo+=`<div class="voce"><div class="voce-eti incisa">Con moderazione</div><div class="voce-testo">${mod.map(p=>vocePr(p)+` <span class="n">(${stagBreve(p.stagione)})</span>`).join('<span class="sep">·</span>')}</div></div>`;
     if(!si.length&&!mod.length)corpo+=`<div class="voce"><div class="voce-nota">Nessuna boccetta in collezione per questa occasione.</div></div>`;
     if(s.nota)corpo+=`<div class="voce"><div class="voce-nota">${s.nota}</div></div>`;
-    const n=si.length+mod.length;
+    // il filtro rapido conta solo i "si": qui si dice lo stesso numero, e i
+    // "con moderazione" si dichiarano invece di sparire dentro il totale
+    const n=`${si.length} boccette`+(mod.length?` · ${mod.length} con moderazione`:"");
     h+=`<section class="cassetto${idx===0?" aperto":""}" id="g-${s.k}">
       <div class="cassetto-testa" onclick="commuta('g-${s.k}')">
         <div class="ct-sx">
           <div class="ct-icona" style="background:${tinta[s.c]}1a;border-color:${tinta[s.c]}33;color:${tinta[s.c]}">${s.i}</div>
-          <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} boccette · ${s.sub}</div></div>
+          <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} · ${s.sub}</div></div>
         </div>
         <svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
       </div>
@@ -536,7 +589,7 @@ function disegnaNumeri(){
   const perR={};votati.forEach(p=>{(perR[p.rating]=perR[p.rating]||[]).push(p)});
   h+=`<div class="tavola"><div class="tavola-t incisa">Rating Fragrantica</div>`;
   Object.keys(perR).sort((a,b)=>b-a).forEach(r=>{
-    h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${r}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
+    h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${voto(r)}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
   });
   const senza=profumi.filter(p=>!p.rating);
   if(senza.length)h+=`<div class="asta"><div class="asta-eti"><span>${senza.map(p=>p.name).join(" · ")}</span><span>n.d.</span></div><div class="binario"></div></div>`;
@@ -577,8 +630,14 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")chiudiFiltri()});
 // ── AVVIO ─────────────────────────────────────────────────────────────────
 async function avvia() {
   document.getElementById("cerca").addEventListener("input", e => { testoCerca = e.target.value; disegna() });
+  let primo = true;
+  const mostra = () => {
+    costruisciFoglio();
+    disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
+    if (primo) { cambiaVista("collezione"); primo = false; }
+  };
   try {
-    await caricaDati();
+    await caricaDati(mostra);
   } catch (err) {
     console.error("Sillage:", err);
     document.getElementById("vista-collezione").innerHTML =
@@ -586,9 +645,5 @@ async function avvia() {
     document.getElementById("conteggio").textContent = "—";
     return;
   }
-  document.body.dataset.origine = origineDati;
-  costruisciFoglio();
-  disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
-  cambiaVista("collezione");
 }
 avvia();

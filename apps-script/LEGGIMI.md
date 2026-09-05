@@ -9,6 +9,7 @@ Il foglio [`sillage-profumi`](https://docs.google.com/spreadsheets/d/12SyJ5v4ypS
 |---|---|
 | `Codice.gs` | `doGet()` — restituisce il foglio in JSON, già nella forma che l'app usa |
 | `Installa.gs` | `installa()` — da lanciare una volta: aggiunge al foglio colonne e tab mancanti |
+| `Correzioni.gs` | `correggi()` — applica al foglio le correzioni puntuali decise nel repo |
 
 ## Messa in opera
 
@@ -72,6 +73,27 @@ for k in ('profumi', 'note', 'layering', 'consigli'):
     print(p, len(d[k]), 'voci')
 PY
 ```
+
+## Correzioni puntuali
+
+Chi lavora al repo non ha modo di scrivere nel foglio: `correggi()` è quel
+canale. In cima a `Correzioni.gs` c'è l'elenco `CORREZIONI`, e ogni voce dichiara
+il valore che si aspetta di trovare e quello che vuole mettere:
+
+```js
+{ id: 26, colonna: 'ufficio', da: 'moderazione', a: 'no', perche: '…' }
+```
+
+Scrive **solo** se la cella contiene ancora `da`. Se nel frattempo l'hai
+cambiata tu, la salta e lo scrive nel log: le modifiche fatte a mano nel foglio
+vincono sempre. Rilanciarla non fa danni — le voci già applicate risultano
+«già a posto».
+
+`correggi(true)` è una prova a vuoto: dice cosa farebbe senza toccare niente.
+
+In coda ora c'è una sola voce: **Atlas, `ufficio` da `moderazione` a `no`**. Con
+scia Enorme in uno spazio chiuso condiviso non è nemmeno un forse, e con
+`moderazione` rientrava nel filtro Ufficio.
 
 ## Colonne del foglio che l'app non disegna (ancora)
 
