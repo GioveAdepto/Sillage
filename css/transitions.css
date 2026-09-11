@@ -75,6 +75,13 @@
   /* Tabs sliding */
   --tabs-dur: 250ms;
   --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Skeleton loader and reveal */
+  --pulse-dur: 1000ms;
+  --pulse-count: 1;
+  --pulse-min: 0.5;
+  --reveal-dur: 400ms;
+  --reveal-blur: 2px;
+  --reveal-ease: ease-in-out;
   /* Accordion expand */
   --acc-expand: 250ms;
   --acc-collapse: 250ms;
@@ -299,6 +306,68 @@
   }
 }
 
+/* ═══════════ 14 · SKELETON LOADER AND REVEAL ═══════════ */
+/* The wrap stacks two layers on the same coordinates. The
+   skeleton owns the cold pulse + the fade-out side of the
+   reveal; the content owns the fade-in side. They share the
+   same duration / ease so the swap reads as one motion. */
+.t-skel { position: relative; }
+.t-skel-skeleton,
+.t-skel-content {
+  position: absolute;
+  inset: 0;
+}
+
+.t-skel-skeleton {
+  z-index: 1;
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter  var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel-content {
+  z-index: 2;
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter  var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel.is-revealed .t-skel-skeleton {
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+}
+.t-skel.is-revealed .t-skel-content {
+  opacity: 1;
+  filter: blur(0);
+}
+/* Snap-back when replaying: kill transitions so the reverse
+   (revealed → skeleton) is instant. Drop `.is-resetting`
+   after a forced reflow and the next reveal animates again. */
+.t-skel.is-resetting .t-skel-skeleton,
+.t-skel.is-resetting .t-skel-content {
+  transition: none !important;
+}
+
+/* Pulse: place the animation on the bar/avatar children, not
+   on the skeleton itself, so the skeleton's opacity / filter
+   stay free for the cross-fade transition above. */
+.t-skel-skeleton.is-pulsing > * {
+  animation: t-skel-pulse var(--pulse-dur) ease-in-out var(--pulse-count);
+}
+@keyframes t-skel-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: var(--pulse-min); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-skel-skeleton, .t-skel-content {
+    transition: none !important;
+  }
+  .t-skel-skeleton.is-pulsing > * { animation: none !important; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    ADATTAMENTI A SILLAGE
    Da qui in giu' non c'e' piu' codice della skill: solo l'aggancio dei
@@ -368,3 +437,29 @@
 @media (prefers-reduced-motion: reduce) {
   .fondale { transition: none !important; }
 }
+
+/* — Lo scheletro dell'avvio —
+   La referenza impila i due strati con position:absolute e inset:0. Qui sotto
+   c'e' la collezione intera: e' in flusso, l'altezza dipende da quante
+   boccette ci sono, e staccarla dal flusso romperebbe la pagina. Stessa idea
+   con una griglia a una cella: i due strati si sovrappongono, lo scambio resta
+   senza salti, e l'altezza la detta il piu' alto dei due. */
+#avvio.t-skel { display: grid; }
+#avvio .t-skel-skeleton,
+#avvio .t-skel-content { position: static; inset: auto; grid-area: 1 / 1; }
+#avvio .t-skel-skeleton { padding: 16px 14px 0; display: grid; gap: 12px; align-content: start; }
+@media (min-width: 680px) { #avvio .t-skel-skeleton { grid-template-columns: 1fr 1fr } }
+@media (min-width: 980px) {
+  #avvio .t-skel-skeleton { grid-template-columns: 1fr 1fr 1fr; max-width: 1120px;
+                            margin: 0 auto; padding: 18px 18px 0 }
+}
+
+/* Le teche fantasma: la sagoma di una scheda, senza contenuto. */
+.teca-fantasma { padding: 15px; display: flex; gap: 13px; cursor: default; animation: none }
+.fantasma-nicchia { flex: 0 0 98px; height: 120px; border-radius: 10px;
+                    background: var(--vetro); border: 1px solid var(--filo) }
+.fantasma-testo { flex: 1; display: flex; flex-direction: column; gap: 9px; padding-top: 6px }
+.fantasma-riga { height: 11px; border-radius: 6px; background: var(--vetro) }
+.fantasma-riga.corta { width: 38% }
+.fantasma-riga.lunga { width: 82%; height: 18px }
+.fantasma-riga.media { width: 60% }
