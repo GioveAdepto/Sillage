@@ -726,14 +726,39 @@ function commuta(id){
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape")chiudiFiltri()});
 
+/* Lo scheletro si accende solo se l'attesa ci sarà davvero. Con la collezione
+   già in cache il primo disegno è immediato, e far lampeggiare dei fantasmi per
+   due fotogrammi sarebbe peggio del niente. Il markup nasce già rivelato: se
+   questa funzione non gira, la collezione resta visibile lo stesso. */
+function forseScheletro(){
+  const s=document.getElementById("avvio");
+  if(!s)return;
+  if(ORIGINE_DATI.appsScript&&!leggiCache()){s.classList.remove("is-revealed");return}
+  document.getElementById("scheletro")?.remove();
+}
+
+/* Rivela la collezione e poi toglie di mezzo i fantasmi: restando nella cella
+   terrebbero alta la griglia anche nelle altre viste, dove la collezione è
+   display:none e la cella sarebbe vuota. */
+function rivela(){
+  const s=document.getElementById("avvio");
+  if(!s)return;
+  s.classList.add("is-revealed");
+  const ms=parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--reveal-dur"))||400;
+  setTimeout(()=>document.getElementById("scheletro")?.remove(),ms);
+}
+
 // ── AVVIO ─────────────────────────────────────────────────────────────────
 async function avvia() {
   document.getElementById("cerca").addEventListener("input", e => { testoCerca = e.target.value; disegna() });
+  forseScheletro();
   let primo = true;
   const mostra = () => {
     costruisciFoglio();
     disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
     if (primo) { cambiaVista("collezione"); primo = false;
+                 rivela();
                  requestAnimationFrame(() => muoviPillola(false)); }
   };
   try {
@@ -743,6 +768,7 @@ async function avvia() {
     document.getElementById("vista-collezione").innerHTML =
       `<div class="deserto">Non riesco a caricare la collezione.<span>${esc(err.message)}</span></div>`;
     document.getElementById("conteggio").textContent = "—";
+    rivela();          // anche quando non c'è niente da mostrare, i fantasmi vanno via
     return;
   }
 }

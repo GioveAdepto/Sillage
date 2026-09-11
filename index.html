@@ -39,7 +39,18 @@
   <div class="attivi" id="attivi"></div>
 </div>
 
-<main id="vista-collezione"></main>
+<!-- Due strati nella stessa cella: i fantasmi sopra finche' si aspetta, la
+     collezione sotto. Parte gia' rivelato di proposito: se l'avvio non
+     riuscisse ad accendere lo scheletro, la collezione resta comunque
+     visibile invece di sparire. -->
+<div class="t-skel is-revealed" id="avvio">
+  <div class="t-skel-skeleton is-pulsing" id="scheletro" aria-hidden="true">
+      <article class="teca teca-fantasma"><div class="fantasma-nicchia"></div><div class="fantasma-testo"><span class="fantasma-riga corta"></span><span class="fantasma-riga lunga"></span><span class="fantasma-riga media"></span></div></article>
+      <article class="teca teca-fantasma"><div class="fantasma-nicchia"></div><div class="fantasma-testo"><span class="fantasma-riga corta"></span><span class="fantasma-riga lunga"></span><span class="fantasma-riga media"></span></div></article>
+      <article class="teca teca-fantasma"><div class="fantasma-nicchia"></div><div class="fantasma-testo"><span class="fantasma-riga corta"></span><span class="fantasma-riga lunga"></span><span class="fantasma-riga media"></span></div></article>
+  </div>
+  <main id="vista-collezione" class="t-skel-content"></main>
+</div>
 <section id="vista-confronta" class="vista">
   <div class="cf-vuoto" id="cf-vuoto" style="display:none">
     Il tavolo del confronto è vuoto.
