@@ -244,6 +244,16 @@ function costruisciTeca(p,i){
   }).join("");
   const accordi=p.accordi.slice(0,3).map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("");
   const presa=insiemeConfronto.has(p.id);
+  const ric=strati.get(p.id)||[];
+  const bloccoStrati=ric.length?`
+          <div class="strati t-stagger-line t-stagger-line--4">
+            <div class="incisa">Layering</div>
+            <div class="strati-elenco">
+              ${ric.map(r=>`<button class="strato" onclick="event.stopPropagation();vaiAllaRicetta(${r.i})">
+                ${iconaStrati}<span>${esc(r.nome)}</span><span class="strato-ruolo">${r.ruolo}</span>
+              </button>`).join("")}
+            </div>
+          </div>`:"";
   return `<article class="teca t-acc ${cl}${presa?" presa":""}" data-open="false" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
     tabindex="0" role="button" aria-expanded="false" onclick="apriTeca(${p.id})"
     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();apriTeca(${p.id})}">
@@ -258,9 +268,13 @@ function costruisciTeca(p,i){
             <span class="targa grado">${p.conc}</span>
             <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
+            ${ric.length?`<span class="targa strati-conta">${iconaStrati}${ric.length} ${ric.length===1?"ricetta":"ricette"}</span>`:""}
           </div>
         </div>
-        <div class="gemma ${cl}" title="${vetroNome[p.colore]}">${vetroLettera[p.colore]}</div>
+        <span class="t-tt-wrap">
+          <span class="gemma ${cl}" aria-label="${vetroNome[p.colore]}">${vetroLettera[p.colore]}</span>
+          <span class="t-tt" role="tooltip">${vetroNome[p.colore]}</span>
+        </span>
       </div>
       <p class="note-riga">${evidenzia(p.note)}</p>
       <div class="accordi">${accordi}</div>
@@ -271,10 +285,10 @@ function costruisciTeca(p,i){
         <span class="segno">${p.famiglia}</span>
       </div>
       <div class="scheda-int t-acc-panel">
-        <div class="scheda-int-int t-acc-panel-inner">
-          <div class="incisa">Quando indossarlo</div>
-          <div class="usi">${usi}</div>
-          <p class="racconto">${esc(p.desc)}</p>
+        <div class="scheda-int-int t-acc-panel-inner t-stagger">
+          <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
+          <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
+          <p class="racconto t-stagger-line t-stagger-line--3">${esc(p.desc)}</p>${bloccoStrati}
         </div>
       </div>
     </div>
@@ -290,9 +304,21 @@ function apriTeca(id){
   const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
   c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
+  const righe=c.querySelector(".t-stagger");
+  if(!righe)return;
+  if(aperta){
+    righe.classList.remove("is-hiding","is-shown");
+    void righe.offsetHeight;          // senza il reflow il rivelo non riparte
+    righe.classList.add("is-shown");
+  }else{
+    righe.classList.add("is-hiding");
+    righe.classList.remove("is-shown");
+    setTimeout(()=>righe.classList.remove("is-hiding"),200);
+  }
 }
 
 function disegna(){
+  strati=indiceStrati();
   const lista=selezione();
   document.getElementById("vista-collezione").innerHTML=lista.length
     ? lista.map(costruisciTeca).join("")
@@ -548,6 +574,37 @@ const sezioniGuida=[
   {k:"festivita",t:"Festività e inverno",sub:"Avvolgenti, per le sere più fredde",i:ic.stella,c:"oro"},
   {k:"casa",t:"In casa e relax",sub:"Per il piacere di sentirli addosso",i:ic.casa,c:"bosco"}
 ];
+/* Ogni ricetta dichiara i due profumi nel sommario, come "№ 3 sotto · № 2
+   sopra". Da li' si ricava l'indice inverso: dato un profumo, in quali ricette
+   compare e con che ruolo. Si ricalcola a ogni disegno perche' il foglio puo'
+   cambiare sotto, ed e' roba da trenta voci: costa nulla. */
+function indiceStrati(){
+  const m=new Map();
+  layering.forEach((r,i)=>{
+    const ids=[...r.s.matchAll(/№\s*(\d+)/g)].map(x=>+x[1]);
+    ids.forEach((id,posto)=>{
+      if(!m.has(id))m.set(id,[]);
+      m.get(id).push({i,nome:r.n,gruppo:r.g,ruolo:posto===0?"sotto":"sopra"});
+    });
+  });
+  return m;
+}
+let strati=new Map();
+
+const iconaStrati='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 3 7l9 5 9-5-9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg>';
+
+/* Dalla scheda alla ricetta: cambia vista, apre quella giusta e ci porta
+   sopra. Il salto aspetta un fotogramma, se no si scorre prima che il
+   pannello abbia preso la sua altezza. */
+function vaiAllaRicetta(i){
+  cambiaVista("layering");
+  const el=document.getElementById("lay-"+i);
+  if(!el)return;
+  el.setAttribute("data-open","true");
+  el.firstElementChild?.setAttribute("aria-expanded","true");
+  requestAnimationFrame(()=>el.scrollIntoView({block:"start",behavior:"smooth"}));
+}
+
 const vocePr=p=>`${esc(p.name)} <span class="n">${p.conc} · № ${p.id}</span>`;
 function disegnaGuida(){
   let h=`<div class="premessa">Ogni sezione nasce dalla collezione reale: aggiungi una boccetta e compare qui da sola, nella stagione giusta. I numeri sono quelli incisi sui cartellini.</div>`;
