@@ -244,7 +244,7 @@ function costruisciTeca(p,i){
   }).join("");
   const accordi=p.accordi.slice(0,3).map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("");
   const presa=insiemeConfronto.has(p.id);
-  return `<article class="teca ${cl}${presa?" presa":""}" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
+  return `<article class="teca t-acc ${cl}${presa?" presa":""}" data-open="false" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
     tabindex="0" role="button" aria-expanded="false" onclick="apriTeca(${p.id})"
     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();apriTeca(${p.id})}">
     <div class="corpo">
@@ -270,22 +270,25 @@ function costruisciTeca(p,i){
         <span class="segno ore">${p.longevita}h</span>
         <span class="segno">${p.famiglia}</span>
       </div>
-      <div class="scheda-int">
-        <div class="incisa">Quando indossarlo</div>
-        <div class="usi">${usi}</div>
-        <p class="racconto">${esc(p.desc)}</p>
+      <div class="scheda-int t-acc-panel">
+        <div class="scheda-int-int t-acc-panel-inner">
+          <div class="incisa">Quando indossarlo</div>
+          <div class="usi">${usi}</div>
+          <p class="racconto">${esc(p.desc)}</p>
+        </div>
       </div>
     </div>
     <button class="btn-affianca${presa?" presa":""}" id="affianca-${p.id}"
       onclick="event.stopPropagation();aggiungiAlConfronto(${p.id})"
-      aria-label="${presa?"Togli dal confronto":"Aggiungi al confronto"}">${presa?spunta:piu}</button>
+      aria-label="${presa?"Togli dal confronto":"Aggiungi al confronto"}"><span class="t-icon-swap" data-state="${presa?"b":"a"}"><span class="t-icon" data-icon="a">${piu}</span><span class="t-icon" data-icon="b">${spunta}</span></span></button>
   </article>`;
 }
 
 function apriTeca(id){
   const c=document.getElementById("teca-"+id);
   if(!c)return;
-  const aperta=c.classList.toggle("aperta");
+  const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
+  c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
 }
 
@@ -295,16 +298,37 @@ function disegna(){
     ? lista.map(costruisciTeca).join("")
     : `<div class="deserto">Nessuna boccetta con questi filtri.<span>Togli un filtro per allargare la ricerca.</span></div>`;
   const tot=profumi.length;
-  document.getElementById("conteggio").innerHTML=lista.length===tot
-    ? `<b>${tot}</b> boccette`
-    : `<b>${lista.length}</b> di ${tot}`;
+  scriviConteggio(lista.length, lista.length===tot?" boccette":` di ${tot}`);
   const n=filtriAttivi.size+noteAttive.size;
   const bollo=document.getElementById("bollo-filtri");
-  bollo.textContent=n||"";bollo.classList.toggle("mostra",n>0);
+  if(n>0)bollo.querySelector(".t-badge-dot").textContent=n;  // in chiusura il
+  bollo.dataset.open=n>0?"true":"false";                     // numero resta
+
   document.getElementById("btn-filtri").classList.toggle("acceso",n>0);
   document.getElementById("btn-mostra").textContent=lista.length===tot?"Mostra la collezione":`Mostra ${lista.length} ${lista.length===1?"boccetta":"boccette"}`;
   document.getElementById("foglio-sotto").textContent=n===0?"Tutta la collezione":`${lista.length} di ${tot} boccette`;
   disegnaAttivi();disegnaRapidi();aggiornaConteggiFoglio();
+}
+
+/* Il numero rientra dal basso solo quando cambia davvero: disegna() gira anche
+   quando il foglio conferma i dati, e rianimarlo ogni volta sarebbe un tic. */
+let ultimoConteggio=null;
+function scriviConteggio(numero,coda){
+  const el=document.getElementById("conteggio");
+  const cambiato=ultimoConteggio!==null&&ultimoConteggio!==numero;
+  ultimoConteggio=numero;
+  el.innerHTML=`<b class="t-digit-group"></b>${coda}`;
+  const gruppo=el.firstChild,cifre=String(numero).split("");
+  cifre.forEach((c,i)=>{
+    const sp=document.createElement("span");
+    sp.className="t-digit";sp.textContent=c;
+    if(i===cifre.length-2)sp.dataset.stagger="1";
+    else if(i===cifre.length-1)sp.dataset.stagger="2";
+    gruppo.appendChild(sp);
+  });
+  if(!cambiato)return;
+  void gruppo.offsetHeight;          // senza il reflow l'animazione non riparte
+  gruppo.classList.add("is-animating");
 }
 
 // ── SCELTE RAPIDE E FILTRI ATTIVI ─────────────────────────────────────────
@@ -394,8 +418,31 @@ function aggiornaConteggiFoglio(){
   document.querySelectorAll(".foglio-corpo .scelta[data-o]").forEach(b=>b.classList.toggle("on",b.dataset.o===ordine));
 }
 function impostaOrdine(o){ordine=o;disegna()}
-function apriFiltri(){document.getElementById("fondale-filtri").classList.add("aperto");aggiornaConteggiFoglio()}
-function chiudiFiltri(){document.getElementById("fondale-filtri").classList.remove("aperto")}
+/* I tempi si leggono dalle variabili, non si riscrivono qui: se cambi
+   --modal-close-dur in transitions.css la pulizia resta in passo. */
+const msChiusuraModale=parseFloat(
+  getComputedStyle(document.documentElement).getPropertyValue("--modal-close-dur"))||150;
+
+function apriFiltri(){
+  const f=document.getElementById("fondale-filtri"),s=f.querySelector(".t-modal");
+  f.classList.add("in-scena");
+  s.classList.remove("is-closing");
+  void f.offsetWidth;              // un fotogramma da fermi, poi si parte
+  f.classList.add("aperto");
+  s.classList.add("is-open");
+  aggiornaConteggiFoglio();
+}
+function chiudiFiltri(){
+  const f=document.getElementById("fondale-filtri"),s=f.querySelector(".t-modal");
+  if(!f.classList.contains("aperto"))return;
+  f.classList.remove("aperto");
+  s.classList.remove("is-open");
+  s.classList.add("is-closing");
+  setTimeout(()=>{
+    f.classList.remove("in-scena");
+    s.classList.remove("is-closing");   // senza questo la prossima apertura
+  },msChiusuraModale);                  // parte dalla scala di chiusura
+}
 function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"))chiudiFiltri()}
 
 // ── CONFRONTO ─────────────────────────────────────────────────────────────
@@ -417,7 +464,8 @@ function aggiornaPulsante(id){
   const card=document.getElementById("teca-"+id),btn=document.getElementById("affianca-"+id);
   const presa=insiemeConfronto.has(id);
   if(card)card.classList.toggle("presa",presa);
-  if(btn){btn.classList.toggle("presa",presa);btn.innerHTML=presa?spunta:piu;
+  if(btn){btn.classList.toggle("presa",presa);
+    btn.querySelector(".t-icon-swap")?.setAttribute("data-state",presa?"b":"a");
     btn.setAttribute("aria-label",presa?"Togli dal confronto":"Aggiungi al confronto")}
 }
 function svuotaConfronto(){const ids=[...insiemeConfronto];insiemeConfronto.clear();ids.forEach(aggiornaPulsante);aggiornaVassoio()}
@@ -435,7 +483,8 @@ function aggiornaVassoio(){
   document.getElementById("vassoio-conto").textContent=n+" / 3";
   document.getElementById("btn-confronta").disabled=n<2;
   const pal=document.getElementById("pallino");
-  pal.textContent=n||"";pal.classList.toggle("mostra",n>0);
+  if(n>0)pal.querySelector(".t-badge-dot").textContent=n;
+  pal.dataset.open=n>0?"true":"false";
   if(document.getElementById("vista-confronta").classList.contains("attiva"))disegnaConfronto();
 }
 function disegnaConfronto(){
@@ -515,15 +564,15 @@ function disegnaGuida(){
     // il filtro rapido conta solo i "si": qui si dice lo stesso numero, e i
     // "con moderazione" si dichiarano invece di sparire dentro il totale
     const n=`${si.length} boccette`+(mod.length?` · ${mod.length} con moderazione`:"");
-    h+=`<section class="cassetto${idx===0?" aperto":""}" id="g-${s.k}">
+    h+=`<section class="cassetto t-acc" data-open="${idx===0}" id="g-${s.k}">
       <div class="cassetto-testa" onclick="commuta('g-${s.k}')">
         <div class="ct-sx">
           <div class="ct-icona" style="background:${tinta[s.c]}1a;border-color:${tinta[s.c]}33;color:${tinta[s.c]}">${s.i}</div>
           <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} · ${s.sub}</div></div>
         </div>
-        <svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        <span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
-      <div class="cassetto-corpo">${corpo}</div>
+      <div class="cassetto-corpo t-acc-panel"><div class="cassetto-corpo-int t-acc-panel-inner">${corpo}</div></div>
     </section>`;
   });
   document.getElementById("vista-guida").innerHTML=h;
@@ -543,12 +592,13 @@ function disegnaLayering(){
   let gruppo="";
   layering.forEach((l,i)=>{
     if(l.g!==gruppo){gruppo=l.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
-    h+=`<article class="ricetta" id="lay-${i}">
+    h+=`<article class="ricetta t-acc" data-open="false" id="lay-${i}">
       <div class="ricetta-testa" onclick="commuta('lay-${i}')">
         <div class="ricetta-bollo" style="color:${l.t==="app"?tinta.ambra:l.t==="uff"?tinta.bosco:l.t==="lab"?"#bd96dc":tinta.oro}">${bolloIcona[l.t]}</div>
-        <div><div class="ricetta-nome">${l.n}</div><div class="ricetta-sotto">${l.s}</div></div>
+        <div class="ricetta-testo"><div class="ricetta-nome">${l.n}</div><div class="ricetta-sotto">${l.s}</div></div>
+        <span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
-      <div class="ricetta-corpo">
+      <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">
         <div class="passo"><span class="passo-nome">Come si fa</span><span class="passo-testo">${l.come}</span></div>
         <div class="passo"><span class="passo-nome">Risultato olfattivo</span><span class="passo-testo">${l.ris}</span></div>
         <div class="passo"><span class="passo-nome">Perché funziona</span><span class="passo-testo">${l.perche}</span></div>
@@ -570,12 +620,13 @@ function disegnaAcquisti(){
   let gruppo="";
   consigli.forEach((c,i)=>{
     if(c.g!==gruppo){gruppo=c.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
-    h+=`<article class="ricetta" id="acq-${i}">
+    h+=`<article class="ricetta t-acc" data-open="false" id="acq-${i}">
       <div class="ricetta-testa" onclick="commuta('acq-${i}')">
         <div class="ricetta-bollo" style="color:var(--ottone)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
-        <div><div class="ricetta-nome">${c.n}</div><div class="ricetta-sotto">${c.gap}</div></div>
+        <div class="ricetta-testo"><div class="ricetta-nome">${c.n}</div><div class="ricetta-sotto">${c.gap}</div></div>
+        <span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
-      <div class="ricetta-corpo">${c.voci.map(v=>`<div class="passo"><span class="passo-nome">${v.t}</span><span class="passo-testo">${v.d}</span></div>`).join("")}</div>
+      <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">${c.voci.map(v=>`<div class="passo"><span class="passo-nome">${v.t}</span><span class="passo-testo">${v.d}</span></div>`).join("")}</div></div>
     </article>`;
   });
   document.getElementById("vista-acquisti").innerHTML=h;
@@ -632,6 +683,27 @@ function disegnaNumeri(){
 }
 
 // ── NAVIGAZIONE ───────────────────────────────────────────────────────────
+/* La pillola prende la posizione e la larghezza della voce attiva: CSS fa il
+   resto. Al primo disegno e al ridimensionamento va scritta senza transizione,
+   o parte da translateX(0) con larghezza zero. */
+function muoviPillola(animata){
+  const timone=document.querySelector(".timone");
+  const pillola=timone?.querySelector(".t-tabs-pill");
+  const attivo=timone?.querySelector(".remo.attivo");
+  if(!pillola||!attivo)return;
+  const scrivi=()=>{
+    pillola.style.transform=`translateX(${attivo.offsetLeft}px)`;
+    pillola.style.width=`${attivo.offsetWidth}px`;
+  };
+  if(animata){scrivi();return}
+  const prec=pillola.style.transition;
+  pillola.style.transition="none";
+  scrivi();
+  void pillola.offsetWidth;
+  pillola.style.transition=prec;
+}
+window.addEventListener("resize",()=>muoviPillola(false));
+
 function cambiaVista(v){
   ["collezione","confronta","layering","guida","acquisti","numeri"].forEach(n=>{
     document.getElementById("vista-"+n).classList.toggle("attiva",n===v);
@@ -642,9 +714,16 @@ function cambiaVista(v){
   document.getElementById("strumenti").style.display=inCollezione?"block":"none";
   document.getElementById("vassoio").classList.toggle("mostra",insiemeConfronto.size>0&&inCollezione);
   if(v==="confronta")disegnaConfronto();
+  muoviPillola(true);
   window.scrollTo({top:0,behavior:"instant"});
 }
-function commuta(id){document.getElementById(id)?.classList.toggle("aperto")}
+function commuta(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const aperto=el.getAttribute("data-open")!=="true";
+  el.setAttribute("data-open",String(aperto));
+  el.firstElementChild?.setAttribute("aria-expanded",String(aperto));
+}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")chiudiFiltri()});
 
 // ── AVVIO ─────────────────────────────────────────────────────────────────
@@ -654,7 +733,8 @@ async function avvia() {
   const mostra = () => {
     costruisciFoglio();
     disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
-    if (primo) { cambiaVista("collezione"); primo = false; }
+    if (primo) { cambiaVista("collezione"); primo = false;
+                 requestAnimationFrame(() => muoviPillola(false)); }
   };
   try {
     await caricaDati(mostra);
