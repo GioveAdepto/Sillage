@@ -82,6 +82,21 @@
   --reveal-dur: 400ms;
   --reveal-blur: 2px;
   --reveal-ease: ease-in-out;
+  /* Texts reveal */
+  --stagger-dur: 500ms;
+  --stagger-distance: 12px;
+  --stagger-stagger: 40ms;
+  --stagger-blur: 3px;
+  --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Tooltip open/close */
+  --tt-in-dur: 150ms;
+  --tt-out-dur: 50ms;
+  --tt-scale: 0.98;
+  --tt-delay: 80ms;
+  --tt-in-ease: ease-out;
+  --tt-out-ease: ease-out;
+  --tt-bg: #ffffff;
+  --tt-fg: #2f2f2f;
   /* Accordion expand */
   --acc-expand: 250ms;
   --acc-collapse: 250ms;
@@ -368,6 +383,91 @@
   .t-skel-skeleton.is-pulsing > * { animation: none !important; }
 }
 
+/* ═══════════ 17 · TOOLTIP OPEN / CLOSE ═══════════ */
+.t-tt-wrap {
+  position: relative;
+  display: inline-block;
+}
+.t-tt {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translate(-50%, 0) scale(var(--tt-scale));
+  transform-origin: 50% 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--tt-bg);
+  color: var(--tt-fg);
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2px 6px 0 rgba(0, 0, 0, 0.05),
+    0 4px 42px 0 rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  pointer-events: none;
+  /* Default rule controls the LEAVE state. transition-delay
+     stays unset so leaving plays without delay. */
+  transition:
+    opacity   var(--tt-out-dur) var(--tt-out-ease),
+    transform var(--tt-out-dur) var(--tt-out-ease);
+}
+/* The 50ms delay belongs ONLY to the hover rule so leaving
+   the trigger snaps the delay back to 0 and the disappear
+   plays immediately. */
+.t-tt-wrap:hover .t-tt,
+.t-tt-trigger:focus-visible + .t-tt {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  transition-duration: var(--tt-in-dur);
+  transition-timing-function: var(--tt-in-ease);
+  transition-delay: var(--tt-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-tt { transition: none !important; }
+}
+
+/* ═══════════ 18 · TEXTS REVEAL ═══════════ */
+/* Lines start translated down + blurred + invisible; .is-shown
+   on the parent flips them to their resting state. The second
+   line's transition-delay holds it back by --stagger-stagger
+   so the eye lands on the headline first. */
+.t-stagger-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(var(--stagger-distance));
+  filter: blur(var(--stagger-blur));
+  transition:
+    opacity   var(--stagger-dur) var(--stagger-ease),
+    transform var(--stagger-dur) var(--stagger-ease),
+    filter    var(--stagger-dur) var(--stagger-ease);
+  will-change: transform, opacity, filter;
+}
+.t-stagger-line--2 { transition-delay: var(--stagger-stagger); }
+
+.t-stagger.is-shown .t-stagger-line {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+/* Exit decouples from the stagger: same fade for every line,
+   no Y return, no blur — so the disappearance reads as a
+   single quiet fade instead of a reverse reveal. */
+.t-stagger.is-hiding .t-stagger-line {
+  opacity: 0;
+  transform: translateY(0);
+  filter: blur(0);
+  transition:
+    opacity 200ms ease,
+    transform 0s linear,
+    filter 0s linear;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-stagger-line { transition: none !important; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    ADATTAMENTI A SILLAGE
    Da qui in giu' non c'e' piu' codice della skill: solo l'aggancio dei
@@ -377,7 +477,9 @@
 /* — La pillola del timone —
    Prende il posto delle sei .tacca: una sola barretta d'oro larga quanto la
    voce attiva, che percorre la barra invece di accendersi e spegnersi. */
-.timone { position: relative; }
+/* Niente position:relative qui: .timone e' gia' position:fixed, che stabilisce
+   di suo il riferimento per la pillola. Scriverlo lo sganciava dal fondo dello
+   schermo e lo rimandava in fondo al documento. */
 .timone .t-tabs-pill {
   top: auto;
   bottom: max(5px, env(safe-area-inset-bottom));
@@ -453,6 +555,53 @@
   #avvio .t-skel-skeleton { grid-template-columns: 1fr 1fr 1fr; max-width: 1120px;
                             margin: 0 auto; padding: 18px 18px 0 }
 }
+
+/* — Le righe della scheda aperta —
+   La referenza ne dichiara due; qui dentro ce ne sono quattro: il titolino,
+   la griglia degli usi, il racconto e la nota di layering. */
+.t-stagger-line--3 { transition-delay: calc(var(--stagger-stagger) * 2); }
+.t-stagger-line--4 { transition-delay: calc(var(--stagger-stagger) * 3); }
+
+/* — Il cartellino della famiglia —
+   Il suggerimento va sotto, non sopra: la gemma sta in alto nella teca, e la
+   teca ha overflow:hidden, quindi sopra verrebbe tagliato. Colori della casa
+   al posto del bianco della demo. */
+.teca .t-tt {
+  bottom: auto;
+  top: calc(100% + 8px);
+  transform-origin: 50% 0;
+  font-size: 11.5px;
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: .02em;
+  box-shadow: 0 10px 26px -12px #000;
+}
+.teca .t-tt-wrap { display: flex }
+
+/* — Lo zoom del flacone —
+   A scheda aperta il flacone si avvicina piu' che al solo passaggio del mouse,
+   e ci mette il suo tempo: e' il momento in cui lo stai guardando davvero. */
+.teca.aperta .faretto img { transform: scale(1.12) }
+
+/* — La nota di layering dentro la scheda — */
+.strati { margin-top: 13px }
+.strati-elenco { display: flex; flex-direction: column; gap: 6px; margin-top: 7px }
+.strato {
+  display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+  background: var(--vetro); border: 1px solid var(--filo); border-radius: var(--r-xs);
+  padding: 8px 10px; cursor: pointer; color: var(--carta-2);
+  font-family: 'Manrope', sans-serif; font-size: 12.5px; line-height: 1.35;
+  transition: border-color var(--duration-fast) var(--ease-smooth-out),
+              background var(--duration-fast) var(--ease-smooth-out);
+}
+.strato:hover { border-color: rgba(200,163,94,.45); background: var(--ottone-velo) }
+.strato svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--ottone) }
+.strato span:not(.strato-ruolo) { flex: 1 }
+.strato .strato-ruolo { color: var(--carta-3); font-size: 11px; white-space: nowrap; margin-left: auto }
+.targa.strati-conta {
+  color: var(--carta-2); background: var(--vetro-2); border: 1px solid var(--filo);
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.targa.strati-conta svg { width: 12px; height: 12px; color: var(--ottone) }
 
 /* Le teche fantasma: la sagoma di una scheda, senza contenuto. */
 .teca-fantasma { padding: 15px; display: flex; gap: 13px; cursor: default; animation: none }
