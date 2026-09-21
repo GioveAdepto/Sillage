@@ -1,1 +1,56 @@
-[]
+[
+ {
+  "tab": "Consigli",
+  "chiave": "nome",
+  "valore": "Quattro gap chiusi negli ultimi acquisti",
+  "colonna": "nome",
+  "da": "Quattro gap chiusi negli ultimi acquisti",
+  "a": "Cinque gap chiusi negli ultimi acquisti",
+  "perche": "con Ombre Noire i gap chiusi diventano cinque"
+ },
+ {
+  "tab": "ConsigliVoci",
+  "chiave": "titolo",
+  "valore": "Boozy gourmand → Angelsear № 31",
+  "colonna": "consiglio",
+  "da": "Quattro gap chiusi negli ultimi acquisti",
+  "a": "Cinque gap chiusi negli ultimi acquisti",
+  "perche": "il gruppo e stato rinominato: la voce deve seguirlo"
+ },
+ {
+  "tab": "ConsigliVoci",
+  "chiave": "titolo",
+  "valore": "Tropicale cremoso → Island № 29",
+  "colonna": "consiglio",
+  "da": "Quattro gap chiusi negli ultimi acquisti",
+  "a": "Cinque gap chiusi negli ultimi acquisti",
+  "perche": "il gruppo e stato rinominato: la voce deve seguirlo"
+ },
+ {
+  "tab": "ConsigliVoci",
+  "chiave": "titolo",
+  "valore": "Marino salato → Atlas № 26",
+  "colonna": "consiglio",
+  "da": "Quattro gap chiusi negli ultimi acquisti",
+  "a": "Cinque gap chiusi negli ultimi acquisti",
+  "perche": "il gruppo e stato rinominato: la voce deve seguirlo"
+ },
+ {
+  "tab": "ConsigliVoci",
+  "chiave": "titolo",
+  "valore": "Agrumato ambrato estivo → Zara № 28",
+  "colonna": "consiglio",
+  "da": "Quattro gap chiusi negli ultimi acquisti",
+  "a": "Cinque gap chiusi negli ultimi acquisti",
+  "perche": "il gruppo e stato rinominato: la voce deve seguirlo"
+ },
+ {
+  "tab": "Consigli",
+  "chiave": "nome",
+  "valore": "Legnoso secco A/I da giorno",
+  "colonna": "lacuna",
+  "da": "Gli orientali dolci da sera fredda sono ben coperti; mancano legnosi asciutti da portare di giorno in autunno-inverno senza risultare pesanti.",
+  "a": "Gli orientali dolci da sera fredda sono ben coperti; mancano legnosi asciutti da portare di giorno in autunno-inverno senza risultare pesanti. Ombre Noire ci va vicino — legnoso speziato, A/I, anche da giorno — ma cognac e mirra lo tengono sul resinoso-dolce: il legnoso secco vero, minerale e senza zucchero, non c'è ancora.",
+  "perche": "la lacuna resta, ma va detto dove Ombre Noire arriva e dove si ferma"
+ }
+]
