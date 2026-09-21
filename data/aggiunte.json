@@ -1,0 +1,77 @@
+[
+ {
+  "tab": "Layering",
+  "chiave": "nome",
+  "valore": "Angelsear → Ombre Noire",
+  "perche": "Ombre Noire non compariva in nessuna ricetta",
+  "riga": {
+   "gruppo": "Autunno / Inverno · Sera elegante",
+   "tag": "sera",
+   "nome": "Angelsear → Ombre Noire",
+   "sommario": "№ 31 sotto · № 32 sopra — cognac resinoso, sera A/I",
+   "come": "2 spray di Angelsear su petto e collo (cognac, pralina, vaniglia: la base dolce e densa) → 1 spray di Ombre Noire sui polsi. Fico e menta aprono verdi sopra il liquoroso, poi cedono a mirra e olibano.",
+   "risultato": "Cognac due volte, ma da due parti opposte: dolce e pralinato sotto, secco e resinoso sopra. La cannella c'è in entrambi e fa da cerniera; papiro e foglia di tabacco dell'Ombre asciugano la pasticceria dell'Angelsear.",
+   "perche": "Cognac, cannella e fava tonka in comune, più gli accordi dolce, legnoso e speziato caldo: sono i due profumi della collezione che condividono di più. Il rischio qui è la ridondanza, non la dissonanza — fermati a 2+1.",
+   "quando": "Sera fredda, cena, festività. Non in ufficio: sono due densi sovrapposti."
+  }
+ },
+ {
+  "tab": "Layering",
+  "chiave": "nome",
+  "valore": "Prada L'Homme Intense → Asad",
+  "perche": "Asad non compariva in nessuna ricetta",
+  "riga": {
+   "gruppo": "Autunno / Inverno · Sera elegante",
+   "tag": "sera",
+   "nome": "Prada L'Homme Intense → Asad",
+   "sommario": "№ 22 sotto · № 30 sopra — iris speziato, sera A/I",
+   "come": "2 spray di Prada Intense (iris, ambra, patchouli, cuoio: vellutato e lungo, 8h) → 1 spray di Asad sui polsi. Pepe nero, tabacco e ananas aprono sopra l'iris.",
+   "risultato": "Iris con la scorza speziata. Pepe e tabacco dell'Asad danno all'iris del Prada il taglio secco che da solo non ha; caffè e labdano si appoggiano sul cuoio senza coprirlo.",
+   "perche": "Iris, ambra e patchouli in comune, e gli accordi ambra e legnoso. Il Prada è il più lungo dei due (8h contro 7h) e per questo va sotto: regge quando l'Asad si spegne.",
+   "quando": "Sera invernale, cena formale. Asad è un campione da 12 ml: qui ne basta uno spray."
+  }
+ },
+ {
+  "tab": "Layering",
+  "chiave": "nome",
+  "valore": "CDN Intense → CDN Sillage",
+  "perche": "Club de Nuit Intense non compariva in nessuna ricetta",
+  "riga": {
+   "gruppo": "Estate · Sera e appuntamento",
+   "tag": "app",
+   "nome": "CDN Intense → CDN Sillage",
+   "sommario": "№ 17 sotto · № 5 sopra — ananas fumé agrumato, sera P/E",
+   "come": "2 spray di Club de Nuit Intense su petto e collo (ananas, betulla fumosa, muschio: 8h e proiezione alta) → 1 spray di Club de Nuit Sillage sui polsi. Lime e ambroxan schiariscono la testa.",
+   "risultato": "L'Aventus di casa Armaf con l'apertura ripulita. Ribes nero e rosa ci sono in entrambi e si sommano; l'ambroxan del Sillage tiene viva la testa citrica più a lungo, dove l'Intense vira presto sul fumé.",
+   "perche": "Sei note in comune — bergamotto, limone, ribes nero, gelsomino, rosa, muschio — e la stessa maison: è la coppia più imparentata della collezione, come i due Gucci Guilty. L'Intense è il più lungo di tutti (8h) e fa da fondamenta.",
+   "quando": "Sera estiva, aperitivo, uscita lunga. Con due profumi a scia forte, due spray totali bastano."
+  }
+ },
+ {
+  "tab": "Layering",
+  "chiave": "nome",
+  "valore": "Versace Eros EDT → Cool Water",
+  "perche": "Eros EDT non compariva in nessuna ricetta",
+  "riga": {
+   "gruppo": "Sperimentali",
+   "tag": "lab",
+   "nome": "Versace Eros EDT → Cool Water",
+   "sommario": "№ 14 sotto · № 18 sopra — menta doppia, giorno tutto l'anno",
+   "come": "2 spray di Eros EDT (vaniglia, fava tonka, cedro: base dolce e persistente) → 1 spray di Cool Water sui polsi. Lavanda, rosmarino e calone aprono freschi sopra il mentolato.",
+   "risultato": "L'Eros portabile di giorno. La menta c'è in entrambi e raddoppia; lavanda e note marine del Cool Water tagliano la vaniglia, che resta sotto come coda calda invece di dominare.",
+   "perche": "Menta, cedro, geranio e muschio di quercia in comune, e i tre accordi aromatico, verde e speziato fresco. È un esperimento dichiarato: si prende un serale dolce e lo si sposta al mattino appoggiandosi alla nota che i due hanno davvero in comune.",
+   "quando": "Giornata qualsiasi, weekend, quando l'Eros ti va ma non è sera."
+  }
+ },
+ {
+  "tab": "ConsigliVoci",
+  "chiave": "titolo",
+  "valore": "Incenso e resine → Ombre Noire № 32",
+  "perche": "il quinto gap chiuso, l'ultimo territorio che restava scoperto",
+  "riga": {
+   "consiglio": "Cinque gap chiusi negli ultimi acquisti",
+   "titolo": "Incenso e resine → Ombre Noire № 32",
+   "dettaglio": "Mirra e olibano nel fondo, sopra cognac e foglia di tabacco. Era l'ultimo territorio scoperto: nessun altro profumo in collezione ha incenso o resine. Legnoso speziato da autunno-inverno, 6h e scia forte, 4.3 su 1.528 voti."
+  }
+ }
+]
