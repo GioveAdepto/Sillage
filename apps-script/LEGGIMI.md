@@ -28,7 +28,7 @@ Il foglio [`sillage-profumi`](https://docs.google.com/spreadsheets/d/12SyJ5v4ypS
 
    Scrive **solo in celle vuote** e non tocca una tab che esiste già: rilanciarlo
    non fa danni.
-4. Esegui `prova()` e guarda il log: deve stampare 31 profumi, 53 note, 26
+4. Esegui `prova()` e guarda il log: deve stampare 32 profumi, 53 note, 26
    layering, 7 consigli.
 5. **Distribuisci ▸ Nuova distribuzione ▸ App web**
    - *Esegui come*: me stesso

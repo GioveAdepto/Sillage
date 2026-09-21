@@ -1747,5 +1747,62 @@
    "estate": 5,
    "autunno": 40
   }
+ },
+ {
+  "id": 32,
+  "brand": "Lalique",
+  "name": "Ombre Noire",
+  "conc": "EDP",
+  "genere": "uomo",
+  "famiglia": "Legnoso speziato",
+  "accordi": [
+   "Legnoso",
+   "Speziato Caldo",
+   "Ambra",
+   "Dolce",
+   "Verde"
+  ],
+  "noteElenco": [
+   "Cognac",
+   "Tabacco",
+   "Cannella",
+   "Mirra",
+   "Olibano",
+   "Foglia di Fico"
+  ],
+  "longevita": 6,
+  "sillage": "Forte",
+  "giornoPct": 42,
+  "rating": 4.3,
+  "voti": 1528,
+  "ufficio": "si-mod",
+  "serata": "si",
+  "palestra": "no",
+  "formatoMl": null,
+  "tipoPossesso": "full",
+  "numFlaconi": 1,
+  "residuoPct": null,
+  "cloneStato": "",
+  "img": "img/lalique-ombre-noire.webp",
+  "attivo": "si",
+  "notePersonali": "Chiude il gap incenso-resine. Resa reale da rilevare in uso: la scia dichiarata forte convive con 6h soltanto.",
+  "note": "Testa: foglia di fico, menta, bergamotto · Cuore: foglia di tabacco, cannella, papiro · Fondo: cognac, mirra, olibano, legno di cedro, fava tonka",
+  "stagione": "ai",
+  "momento": "entrambi",
+  "colore": "rosso",
+  "quotidiano": "si",
+  "formale": "si",
+  "informale": "si",
+  "appuntamento": "si",
+  "casa": "si",
+  "festivita": "si",
+  "nuovo": true,
+  "desc": "Il primo incenso-resinoso della collezione: mirra e olibano nel fondo chiudono il gap che restava aperto. Apre verde e amaro — foglia di fico, menta, bergamotto — passa per tabacco e cannella e chiude su cognac, cedro e fava tonka. Il tabacco è foglia fresca, non fumo: resta più secco e meno dolce di quanto la lista note faccia pensare, e la componente boozy sta indietro rispetto ad Angelsear e a SWY Absolutely. Autunno-inverno, ma l'apertura verde lo tiene portabile anche di giorno. 2-3 spray; in ufficio dosare, la scia è forte a fronte di 6h dichiarate. Rating 4.3 su 1.528 recensioni. Terzo Lalique in collezione: registro opposto al vetiver degli Encre Noire.",
+  "stagioni": {
+   "inverno": 41,
+   "primavera": 17,
+   "estate": 11,
+   "autunno": 41
+  }
  }
 ]

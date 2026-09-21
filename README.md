@@ -10,7 +10,7 @@ index.html            solo markup (92 righe)
 css/sillage.css       lo stile, com'era nel <style> inline
 js/app.js             la logica + il caricamento dei dati
 data/*.json           copia dei dati nel repo (ripiego e avvio a freddo)
-img/*.webp            31 flaconi, 176×208, più il segnaposto
+img/*.webp            32 flaconi, 176×208, più il segnaposto
 apps-script/          backend di lettura sul foglio Google
 ```
 
