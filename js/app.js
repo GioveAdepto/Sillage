@@ -150,12 +150,12 @@ const voto=r=>Number(r).toFixed(1);
    sembrava una categoria senza esserlo. Sette famiglie, tinte fisse. */
 const famigliaAccordo={
   acqua: ["Marino","Acquatico","Minerale","Salato","Ozonico","Fresco"],
-  bosco: ["Aromatico","Legnoso","Verde","Terroso","Lavanda","Muschiato","Muschio Vegetale"],
+  bosco: ["Aromatico","Legnoso","Verde","Terroso","Lavanda","Muschiato","Muschio Vegetale","Cannabis"],
   agrume:["Agrumato","Fruttato"],
   spezia:["Speziato Fresco","Speziato Caldo","Ambra","Cannella","Balsamico"],
   cipria:["Talcato","Iris","Violetta","Rosa","Floreale Bianco"],
-  dolce: ["Vanigliato","Dolce","Cocco","Caffè","Rum","Whisky"],
-  fumo:  ["Cuoiato","Fumoso","Animalico","Tabacco"]
+  dolce: ["Vanigliato","Dolce","Cocco","Caffè","Rum","Whisky","Mielato"],
+  fumo:  ["Cuoiato","Fumoso","Animalico","Tabacco","Oud"]
 };
 const tintaAccordo={acqua:"#7fa8cf",bosco:"#93b98a",agrume:"#ddc76b",
                     spezia:"#d9906f",cipria:"#bd96dc",dolce:"#c8a35e",fumo:"#9aa0a8"};
@@ -171,7 +171,7 @@ const ordinamenti={
   rating:{lbl:"Rating più alto",fn:p=>-(p.rating||0)},
   famiglia:{lbl:"Famiglia olfattiva",fn:p=>p.famiglia.toLowerCase()},
   stagione:{lbl:"Stagione",fn:p=>({pe:0,tutto:1,ai:2}[p.stagione]??3)},
-  longevita:{lbl:"Longevità più lunga",fn:p=>-p.longevita},
+  longevita:{lbl:"Longevità più lunga",fn:p=>-(p.longevita||0)},
   id:{lbl:"Numero di catalogo",fn:p=>p.id}
 };
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -217,9 +217,43 @@ function passa(p,filtri,note){
   }
   return true;
 }
-const selezione=()=>profumi.filter(p=>passa(p,filtriAttivi,noteAttive))
+/* La collezione tiene due cose diverse nello stesso elenco: le boccette e i
+   campioncini in prova. Un 2 ml non lo indossi, lo provi — quindi Numeri,
+   Guida e Acquisti parlano solo delle boccette, e i campioni stanno in una
+   vetrina per conto loro. Il discrimine e' tipo_possesso. */
+let vetrina="boccette";
+const eCampione=p=>p.tipoPossesso&&p.tipoPossesso!=="full";
+const boccette=()=>profumi.filter(p=>!eCampione(p));
+const campioni=()=>profumi.filter(eCampione);
+const inVetrina=()=>vetrina==="campioni"?campioni():boccette();
+
+function cambiaVetrina(v){
+  if(v===vetrina)return;
+  vetrina=v;
+  document.querySelectorAll(".vetrina").forEach(b=>
+    b.setAttribute("aria-selected",String(b.dataset.vetrina===v)));
+  muoviVetrina(true);
+  svuotaConfronto();       // il tavolo del confronto non mescola le due vetrine
+  disegna();
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+/* Stessa meccanica della pillola del timone: la posizione la scrive il JS,
+   il resto lo fa il CSS. Al primo disegno va messa senza transizione. */
+function muoviVetrina(animata){
+  const barra=document.querySelector(".vetrine");
+  const pil=barra?.querySelector(".t-tabs-pill");
+  const att=barra?.querySelector('.vetrina[aria-selected="true"]');
+  if(!pil||!att)return;
+  const scrivi=()=>{pil.style.transform=`translateX(${att.offsetLeft}px)`;pil.style.width=`${att.offsetWidth}px`};
+  if(animata){scrivi();return}
+  const prec=pil.style.transition;
+  pil.style.transition="none";scrivi();void pil.offsetWidth;pil.style.transition=prec;
+}
+
+const selezione=()=>inVetrina().filter(p=>passa(p,filtriAttivi,noteAttive))
   .sort((a,b)=>{const fn=ordinamenti[ordine].fn,va=fn(a),vb=fn(b);return typeof va==="number"?va-vb:va<vb?-1:va>vb?1:0});
-const quanti=(f,n)=>profumi.filter(p=>passa(p,f,n)).length;
+const quanti=(f,n)=>inVetrina().filter(p=>passa(p,f,n)).length;
 
 function evidenzia(testo){
   if(!noteAttive.size)return esc(testo);
@@ -281,7 +315,7 @@ function costruisciTeca(p,i){
       <div class="contrassegni">
         <span class="segno stag">${stagLbl(p.stagione)}</span>
         <span class="segno">${momLbl(p.momento)}</span>
-        <span class="segno ore">${p.longevita}h</span>
+        <span class="segno ore">${p.longevita?p.longevita+"h":"durata n.d."}</span>
         <span class="segno">${p.famiglia}</span>
       </div>
       <div class="scheda-int t-acc-panel">
@@ -323,8 +357,11 @@ function disegna(){
   document.getElementById("vista-collezione").innerHTML=lista.length
     ? lista.map(costruisciTeca).join("")
     : `<div class="deserto">Nessuna boccetta con questi filtri.<span>Togli un filtro per allargare la ricerca.</span></div>`;
-  const tot=profumi.length;
-  scriviConteggio(lista.length, lista.length===tot?" boccette":` di ${tot}`);
+  const tot=inVetrina().length;
+  const parola=vetrina==="campioni"?" campioni":" boccette";
+  scriviConteggio(lista.length, lista.length===tot?parola:` di ${tot}`);
+  const conta=document.querySelector(".vetrina-conta");
+  if(conta)conta.textContent=campioni().length||"";
   const n=filtriAttivi.size+noteAttive.size;
   const bollo=document.getElementById("bollo-filtri");
   if(n>0)bollo.querySelector(".t-badge-dot").textContent=n;  // in chiusura il
@@ -519,7 +556,8 @@ function disegnaConfronto(){
   vuoto.style.display="none";
   const lista=ids.map(id=>profumi.find(p=>p.id===id)).filter(Boolean);
   const votati=lista.filter(p=>p.rating);
-  const megR=votati.length?Math.max(...votati.map(p=>p.rating)):null,megL=Math.max(...lista.map(p=>p.longevita));
+  const megR=votati.length?Math.max(...votati.map(p=>p.rating)):null,
+        megL=Math.max(...lista.filter(p=>p.longevita).map(p=>p.longevita),0);
   let h=`<div class="cf-tabella"><div class="cf-griglia col${lista.length}">`;
   h+=`<div class="cf-eti" style="border-bottom:1px solid var(--filo-2)"></div>`;
   lista.forEach(p=>{
@@ -534,7 +572,7 @@ function disegnaConfronto(){
   const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
   h+=`<div class="cf-sez incisa">Profilo</div>`;
   riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${voto(p.rating)}`:"n.d."}</div>`);
-  riga("Longevità",p=>`<div class="cf-cella${p.longevita===megL?" meglio":""}">${p.longevita}h</div>`);
+  riga("Longevità",p=>`<div class="cf-cella${p.longevita&&p.longevita===megL?" meglio":""}">${p.longevita?p.longevita+"h":"n.d."}</div>`);
   riga("Stagione",p=>`<div class="cf-cella"><span class="cf-segno stag">${stagLbl(p.stagione)}</span></div>`);
   riga("Momento",p=>`<div class="cf-cella" style="font-size:12px">${momLbl(p.momento)}</div>`);
   riga("Famiglia",p=>`<div class="cf-cella"><span class="cf-segno">${p.famiglia}</span></div>`);
@@ -609,7 +647,7 @@ const vocePr=p=>`${esc(p.name)} <span class="n">${p.conc} · № ${p.id}</span>`
 function disegnaGuida(){
   let h=`<div class="premessa">Ogni sezione nasce dalla collezione reale: aggiungi una boccetta e compare qui da sola, nella stagione giusta. I numeri sono quelli incisi sui cartellini.</div>`;
   sezioniGuida.forEach((s,idx)=>{
-    const si=profumi.filter(p=>p[s.k]==="si"), mod=profumi.filter(p=>p[s.k]==="si-mod");
+    const si=boccette().filter(p=>p[s.k]==="si"), mod=boccette().filter(p=>p[s.k]==="si-mod");
     let corpo="";
     [["tutto","Tutto l'anno"],["pe","Primavera / Estate"],["ai","Autunno / Inverno"]].forEach(([st,lbl])=>{
       const l=si.filter(p=>p.stagione===st);
@@ -673,7 +711,7 @@ const collegamentoProfilo=`<a class="profilo" href="https://www.fragrantica.it/m
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--carta-3)"><path d="m9 18 6-6-6-6"/></svg>
 </a>`;
 function disegnaAcquisti(){
-  let h=collegamentoProfilo+`<div class="premessa">Le famiglie assenti o poco coperte, lette sulla collezione com'è oggi: ${profumi.length} boccette. In fondo, quello che gli ultimi acquisti hanno già risolto.</div>`;
+  let h=collegamentoProfilo+`<div class="premessa">Le famiglie assenti o poco coperte, lette sulla collezione com'è oggi: ${boccette().length} boccette. In fondo, quello che gli ultimi acquisti hanno già risolto.</div>`;
   let gruppo="";
   consigli.forEach((c,i)=>{
     if(c.g!==gruppo){gruppo=c.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
@@ -691,13 +729,17 @@ function disegnaAcquisti(){
 
 // ── NUMERI ────────────────────────────────────────────────────────────────
 function disegnaNumeri(){
-  const tot=profumi.length,perStag=k=>profumi.filter(p=>p.stagione===k).length;
-  const votati=profumi.filter(p=>p.rating);
+  const bocc=boccette();
+  const tot=bocc.length,perStag=k=>bocc.filter(p=>p.stagione===k).length;
+  const votati=bocc.filter(p=>p.rating);
   const mediaR=(votati.reduce((a,p)=>a+p.rating,0)/votati.length).toFixed(2);
-  const mediaL=(profumi.reduce((a,p)=>a+p.longevita,0)/tot).toFixed(1);
+  /* la media esclude chi la durata non ce l'ha, come gia' fa quella dei voti:
+     contarli come zero abbassava il numero senza dirlo */
+  const durate=bocc.filter(p=>p.longevita);
+  const mediaL=(durate.reduce((a,p)=>a+p.longevita,0)/durate.length).toFixed(1);
   let h=collegamentoProfilo+`<div class="numeri">
     <div class="numero"><div class="numero-n">${tot}</div><div class="numero-l">Boccette</div></div>
-    <div class="numero"><div class="numero-n">${profumi.filter(p=>p.dupe).length}</div><div class="numero-l">Cloni e dupe</div></div>
+    <div class="numero"><div class="numero-n">${bocc.filter(p=>p.dupe).length}</div><div class="numero-l">Cloni e dupe</div></div>
     <div class="numero"><div class="numero-n">${perStag("pe")}</div><div class="numero-l">Primavera / Estate</div></div>
     <div class="numero"><div class="numero-n">${perStag("ai")}</div><div class="numero-l">Autunno / Inverno</div></div>
     <div class="numero"><div class="numero-n">${mediaR}</div><div class="numero-l">Rating medio · ${votati.length} valutati</div></div>
@@ -705,12 +747,12 @@ function disegnaNumeri(){
   </div>`;
   h+=`<div class="tavola"><div class="tavola-t incisa">Famiglia olfattiva</div>`;
   ["rosso","verde","blu"].forEach(c=>{
-    const n=profumi.filter(p=>p.colore===c).length;
+    const n=bocc.filter(p=>p.colore===c).length;
     h+=`<div class="asta"><div class="asta-eti"><span>${vetroNome[c]}</span><span>${n}</span></div><div class="binario"><div class="riempio ${vetroClasse[c]}" style="width:${Math.round(n/tot*100)}%"></div></div></div>`;
   });
   h+=`</div><div class="tavola"><div class="tavola-t incisa">Occasione d'uso</div>`;
   Object.keys(usoLabels).forEach(k=>{
-    const n=profumi.filter(p=>p[k]==="si"||p[k]==="si-mod").length,pct=Math.round(n/tot*100);
+    const n=bocc.filter(p=>p[k]==="si"||p[k]==="si-mod").length,pct=Math.round(n/tot*100);
     h+=`<div class="asta"><div class="asta-eti"><span>${usoLabels[k]}</span><span>${n} · ${pct}%</span></div><div class="binario"><div class="riempio" style="width:${pct}%"></div></div></div>`;
   });
   h+=`</div>`;
@@ -719,11 +761,11 @@ function disegnaNumeri(){
   Object.keys(perR).sort((a,b)=>b-a).forEach(r=>{
     h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${voto(r)}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
   });
-  const senza=profumi.filter(p=>!p.rating);
+  const senza=bocc.filter(p=>!p.rating);
   if(senza.length)h+=`<div class="asta"><div class="asta-eti"><span>${senza.map(p=>p.name).join(" · ")}</span><span>n.d.</span></div><div class="binario"></div></div>`;
   h+=`</div>`;
-  const perL={};profumi.forEach(p=>{(perL[p.longevita]=perL[p.longevita]||[]).push(p)});
-  const maxL=Math.max(...profumi.map(p=>p.longevita));
+  const perL={};durate.forEach(p=>{(perL[p.longevita]=perL[p.longevita]||[]).push(p)});
+  const maxL=Math.max(...durate.map(p=>p.longevita),1);
   h+=`<div class="tavola"><div class="tavola-t incisa">Longevità dichiarata</div>`;
   Object.keys(perL).sort((a,b)=>b-a).forEach(l=>{
     const ns=perL[l].map(p=>p.name);
@@ -731,7 +773,7 @@ function disegnaNumeri(){
   });
   h+=`</div>`;
   h+=`<div class="tavola"><div class="tavola-t incisa">Di quale profumo sono la copia</div>`;
-  profumi.filter(p=>p.dupe).forEach(p=>{
+  bocc.filter(p=>p.dupe).forEach(p=>{
     h+=`<div class="asta" style="margin-bottom:13px"><div class="asta-eti"><span style="color:var(--carta)">${esc(p.name)} <span style="color:var(--carta-3);font-size:11.5px">№ ${p.id}</span></span></div>
       <div style="font-size:13px;color:var(--ottone);line-height:1.5">→ ${esc(p.dupe)}</div></div>`;
   });
@@ -759,7 +801,7 @@ function muoviPillola(animata){
   void pillola.offsetWidth;
   pillola.style.transition=prec;
 }
-window.addEventListener("resize",()=>muoviPillola(false));
+window.addEventListener("resize",()=>{muoviPillola(false);muoviVetrina(false)});
 
 function cambiaVista(v){
   ["collezione","confronta","layering","guida","acquisti","numeri"].forEach(n=>{
@@ -816,7 +858,7 @@ async function avvia() {
     disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
     if (primo) { cambiaVista("collezione"); primo = false;
                  rivela();
-                 requestAnimationFrame(() => muoviPillola(false)); }
+                 requestAnimationFrame(() => { muoviPillola(false); muoviVetrina(false); }); }
   };
   try {
     await caricaDati(mostra);

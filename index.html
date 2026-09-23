@@ -25,6 +25,15 @@
 </header>
 
 <div class="strumenti" id="strumenti">
+  <!-- Due vetrine: le boccette e i campioncini in prova. La pillola che scorre
+       e' la stessa transizione del timone. -->
+  <div class="vetrine" role="tablist" aria-label="Boccette o campioni">
+    <span class="t-tabs-pill" aria-hidden="true"></span>
+    <button class="vetrina" role="tab" aria-selected="true" data-vetrina="boccette"
+            onclick="cambiaVetrina('boccette')">Boccette</button>
+    <button class="vetrina" role="tab" aria-selected="false" data-vetrina="campioni"
+            onclick="cambiaVetrina('campioni')">Campioni<span class="vetrina-conta"></span></button>
+  </div>
   <div class="riga-cerca">
     <div class="cerca">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 3.8 3.8"/></svg>
