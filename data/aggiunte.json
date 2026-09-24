@@ -1,11 +1,6 @@
 [
  {
   "tab": "Profumi",
-  "colonna": "stato",
-  "perche": "a che punto e': da provare, promosso, forse, bocciato per i campioni; in arrivo per le boccette"
- },
- {
-  "tab": "Profumi",
   "chiave": "id",
   "valore": "33",
   "perche": "campioncino 2 ml",
@@ -50,8 +45,7 @@
    "casa": "si",
    "festivita": "si",
    "nuovo": "si",
-   "descrizione": "L'originale di cui Amber Oud Gold Edition (№ 27) è la copia: stessa apertura di agrumi siciliani su fondo di vaniglia, muschio bianco e ambra. Averli tutti e due permette di sentire quanto il clone si avvicina davvero.",
-   "stato": "da provare"
+   "descrizione": "L'originale di cui Amber Oud Gold Edition (№ 27) è la copia: stessa apertura di agrumi siciliani su fondo di vaniglia, muschio bianco e ambra. Averli tutti e due permette di sentire quanto il clone si avvicina davvero."
   }
  },
  {
@@ -100,8 +94,7 @@
    "casa": "si",
    "festivita": "si",
    "nuovo": "si",
-   "descrizione": "Miele e tabacco su una base di vaniglia e fava tonka, con la lavanda in apertura a tenere il dolce lontano dallo sciroppo. Rating 4.49 su 21.028 voti: il più amato dei sei campioni.",
-   "stato": "da provare"
+   "descrizione": "Miele e tabacco su una base di vaniglia e fava tonka, con la lavanda in apertura a tenere il dolce lontano dallo sciroppo. Rating 4.49 su 21.028 voti: il più amato dei sei campioni."
   }
  },
  {
@@ -150,8 +143,7 @@
    "casa": "si",
    "festivita": "si",
    "nuovo": "si",
-   "descrizione": "Oud e pelle scamosciata su un cuore di iris nero e violetta. È l'iris denso e serale che la collezione ha già, ma portato dentro il territorio dell'oud, che invece non aveva.",
-   "stato": "da provare"
+   "descrizione": "Oud e pelle scamosciata su un cuore di iris nero e violetta. È l'iris denso e serale che la collezione ha già, ma portato dentro il territorio dell'oud, che invece non aveva."
   }
  },
  {
@@ -200,8 +192,7 @@
    "casa": "si",
    "festivita": "si",
    "nuovo": "si",
-   "descrizione": "Tabacco e incenso su ambra e labdano, con la cannella in apertura. Il secondo profumo con l'incenso dopo Ombre Noire, ma qui è secco e tabaccoso invece che resinoso.",
-   "stato": "da provare"
+   "descrizione": "Tabacco e incenso su ambra e labdano, con la cannella in apertura. Il secondo profumo con l'incenso dopo Ombre Noire, ma qui è secco e tabaccoso invece che resinoso."
   }
  },
  {
@@ -250,8 +241,7 @@
    "casa": "si",
    "festivita": "si",
    "nuovo": "si",
-   "descrizione": "Il più estremo dei sei: resine, oud, note animali e cannabis in un extrait quasi solido. Non è un profumo da indossare distrattamente — Fragrantica lo dà a 27 di giorno su 100, il valore più basso di tutta la collezione.",
-   "stato": "da provare"
+   "descrizione": "Il più estremo dei sei: resine, oud, note animali e cannabis in un extrait quasi solido. Non è un profumo da indossare distrattamente — Fragrantica lo dà a 27 di giorno su 100, il valore più basso di tutta la collezione."
   }
  },
  {
@@ -300,8 +290,7 @@
    "casa": "si",
    "festivita": "si",
    "nuovo": "si",
-   "descrizione": "Frutto della passione e zafferano sopra oud e cuoio: la scuola fruttato-cuoiata di La Yuqawam (№ 23), ma con l'oud al posto del lampone. Rating 3.75, il più basso dei sei.",
-   "stato": "da provare"
+   "descrizione": "Frutto della passione e zafferano sopra oud e cuoio: la scuola fruttato-cuoiata di La Yuqawam (№ 23), ma con l'oud al posto del lampone. Rating 3.75, il più basso dei sei."
   }
  }
 ]
