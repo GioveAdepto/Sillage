@@ -121,6 +121,22 @@ ancora esattamente il valore che si aspettava. Il resoconto di ogni esecuzione
 Se preferisci vedere prima cosa arriverebbe, tieni l'automatismo spento e lancia
 `correggi(true)` quando ti va.
 
+## Lanciarle da fuori
+
+Il Web App risponde anche in POST: `…/exec?azione=applica` lancia `aggiungi()`
+e poi `correggi()`, svuota la cache e restituisce i due resoconti. Così chi
+lavora al repo applica le modifiche subito, senza aprire l'editor:
+
+```
+curl -sL -X POST "<url del Web App>?azione=applica"
+```
+
+Scrive solo quello che è in `data/aggiunte.json` e `data/correzioni.json` su
+main, con le guardie di sempre: le modifiche fatte a mano vincono, e rilanciare
+non duplica niente. Dopo aver incollato questo codice va pubblicata una
+**nuova versione** del Web App (Distribuisci → Gestisci distribuzioni → matita →
+Versione: Nuova versione), una volta sola: l'URL resta lo stesso.
+
 `aggiungi()` sa anche creare colonne: una voce con `"colonna"` al posto di
 `"riga"` aggiunge l'intestazione in fondo alla tab, se manca. Le colonne vengono
 create prima delle righe, così una riga nuova può già usarle.

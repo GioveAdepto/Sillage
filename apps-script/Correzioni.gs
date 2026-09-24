@@ -119,14 +119,16 @@ function correggi(soloProva) {
  */
 function attivaAutomatismo() {
   fermaAutomatismo();
-  ScriptApp.newTrigger('correggi').timeBased().everyDays(1).atHour(4).create();
-  return 'correzioni automatiche attive: ogni notte verso le 4';
+  // applica(): righe nuove e correzioni insieme
+  ScriptApp.newTrigger('applica').timeBased().everyDays(1).atHour(4).create();
+  return 'aggiunte e correzioni automatiche attive: ogni notte verso le 4';
 }
 
 function fermaAutomatismo() {
   var tolti = 0;
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === 'correggi') { ScriptApp.deleteTrigger(t); tolti++; }
+    var h = t.getHandlerFunction();
+    if (h === 'correggi' || h === 'applica') { ScriptApp.deleteTrigger(t); tolti++; }
   });
   return tolti ? 'automatismo fermato' : 'non era attivo';
 }
