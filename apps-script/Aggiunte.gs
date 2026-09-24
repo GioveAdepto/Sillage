@@ -15,6 +15,10 @@
  *
  *   aggiungi()       accoda quello che manca
  *   aggiungi(true)   prova a vuoto: dice cosa farebbe senza scrivere
+ *
+ * Oltre alle righe sa aggiungere colonne: una voce con "colonna" al posto di
+ * "riga" crea l'intestazione in fondo alla tab, se non c'è già. Le colonne
+ * vengono create prima delle righe, così una riga nuova può già usarle.
  */
 
 var AGGIUNTE_URL = REPO + 'data/aggiunte.json';
@@ -46,8 +50,27 @@ function aggiungi(soloProva) {
     return x.length > 64 ? x.slice(0, 61) + '…' : x;
   }
 
-  var esiti = [], aggiunte = 0, saltate = 0;
-  voci.forEach(function (v) {
+  var esiti = [], aggiunte = 0, colonne = 0, saltate = 0;
+
+  // prima le colonne: le righe che seguono possono aver bisogno di quelle nuove
+  voci.filter(function (v) { return v.colonna; }).forEach(function (v) {
+    var etichetta = v.tab + ' colonna «' + v.colonna + '»';
+    var t;
+    try { t = tabella(v.tab); }
+    catch (e) { esiti.push(etichetta + ': ' + e.message); return; }
+    if (t.testa.indexOf(v.colonna) >= 0) { saltate++; esiti.push(etichetta + ': c\'è già, salto'); return; }
+    var col = t.testa.length + 1;
+    // anche in prova la colonna entra in memoria: le righe che seguono la
+    // usano, e senza la prova a vuoto le respingerebbe dando un esito falso
+    t.testa.push(v.colonna);
+    t.griglia.forEach(function (r, i) { r.push(i === 0 ? v.colonna : ''); });
+    if (soloProva) { esiti.push(etichetta + ': (prova) colonna nuova in fondo'); return; }
+    t.foglio.getRange(1, col).setValue(v.colonna).setFontWeight('bold');
+    colonne++;
+    esiti.push(etichetta + ': creata — ' + (v.perche || ''));
+  });
+
+  voci.filter(function (v) { return v.riga; }).forEach(function (v) {
     var etichetta = v.tab + ' «' + breve(v.valore) + '»';
     var t;
     try { t = tabella(v.tab); }
@@ -82,7 +105,7 @@ function aggiungi(soloProva) {
 
   var riassunto = voci.length + ' voci in coda · ' +
                   (soloProva ? 'PROVA A VUOTO, niente è stato scritto'
-                             : aggiunte + ' righe aggiunte') +
+                             : (colonne ? colonne + ' colonne e ' : '') + aggiunte + ' righe aggiunte') +
                   (saltate ? ' · ' + saltate + ' già presenti' : '');
   var testo = riassunto + '\n' + (esiti.join('\n') || 'niente da aggiungere');
   Logger.log(testo);

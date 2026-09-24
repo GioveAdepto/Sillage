@@ -121,6 +121,26 @@ ancora esattamente il valore che si aspettava. Il resoconto di ogni esecuzione
 Se preferisci vedere prima cosa arriverebbe, tieni l'automatismo spento e lancia
 `correggi(true)` quando ti va.
 
+## La colonna `stato`
+
+Dice a che punto è un profumo.
+
+| valore | per | come lo mostra l'app |
+|---|---|---|
+| `da provare` | campioni | targa tratteggiata, e scelta rapida nella vetrina Campioni |
+| `promosso` | campioni | targa verde, e compare negli Acquisti fra i candidati |
+| `forse` | campioni | targa ottone, negli Acquisti fra quelli da riprovare |
+| `bocciato` | campioni | targa barrata |
+| `in arrivo` | boccette | targa azzurra |
+| *vuoto* | tutti | in collezione, niente da segnalare |
+
+Quando provi un campione, cambia la cella: il resto lo fa l'app. Quando una
+boccetta in arrivo arriva, svuota la cella.
+
+`aggiungi()` sa anche creare colonne: una voce con `"colonna"` al posto di
+`"riga"` aggiunge l'intestazione in fondo alla tab, se manca. Le colonne vengono
+create prima delle righe, così una riga nuova può già usarle.
+
 ## Colonne del foglio che l'app non disegna (ancora)
 
 `genere`, `sillage`, `voti`, `giorno_pct`, le quattro percentuali stagionali,

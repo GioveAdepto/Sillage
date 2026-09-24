@@ -209,6 +209,7 @@ function passa(p,filtri,note){
     if(f==="sera"&&p.momento!=="sera")return false;
     if(f==="giorno"&&p.momento!=="giorno")return false;
     if(f==="dupe"&&!p.dupe)return false;
+    if(f.startsWith("stato:")&&statoDi(p)!==f.slice(6))return false;
   }
   if(note.size){
     let trovata=false;
@@ -227,9 +228,55 @@ const boccette=()=>profumi.filter(p=>!eCampione(p));
 const campioni=()=>profumi.filter(eCampione);
 const inVetrina=()=>vetrina==="campioni"?campioni():boccette();
 
+/* Lo stato dice a che punto e' un profumo. Per i campioni e' l'esito della
+   prova — il motivo per cui un campioncino esiste; per le boccette, per ora,
+   solo "in arrivo". Vuoto vuol dire: in collezione, niente da segnalare. */
+const STATI_CAMPIONE=[["da provare","Da provare"],["promosso","Promossi"],["forse","Forse"],["bocciato","Bocciati"]];
+const ETICHETTA_STATO={"da provare":"Da provare","promosso":"Promosso","forse":"Forse",
+                       "bocciato":"Bocciato","in arrivo":"In arrivo"};
+const statoDi=p=>String(p.stato||"").trim().toLowerCase();
+const classeStato=st=>st.replace(/\s+/g,"-");
+
+/* "EDP · 100 ml", e il residuo quando la boccetta non e' piu' piena. Le
+   colonne formato_ml e residuo_pct c'erano gia' nel foglio: l'app non le
+   mostrava. */
+function formato(p){
+  if(!p.formatoMl)return "";
+  let t=` · ${p.formatoMl} ml`;
+  if(p.residuoPct!=null&&p.residuoPct!==""&&+p.residuoPct<100)t+=` · ${p.residuoPct}%`;
+  return t;
+}
+
+/* Originale e clone si riconoscono dal nome: clone_di contiene "Marchio
+   Profumo" dell'originale. Se l'originale e' in collezione — anche come
+   campione — le due schede si puntano a vicenda. */
+const chiaveNome=t=>String(t).split(" (")[0].toLowerCase().normalize("NFD")
+  .replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+const originaleDi=p=>p.dupe?profumi.find(q=>q.id!==p.id&&chiaveNome(q.brand+" "+q.name)===chiaveNome(p.dupe))||null:null;
+const copieDi=p=>profumi.filter(q=>q.id!==p.id&&q.dupe&&chiaveNome(q.dupe)===chiaveNome(p.brand+" "+p.name));
+
+/* Porta a un profumo da qualunque punto: sceglie la vetrina giusta, toglie i
+   filtri che potrebbero nasconderlo, apre la scheda e ci scorre sopra. */
+function vaiAlProfumo(id){
+  const p=profumi.find(x=>x.id===id);
+  if(!p)return;
+  filtriAttivi.clear();noteAttive.clear();testoCerca="";
+  const c=document.getElementById("cerca");if(c)c.value="";
+  const v=eCampione(p)?"campioni":"boccette";
+  if(v!==vetrina)cambiaVetrina(v);else disegna();
+  cambiaVista("collezione");
+  // la scheda e' gia' nel DOM: si apre subito, senza aspettare un fotogramma
+  // che in una scheda del browser in secondo piano potrebbe non arrivare mai
+  const t=document.getElementById("teca-"+id);
+  if(!t)return;
+  if(t.getAttribute("data-open")!=="true")apriTeca(id);
+  t.scrollIntoView({block:"start",behavior:"smooth"});
+}
+
 function cambiaVetrina(v){
   if(v===vetrina)return;
   vetrina=v;
+  filtriAttivi.clear();noteAttive.clear();   // le scelte rapide cambiano con la vetrina
   document.querySelectorAll(".vetrina").forEach(b=>
     b.setAttribute("aria-selected",String(b.dataset.vetrina===v)));
   muoviVetrina(true);
@@ -279,6 +326,17 @@ function costruisciTeca(p,i){
   const accordi=p.accordi.slice(0,3).map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("");
   const presa=insiemeConfronto.has(p.id);
   const ric=strati.get(p.id)||[];
+  const orig=originaleDi(p),copie=copieDi(p);
+  const legame=(q,testo)=>`<button class="strato" onclick="event.stopPropagation();vaiAlProfumo(${q.id})">
+                ${iconaLegame}<span>${testo} <b>${esc(q.name)}</b></span><span class="strato-ruolo">№ ${q.id}</span></button>`;
+  const bloccoLegami=(orig||copie.length)?`
+          <div class="strati t-stagger-line t-stagger-line--4">
+            <div class="incisa">Parentele</div>
+            <div class="strati-elenco">
+              ${orig?legame(orig,eCampione(orig)?"L'originale, in prova:":"L'originale, in collezione:"):""}
+              ${copie.map(q=>legame(q,eCampione(q)?"Il suo clone, in prova:":"Il suo clone, in collezione:")).join("")}
+            </div>
+          </div>`:"";
   const bloccoStrati=ric.length?`
           <div class="strati t-stagger-line t-stagger-line--4">
             <div class="incisa">Layering</div>
@@ -299,7 +357,8 @@ function costruisciTeca(p,i){
           <h2 class="nome">${esc(p.name)}</h2>
           <div class="targhette">
             ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
-            <span class="targa grado">${p.conc}</span>
+            ${statoDi(p)?`<span class="targa stato stato-${classeStato(statoDi(p))}">${ETICHETTA_STATO[statoDi(p)]||esc(p.stato)}</span>`:""}
+            <span class="targa grado">${p.conc}${formato(p)}</span>
             <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
             ${ric.length?`<span class="targa strati-conta">${iconaStrati}${ric.length} ${ric.length===1?"ricetta":"ricette"}</span>`:""}
@@ -322,7 +381,7 @@ function costruisciTeca(p,i){
         <div class="scheda-int-int t-acc-panel-inner t-stagger">
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
-          <p class="racconto t-stagger-line t-stagger-line--3">${esc(p.desc)}</p>${bloccoStrati}
+          <p class="racconto t-stagger-line t-stagger-line--3">${esc(p.desc)}</p>${bloccoLegami}${bloccoStrati}
         </div>
       </div>
     </div>
@@ -404,6 +463,12 @@ function scelta(f,extra,etichetta){
     ${etichetta}<span class="q">${n}</span></button>`;
 }
 function disegnaRapidi(){
+  if(vetrina==="campioni"){
+    // nei campioni "Ufficio" e "Adesso" dicono poco: conta a che punto e' la prova
+    document.getElementById("rapidi").innerHTML=
+      STATI_CAMPIONE.map(([k,l])=>scelta("stato:"+k,"",l)).join("");
+    return;
+  }
   const st=stagioneOra()==="pe"?"estate":"inverno",mo=moment0Ora();
   document.getElementById("rapidi").innerHTML=
     scelta("adesso","ora",`Adesso · ${st}, ${mo}`)+
@@ -629,6 +694,7 @@ function indiceStrati(){
 }
 let strati=new Map();
 
+const iconaLegame='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L12.5 19.5"/></svg>';
 const iconaStrati='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 3 7l9 5 9-5-9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg>';
 
 /* Dalla scheda alla ricetta: cambia vista, apre quella giusta e ci porta
@@ -724,6 +790,21 @@ function disegnaAcquisti(){
       <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">${c.voci.map(v=>`<div class="passo"><span class="passo-nome">${v.t}</span><span class="passo-testo">${v.d}</span></div>`).join("")}</div></div>
     </article>`;
   });
+  /* I campioni sono il modo in cui un acquisto si decide: quelli promossi sono
+     candidati, i "forse" meritano una seconda prova. Si elencano qui, dove si
+     ragiona su cosa comprare. */
+  const cmp=campioni();
+  if(cmp.length){
+    const di=k=>cmp.filter(p=>statoDi(p)===k);
+    const riga=(etichetta,lista,vuoto)=>`<div class="voce"><div class="voce-eti incisa">${etichetta}</div>
+      <div class="voce-testo">${lista.length?lista.map(p=>`<a class="salto" onclick="vaiAlProfumo(${p.id})">${esc(p.name)}</a>`).join('<span class="sep">·</span>'):`<span class="voce-nota">${vuoto}</span>`}</div></div>`;
+    h+=`<div class="divisorio incisa">Dai campioncini</div>
+    <div class="tavola">
+      ${riga("Promossi — candidati all'acquisto",di("promosso"),"Nessuno ancora.")}
+      ${riga("Forse — da riprovare",di("forse"),"Nessuno.")}
+      ${riga("Da provare",di("da provare"),"Nessuno: li hai provati tutti.")}
+    </div>`;
+  }
   document.getElementById("vista-acquisti").innerHTML=h;
 }
 

@@ -1,1 +1,16 @@
-[]
+[
+ {
+  "id": 30,
+  "colonna": "stato",
+  "da": "",
+  "a": "da provare",
+  "perche": "Asad e un campione ancora in prova, come dice la sua nota"
+ },
+ {
+  "id": 32,
+  "colonna": "stato",
+  "da": "",
+  "a": "in arrivo",
+  "perche": "comprato il 21 settembre, non ancora in casa"
+ }
+]
