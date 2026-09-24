@@ -99,6 +99,20 @@
   </div>
 </div>
 
+<div class="fondale" id="fondale-oggi" onclick="if(event.target===this)chiudiOggi()">
+  <div class="foglio t-modal" role="dialog" aria-modal="true" aria-label="Cosa metto oggi">
+    <div class="foglio-testa">
+      <div class="maniglia"></div>
+      <div class="foglio-titolo">Cosa metto oggi</div>
+      <div class="foglio-sotto" id="oggi-sotto"></div>
+      <button class="foglio-chiudi" onclick="chiudiOggi()" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="foglio-corpo" id="oggi-corpo"></div>
+  </div>
+</div>
+
 <nav class="timone">
   <span class="t-tabs-pill" aria-hidden="true"></span>
   <button class="remo attivo" id="remo-collezione" onclick="cambiaVista('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Collezione</button>
