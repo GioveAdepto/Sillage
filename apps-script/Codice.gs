@@ -6,7 +6,8 @@
  *           tradotte nei nomi di campo usati da js/app.js).
  * installa() da lanciare UNA VOLTA dall'editor: aggiunge al foglio le colonne
  *           e le tab che ancora non ci sono, riempiendole con i dati del repo.
- * doPost()  con azione=applica lancia aggiungi() e poi correggi(): chi lavora
+ * doPost()  con azione=diario segna (o toglie) un profumo indossato: vedi
+ *           Diario.gs. Con azione=applica lancia aggiungi() e poi correggi(): chi lavora
  *           al repo applica le sue modifiche al foglio senza passare
  *           dall'editor. Scrive solo quello che sta in data/aggiunte.json e
  *           data/correzioni.json su main, con le stesse guardie di sempre.
@@ -141,6 +142,7 @@ function tutto_() {
     note:      note_(),
     layering:  layering_(),
     consigli:  consigli_(),
+    diario:    diario_(),
     aggiornato: new Date().toISOString()
   };
 }
@@ -165,12 +167,18 @@ function doGet(e) {
 function doPost(e) {
   var azione = e && e.parameter && e.parameter.azione;
   var esito;
-  if (azione !== 'applica') {
+  if (azione !== 'applica' && azione !== 'diario') {
     esito = { errore: 'azione sconosciuta: ' + azione };
   } else {
     var lucchetto = LockService.getScriptLock();
     lucchetto.waitLock(30000);            // due lanci insieme non si pestano
-    try { esito = applica(); } finally { lucchetto.releaseLock(); }
+    try {
+      if (azione === 'applica') esito = applica();
+      else {
+        esito = scriviDiario_(e.parameter);   // vedi Diario.gs
+        CacheService.getScriptCache().remove('dati');
+      }
+    } finally { lucchetto.releaseLock(); }
   }
   return ContentService.createTextOutput(JSON.stringify(esito))
     .setMimeType(ContentService.MimeType.JSON);

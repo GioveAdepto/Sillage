@@ -151,3 +151,14 @@ create prima delle righe, così una riga nuova può già usarle.
 Attenzione a `serata`: **non** è `appuntamento`. Sono due colonne distinte e su
 4 profumi danno risposte diverse (Helan, Terre d'Hermès, Acqua di Giò, CdN
 Sillage); l'app legge `appuntamento`.
+
+## Il diario d'uso
+
+`Diario.gs` tiene la tab **Diario**: una riga per ogni volta che indossi un
+profumo (data, id, profumo, t). La scrive l'app dal pulsante «Lo metto oggi»,
+passando da `doPost` con `azione=diario`; la tab nasce da sola alla prima voce.
+Si può correggere a mano, lasciando la data nel formato AAAA-MM-GG.
+
+Se il Web App non risponde, le voci aspettano sul telefono e partono al
+prossimo avvio. Il link è pubblico, quindi ogni voce viene controllata: il
+profumo deve esistere e in un giorno non entrano più di dieci voci.

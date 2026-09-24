@@ -15,7 +15,7 @@ const ORIGINE_DATI = {
 const CHIAVE_CACHE = "sillage:dati";
 
 // Riempiti all'avvio da caricaDati(). Prima di allora la collezione è vuota.
-let profumi = [], noteChips = [], layering = [], consigli = [];
+let profumi = [], noteChips = [], layering = [], consigli = [], diarioFoglio = [];
 let origineDati = "locale";
 
 /* Da dove arrivano i dati che sono a schermo adesso. Finisce su <body> per
@@ -33,6 +33,7 @@ function applicaDati(d) {
   noteChips = d.note      || [];
   layering  = d.layering  || [];
   consigli  = d.consigli  || [];
+  diarioFoglio = d.diario || [];
 }
 
 async function leggiLocale() {
@@ -72,7 +73,7 @@ function leggiCache() {
 /* Impronta dei soli dati: `aggiornato` cambia a ogni risposta e falserebbe
    il confronto fra quello che è a schermo e quello che è appena arrivato. */
 function impronta(d) {
-  return JSON.stringify([d.profumi, d.note, d.layering, d.consigli]);
+  return JSON.stringify([d.profumi, d.note, d.layering, d.consigli, d.diario || []]);
 }
 
 /* Ordine di preferenza: foglio Google → ultima copia in cache → JSON del repo.
@@ -227,6 +228,91 @@ const boccette=()=>profumi.filter(p=>!eCampione(p));
 const campioni=()=>profumi.filter(eCampione);
 const inVetrina=()=>vetrina==="campioni"?campioni():boccette();
 
+/* Il numero sul cartellino e' la posizione nella sua vetrina, in ordine di
+   arrivo: le boccette vanno da 1 a 31, i campioni da 1 a 7. L'id del foglio
+   resta la chiave di tutto, ma a schermo non si vede piu': contava anche i
+   campioni, e Ombre Noire risultava № 32 su 31 boccette. I testi che citano
+   "№ 27" vengono riscritti con il numero nuovo. */
+let numeri=new Map();
+function numera(){
+  numeri=new Map();
+  [boccette(),campioni()].forEach(l=>[...l].sort((a,b)=>a.id-b.id).forEach((p,i)=>numeri.set(p.id,i+1)));
+}
+const numeroDi=id=>{if(numeri.size!==profumi.length)numera();return numeri.get(id)??id};
+const rinumera=t=>String(t??"").replace(/№\s*(\d+)/g,(m,n)=>"№ "+numeroDi(+n));
+
+/* ── Il diario d'uso ──
+   Le voci confermate arrivano dal foglio (tab Diario). Quelle appena toccate
+   aspettano in una coda locale finche' il foglio non le conferma: cosi' il
+   pulsante risponde subito anche senza rete, e niente va perso. */
+const CODA_DIARIO="sillage:diario-coda";
+const leggiCoda=()=>{try{return JSON.parse(localStorage.getItem(CODA_DIARIO))||[]}catch(e){return []}};
+const scriviCoda=c=>{try{localStorage.setItem(CODA_DIARIO,JSON.stringify(c))}catch(e){}};
+const oggiISO=(d=new Date())=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function diario(){
+  const coda=leggiCoda(),tolte=new Set(coda.filter(o=>o.op==="togli").map(o=>String(o.t))),m=new Map();
+  diarioFoglio.forEach(v=>m.set(String(v.t),v));
+  coda.filter(o=>o.op==="metti").forEach(o=>m.set(String(o.t),o));
+  return [...m.values()].filter(v=>!tolte.has(String(v.t)));
+}
+const vociDi=id=>diario().filter(v=>+v.id===id).map(v=>v.data).sort();
+function giorniDa(id){
+  const v=vociDi(id);
+  if(!v.length)return null;
+  return Math.round((new Date(oggiISO())-new Date(v[v.length-1]))/864e5);
+}
+const indossatoOggi=id=>diario().some(v=>+v.id===id&&v.data===oggiISO());
+const quandoFu=g=>g===0?"oggi":g===1?"ieri":g<45?`${g} giorni fa`:g<365?`${Math.round(g/30)} mesi fa`:"più di un anno fa";
+
+function indossa(id){
+  const oggi=oggiISO(),coda=leggiCoda();
+  const gia=diario().find(v=>+v.id===id&&v.data===oggi);
+  if(gia){
+    // tolta prima che il foglio la vedesse: basta cancellarla dalla coda
+    const i=coda.findIndex(o=>o.op==="metti"&&String(o.t)===String(gia.t));
+    if(i>=0)coda.splice(i,1);else coda.push({op:"togli",id,data:oggi,t:String(gia.t)});
+  }else coda.push({op:"metti",id,data:oggi,t:String(Date.now())});
+  scriviCoda(coda);
+  dopoDiario(id);
+  sincronizzaDiario();
+}
+function dopoDiario(id){
+  const r=document.getElementById("diario-"+id);
+  if(r)r.innerHTML=rigaDiario(profumi.find(p=>p.id===id));
+  disegnaNumeri();
+  if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
+}
+
+let sincronizzando=false;
+async function sincronizzaDiario(){
+  if(sincronizzando||!ORIGINE_DATI.appsScript)return;
+  sincronizzando=true;
+  try{
+    for(const o of leggiCoda()){
+      const q=new URLSearchParams({azione:"diario",op:o.op,id:o.id,data:o.data,t:o.t});
+      const r=await fetch(ORIGINE_DATI.appsScript+"?"+q,{method:"POST",redirect:"follow"});
+      const e=await r.json();
+      // un rifiuto del foglio (voce non valida) toglie la voce dalla coda;
+      // un errore di rete o un Web App vecchio la lasciano li' per la prossima
+      if(!e||(!e.ok&&(!e.errore||/sconosciuta:/.test(e.errore))))break;
+      if(e.ok){
+        if(o.op==="metti")diarioFoglio.push({data:o.data,id:+o.id,t:String(o.t)});
+        else diarioFoglio=diarioFoglio.filter(v=>String(v.t)!==String(o.t));
+      }
+      scriviCoda(leggiCoda().filter(x=>!(x.op===o.op&&String(x.t)===String(o.t))));
+      const c=leggiCache();if(c){c.diario=diarioFoglio;scriviCache(c)}
+    }
+  }catch(e){/* rete assente: si riprova al prossimo avvio o al prossimo tocco */}
+  finally{sincronizzando=false}
+}
+const goccia='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 3h6M10 3v3h4V3M8 9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/><path d="M8 13h8"/></svg>';
+function rigaDiario(p){
+  if(!p)return "";
+  const oggi=indossatoOggi(p.id),n=vociDi(p.id).length,g=giorniDa(p.id);
+  return `<button class="btn-indossa${oggi?" fatto":""}" onclick="event.stopPropagation();indossa(${p.id})">${oggi?spunta+"Indossato oggi":goccia+"Lo metto oggi"}</button>
+    <span class="diario-nota">${n?`${n} ${n===1?"volta":"volte"} · l'ultima ${quandoFu(g)}`:"Mai segnato nel diario"}</span>`;
+}
+
 /* "EDP · 100 ml", e il residuo quando la boccetta non e' piu' piena. Le
    colonne formato_ml e residuo_pct c'erano gia' nel foglio: l'app non le
    mostrava. */
@@ -318,7 +404,7 @@ function costruisciTeca(p,i){
   const ric=strati.get(p.id)||[];
   const orig=originaleDi(p),copie=copieDi(p);
   const legame=(q,testo)=>`<button class="strato" onclick="event.stopPropagation();vaiAlProfumo(${q.id})">
-                ${iconaLegame}<span>${testo} <b>${esc(q.name)}</b></span><span class="strato-ruolo">№ ${q.id}</span></button>`;
+                ${iconaLegame}<span>${testo} <b>${esc(q.name)}</b></span><span class="strato-ruolo">№ ${numeroDi(q.id)}</span></button>`;
   const bloccoLegami=(orig||copie.length)?`
           <div class="strati t-stagger-line t-stagger-line--4">
             <div class="incisa">Parentele</div>
@@ -343,7 +429,7 @@ function costruisciTeca(p,i){
       <div class="esposizione">
         <div class="nicchia">${nicchia}<div class="ripiano"></div></div>
         <div class="cartellino">
-          <div class="riga-marca"><span class="marca">${esc(p.brand)}</span><span class="catalogo">№ ${p.id}</span></div>
+          <div class="riga-marca"><span class="marca">${esc(p.brand)}</span><span class="catalogo">№ ${numeroDi(p.id)}</span></div>
           <h2 class="nome">${esc(p.name)}</h2>
           <div class="targhette">
             ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
@@ -370,7 +456,8 @@ function costruisciTeca(p,i){
         <div class="scheda-int-int t-acc-panel-inner t-stagger">
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
-          <p class="racconto t-stagger-line t-stagger-line--3">${esc(p.desc)}</p>${bloccoLegami}${bloccoStrati}
+          <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>
+          <p class="racconto t-stagger-line t-stagger-line--3">${rinumera(esc(p.desc))}</p>${bloccoLegami}${bloccoStrati}
         </div>
       </div>
     </div>
@@ -400,6 +487,7 @@ function apriTeca(id){
 }
 
 function disegna(){
+  numera();
   strati=indiceStrati();
   const lista=selezione();
   document.getElementById("vista-collezione").innerHTML=lista.length
@@ -453,7 +541,8 @@ function scelta(f,extra,etichetta){
 }
 function disegnaRapidi(){
   const st=stagioneOra()==="pe"?"estate":"inverno",mo=moment0Ora();
-  document.getElementById("rapidi").innerHTML=
+  const oggi=vetrina==="boccette"?`<button class="scelta oggi" onclick="apriOggi()">${ic.stella}Cosa metto oggi</button>`:"";
+  document.getElementById("rapidi").innerHTML=oggi+
     scelta("adesso","ora",`Adesso · ${st}, ${mo}`)+
     scelta("ufficio","","Ufficio")+
     scelta("appuntamento","","Appuntamento")+
@@ -556,6 +645,88 @@ function chiudiFiltri(){
 }
 function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"))chiudiFiltri()}
 
+// ── COSA METTO OGGI ───────────────────────────────────────────────────────
+/* Un consiglio alla volta, scelto fra le boccette adatte all'occasione, alla
+   stagione e all'ora. A parita', vince quella che non metti da piu' tempo:
+   il diario serve anche a questo. */
+const occasioniOggi=[["ufficio","Ufficio"],["quotidiano","Quotidiano"],["appuntamento","Appuntamento"],["formale","Formale"],["casa","In casa"],["festivita","Festività"],["palestra","Palestra"]];
+let occOggi=null,giroOggi=0;
+function occasioneProbabile(){
+  const d=new Date(),g=d.getDay(),h=d.getHours(),feriale=g>=1&&g<=5;
+  if(h>=18||h<5)return (g===5||g===6)?"appuntamento":"casa";
+  return feriale?"ufficio":"quotidiano";
+}
+function candidatiOggi(occ){
+  const st=stagioneOra(),mo=moment0Ora();
+  return boccette().filter(p=>p[occ]==="si"||p[occ]==="si-mod").map(p=>{
+    const g=giorniDa(p.id);
+    let s=0;
+    s+=p.stagione===st?3:p.stagione==="tutto"?2:-3;
+    s+=(p.momento===mo||p.momento==="entrambi")?2:-2;
+    s+=p[occ]==="si"?2:.5;
+    s+=g===null?2.5:g===0?-8:g===1?-2:Math.min(g,30)/10;
+    s+=((p.rating||3.9)-3.9)*1.5;
+    return {p,s,g};
+  }).sort((a,b)=>b.s-a.s).slice(0,6);
+}
+const tagPerOccasione={ufficio:["uff"],quotidiano:["casa","uff"],appuntamento:["app","sera"],formale:["sera"],casa:["casa"],festivita:["sera"],palestra:[]};
+function ricettaPer(p,occ){
+  const st=stagioneOra(),adatta=g=>st==="pe"?!/autunno|inverno/i.test(g):!/estate/i.test(g);
+  const r=(strati.get(p.id)||[]).map(x=>({...x,l:layering[x.i]}))
+    .map(x=>({...x,s:(tagPerOccasione[occ]||[]).includes(x.l.t)*2+adatta(x.l.g)}))
+    .filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  return r[0]||null;
+}
+function apriOggi(){
+  occOggi=occasioneProbabile();giroOggi=0;
+  disegnaOggi();
+  const f=document.getElementById("fondale-oggi"),s=f.querySelector(".t-modal");
+  f.classList.add("in-scena");s.classList.remove("is-closing");
+  void f.offsetWidth;
+  f.classList.add("aperto");s.classList.add("is-open");
+}
+function chiudiOggi(){
+  const f=document.getElementById("fondale-oggi"),s=f.querySelector(".t-modal");
+  if(!f.classList.contains("aperto"))return;
+  f.classList.remove("aperto");s.classList.remove("is-open");s.classList.add("is-closing");
+  setTimeout(()=>{f.classList.remove("in-scena");s.classList.remove("is-closing")},msChiusuraModale);
+}
+function scegliOccOggi(k){occOggi=k;giroOggi=0;disegnaOggi()}
+function altraIdea(){giroOggi++;disegnaOggi()}
+function disegnaOggi(){
+  const giorni=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+  document.getElementById("oggi-sotto").textContent=
+    `${giorni[new Date().getDay()].replace(/^./,c=>c.toUpperCase())} ${moment0Ora()==="giorno"?"di giorno":"sera"} · ${stagLbl(stagioneOra()).toLowerCase()}`;
+  const c=candidatiOggi(occOggi);
+  let h=`<div class="ventaglio oggi-occasioni">${occasioniOggi.map(([k,l])=>
+    `<button class="scelta${k===occOggi?" on":""}" onclick="scegliOccOggi('${k}')">${l}</button>`).join("")}</div>`;
+  if(!c.length){
+    h+=`<div class="oggi-vuoto">Nessuna boccetta adatta a questa occasione.</div>`;
+  }else{
+    const {p,g}=c[giroOggi%c.length],cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
+    const motivi=[stagLbl(p.stagione),momLbl(p.momento),
+      g===null?"mai segnato nel diario":g===0?"l'hai già messo oggi":`l'ultima volta ${quandoFu(g)}`];
+    const altro=r?profumi.find(x=>x.id===[...r.l.s.matchAll(/№\s*(\d+)/g)].map(m=>+m[1]).find(id=>id!==p.id)):null;
+    h+=`<div class="oggi-scelta ${cl}">
+      <div class="oggi-nicchia"><div class="faretto acceso">${p.img?`<img src="${p.img}" alt="">`:vetroLettera[p.colore]}</div><div class="ripiano"></div></div>
+      <div class="oggi-testo">
+        <div class="marca">${esc(p.brand)}</div>
+        <div class="oggi-nome">${esc(p.name)}</div>
+        <div class="oggi-motivi">${motivi.map(m=>`<span>${m}</span>`).join("")}</div>
+        <div class="oggi-conto">${giroOggi%c.length+1} di ${c.length}</div>
+      </div>
+    </div>
+    ${r&&altro?`<button class="oggi-strato" onclick="chiudiOggi();vaiAllaRicetta(${r.i})">${miniatura(altro)}
+      <span><span class="incisa">Se vuoi osare, con</span><b>${esc(altro.name)}</b><small>${esc(r.nome)}</small></span></button>`:""}
+    <div class="oggi-azioni">
+      <button class="btn-ombra" onclick="altraIdea()"${c.length<2?" disabled":""}>Un'altra idea</button>
+      <button class="btn-ombra" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>
+      <button class="btn-oro" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>
+    </div>`;
+  }
+  document.getElementById("oggi-corpo").innerHTML=h;
+}
+
 // ── CONFRONTO ─────────────────────────────────────────────────────────────
 let insiemeConfronto=new Set();
 function aggiungiAlConfronto(id){
@@ -614,7 +785,7 @@ function disegnaConfronto(){
       <div class="cf-foto">${p.img?`<img src="${p.img}" alt="${esc(p.name)}">`:""}</div>
       <div class="cf-marca">${esc(p.brand)}</div>
       <div class="cf-nome">${esc(p.name)}</div>
-      <span class="cf-grado">${p.conc} · № ${p.id}</span>
+      <span class="cf-grado">${p.conc} · № ${numeroDi(p.id)}</span>
     </div>`;
   });
   const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
@@ -791,16 +962,16 @@ function disegnaLayering(){
         <div class="coppia">${miniatura(r.sotto,"sotto")}${miniatura(r.sopra,"sopra")}</div>
         <div class="ricetta-testo">
           <div class="ricetta-nome">${l.n}</div>
-          <div class="ricetta-sotto">${r.desc||l.s}</div>
+          <div class="ricetta-sotto">${r.desc||rinumera(l.s)}</div>
           <div class="dosi"><span class="dosi-icona">${bolloIcona[l.t]||""}</span>${spray(r.dSotto)} sotto · ${spray(r.dSopra)} sopra</div>
         </div>${chevron}
       </div>
       <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">
         <div class="pila">${riga("Sopra",r.sopra,r.dSopra)}${riga("Sotto",r.sotto,r.dSotto)}</div>
-        <div class="passo"><span class="passo-nome">Come si fa</span><span class="passo-testo">${l.come}</span></div>
-        <div class="passo"><span class="passo-nome">Risultato</span><span class="passo-testo">${l.ris}</span></div>
-        <div class="passo"><span class="passo-nome">Perché funziona</span><span class="passo-testo">${l.perche}</span></div>
-        <div class="passo"><span class="passo-nome">Quando</span><span class="passo-testo">${l.quando}</span></div>
+        <div class="passo"><span class="passo-nome">Come si fa</span><span class="passo-testo">${rinumera(l.come)}</span></div>
+        <div class="passo"><span class="passo-nome">Risultato</span><span class="passo-testo">${rinumera(l.ris)}</span></div>
+        <div class="passo"><span class="passo-nome">Perché funziona</span><span class="passo-testo">${rinumera(l.perche)}</span></div>
+        <div class="passo"><span class="passo-nome">Quando</span><span class="passo-testo">${rinumera(l.quando)}</span></div>
       </div></div>
     </article>`;
   });
@@ -845,10 +1016,10 @@ function disegnaAcquisti(){
           <div class="ricetta-sotto">${resto.length?(t=>t.charAt(0).toUpperCase()+t.slice(1))(resto.join(" — "))+" · ":""}${c.voci.length} ${c.voci.length===1?"idea":"idee"}</div></div>${chevron}
       </div>
       <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">
-        <p class="lacuna-testo">${c.gap}</p>
+        <p class="lacuna-testo">${rinumera(c.gap)}</p>
         ${c.voci.map((v,j)=>{const p=giaInCasa(v.t);return `<div class="candidato${p?" preso":""}">
           <span class="candidato-n">${p?spunta:j+1}</span>
-          <div><div class="candidato-t">${esc(v.t)}</div><div class="candidato-d">${v.d}</div>
+          <div><div class="candidato-t">${esc(v.t)}</div><div class="candidato-d">${rinumera(v.d)}</div>
           ${p?`<button class="candidato-gia" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}${eCampione(p)?"Ce l'hai come campione":"Ce l'hai in collezione"} →</button>`:""}</div>
         </div>`}).join("")}
       </div></div>
@@ -860,7 +1031,7 @@ function disegnaAcquisti(){
       return `<button class="chiuso"${p?` onclick="vaiAlProfumo(${p.id})"`:""}>${miniatura(p)}
         <div class="chiuso-testo"><div class="chiuso-gap">${spunta}${esc(gap)}</div>
         <div class="chiuso-nome">${p?esc(p.name):esc(v.t.split("→")[1]||"")}</div>
-        <div class="chiuso-d">${v.d}</div></div></button>`}).join("")}</div>`;
+        <div class="chiuso-d">${rinumera(v.d)}</div></div></button>`}).join("")}</div>`;
   });
   h+=`<div class="divisorio incisa">Altrove</div>`+collegamentoProfilo;
   document.getElementById("vista-acquisti").innerHTML=h;
@@ -926,7 +1097,22 @@ function disegnaNumeri(){
     return `<button class="clone" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}
       <span class="clone-testo"><span class="clone-nome">${esc(p.name)}</span>
       <span class="clone-orig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>${esc(p.dupe.split(" (")[0])}${o?` <em>${eCampione(o)?"campione in casa":"in casa"}</em>`:""}</span></span></button>`}).join("")}</div>`;
-  h+=`</div>`+collegamentoProfilo;
+  const D=diario().filter(v=>B.some(p=>p.id===+v.id));
+  h+=`<div class="tavola diario-tavola"><div class="tavola-t incisa">Diario d'uso</div>`;
+  if(!D.length){
+    h+=`<p class="diario-invito">Segna quello che indossi con «Lo metto oggi», nella scheda di ogni boccetta o da «Cosa metto oggi». Qui compariranno le più usate e quelle dimenticate.</p>`;
+  }else{
+    const mese=oggiISO().slice(0,7),n=id=>D.filter(v=>+v.id===id).length;
+    const usate=B.filter(p=>n(p.id)).sort((a,b)=>n(b.id)-n(a.id)||giorniDa(a.id)-giorniDa(b.id));
+    const dimenticate=B.map(p=>({p,g:giorniDa(p.id)})).sort((a,b)=>(b.g??1e4)-(a.g??1e4)).slice(0,6);
+    h+=`<div class="diario-cifre"><div><b>${D.filter(v=>v.data.startsWith(mese)).length}</b><span>questo mese</span></div>
+      <div><b>${usate.length}</b><span>boccette usate</span></div><div><b>${tot-usate.length}</b><span>mai segnate</span></div></div>
+      <div class="incisa diario-sotto">Le più indossate</div>
+      ${classifica(usate,p=>n(p.id),p=>n(p.id)+"×",n(usate[0].id),5)}
+      <div class="incisa diario-sotto">Da riprendere</div>
+      <div class="tessere">${dimenticate.map(({p,g})=>tessera(p,"",g===null?"mai":quandoFu(g))).join("")}</div>`;
+  }
+  h+=`</div></div>`+collegamentoProfilo;
   document.getElementById("vista-numeri").innerHTML=h;
 }
 
@@ -972,7 +1158,7 @@ function commuta(id){
   el.setAttribute("data-open",String(aperto));
   el.firstElementChild?.setAttribute("aria-expanded",String(aperto));
 }
-document.addEventListener("keydown",e=>{if(e.key==="Escape")chiudiFiltri()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){chiudiFiltri();chiudiOggi()}});
 
 /* Lo scheletro si accende solo se l'attesa ci sarà davvero. Con la collezione
    già in cache il primo disegno è immediato, e far lampeggiare dei fantasmi per
@@ -1005,6 +1191,7 @@ async function avvia() {
   const mostra = () => {
     costruisciFoglio();
     disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
+    sincronizzaDiario();
     if (primo) { cambiaVista("collezione"); primo = false;
                  rivela();
                  requestAnimationFrame(() => { muoviPillola(false); muoviVetrina(false); }); }

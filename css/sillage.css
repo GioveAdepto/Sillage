@@ -609,6 +609,56 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .clone-orig svg{width:13px;height:13px;flex-shrink:0}
 .clone-orig em{font-style:normal;font-size:10.5px;letter-spacing:.06em;padding:1px 7px;border-radius:99px;color:#b5d3ab;background:var(--bosco-velo);border:1px solid rgba(147,185,138,.3)}
 
+/* — Il diario, nella scheda — */
+.diario-riga{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding-right:34px}
+.btn-indossa{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 15px 0 12px;cursor:pointer;border-radius:99px;
+  background:var(--ottone-velo);border:1px solid rgba(200,163,94,.4);color:var(--ottone-chiaro);
+  font:600 13px 'Manrope',sans-serif;letter-spacing:.02em;transition:all .2s}
+.btn-indossa svg{width:15px;height:15px}
+.btn-indossa:hover{border-color:var(--ottone)}
+.btn-indossa:active{transform:scale(.97)}
+.btn-indossa.fatto{background:var(--bosco-velo);border-color:rgba(147,185,138,.45);color:#b5d3ab}
+.diario-nota{font-size:12.5px;color:var(--carta-3)}
+
+/* — Cosa metto oggi — */
+.scelta.oggi{color:var(--ottone-chiaro);background:linear-gradient(115deg,rgba(240,217,164,.14),rgba(200,163,94,.08));border-color:rgba(200,163,94,.45)}
+.scelta.oggi svg{width:14px;height:14px;color:var(--ottone)}
+.oggi-occasioni{padding:14px 0 4px}
+.oggi-scelta{display:flex;gap:18px;align-items:center;margin:14px 0 12px;padding:18px;border-radius:var(--r);border:1px solid rgba(200,163,94,.3);
+  background:radial-gradient(ellipse 70% 90% at 20% 0%,rgba(255,238,205,.1),transparent 70%),var(--lastra);animation:sale .45s cubic-bezier(.22,1,.36,1)}
+.oggi-nicchia{flex:0 0 112px}
+.oggi-nicchia .faretto{width:112px;height:136px;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:32px;color:var(--carta-3)}
+.faretto.acceso::before{opacity:1}
+.faretto.acceso{border-color:rgba(243,223,175,.66);box-shadow:0 12px 24px -14px #000,inset 0 0 30px rgba(255,238,205,.24),0 0 34px -6px rgba(255,214,146,.42)}
+.faretto.acceso img{filter:saturate(1.02) contrast(1.06) brightness(1.16)}
+.oggi-nicchia .ripiano{filter:brightness(2);box-shadow:0 0 20px 2px rgba(243,223,175,.5)}
+.oggi-testo{flex:1;min-width:0}
+.oggi-nome{font-family:'Marcellus',serif;font-size:26px;line-height:1.1;color:var(--carta);margin:5px 0 11px}
+.oggi-motivi{display:flex;flex-wrap:wrap;gap:5px}
+.oggi-motivi span{font-size:11.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--filo);color:var(--carta-2)}
+.oggi-motivi span:last-child{border-color:rgba(200,163,94,.3);color:var(--ottone)}
+.oggi-conto{margin-top:12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--carta-3)}
+.oggi-strato{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px 10px 10px;margin-bottom:14px;cursor:pointer;text-align:left;
+  background:var(--vetro);border:1px solid var(--filo);border-radius:var(--r-s);color:inherit;font:inherit}
+.oggi-strato:hover{border-color:var(--filo-2)}
+.oggi-strato > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.oggi-strato b{font-family:'Marcellus',serif;font-weight:400;font-size:16px;color:var(--carta)}
+.oggi-strato small{font-size:12px;color:var(--carta-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oggi-azioni{display:flex;gap:8px;padding-bottom:6px}
+.oggi-azioni .btn-ombra{flex:0 0 auto;padding:12px 14px}
+.oggi-azioni .btn-ombra:disabled{opacity:.4;cursor:default}
+.oggi-azioni .btn-oro{flex:1;padding:12px 14px}
+.oggi-vuoto{padding:40px 10px;text-align:center;color:var(--carta-3);font-style:italic}
+
+/* — Il diario, nei Numeri — */
+.diario-tavola{grid-column:1/-1}
+.diario-invito{font-size:13.5px;color:var(--carta-2);line-height:1.6}
+.diario-cifre{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.diario-cifre div{text-align:center;padding:12px 6px;border-radius:var(--r-s);background:var(--vetro);border:1px solid var(--filo)}
+.diario-cifre b{display:block;font-family:'Marcellus',serif;font-weight:400;font-size:26px;color:var(--ottone-chiaro);line-height:1;margin-bottom:6px}
+.diario-cifre span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--carta-3)}
+.diario-sotto{margin:18px 2px 8px;color:var(--ottone);opacity:.9}
+
 /* ─────────── MISURA DI LETTURA ─────────── */
 /* In fondo al foglio di proposito: a parita' di specificita' vince la regola
    che viene dopo, e queste devono passare sopra i corpi definiti sopra. */
