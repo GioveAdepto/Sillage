@@ -652,13 +652,13 @@ const ic={
 };
 const tinta={acqua:"#7fa8cf",bosco:"#93b98a",ambra:"#d9906f",oro:"#c8a35e"};
 const sezioniGuida=[
-  {k:"ufficio",t:"Ufficio e lavoro",sub:"Spazi chiusi condivisi: due spray, sul petto e non sul collo",i:ic.ufficio,c:"acqua",nota:"Gli orientali e i gourmand restano fuori: in una stanza chiusa la scia diventa invadente entro un'ora."},
-  {k:"appuntamento",t:"Appuntamento e serata",sub:"Dove la scia è un vantaggio",i:ic.cuore,c:"ambra"},
-  {k:"quotidiano",t:"Quotidiano e casual",sub:"Il guardaroba di tutti i giorni",i:ic.sole,c:"bosco"},
-  {k:"formale",t:"Formale e cerimonia",sub:"Eleganza misurata, mai dolciastra",i:ic.calice,c:"oro"},
-  {k:"palestra",t:"Palestra e sport",sub:"Leggeri, puliti, senza dolcezza",i:ic.fulmine,c:"acqua",nota:"Da evitare: orientali, gourmand e cuoiati. Con il calore corporeo diventano nauseanti."},
-  {k:"festivita",t:"Festività e inverno",sub:"Avvolgenti, per le sere più fredde",i:ic.stella,c:"oro"},
-  {k:"casa",t:"In casa e relax",sub:"Per il piacere di sentirli addosso",i:ic.casa,c:"bosco"}
+  {k:"ufficio",breve:"Ufficio",t:"Ufficio e lavoro",sub:"Spazi chiusi condivisi: due spray, sul petto e non sul collo",i:ic.ufficio,c:"acqua",nota:"Gli orientali e i gourmand restano fuori: in una stanza chiusa la scia diventa invadente entro un'ora."},
+  {k:"appuntamento",breve:"Appuntamento",t:"Appuntamento e serata",sub:"Dove la scia è un vantaggio",i:ic.cuore,c:"ambra"},
+  {k:"quotidiano",breve:"Quotidiano",t:"Quotidiano e casual",sub:"Il guardaroba di tutti i giorni",i:ic.sole,c:"bosco"},
+  {k:"formale",breve:"Formale",t:"Formale e cerimonia",sub:"Eleganza misurata, mai dolciastra",i:ic.calice,c:"oro"},
+  {k:"palestra",breve:"Palestra",t:"Palestra e sport",sub:"Leggeri, puliti, senza dolcezza",i:ic.fulmine,c:"acqua",nota:"Da evitare: orientali, gourmand e cuoiati. Con il calore corporeo diventano nauseanti."},
+  {k:"festivita",breve:"Festività",t:"Festività e inverno",sub:"Avvolgenti, per le sere più fredde",i:ic.stella,c:"oro"},
+  {k:"casa",breve:"In casa",t:"In casa e relax",sub:"Per il piacere di sentirli addosso",i:ic.casa,c:"bosco"}
 ];
 /* Ogni ricetta dichiara i due profumi nel sommario, come "№ 3 sotto · № 2
    sopra". Da li' si ricava l'indice inverso: dato un profumo, in quali ricette
@@ -684,6 +684,8 @@ const iconaStrati='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
    sopra. Il salto aspetta un fotogramma, se no si scorre prima che il
    pannello abbia preso la sua altezza. */
 function vaiAllaRicetta(i){
+  // un filtro sulle ricette potrebbe nascondere proprio quella cercata
+  if(filtroStrati!=="tutte"&&layering[i]&&layering[i].t!==filtroStrati){filtroStrati="tutte";disegnaLayering()}
   cambiaVista("layering");
   const el=document.getElementById("lay-"+i);
   if(!el)return;
@@ -692,62 +694,114 @@ function vaiAllaRicetta(i){
   requestAnimationFrame(()=>el.scrollIntoView({block:"start",behavior:"smooth"}));
 }
 
-const vocePr=p=>`${esc(p.name)} <span class="n">${p.conc} · № ${p.id}</span>`;
+// ── PEZZI COMUNI DELLE VISTE ──────────────────────────────────────────────
+/* La boccetta in piccolo: la stessa nicchia della teca, ridotta. Le quattro
+   viste di testo nominavano i profumi e basta; adesso li mostrano, e ogni
+   miniatura porta alla sua scheda. */
+const miniatura=(p,cls="")=>p?`<span class="mini ${cls}">${p.img
+  ?`<img src="${p.img}" alt="" loading="lazy">`
+  :`<b class="${vetroClasse[p.colore]||""}">${vetroLettera[p.colore]||"·"}</b>`}</span>`:"";
+const tessera=(p,cls="",nota="")=>`<button class="tessera ${cls}" onclick="vaiAlProfumo(${p.id})">
+  ${miniatura(p)}<span class="tessera-nome">${esc(p.name)}</span><span class="tessera-sotto">${nota||p.conc}</span></button>`;
+const intesta=(titolo,testo)=>`<header class="intesta"><h2>${titolo}</h2><p>${testo}</p></header>`;
+const chevron=`<span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>`;
+const ricorda=(k,v)=>{try{localStorage.setItem("sillage."+k,v)}catch(e){}};
+const ricordato=(k,d)=>{try{return localStorage.getItem("sillage."+k)||d}catch(e){return d}};
+
+/* Sette occasioni: una alla volta, scelta da una fila di pillole, invece di
+   sette cassetti con dentro elenchi di nomi. La stagione in corso viene per
+   prima. */
+let occasioneGuida=ricordato("guida","ufficio");
+function scegliOccasione(k){occasioneGuida=k;ricorda("guida",k);disegnaGuida()}
 function disegnaGuida(){
-  let h=`<div class="premessa">Ogni sezione nasce dalla collezione reale: aggiungi una boccetta e compare qui da sola, nella stagione giusta. I numeri sono quelli incisi sui cartellini.</div>`;
-  sezioniGuida.forEach((s,idx)=>{
-    const si=boccette().filter(p=>p[s.k]==="si"), mod=boccette().filter(p=>p[s.k]==="si-mod");
-    let corpo="";
-    [["tutto","Tutto l'anno"],["pe","Primavera / Estate"],["ai","Autunno / Inverno"]].forEach(([st,lbl])=>{
-      const l=si.filter(p=>p.stagione===st);
-      if(l.length)corpo+=`<div class="voce"><div class="voce-eti incisa">${lbl}</div><div class="voce-testo">${l.map(vocePr).join('<span class="sep">·</span>')}</div></div>`;
-    });
-    if(mod.length)corpo+=`<div class="voce"><div class="voce-eti incisa">Con moderazione</div><div class="voce-testo">${mod.map(p=>vocePr(p)+` <span class="n">(${stagBreve(p.stagione)})</span>`).join('<span class="sep">·</span>')}</div></div>`;
-    if(!si.length&&!mod.length)corpo+=`<div class="voce"><div class="voce-nota">Nessuna boccetta in collezione per questa occasione.</div></div>`;
-    if(s.nota)corpo+=`<div class="voce"><div class="voce-nota">${s.nota}</div></div>`;
-    // il filtro rapido conta solo i "si": qui si dice lo stesso numero, e i
-    // "con moderazione" si dichiarano invece di sparire dentro il totale
-    const n=`${si.length} boccette`+(mod.length?` · ${mod.length} con moderazione`:"");
-    h+=`<section class="cassetto t-acc" data-open="${idx===0}" id="g-${s.k}">
-      <div class="cassetto-testa" onclick="commuta('g-${s.k}')">
-        <div class="ct-sx">
-          <div class="ct-icona" style="background:${tinta[s.c]}1a;border-color:${tinta[s.c]}33;color:${tinta[s.c]}">${s.i}</div>
-          <div><div class="ct-titolo">${s.t}</div><div class="ct-sotto">${n} · ${s.sub}</div></div>
-        </div>
-        <span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>
-      </div>
-      <div class="cassetto-corpo t-acc-panel"><div class="cassetto-corpo-int t-acc-panel-inner">${corpo}</div></div>
-    </section>`;
+  const B=boccette(),ora=stagioneOra();
+  const s=sezioniGuida.find(x=>x.k===occasioneGuida)||sezioniGuida[0];
+  const si=B.filter(p=>p[s.k]==="si"),mod=B.filter(p=>p[s.k]==="si-mod");
+  const t=tinta[s.c];
+  let h=intesta("Guida","Cosa mettere, occasione per occasione. Si aggiorna da sola quando la collezione cambia.");
+  h+=`<div class="occasioni" role="tablist">${sezioniGuida.map(x=>{
+    // come la scelta rapida "Ufficio": contano i si, i "con moderazione" si vedono dentro
+    const n=B.filter(p=>p[x.k]==="si").length,on=x.k===s.k;
+    return `<button class="occasione${on?" on":""}" role="tab" aria-selected="${on}" style="--t:${tinta[x.c]}" onclick="scegliOccasione('${x.k}')">
+      <span class="occasione-icona">${x.i}</span>${x.breve}<span class="occasione-q">${n}</span></button>`}).join("")}</div>`;
+  const ordine=ora==="pe"?["pe","tutto","ai"]:["ai","tutto","pe"];
+  let gruppi="";
+  ordine.forEach(st=>{
+    const l=si.filter(p=>p.stagione===st);
+    if(!l.length)return;
+    gruppi+=`<div class="os-gruppo"><div class="os-gruppo-eti"><span class="incisa">${stagLbl(st)}</span>
+      ${st===ora?`<span class="ora-badge">Stagione in corso</span>`:""}<span class="os-q">${l.length}</span></div>
+      <div class="tessere">${l.map(p=>tessera(p)).join("")}</div></div>`;
   });
+  if(mod.length)gruppi+=`<div class="os-gruppo"><div class="os-gruppo-eti"><span class="incisa">Con moderazione</span><span class="os-q">${mod.length}</span></div>
+      <div class="tessere">${mod.map(p=>tessera(p,"moderato",`${p.conc} · ${stagBreve(p.stagione)}`)).join("")}</div></div>`;
+  if(!si.length&&!mod.length)gruppi=`<div class="os-vuoto">Nessuna boccetta in collezione per questa occasione.</div>`;
+  h+=`<section class="os" style="--t:${t}">
+    <div class="os-testa">
+      <div class="os-icona">${s.i}</div>
+      <div class="os-titoli"><div class="os-titolo">${s.t}</div><div class="os-sotto">${s.sub}</div></div>
+      <div class="os-conto"><b>${si.length}</b><span>${si.length===1?"boccetta":"boccette"}</span></div>
+    </div>${gruppi}
+    ${s.nota?`<div class="os-nota"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><span>${s.nota}</span></div>`:""}
+  </section>`;
   document.getElementById("vista-guida").innerHTML=h;
 }
 
 // ── LAYERING ──────────────────────────────────────────────────────────────
 const bolloIcona={uff:ic.ufficio,app:ic.cuore,sera:ic.stella,casa:ic.casa,lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v7.5L4.5 19A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3L14 9.5V2M9 2h6M7.5 15h9"/></svg>'};
+const tintaStrato=t=>t==="app"?tinta.ambra:t==="uff"?tinta.bosco:t==="lab"?"#bd96dc":tinta.oro;
+const tipiStrato=[["tutte","Tutte"],["uff","Ufficio"],["app","Appuntamento"],["sera","Sera"],["casa","Casa"],["lab","Sperimentali"]];
+let filtroStrati=ricordato("strati","tutte");
+function scegliStrati(k){filtroStrati=k;ricorda("strati",k);disegnaLayering()}
+
+/* Il sommario dice chi sta sotto e chi sopra ("№ 3 sotto · № 2 sopra — ..."),
+   la ricetta dice quanti spray. Da qui la coppia di boccette e le dosi. */
+function partiRicetta(l){
+  const [sotto,sopra]=[...l.s.matchAll(/№\s*(\d+)/g)].map(x=>profumi.find(p=>p.id===+x[1]));
+  const dosi=[...String(l.come).matchAll(/(\d+)\s+(?:solo\s+)?spray/gi)].map(x=>+x[1]);
+  let desc=l.s.split(" — ").slice(1).join(" — ")||"";
+  desc=desc.charAt(0).toUpperCase()+desc.slice(1);
+  return {sotto,sopra,dSotto:dosi[0]||2,dSopra:dosi[1]||1,desc};
+}
+const gocce=n=>`<span class="gocce">${"<i></i>".repeat(Math.min(n,4))}</span>`;
+const spray=n=>n===1?"1 spray":n+" spray";
+
 function disegnaLayering(){
-  let h=`<div class="premessa">Prima il più intenso e persistente, poi il più leggero sopra: il denso fa da fondamenta, il leggero porta l'apertura. Punto di partenza: due spray del primo, uno del secondo, e dieci minuti di pazienza prima di giudicare.</div>
-  <div class="tavola"><div class="tavola-t incisa">Le quattro regole</div>
-    ${[["Prima il più denso","Legnoso, ambrato o gourmand sotto; acquatico, agrumato o floreale sopra. Il pesante dura di più e regge la struttura."],
+  let h=intesta("Layering",`${layering.length} abbinamenti fra le tue boccette. Il più denso sotto, il più leggero sopra, e dieci minuti prima di giudicare.`);
+  h+=`<div class="regole">${[["Prima il più denso","Legnoso, ambrato o gourmand sotto; acquatico, agrumato o floreale sopra. Il pesante dura di più e regge la struttura."],
        ["Dosi asimmetriche","Non serve la stessa quantità per entrambi. Due più uno è quasi sempre il punto di equilibrio."],
-       ["Aspetta prima di giudicare","I profumi cambiano sulla pelle: quello che stona nei primi minuti spesso si armonizza quando le note di testa evaporano."],
+       ["Aspetta prima di giudicare","Quello che stona nei primi minuti spesso si armonizza quando le note di testa evaporano."],
        ["Almeno uno monocorda","Due profumi molto strutturati litigano. Meglio che uno sia centrato su una nota dominante."]]
-      .map(([t,d])=>`<div class="asta"><div style="color:var(--ottone);font-size:13.5px;font-weight:600;margin-bottom:5px">${t}</div><div style="font-size:13.5px;color:var(--carta-2);line-height:1.62">${d}</div></div>`).join("")}
-  </div>`;
+      .map(([t,d],i)=>`<div class="regola"><div class="regola-n">${["I","II","III","IV"][i]}</div><div class="regola-t">${t}</div><div class="regola-d">${d}</div></div>`).join("")}</div>`;
+  const conta=k=>k==="tutte"?layering.length:layering.filter(l=>l.t===k).length;
+  if(!tipiStrato.some(([k])=>k===filtroStrati))filtroStrati="tutte";
+  h+=`<div class="filtri-vista">${tipiStrato.filter(([k])=>conta(k)).map(([k,lbl])=>
+    `<button class="scelta${k===filtroStrati?" on":""}" onclick="scegliStrati('${k}')">${lbl}<span class="q">${conta(k)}</span></button>`).join("")}</div>`;
   let gruppo="";
   layering.forEach((l,i)=>{
+    if(filtroStrati!=="tutte"&&l.t!==filtroStrati)return;
     if(l.g!==gruppo){gruppo=l.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
-    h+=`<article class="ricetta t-acc" data-open="false" id="lay-${i}">
+    const r=partiRicetta(l),t=tintaStrato(l.t);
+    const riga=(ruolo,p,d)=>p?`<button class="pila-riga" onclick="event.stopPropagation();vaiAlProfumo(${p.id})">
+        <span class="pila-ruolo incisa">${ruolo}</span>${miniatura(p)}
+        <span class="pila-nome">${esc(p.name)}<small>${esc(p.brand)} · ${p.conc}</small></span>
+        <span class="pila-dose">${gocce(d)}${spray(d)}</span></button>`:"";
+    h+=`<article class="ricetta strato-ricetta t-acc" data-open="false" id="lay-${i}" style="--t:${t}">
       <div class="ricetta-testa" onclick="commuta('lay-${i}')">
-        <div class="ricetta-bollo" style="color:${l.t==="app"?tinta.ambra:l.t==="uff"?tinta.bosco:l.t==="lab"?"#bd96dc":tinta.oro}">${bolloIcona[l.t]}</div>
-        <div class="ricetta-testo"><div class="ricetta-nome">${l.n}</div><div class="ricetta-sotto">${l.s}</div></div>
-        <span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="coppia">${miniatura(r.sotto,"sotto")}${miniatura(r.sopra,"sopra")}</div>
+        <div class="ricetta-testo">
+          <div class="ricetta-nome">${l.n}</div>
+          <div class="ricetta-sotto">${r.desc||l.s}</div>
+          <div class="dosi"><span class="dosi-icona">${bolloIcona[l.t]||""}</span>${spray(r.dSotto)} sotto · ${spray(r.dSopra)} sopra</div>
+        </div>${chevron}
       </div>
       <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">
+        <div class="pila">${riga("Sopra",r.sopra,r.dSopra)}${riga("Sotto",r.sotto,r.dSotto)}</div>
         <div class="passo"><span class="passo-nome">Come si fa</span><span class="passo-testo">${l.come}</span></div>
-        <div class="passo"><span class="passo-nome">Risultato olfattivo</span><span class="passo-testo">${l.ris}</span></div>
+        <div class="passo"><span class="passo-nome">Risultato</span><span class="passo-testo">${l.ris}</span></div>
         <div class="passo"><span class="passo-nome">Perché funziona</span><span class="passo-testo">${l.perche}</span></div>
         <div class="passo"><span class="passo-nome">Quando</span><span class="passo-testo">${l.quando}</span></div>
-      </div>
+      </div></div>
     </article>`;
   });
   document.getElementById("vista-layering").innerHTML=h;
@@ -759,74 +813,120 @@ const collegamentoProfilo=`<a class="profilo" href="https://www.fragrantica.it/m
   <div style="flex:1"><div class="incisa">Fragrantica.it</div><div class="profilo-nome">Il mio profilo →</div></div>
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--carta-3)"><path d="m9 18 6-6-6-6"/></svg>
 </a>`;
+/* Una voce dei consigli e' gia' in casa se cita un numero di catalogo
+   ("→ Island № 29") o se il suo titolo contiene marchio e nome di un profumo
+   della collezione ("Lattafa Asad"). */
+function giaInCasa(t){
+  const n=String(t).match(/№\s*(\d+)/);
+  if(n)return profumi.find(p=>p.id===+n[1])||null;
+  const k=" "+chiaveNome(t)+" ";
+  return profumi.find(p=>k.includes(" "+chiaveNome(p.brand+" "+p.name)+" "))||null;
+}
+const eChiuso=c=>/copert/i.test(c.g);
 function disegnaAcquisti(){
-  let h=collegamentoProfilo+`<div class="premessa">Le famiglie assenti o poco coperte, lette sulla collezione com'è oggi: ${boccette().length} boccette. In fondo, quello che gli ultimi acquisti hanno già risolto.</div>`;
+  const aperte=consigli.filter(c=>!eChiuso(c)),chiuse=consigli.filter(eChiuso);
+  const lacune=aperte.filter(c=>/lacun/i.test(c.g)).length||aperte.length;
+  const idee=aperte.reduce((a,c)=>a+c.voci.filter(v=>!giaInCasa(v.t)).length,0);
+  const nChiusi=chiuse.reduce((a,c)=>a+c.voci.length,0);
+  let h=intesta("Acquisti",`Dove la collezione è scoperta e con cosa riempirla, letta sulle ${boccette().length} boccette di oggi.`);
+  h+=`<div class="riepilogo">
+    <div><b>${lacune}</b><span>${lacune===1?"lacuna aperta":"lacune aperte"}</span></div>
+    <div><b>${idee}</b><span>idee d'acquisto</span></div>
+    <div><b>${nChiusi}</b><span>chiuse di recente</span></div></div>`;
   let gruppo="";
-  consigli.forEach((c,i)=>{
+  aperte.forEach(c=>{
+    const i=consigli.indexOf(c);
     if(c.g!==gruppo){gruppo=c.g;h+=`<div class="divisorio incisa">${gruppo}</div>`}
-    h+=`<article class="ricetta t-acc" data-open="false" id="acq-${i}">
+    const [titolo,...resto]=c.n.split(" — ");
+    h+=`<article class="ricetta lacuna t-acc" data-open="false" id="acq-${i}">
       <div class="ricetta-testa" onclick="commuta('acq-${i}')">
-        <div class="ricetta-bollo" style="color:var(--ottone)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
-        <div class="ricetta-testo"><div class="ricetta-nome">${c.n}</div><div class="ricetta-sotto">${c.gap}</div></div>
-        <span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="ricetta-bollo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M12 8v8M8 12h8"/></svg></div>
+        <div class="ricetta-testo"><div class="ricetta-nome">${titolo}</div>
+          <div class="ricetta-sotto">${resto.length?(t=>t.charAt(0).toUpperCase()+t.slice(1))(resto.join(" — "))+" · ":""}${c.voci.length} ${c.voci.length===1?"idea":"idee"}</div></div>${chevron}
       </div>
-      <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">${c.voci.map(v=>`<div class="passo"><span class="passo-nome">${v.t}</span><span class="passo-testo">${v.d}</span></div>`).join("")}</div></div>
+      <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">
+        <p class="lacuna-testo">${c.gap}</p>
+        ${c.voci.map((v,j)=>{const p=giaInCasa(v.t);return `<div class="candidato${p?" preso":""}">
+          <span class="candidato-n">${p?spunta:j+1}</span>
+          <div><div class="candidato-t">${esc(v.t)}</div><div class="candidato-d">${v.d}</div>
+          ${p?`<button class="candidato-gia" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}${eCampione(p)?"Ce l'hai come campione":"Ce l'hai in collezione"} →</button>`:""}</div>
+        </div>`}).join("")}
+      </div></div>
     </article>`;
   });
+  chiuse.forEach(c=>{
+    h+=`<div class="divisorio incisa">${c.g}</div><div class="chiusi">${c.voci.map(v=>{
+      const p=giaInCasa(v.t),gap=v.t.split("→")[0].trim();
+      return `<button class="chiuso"${p?` onclick="vaiAlProfumo(${p.id})"`:""}>${miniatura(p)}
+        <div class="chiuso-testo"><div class="chiuso-gap">${spunta}${esc(gap)}</div>
+        <div class="chiuso-nome">${p?esc(p.name):esc(v.t.split("→")[1]||"")}</div>
+        <div class="chiuso-d">${v.d}</div></div></button>`}).join("")}</div>`;
+  });
+  h+=`<div class="divisorio incisa">Altrove</div>`+collegamentoProfilo;
   document.getElementById("vista-acquisti").innerHTML=h;
 }
 
 // ── NUMERI ────────────────────────────────────────────────────────────────
+const icUso={ufficio:ic.ufficio,quotidiano:ic.sole,formale:ic.calice,appuntamento:ic.cuore,palestra:ic.fulmine,casa:ic.casa,festivita:ic.stella,
+  informale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.4 3.5 16 2a4 4 0 0 1-8 0L3.6 3.5a2 2 0 0 0-1.3 2.2l.6 3.5a1 1 0 0 0 1 .8H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.1a1 1 0 0 0 1-.8l.6-3.5a2 2 0 0 0-1.3-2.2z"/></svg>'};
+const tintaStagione={pe:"#ddc76b",tutto:"#93b98a",ai:"#d9906f"};
+const tintaVetro={blu:"var(--acqua)",verde:"var(--bosco)",rosso:"var(--ambra)"};
+/* Una barra sola divisa in parti: dice le proporzioni a colpo d'occhio,
+   dove tre barre separate costringevano a confrontare lunghezze. */
+function segmenti(parti,tot){
+  return `<div class="segmenti">${parti.filter(x=>x.n).map(x=>`<span style="flex:${x.n};background:${x.c}"></span>`).join("")}</div>
+    <div class="legenda">${parti.map(x=>`<span><i style="background:${x.c}"></i>${x.l}<b>${x.n}</b><em>${Math.round(x.n/tot*100)}%</em></span>`).join("")}</div>`;
+}
+function classifica(lista,val,fmt,max,quanti){
+  const riga=(p,i)=>`<button class="cl-riga${i<3?" podio":""}" onclick="vaiAlProfumo(${p.id})">
+      <span class="cl-pos">${i+1}</span>${miniatura(p)}
+      <span class="cl-mezzo"><span class="cl-nome">${esc(p.name)}<small>${p.conc}</small></span>
+        <span class="binario"><span class="riempio" style="width:${Math.max(4,Math.round(val(p)/max*100))}%"></span></span></span>
+      <span class="cl-val">${fmt(p)}</span></button>`;
+  const primi=lista.slice(0,quanti).map(riga).join(""),resto=lista.slice(quanti);
+  return primi+(resto.length?`<details class="altri"><summary>Tutti gli altri ${resto.length}</summary>${resto.map((p,i)=>riga(p,i+quanti)).join("")}</details>`:"");
+}
 function disegnaNumeri(){
-  const bocc=boccette();
-  const tot=bocc.length,perStag=k=>bocc.filter(p=>p.stagione===k).length;
-  const votati=bocc.filter(p=>p.rating);
+  const B=boccette(),tot=B.length,C=campioni();
+  const votati=B.filter(p=>p.rating).sort((a,b)=>b.rating-a.rating||b.voti-a.voti);
   const mediaR=(votati.reduce((a,p)=>a+p.rating,0)/votati.length).toFixed(2);
   /* la media esclude chi la durata non ce l'ha, come gia' fa quella dei voti:
      contarli come zero abbassava il numero senza dirlo */
-  const durate=bocc.filter(p=>p.longevita);
+  const durate=B.filter(p=>p.longevita).sort((a,b)=>b.longevita-a.longevita||(b.rating||0)-(a.rating||0));
   const mediaL=(durate.reduce((a,p)=>a+p.longevita,0)/durate.length).toFixed(1);
-  let h=collegamentoProfilo+`<div class="numeri">
-    <div class="numero"><div class="numero-n">${tot}</div><div class="numero-l">Boccette</div></div>
-    <div class="numero"><div class="numero-n">${bocc.filter(p=>p.dupe).length}</div><div class="numero-l">Cloni e dupe</div></div>
-    <div class="numero"><div class="numero-n">${perStag("pe")}</div><div class="numero-l">Primavera / Estate</div></div>
-    <div class="numero"><div class="numero-n">${perStag("ai")}</div><div class="numero-l">Autunno / Inverno</div></div>
-    <div class="numero"><div class="numero-n">${mediaR}</div><div class="numero-l">Rating medio · ${votati.length} valutati</div></div>
-    <div class="numero"><div class="numero-n">${mediaL}h</div><div class="numero-l">Longevità media</div></div>
-  </div>`;
-  h+=`<div class="tavola"><div class="tavola-t incisa">Famiglia olfattiva</div>`;
-  ["rosso","verde","blu"].forEach(c=>{
-    const n=bocc.filter(p=>p.colore===c).length;
-    h+=`<div class="asta"><div class="asta-eti"><span>${vetroNome[c]}</span><span>${n}</span></div><div class="binario"><div class="riempio ${vetroClasse[c]}" style="width:${Math.round(n/tot*100)}%"></div></div></div>`;
-  });
-  h+=`</div><div class="tavola"><div class="tavola-t incisa">Occasione d'uso</div>`;
-  Object.keys(usoLabels).forEach(k=>{
-    const n=bocc.filter(p=>p[k]==="si"||p[k]==="si-mod").length,pct=Math.round(n/tot*100);
-    h+=`<div class="asta"><div class="asta-eti"><span>${usoLabels[k]}</span><span>${n} · ${pct}%</span></div><div class="binario"><div class="riempio" style="width:${pct}%"></div></div></div>`;
-  });
-  h+=`</div>`;
-  const perR={};votati.forEach(p=>{(perR[p.rating]=perR[p.rating]||[]).push(p)});
-  h+=`<div class="tavola"><div class="tavola-t incisa">Rating Fragrantica</div>`;
-  Object.keys(perR).sort((a,b)=>b-a).forEach(r=>{
-    h+=`<div class="asta"><div class="asta-eti"><span>${perR[r].map(p=>p.name).join(" · ")}</span><span>★ ${voto(r)}</span></div><div class="binario"><div class="riempio" style="width:${r/5*100}%"></div></div></div>`;
-  });
-  const senza=bocc.filter(p=>!p.rating);
-  if(senza.length)h+=`<div class="asta"><div class="asta-eti"><span>${senza.map(p=>p.name).join(" · ")}</span><span>n.d.</span></div><div class="binario"></div></div>`;
-  h+=`</div>`;
-  const perL={};durate.forEach(p=>{(perL[p.longevita]=perL[p.longevita]||[]).push(p)});
-  const maxL=Math.max(...durate.map(p=>p.longevita),1);
-  h+=`<div class="tavola"><div class="tavola-t incisa">Longevità dichiarata</div>`;
-  Object.keys(perL).sort((a,b)=>b-a).forEach(l=>{
-    const ns=perL[l].map(p=>p.name);
-    h+=`<div class="asta"><div class="asta-eti"><span>${ns.slice(0,4).join(", ")}${ns.length>4?"…":""}</span><span>${l}h · ${ns.length}</span></div><div class="binario"><div class="riempio acqua" style="width:${l/maxL*100}%"></div></div></div>`;
-  });
-  h+=`</div>`;
-  h+=`<div class="tavola"><div class="tavola-t incisa">Di quale profumo sono la copia</div>`;
-  bocc.filter(p=>p.dupe).forEach(p=>{
-    h+=`<div class="asta" style="margin-bottom:13px"><div class="asta-eti"><span style="color:var(--carta)">${esc(p.name)} <span style="color:var(--carta-3);font-size:11.5px">№ ${p.id}</span></span></div>
-      <div style="font-size:13px;color:var(--ottone);line-height:1.5">→ ${esc(p.dupe)}</div></div>`;
-  });
-  h+=`</div>`;
+  const cloni=B.filter(p=>p.dupe);
+  let h=intesta("Numeri","La collezione in cifre. Tocca un profumo per aprire la sua scheda.");
+  h+=`<div class="eroe">
+    <div><div class="eroe-n">${tot}</div><div class="incisa">Boccette in collezione</div></div>
+    <div class="eroe-dx">${C.length?`<div><b>${C.length}</b> campioni</div>`:""}<div><b>${cloni.length}</b> cloni e dupe</div><div><b>${new Set(B.map(p=>p.brand)).size}</b> marchi</div></div>
+  </div>
+  <div class="numeri tre">
+    <div class="numero"><div class="numero-n">${mediaR.replace(".",",")}</div><div class="numero-l">Rating medio</div></div>
+    <div class="numero"><div class="numero-n">${mediaL.replace(".",",")}<small>h</small></div><div class="numero-l">Durata media</div></div>
+    <div class="numero"><div class="numero-n">${B.filter(p=>p.momento==="entrambi").length}</div><div class="numero-l">Giorno e sera</div></div>
+  </div><div class="tavole">`;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Stagione</div>${segmenti(
+    ["pe","tutto","ai"].map(k=>({n:B.filter(p=>p.stagione===k).length,c:tintaStagione[k],l:stagLbl(k)})),tot)}
+    <div class="tavola-t incisa" style="margin-top:22px">Famiglia olfattiva</div>${segmenti(
+    ["blu","verde","rosso"].map(k=>({n:B.filter(p=>p.colore===k).length,c:tintaVetro[k],l:vetroNome[k]})),tot)}</div>`;
+  const usi=Object.keys(usoLabels).map(k=>({k,n:B.filter(p=>p[k]==="si").length,m:B.filter(p=>p[k]==="si-mod").length})).sort((a,b)=>b.n+b.m-a.n-a.m);
+  h+=`<div class="tavola"><div class="tavola-t incisa">Occasione d'uso</div>${usi.map(u=>`<div class="asta">
+      <div class="asta-eti"><span class="asta-nome">${icUso[u.k]||""}${usoLabels[u.k]}</span><span>${u.n}${u.m?` <em>+${u.m}</em>`:""}</span></div>
+      <div class="binario doppio"><div class="riempio" style="width:${u.n/tot*100}%"></div><div class="riempio tenue" style="width:${u.m/tot*100}%"></div></div></div>`).join("")}
+    <div class="tavola-nota">In chiaro le boccette da usare con moderazione.</div></div>`;
+  const conta={};B.forEach(p=>p.accordi.forEach(a=>conta[a]=(conta[a]||0)+1));
+  const accordi=Object.entries(conta).sort((a,b)=>b[1]-a[1]).slice(0,10),maxA=accordi[0]?accordi[0][1]:1;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Accordi più presenti</div>${accordi.map(([a,n])=>`<div class="asta">
+      <div class="asta-eti"><span style="color:${coloreAccordo(a)}">${a}</span><span>${n}</span></div>
+      <div class="binario"><div class="riempio" style="width:${n/maxA*100}%;background:${coloreAccordo(a)}"></div></div></div>`).join("")}</div>`;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Rating Fragrantica</div>${classifica(votati,p=>p.rating-3,p=>"★ "+voto(p.rating),2,5)}</div>`;
+  h+=`<div class="tavola"><div class="tavola-t incisa">Durata dichiarata</div>${classifica(durate,p=>p.longevita,p=>p.longevita+"h",durate[0]?durate[0].longevita:1,5)}</div>`;
+  if(cloni.length)h+=`<div class="tavola"><div class="tavola-t incisa">Cloni e i loro originali</div>${cloni.map(p=>{
+    const o=originaleDi(p);
+    return `<button class="clone" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}
+      <span class="clone-testo"><span class="clone-nome">${esc(p.name)}</span>
+      <span class="clone-orig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>${esc(p.dupe.split(" (")[0])}${o?` <em>${eCampione(o)?"campione in casa":"in casa"}</em>`:""}</span></span></button>`}).join("")}</div>`;
+  h+=`</div>`+collegamentoProfilo;
   document.getElementById("vista-numeri").innerHTML=h;
 }
 

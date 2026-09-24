@@ -282,6 +282,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .ricetta-bollo{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--ottone-velo);
   border:1px solid rgba(200,163,94,.24);display:flex;align-items:center;justify-content:center;margin-top:1px}
 .ricetta-bollo svg{width:16px;height:16px}
+.ricetta-testo{flex:1;min-width:0}
 .ricetta-nome{font-family:'Marcellus',serif;font-size:18px;color:var(--ottone-chiaro);margin-bottom:4px;line-height:1.22}
 .ricetta-sotto{font-size:13px;color:var(--carta-2);line-height:1.5}
 .ricetta-corpo-int{padding:0 17px 15px;border-top:1px solid var(--filo)}
@@ -411,6 +412,202 @@ input[type=search]::-webkit-search-cancel-button{display:none}
    barra: vedi .t-tabs-pill in transitions.css */
 /* .pallino e .bollo ora sono involucri del badge: l'aspetto sta in
    transitions.css, nella sezione adattamenti */
+
+/* ─────────── LE VISTE DI LETTURA ─────────── */
+/* Guida, Layering, Acquisti e Numeri erano elenchi di nomi: adesso mostrano
+   le boccette, in una nicchia ridotta che riprende quella della teca. */
+.intesta{padding:8px 4px 16px}
+.intesta h2{font-family:'Marcellus',serif;font-weight:400;font-size:30px;letter-spacing:.1em;line-height:1;color:var(--ottone-chiaro);
+  text-shadow:0 1px 0 rgba(0,0,0,.6),0 0 22px rgba(240,217,164,.16)}
+.intesta p{margin-top:9px;font-size:13.5px;line-height:1.55;color:var(--carta-3);max-width:46ch}
+
+.mini{position:relative;flex-shrink:0;width:40px;height:48px;border-radius:8px;overflow:hidden;background:#0c0a08;
+  border:1px solid rgba(200,163,94,.26);display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 16px -10px #000,inset 0 0 14px rgba(255,238,205,.06)}
+.mini img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.84) contrast(1.04);
+  -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%);
+  mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%)}
+.mini::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(ellipse 90% 42% at 50% -6%,rgba(255,243,216,.22) 0%,transparent 70%),
+             linear-gradient(152deg,rgba(255,255,255,.16) 0%,transparent 40%)}
+.mini b{font-family:'Marcellus',serif;font-weight:400;font-size:15px}
+.mini b.acqua{color:var(--acqua)}.mini b.bosco{color:var(--bosco)}.mini b.ambra{color:var(--ambra)}
+
+.tessere{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:8px}
+.tessera{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 6px 10px;cursor:pointer;
+  background:var(--vetro);border:1px solid var(--filo);border-radius:var(--r-s);color:inherit;font:inherit;text-align:center;
+  transition:border-color .2s,transform .2s,background .2s}
+.tessera .mini{width:56px;height:68px;transition:border-color .3s,box-shadow .3s}
+.tessera-nome{font-family:'Marcellus',serif;font-size:14px;line-height:1.2;color:var(--carta);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tessera-sotto{font-size:10.5px;color:var(--carta-3);letter-spacing:.05em;margin-top:-3px}
+.tessera.moderato{border-style:dashed;border-color:rgba(200,163,94,.28)}
+.tessera.moderato .tessera-sotto{color:var(--ottone)}
+.tessera:active{transform:scale(.97)}
+@media(hover:hover){
+  .tessera:hover{border-color:var(--filo-2);background:var(--vetro-2);transform:translateY(-2px)}
+  .tessera:hover .mini{border-color:rgba(243,223,175,.6);box-shadow:0 8px 16px -10px #000,0 0 20px -6px rgba(255,214,146,.4)}
+}
+
+/* — Guida — */
+.occasioni,.filtri-vista{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:0 -14px 12px;padding:2px 14px}
+.occasioni::-webkit-scrollbar,.filtri-vista::-webkit-scrollbar{display:none}
+.occasione{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 13px 0 11px;cursor:pointer;
+  border-radius:99px;background:var(--vetro);border:1px solid var(--filo);color:var(--carta-2);
+  font-family:'Manrope',sans-serif;font-size:13.5px;font-weight:500;white-space:nowrap;transition:all .18s}
+.occasione-icona svg{display:block;width:16px;height:16px;color:var(--t)}
+.occasione-q{font-size:11.5px;font-weight:600;opacity:.5;font-variant-numeric:tabular-nums}
+.occasione:hover{border-color:var(--filo-2);color:var(--carta)}
+.occasione.on{color:var(--carta);background:color-mix(in srgb,var(--t) 15%,transparent);border-color:color-mix(in srgb,var(--t) 55%,transparent)}
+.occasione.on .occasione-q{opacity:.85}
+
+.os{position:relative;background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);overflow:hidden;
+  animation:sale .45s cubic-bezier(.22,1,.36,1) backwards}
+.os::before{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,var(--t),transparent)}
+.os-testa{display:flex;align-items:center;gap:13px;padding:18px 17px 17px;border-bottom:1px solid var(--filo);
+  background:radial-gradient(ellipse 90% 140% at 0% 0%,color-mix(in srgb,var(--t) 13%,transparent),transparent 70%)}
+.os-icona{width:46px;height:46px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--t);
+  background:color-mix(in srgb,var(--t) 11%,transparent);border:1px solid color-mix(in srgb,var(--t) 32%,transparent)}
+.os-icona svg{width:21px;height:21px}
+.os-titoli{flex:1;min-width:0}
+.os-titolo{font-family:'Marcellus',serif;font-size:21px;line-height:1.15;color:var(--carta)}
+.os-sotto{font-size:12.5px;color:var(--carta-3);margin-top:4px;line-height:1.45}
+.os-conto{flex-shrink:0;text-align:center;padding-left:6px}
+.os-conto b{display:block;font-family:'Marcellus',serif;font-weight:400;font-size:30px;line-height:1;color:var(--ottone-chiaro);font-variant-numeric:tabular-nums}
+.os-conto span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--carta-3)}
+.os-gruppo{padding:15px 14px 15px;border-bottom:1px solid var(--filo)}
+.os-gruppo:last-of-type{border-bottom:none}
+.os-gruppo-eti{display:flex;align-items:center;gap:8px;margin:0 2px 11px}
+.os-gruppo-eti .incisa{color:var(--ottone);opacity:.9}
+.os-q{margin-left:auto;font-size:12px;color:var(--carta-3);font-variant-numeric:tabular-nums}
+.ora-badge{font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:99px;
+  background:var(--ottone-velo);color:var(--ottone-chiaro);border:1px solid rgba(200,163,94,.3)}
+.os-nota{display:flex;gap:10px;align-items:flex-start;padding:14px 17px;font-size:13px;color:var(--carta-2);line-height:1.6;
+  border-top:1px solid var(--filo);background:rgba(217,144,111,.05)}
+.os-nota svg{width:17px;height:17px;flex-shrink:0;color:var(--ambra);margin-top:1px}
+.os-vuoto{padding:30px 18px;text-align:center;font-size:14px;color:var(--carta-3);font-style:italic}
+
+/* — Layering — */
+.regole{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -14px 14px;padding:2px 14px 4px}
+.regole::-webkit-scrollbar{display:none}
+.regola{flex:0 0 76%;max-width:270px;scroll-snap-align:start;background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);padding:15px 16px}
+.regola-n{font-family:'Marcellus',serif;font-size:24px;color:var(--ottone);opacity:.75;line-height:1;margin-bottom:9px}
+.regola-t{font-size:14px;font-weight:600;color:var(--ottone-chiaro);margin-bottom:5px}
+.regola-d{font-size:13px;color:var(--carta-2);line-height:1.55}
+@media(min-width:720px){.regole{display:grid;grid-template-columns:1fr 1fr;overflow:visible;margin:0 0 14px;padding:0}.regola{max-width:none}}
+.strato-ricetta{position:relative}
+.strato-ricetta::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--t),transparent);opacity:.55}
+.coppia{position:relative;flex-shrink:0;width:58px;height:64px}
+.coppia .mini{position:absolute;width:38px;height:46px}
+.coppia .sotto{left:0;bottom:0}
+.coppia .sopra{right:0;top:0;z-index:1;box-shadow:-6px 8px 14px -6px #000}
+.dosi{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:11.5px;color:var(--carta-3);letter-spacing:.02em}
+.dosi-icona svg{display:block;width:13px;height:13px;color:var(--t)}
+.pila{display:flex;flex-direction:column;gap:6px;padding:14px 0 8px}
+.pila-riga{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px 8px 10px;cursor:pointer;text-align:left;
+  background:var(--vetro);border:1px solid var(--filo);border-radius:var(--r-s);color:inherit;font:inherit;transition:border-color .2s,background .2s}
+.pila-riga:hover{border-color:var(--filo-2);background:var(--vetro-2)}
+.pila-ruolo{width:42px;flex-shrink:0;color:var(--t)}
+.pila-nome{flex:1;min-width:0;font-family:'Marcellus',serif;font-size:16px;line-height:1.2;color:var(--carta)}
+.pila-nome small{display:block;font-family:'Manrope',sans-serif;font-size:11px;color:var(--carta-3);margin-top:3px;letter-spacing:.03em}
+.pila-dose{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;font-size:11.5px;color:var(--carta-2)}
+.gocce{display:inline-flex;gap:3px}
+.gocce i{width:6px;height:6px;border-radius:50%;background:var(--t);box-shadow:0 0 8px -1px var(--t)}
+.strato-ricetta .passo-nome{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--t);margin-bottom:6px}
+
+/* — Acquisti — */
+.riepilogo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.riepilogo div{position:relative;overflow:hidden;background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);padding:15px 8px 13px;text-align:center}
+.riepilogo div::before{content:'';position:absolute;top:0;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,var(--filo-3),transparent)}
+.riepilogo b{display:block;font-family:'Marcellus',serif;font-weight:400;font-size:32px;line-height:1;color:var(--ottone-chiaro);margin-bottom:7px}
+.riepilogo span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--carta-3);line-height:1.35;display:block}
+.riepilogo div:last-child b{color:#b5d3ab}
+.lacuna .ricetta-bollo{color:var(--ottone)}
+.lacuna-testo{font-family:'Marcellus',serif;font-size:15.5px;color:var(--carta-2);line-height:1.62;
+  border-left:2px solid rgba(200,163,94,.45);padding-left:14px;margin:15px 0 6px}
+.candidato{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--filo)}
+.candidato:last-child{border-bottom:none}
+.candidato-n{width:26px;height:26px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(200,163,94,.35);color:var(--ottone);font-family:'Marcellus',serif;font-size:13px}
+.candidato-n svg{width:13px;height:13px}
+.candidato.preso .candidato-n{border-color:rgba(147,185,138,.45);color:var(--bosco);background:var(--bosco-velo)}
+.candidato-t{font-family:'Marcellus',serif;font-size:16.5px;color:var(--carta);line-height:1.25;margin-bottom:4px}
+.candidato-d{font-size:13.5px;color:var(--carta-2);line-height:1.6}
+.candidato-gia{display:inline-flex;align-items:center;gap:9px;margin-top:9px;padding:4px 12px 4px 4px;cursor:pointer;
+  border-radius:99px;background:var(--bosco-velo);border:1px solid rgba(147,185,138,.35);color:#b5d3ab;font:500 12.5px 'Manrope',sans-serif}
+.candidato-gia .mini{width:24px;height:28px;border-radius:99px}
+.chiusi{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.chiuso{display:flex;align-items:flex-start;gap:13px;width:100%;padding:13px 15px;cursor:pointer;text-align:left;color:inherit;font:inherit;
+  background:none;border:0;border-bottom:1px solid var(--filo);transition:background .2s}
+.chiuso:last-child{border-bottom:0}
+.chiuso:hover{background:rgba(255,255,255,.025)}
+.chiuso .mini{width:42px;height:50px}
+.chiuso-testo{flex:1;min-width:0}
+.chiuso-gap{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bosco)}
+.chiuso-gap svg{width:12px;height:12px;flex-shrink:0}
+.chiuso-nome{font-family:'Marcellus',serif;font-size:17px;color:var(--carta);margin:3px 0 3px}
+.chiuso-d{font-size:12.5px;color:var(--carta-3);line-height:1.55}
+
+/* — Numeri — */
+.eroe{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding:22px 20px 20px;margin-bottom:10px;
+  border:1px solid rgba(200,163,94,.24);border-radius:var(--r);
+  background:radial-gradient(ellipse 80% 120% at 0% 0%,rgba(255,238,205,.09),transparent 65%),var(--lastra)}
+.eroe::before{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,var(--ottone),transparent);opacity:.7}
+.eroe-n{font-family:'Marcellus',serif;font-size:68px;line-height:.9;color:var(--ottone-chiaro);margin-bottom:10px;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 30px rgba(240,217,164,.2)}
+.eroe-dx{text-align:right;font-size:13px;color:var(--carta-3);line-height:1.8}
+.eroe-dx b{font-family:'Marcellus',serif;font-weight:400;font-size:18px;color:var(--carta);margin-right:3px}
+.numeri.tre{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.numeri.tre .numero{padding:15px 12px}
+.numeri.tre .numero-n{font-size:30px}
+.numero-n small{font-size:.55em;margin-left:2px;color:var(--ottone)}
+.tavole{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:14px}
+.tavole .tavola{margin-bottom:0}
+@media(min-width:760px){.tavole{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+.segmenti{display:flex;gap:3px;height:12px;margin-bottom:13px}
+.segmenti span{display:block;height:100%;border-radius:3px;opacity:.85}
+.segmenti span:first-child{border-radius:99px 3px 3px 99px}
+.segmenti span:last-child{border-radius:3px 99px 99px 3px}
+.legenda{display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--carta-2)}
+.legenda span{display:flex;align-items:center}
+.legenda i{width:9px;height:9px;border-radius:50%;margin-right:9px;flex-shrink:0}
+.legenda b{margin-left:auto;font-weight:600;color:var(--carta);font-variant-numeric:tabular-nums}
+.legenda em{font-style:normal;color:var(--carta-3);width:40px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+.asta-nome{display:inline-flex;align-items:center;gap:8px}
+.asta-nome svg{width:14px;height:14px;color:var(--carta-3);flex-shrink:0}
+.asta-eti em{font-style:normal;color:var(--ottone);opacity:.8}
+.binario.doppio{display:flex}
+.riempio.tenue{background:rgba(200,163,94,.3);border-radius:0 2px 2px 0}
+.binario.doppio .riempio:first-child{border-radius:2px 0 0 2px}
+.tavola-nota{margin-top:14px;font-size:12px;color:var(--carta-3);font-style:italic}
+.cl-riga{display:flex;align-items:center;gap:11px;width:100%;padding:8px 2px;cursor:pointer;text-align:left;color:inherit;font:inherit;
+  background:none;border:0;border-bottom:1px solid var(--filo);transition:background .2s}
+.cl-riga:hover{background:rgba(255,255,255,.025)}
+.tavola > .cl-riga:last-of-type,.altri .cl-riga:last-child{border-bottom:0}
+.cl-pos{width:18px;flex-shrink:0;text-align:center;font-family:'Marcellus',serif;font-size:14px;color:var(--carta-3);font-variant-numeric:tabular-nums}
+.cl-riga.podio .cl-pos{color:var(--ottone-chiaro)}
+.cl-riga .mini{width:32px;height:38px;border-radius:6px}
+.cl-mezzo{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.cl-nome{font-size:14px;color:var(--carta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-nome small{font-size:10.5px;color:var(--carta-3);margin-left:6px;letter-spacing:.04em}
+.cl-mezzo .binario{display:block}
+.cl-mezzo .riempio{display:block}
+.cl-val{flex-shrink:0;min-width:44px;text-align:right;font-size:13.5px;color:var(--ottone-chiaro);font-variant-numeric:tabular-nums}
+.altri summary{list-style:none;cursor:pointer;padding:11px 2px 2px;color:var(--ottone);font-size:13px;font-weight:600;letter-spacing:.02em}
+.altri summary::-webkit-details-marker{display:none}
+.altri summary::after{content:' ↓'}
+.altri[open] summary{padding-bottom:6px}
+.altri[open] summary::after{content:' ↑'}
+.altri[open] summary + .cl-riga{border-top:1px solid var(--filo)}
+.clone{display:flex;align-items:center;gap:12px;width:100%;padding:10px 2px;cursor:pointer;text-align:left;color:inherit;font:inherit;
+  background:none;border:0;border-bottom:1px solid var(--filo)}
+.clone:last-child{border-bottom:0}
+.clone:hover{background:rgba(255,255,255,.025)}
+.clone-testo{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.clone-nome{font-family:'Marcellus',serif;font-size:16px;color:var(--carta)}
+.clone-orig{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ottone);line-height:1.4;flex-wrap:wrap}
+.clone-orig svg{width:13px;height:13px;flex-shrink:0}
+.clone-orig em{font-style:normal;font-size:10.5px;letter-spacing:.06em;padding:1px 7px;border-radius:99px;color:#b5d3ab;background:var(--bosco-velo);border:1px solid rgba(147,185,138,.3)}
 
 /* ─────────── MISURA DI LETTURA ─────────── */
 /* In fondo al foglio di proposito: a parita' di specificita' vince la regola
