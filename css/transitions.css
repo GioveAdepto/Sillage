@@ -548,19 +548,6 @@
   color: var(--ottone-chiaro);
 }
 
-/* — Lo stato di un profumo, come targa nella scheda — */
-.targa.stato { border: 1px solid var(--filo); background: var(--vetro); color: var(--carta-2) }
-.targa.stato-da-provare { border-style: dashed }
-.targa.stato-promosso { color: #b5d3ab; background: rgba(147,185,138,.14); border-color: rgba(147,185,138,.42) }
-.targa.stato-forse    { color: var(--ottone-chiaro); background: var(--ottone-velo); border-color: rgba(200,163,94,.4) }
-.targa.stato-bocciato { color: var(--carta-3); text-decoration: line-through; text-decoration-color: rgba(255,255,255,.35) }
-.targa.stato-in-arrivo { color: #a9c6e2; background: rgba(127,168,207,.13); border-color: rgba(127,168,207,.4) }
-
-/* — I nomi cliccabili negli Acquisti — */
-.salto { color: var(--ottone-chiaro); cursor: pointer; text-decoration: underline;
-         text-decoration-color: rgba(200,163,94,.35); text-underline-offset: 3px }
-.salto:hover { text-decoration-color: var(--ottone) }
-
 /* — I due pallini contatore —
    Erano display:none / flex, quindi comparivano di scatto. Ora stanno sempre
    nel DOM e sono il badge a entrare e uscire. */

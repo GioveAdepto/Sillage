@@ -209,7 +209,6 @@ function passa(p,filtri,note){
     if(f==="sera"&&p.momento!=="sera")return false;
     if(f==="giorno"&&p.momento!=="giorno")return false;
     if(f==="dupe"&&!p.dupe)return false;
-    if(f.startsWith("stato:")&&statoDi(p)!==f.slice(6))return false;
   }
   if(note.size){
     let trovata=false;
@@ -227,15 +226,6 @@ const eCampione=p=>p.tipoPossesso&&p.tipoPossesso!=="full";
 const boccette=()=>profumi.filter(p=>!eCampione(p));
 const campioni=()=>profumi.filter(eCampione);
 const inVetrina=()=>vetrina==="campioni"?campioni():boccette();
-
-/* Lo stato dice a che punto e' un profumo. Per i campioni e' l'esito della
-   prova — il motivo per cui un campioncino esiste; per le boccette, per ora,
-   solo "in arrivo". Vuoto vuol dire: in collezione, niente da segnalare. */
-const STATI_CAMPIONE=[["da provare","Da provare"],["promosso","Promossi"],["forse","Forse"],["bocciato","Bocciati"]];
-const ETICHETTA_STATO={"da provare":"Da provare","promosso":"Promosso","forse":"Forse",
-                       "bocciato":"Bocciato","in arrivo":"In arrivo"};
-const statoDi=p=>String(p.stato||"").trim().toLowerCase();
-const classeStato=st=>st.replace(/\s+/g,"-");
 
 /* "EDP · 100 ml", e il residuo quando la boccetta non e' piu' piena. Le
    colonne formato_ml e residuo_pct c'erano gia' nel foglio: l'app non le
@@ -333,8 +323,8 @@ function costruisciTeca(p,i){
           <div class="strati t-stagger-line t-stagger-line--4">
             <div class="incisa">Parentele</div>
             <div class="strati-elenco">
-              ${orig?legame(orig,eCampione(orig)?"L'originale, in prova:":"L'originale, in collezione:"):""}
-              ${copie.map(q=>legame(q,eCampione(q)?"Il suo clone, in prova:":"Il suo clone, in collezione:")).join("")}
+              ${orig?legame(orig,eCampione(orig)?"L'originale, tra i campioni:":"L'originale, in collezione:"):""}
+              ${copie.map(q=>legame(q,eCampione(q)?"Il suo clone, tra i campioni:":"Il suo clone, in collezione:")).join("")}
             </div>
           </div>`:"";
   const bloccoStrati=ric.length?`
@@ -357,7 +347,6 @@ function costruisciTeca(p,i){
           <h2 class="nome">${esc(p.name)}</h2>
           <div class="targhette">
             ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
-            ${statoDi(p)?`<span class="targa stato stato-${classeStato(statoDi(p))}">${ETICHETTA_STATO[statoDi(p)]||esc(p.stato)}</span>`:""}
             <span class="targa grado">${p.conc}${formato(p)}</span>
             <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
@@ -463,12 +452,6 @@ function scelta(f,extra,etichetta){
     ${etichetta}<span class="q">${n}</span></button>`;
 }
 function disegnaRapidi(){
-  if(vetrina==="campioni"){
-    // nei campioni "Ufficio" e "Adesso" dicono poco: conta a che punto e' la prova
-    document.getElementById("rapidi").innerHTML=
-      STATI_CAMPIONE.map(([k,l])=>scelta("stato:"+k,"",l)).join("");
-    return;
-  }
   const st=stagioneOra()==="pe"?"estate":"inverno",mo=moment0Ora();
   document.getElementById("rapidi").innerHTML=
     scelta("adesso","ora",`Adesso · ${st}, ${mo}`)+
@@ -790,21 +773,6 @@ function disegnaAcquisti(){
       <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">${c.voci.map(v=>`<div class="passo"><span class="passo-nome">${v.t}</span><span class="passo-testo">${v.d}</span></div>`).join("")}</div></div>
     </article>`;
   });
-  /* I campioni sono il modo in cui un acquisto si decide: quelli promossi sono
-     candidati, i "forse" meritano una seconda prova. Si elencano qui, dove si
-     ragiona su cosa comprare. */
-  const cmp=campioni();
-  if(cmp.length){
-    const di=k=>cmp.filter(p=>statoDi(p)===k);
-    const riga=(etichetta,lista,vuoto)=>`<div class="voce"><div class="voce-eti incisa">${etichetta}</div>
-      <div class="voce-testo">${lista.length?lista.map(p=>`<a class="salto" onclick="vaiAlProfumo(${p.id})">${esc(p.name)}</a>`).join('<span class="sep">·</span>'):`<span class="voce-nota">${vuoto}</span>`}</div></div>`;
-    h+=`<div class="divisorio incisa">Dai campioncini</div>
-    <div class="tavola">
-      ${riga("Promossi — candidati all'acquisto",di("promosso"),"Nessuno ancora.")}
-      ${riga("Forse — da riprovare",di("forse"),"Nessuno.")}
-      ${riga("Da provare",di("da provare"),"Nessuno: li hai provati tutti.")}
-    </div>`;
-  }
   document.getElementById("vista-acquisti").innerHTML=h;
 }
 

@@ -1,16 +1,9 @@
 [
  {
-  "id": 30,
-  "colonna": "stato",
-  "da": "",
-  "a": "da provare",
-  "perche": "Asad e un campione ancora in prova, come dice la sua nota"
- },
- {
   "id": 32,
-  "colonna": "stato",
-  "da": "",
-  "a": "in arrivo",
-  "perche": "comprato il 21 settembre, non ancora in casa"
+  "colonna": "note_personali",
+  "da": "100 ml sigillato, mai aperto: in arrivo, non ancora in casa. Chiude il gap incenso-resine. Resa reale da rilevare quando arriva: la scia dichiarata forte convive con 6h soltanto.",
+  "a": "100 ml. Chiude il gap incenso-resine. La scia dichiarata forte convive con 6h soltanto: resa reale da verificare sulla pelle.",
+  "perche": "Ombre Noire è arrivato: via il «in arrivo»"
  }
 ]
