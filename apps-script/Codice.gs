@@ -6,6 +6,10 @@
  *           tradotte nei nomi di campo usati da js/app.js).
  * installa() da lanciare UNA VOLTA dall'editor: aggiunge al foglio le colonne
  *           e le tab che ancora non ci sono, riempiendole con i dati del repo.
+ * doPost()  con azione=applica lancia aggiungi() e poi correggi(): chi lavora
+ *           al repo applica le sue modifiche al foglio senza passare
+ *           dall'editor. Scrive solo quello che sta in data/aggiunte.json e
+ *           data/correzioni.json su main, con le stesse guardie di sempre.
  *
  * Il foglio resta la sorgente di verita'. I file data/*.json nel repo sono una
  * copia di sicurezza: l'app li usa se questo servizio non risponde.
@@ -152,6 +156,32 @@ function doGet(e) {
   }
   return ContentService.createTextOutput(corpo)
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ── APPLICAZIONE DA FUORI ─────────────────────────────────────────────────
+/* POST e non GET: un link aperto per sbaglio, o un crawler, non scrive niente.
+   Non serve una password: chi lo chiama può solo applicare quello che è già
+   nel repo, e rilanciare non fa danni. */
+function doPost(e) {
+  var azione = e && e.parameter && e.parameter.azione;
+  var esito;
+  if (azione !== 'applica') {
+    esito = { errore: 'azione sconosciuta: ' + azione };
+  } else {
+    var lucchetto = LockService.getScriptLock();
+    lucchetto.waitLock(30000);            // due lanci insieme non si pestano
+    try { esito = applica(); } finally { lucchetto.releaseLock(); }
+  }
+  return ContentService.createTextOutput(JSON.stringify(esito))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/** Prima le righe nuove, poi le correzioni: una correzione può toccare una
+    riga appena aggiunta. Poi via la cache, così l'app vede subito il foglio. */
+function applica() {
+  var esito = { aggiunte: aggiungi(), correzioni: correggi() };
+  CacheService.getScriptCache().remove('dati');
+  return esito;
 }
 
 /** Comodo per controllare dall'editor che la lettura funzioni. */
