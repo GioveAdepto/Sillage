@@ -179,11 +179,75 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"
 
 let filtriAttivi=new Set(), noteAttive=new Set(), testoCerca="", ordine="alpha", noteEspanse=false;
 
-// stagione e momento correnti, per il filtro "Adesso"
-/* Le stagioni cambiano agli equinozi, non a inizio mese: prima contava
-   aprile-settembre interi, e il 25 settembre risultava ancora estate. */
-const stagioneOra=(d=new Date())=>{const k=(d.getMonth()+1)*100+d.getDate();return (k>=321&&k<=922)?"pe":"ai"};
-const moment0Ora=()=>{const h=new Date().getHours();return (h>=7&&h<18)?"giorno":"sera"};
+// ── ADESSO: stagione, ora, meteo ──────────────────────────────────────────
+/* Una fonte sola per "adesso": il filtro rapido, la Guida e «Cosa metto
+   oggi» leggono tutti da qui. Prima ognuno aveva la sua regola, e il filtro
+   chiamava "inverno" tutto quello che non era estate.
+   Le stagioni cambiano agli equinozi e ai solstizi. La sera comincia mezz'ora
+   dopo il tramonto, e comunque alle 19: d'inverno alle cinque e mezza e' gia'
+   sera, d'estate alle nove no. Senza meteo il tramonto non si sa, e la sera
+   comincia alle 18. */
+let meteo=null;
+function adesso(d=new Date()){
+  const k=(d.getMonth()+1)*100+d.getDate(),h=d.getHours();
+  const nome=k>=321&&k<621?"primavera":k>=621&&k<923?"estate":k>=923&&k<1221?"autunno":"inverno";
+  let inizioSera=new Date(d);inizioSera.setHours(18,0,0,0);
+  if(meteo&&meteo.tramonto){
+    const t=new Date(meteo.tramonto).getTime()+30*6e4,diciannove=new Date(d).setHours(19,0,0,0);
+    inizioSera=new Date(Math.min(t,diciannove));
+  }
+  const sera=d>=inizioSera||h<5;
+  return {stagione:nome==="primavera"||nome==="estate"?"pe":"ai",nome,momento:sera?"sera":"giorno",
+          giorno:d.getDay(),ora:h,meteo:meteo&&Date.now()-meteo.quando<3*3600e3?meteo:null};
+}
+const stagioneOra=()=>adesso().stagione;
+const moment0Ora=()=>adesso().momento;
+
+/* Il meteo viene da Open-Meteo: gratuito, senza chiave. La posizione la
+   chiede il browser, e solo quando la chiedi tu dal pulsante in «Cosa metto
+   oggi»; poi resta sul telefono, arrotondata a una decina di chilometri, e il
+   meteo si aggiorna da solo ogni mezz'ora. */
+const CHIAVE_POSTO="sillage:posto",CHIAVE_METEO="sillage:meteo";
+const cieli={0:"sereno",1:"quasi sereno",2:"poco nuvoloso",3:"coperto",45:"nebbia",48:"nebbia",51:"pioviggine",53:"pioviggine",55:"pioviggine",
+  56:"pioviggine gelata",57:"pioviggine gelata",61:"pioggia",63:"pioggia",65:"pioggia forte",66:"pioggia gelata",67:"pioggia gelata",
+  71:"neve",73:"neve",75:"neve forte",77:"neve",80:"rovesci",81:"rovesci",82:"rovesci forti",85:"neve",86:"neve",95:"temporale",96:"temporale",99:"temporale"};
+const piove=m=>m&&(m.precipitazioni>0||(m.codice>=51&&m.codice<=67)||(m.codice>=80&&m.codice<=82)||m.codice>=95);
+function leggiJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function scriviJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let chiedendoPosto=false;
+async function aggiornaMeteo(chiedi){
+  const salvato=leggiJSON(CHIAVE_METEO);
+  if(salvato)meteo=salvato;      // anche se vecchio: vale finche' non arriva il nuovo (adesso() lo scarta dopo 3 ore)
+  if(salvato&&Date.now()-salvato.quando<30*6e4)return true;
+  let posto=leggiJSON(CHIAVE_POSTO);
+  if(!posto){
+    if(!chiedi||!navigator.geolocation)return false;
+    chiedendoPosto=true;if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
+    posto=await new Promise(r=>navigator.geolocation.getCurrentPosition(
+      p=>r({lat:+p.coords.latitude.toFixed(1),lon:+p.coords.longitude.toFixed(1)}),()=>r(null),
+      {maximumAge:864e5,timeout:15000,enableHighAccuracy:false}));
+    chiedendoPosto=false;
+    if(!posto)return false;
+    scriviJSON(CHIAVE_POSTO,posto);
+  }
+  try{
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${posto.lat}&longitude=${posto.lon}`+
+      `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code`+
+      `&daily=sunset&timezone=auto&forecast_days=1`;
+    const d=await (await fetch(u)).json();
+    meteo={quando:Date.now(),temperatura:Math.round(d.current.temperature_2m),percepita:Math.round(d.current.apparent_temperature),
+      umidita:d.current.relative_humidity_2m,precipitazioni:d.current.precipitation,codice:d.current.weather_code,
+      tramonto:d.daily&&d.daily.sunset?d.daily.sunset[0]:null};
+    scriviJSON(CHIAVE_METEO,meteo);
+    return true;
+  }catch(e){return false}
+}
+async function usaMeteo(chiedi){
+  if(await aggiornaMeteo(chiedi)){disegnaRapidi();if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi()}
+  else if(chiedi&&document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
+}
+function scordaPosto(){try{localStorage.removeItem(CHIAVE_POSTO);localStorage.removeItem(CHIAVE_METEO)}catch(e){}meteo=null;disegnaRapidi();disegnaOggi()}
+const cieloDi=m=>m?`${m.temperatura}° ${cieli[m.codice]||""}`.trim():"";
 
 // ── FILTRAGGIO ────────────────────────────────────────────────────────────
 function passa(p,filtri,note){
@@ -542,10 +606,10 @@ function scelta(f,extra,etichetta){
     ${etichetta}<span class="q">${n}</span></button>`;
 }
 function disegnaRapidi(){
-  const st=stagioneOra()==="pe"?"estate":"inverno",mo=moment0Ora();
+  const a=adesso();
   const oggi=vetrina==="boccette"?`<button class="scelta oggi" onclick="apriOggi()">${ic.stella}Cosa metto oggi</button>`:"";
   document.getElementById("rapidi").innerHTML=oggi+
-    scelta("adesso","ora",`Adesso · ${st}, ${mo}`)+
+    scelta("adesso","ora",`Adesso · ${a.nome}, ${a.momento}${a.meteo?` · ${a.meteo.temperatura}°`:""}`)+
     scelta("ufficio","","Ufficio")+
     scelta("appuntamento","","Appuntamento")+
     scelta("sera","","Sera")+
@@ -654,21 +718,37 @@ function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"
 const occasioniOggi=[["ufficio","Ufficio"],["quotidiano","Quotidiano"],["appuntamento","Appuntamento"],["formale","Formale"],["casa","In casa"],["festivita","Festività"],["palestra","Palestra"]];
 let occOggi=null,giroOggi=0;
 function occasioneProbabile(){
-  const d=new Date(),g=d.getDay(),h=d.getHours(),feriale=g>=1&&g<=5;
-  if(h>=18||h<5)return (g===5||g===6)?"appuntamento":"casa";
+  const a=adesso(),g=a.giorno,feriale=g>=1&&g<=5;
+  if(a.momento==="sera")return (g===5||g===6)?"appuntamento":"casa";
   return feriale?"ufficio":"quotidiano";
 }
+/* Il calendario dice la stagione, il termometro dice quanto pesare: a 27
+   gradi di fine settembre un orientale denso resta una cattiva idea, a 9
+   gradi di maggio un acquatico sparisce. Col caldo umido i densi pesano
+   ancora di piu'; con la pioggia legni, resine e terra rendono meglio. */
+function effettoMeteo(p,m){
+  if(!m)return {s:0,perche:""};
+  const T=m.percepita,densi=p.colore==="rosso",freschi=p.colore==="blu";
+  let s=0,perche="";
+  if(T>=26){s+=freschi?2.5:densi?-3:0;if(m.umidita>=70&&densi)s-=1.5;
+    if(freschi)perche=`${T}° percepiti: serve fresco`;}
+  else if(T>=21){s+=freschi?1:densi?-1:0;if(p.stagione==="pe")s+=1;if(freschi)perche=`${T}°, clima mite`;}
+  else if(T<=10){s+=densi?2.5:freschi?-2:0;if(p.stagione==="ai")s+=1;if(densi)perche=`${T}°: al freddo regge un intenso`;}
+  else if(T<=15){s+=densi?1.2:freschi?-1:0;if(p.stagione==="ai")s+=.8;if(densi)perche=`${T}°, aria fresca`;}
+  if(piove(m)&&p.accordi.some(a=>/Legnoso|Terroso|Fumoso|Ambra|Balsamico/.test(a))){s+=1;perche=perche||"con la pioggia i legni rendono bene"}
+  return {s,perche};
+}
 function candidatiOggi(occ){
-  const st=stagioneOra(),mo=moment0Ora();
+  const a=adesso(),st=a.stagione,mo=a.momento;
   return boccette().filter(p=>p[occ]==="si"||p[occ]==="si-mod").map(p=>{
-    const g=giorniDa(p.id);
-    let s=0;
+    const g=giorniDa(p.id),mt=effettoMeteo(p,a.meteo);
+    let s=mt.s;
     s+=p.stagione===st?3:p.stagione==="tutto"?2:-3;
     s+=(p.momento===mo||p.momento==="entrambi")?2:-2;
     s+=p[occ]==="si"?2:.5;
     s+=g===null?2.5:g===0?-8:g===1?-2:Math.min(g,30)/10;
     s+=((p.rating||3.9)-3.9)*1.5;
-    return {p,s,g};
+    return {p,s,g,perche:mt.perche};
   }).sort((a,b)=>b.s-a.s).slice(0,6);
 }
 const tagPerOccasione={ufficio:["uff"],quotidiano:["casa","uff"],appuntamento:["app","sera"],formale:["sera"],casa:["casa"],festivita:["sera"],palestra:[]};
@@ -682,6 +762,7 @@ function ricettaPer(p,occ){
 function apriOggi(){
   occOggi=occasioneProbabile();giroOggi=0;
   disegnaOggi();
+  usaMeteo(false);          // se la posizione c'e' gia', il meteo si rinfresca da solo
   const f=document.getElementById("fondale-oggi"),s=f.querySelector(".t-modal");
   f.classList.add("in-scena");s.classList.remove("is-closing");
   void f.offsetWidth;
@@ -697,17 +778,19 @@ function scegliOccOggi(k){occOggi=k;giroOggi=0;disegnaOggi()}
 function altraIdea(){giroOggi++;disegnaOggi()}
 function disegnaOggi(){
   const giorni=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+  const a=adesso();
   document.getElementById("oggi-sotto").textContent=
-    `${giorni[new Date().getDay()].replace(/^./,c=>c.toUpperCase())} ${moment0Ora()==="giorno"?"di giorno":"sera"} · ${stagLbl(stagioneOra()).toLowerCase()}`;
+    `${giorni[a.giorno].replace(/^./,c=>c.toUpperCase())} ${a.momento==="giorno"?"di giorno":"sera"} · ${a.nome}`+
+    (a.meteo?` · ${cieloDi(a.meteo)}${a.meteo.percepita!==a.meteo.temperatura?` (percepiti ${a.meteo.percepita}°)`:""}`:"");
   const c=candidatiOggi(occOggi);
   let h=`<div class="ventaglio oggi-occasioni">${occasioniOggi.map(([k,l])=>
     `<button class="scelta${k===occOggi?" on":""}" onclick="scegliOccOggi('${k}')">${l}</button>`).join("")}</div>`;
   if(!c.length){
     h+=`<div class="oggi-vuoto">Nessuna boccetta adatta a questa occasione.</div>`;
   }else{
-    const {p,g}=c[giroOggi%c.length],cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
-    const motivi=[stagLbl(p.stagione),momLbl(p.momento),
-      g===null?"mai segnato nel diario":g===0?"l'hai già messo oggi":`l'ultima volta ${quandoFu(g)}`];
+    const {p,g,perche}=c[giroOggi%c.length],cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
+    const motivi=[stagLbl(p.stagione),momLbl(p.momento),perche,
+      g===null?"mai segnato nel diario":g===0?"l'hai già messo oggi":`l'ultima volta ${quandoFu(g)}`].filter(Boolean);
     const altro=r?profumi.find(x=>x.id===[...r.l.s.matchAll(/№\s*(\d+)/g)].map(m=>+m[1]).find(id=>id!==p.id)):null;
     h+=`<div class="oggi-scelta ${cl}">
       <div class="oggi-nicchia"><div class="faretto acceso">${p.img?`<img src="${p.img}" alt="">`:vetroLettera[p.colore]}</div><div class="ripiano"></div></div>
@@ -726,6 +809,10 @@ function disegnaOggi(){
       <button class="btn-oro" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>
     </div>`;
   }
+  h+=a.meteo
+    ?`<div class="oggi-meteo">Meteo di dove sei, da Open-Meteo · <button class="collegamento" onclick="scordaPosto()">non usarlo più</button></div>`
+    :`<button class="oggi-meteo-chiedi" onclick="usaMeteo(true)"${chiedendoPosto?" disabled":""}>${chiedendoPosto?"Cerco la posizione…":"Usa il meteo di dove sei"}</button>
+      <div class="oggi-meteo">Serve la posizione, una volta: resta sul telefono, arrotondata a una decina di chilometri.</div>`;
   document.getElementById("oggi-corpo").innerHTML=h;
 }
 
@@ -1194,6 +1281,7 @@ async function avvia() {
     costruisciFoglio();
     disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
     sincronizzaDiario();
+    usaMeteo(false);
     if (primo) { cambiaVista("collezione"); primo = false;
                  rivela();
                  requestAnimationFrame(() => { muoviPillola(false); muoviVetrina(false); }); }
