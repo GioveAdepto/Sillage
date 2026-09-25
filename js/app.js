@@ -180,7 +180,9 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"
 let filtriAttivi=new Set(), noteAttive=new Set(), testoCerca="", ordine="alpha", noteEspanse=false;
 
 // stagione e momento correnti, per il filtro "Adesso"
-const stagioneOra=()=>{const m=new Date().getMonth();return (m>=3&&m<=8)?"pe":"ai"};
+/* Le stagioni cambiano agli equinozi, non a inizio mese: prima contava
+   aprile-settembre interi, e il 25 settembre risultava ancora estate. */
+const stagioneOra=(d=new Date())=>{const k=(d.getMonth()+1)*100+d.getDate();return (k>=321&&k<=922)?"pe":"ai"};
 const moment0Ora=()=>{const h=new Date().getHours();return (h>=7&&h<18)?"giorno":"sera"};
 
 // ── FILTRAGGIO ────────────────────────────────────────────────────────────
