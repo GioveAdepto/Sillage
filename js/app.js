@@ -556,9 +556,17 @@ function disegna(){
   numera();
   strati=indiceStrati();
   const lista=selezione();
-  document.getElementById("vista-collezione").innerHTML=lista.length
+  /* Con un filtro o una ricerca attivi, sotto le boccette compaiono anche i
+     campioni che rispondono: la domanda e' "cosa ho per questo", e un 2 ml
+     adatto e' una risposta. Senza filtri no: la vetrina resta delle boccette. */
+  const cercando=filtriAttivi.size||noteAttive.size||testoCerca.trim();
+  const extra=vetrina==="boccette"&&cercando?campioni().filter(p=>passa(p,filtriAttivi,noteAttive))
+    .sort((a,b)=>{const fn=ordinamenti[ordine].fn,va=fn(a),vb=fn(b);return typeof va==="number"?va-vb:va<vb?-1:va>vb?1:0}):[];
+  document.getElementById("vista-collezione").innerHTML=(lista.length
     ? lista.map(costruisciTeca).join("")
-    : `<div class="deserto">Nessuna boccetta con questi filtri.<span>Togli un filtro per allargare la ricerca.</span></div>`;
+    : `<div class="deserto">Nessuna boccetta con questi filtri.<span>${extra.length?"Ma qualcosa c'è tra i campioni, qui sotto.":"Togli un filtro per allargare la ricerca."}</span></div>`)+
+    (extra.length?`<div class="divisorio incisa tra-campioni">Anche tra i campioni · ${extra.length}</div>`+
+      extra.map((p,i)=>costruisciTeca(p,lista.length+i)).join(""):"");
   const tot=inVetrina().length;
   const parola=vetrina==="campioni"?" campioni":" boccette";
   scriviConteggio(lista.length, lista.length===tot?parola:` di ${tot}`);
@@ -995,7 +1003,10 @@ function disegnaGuida(){
   });
   if(mod.length)gruppi+=`<div class="os-gruppo"><div class="os-gruppo-eti"><span class="incisa">Con moderazione</span><span class="os-q">${mod.length}</span></div>
       <div class="tessere">${mod.map(p=>tessera(p,"moderato",`${p.conc} · ${stagBreve(p.stagione)}`)).join("")}</div></div>`;
+  const prova=campioni().filter(p=>p[s.k]==="si"||p[s.k]==="si-mod");
   if(!si.length&&!mod.length)gruppi=`<div class="os-vuoto">Nessuna boccetta in collezione per questa occasione.</div>`;
+  if(prova.length)gruppi+=`<div class="os-gruppo"><div class="os-gruppo-eti"><span class="incisa">Tra i campioni</span><span class="os-q">${prova.length}</span></div>
+      <div class="tessere">${prova.map(p=>tessera(p,"campione",`${p.conc} · ${p.formatoMl?p.formatoMl+" ml":"campione"}`)).join("")}</div></div>`;
   h+=`<section class="os" style="--t:${t}">
     <div class="os-testa">
       <div class="os-icona">${s.i}</div>
@@ -1186,16 +1197,18 @@ function disegnaNumeri(){
     return `<button class="clone" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}
       <span class="clone-testo"><span class="clone-nome">${esc(p.name)}</span>
       <span class="clone-orig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>${esc(p.dupe.split(" (")[0])}${o?` <em>${eCampione(o)?"campione in casa":"in casa"}</em>`:""}</span></span></button>`}).join("")}</div>`;
-  const D=diario().filter(v=>B.some(p=>p.id===+v.id));
+  // il diario conta tutto quello che indossi, campioni compresi; "da
+  // riprendere" invece guarda solo le boccette: un 2 ml non si riprende
+  const D=diario().filter(v=>profumi.some(p=>p.id===+v.id));
   h+=`<div class="tavola diario-tavola"><div class="tavola-t incisa">Diario d'uso</div>`;
   if(!D.length){
     h+=`<p class="diario-invito">Segna quello che indossi con «Lo metto oggi», nella scheda di ogni boccetta o da «Cosa metto oggi». Qui compariranno le più usate e quelle dimenticate.</p>`;
   }else{
     const mese=oggiISO().slice(0,7),n=id=>D.filter(v=>+v.id===id).length;
-    const usate=B.filter(p=>n(p.id)).sort((a,b)=>n(b.id)-n(a.id)||giorniDa(a.id)-giorniDa(b.id));
+    const usate=profumi.filter(p=>n(p.id)).sort((a,b)=>n(b.id)-n(a.id)||giorniDa(a.id)-giorniDa(b.id));
     const dimenticate=B.map(p=>({p,g:giorniDa(p.id)})).sort((a,b)=>(b.g??1e4)-(a.g??1e4)).slice(0,6);
     h+=`<div class="diario-cifre"><div><b>${D.filter(v=>v.data.startsWith(mese)).length}</b><span>questo mese</span></div>
-      <div><b>${usate.length}</b><span>boccette usate</span></div><div><b>${tot-usate.length}</b><span>mai segnate</span></div></div>
+      <div><b>${usate.length}</b><span>profumi usati</span></div><div><b>${B.filter(p=>!n(p.id)).length}</b><span>boccette mai segnate</span></div></div>
       <div class="incisa diario-sotto">Le più indossate</div>
       ${classifica(usate,p=>n(p.id),p=>n(p.id)+"×",n(usate[0].id),5)}
       <div class="incisa diario-sotto">Da riprendere</div>
