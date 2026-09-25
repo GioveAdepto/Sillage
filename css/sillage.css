@@ -443,6 +443,9 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .tessera-sotto{font-size:10.5px;color:var(--carta-3);letter-spacing:.05em;margin-top:-3px}
 .tessera.moderato{border-style:dashed;border-color:rgba(200,163,94,.28)}
 .tessera.moderato .tessera-sotto{color:var(--ottone)}
+.tessera.campione{border-style:dashed;border-color:rgba(127,168,207,.3)}
+.tessera.campione .tessera-sotto{color:#a9c6e2}
+#vista-collezione .tra-campioni{grid-column:1/-1;margin:14px 2px 0}
 .tessera:active{transform:scale(.97)}
 @media(hover:hover){
   .tessera:hover{border-color:var(--filo-2);background:var(--vetro-2);transform:translateY(-2px)}
