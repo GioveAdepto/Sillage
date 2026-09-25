@@ -650,6 +650,12 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .oggi-azioni .btn-oro{flex:1;padding:12px 14px}
 .oggi-vuoto{padding:40px 10px;text-align:center;color:var(--carta-3);font-style:italic}
 
+.oggi-meteo{margin:10px 2px 4px;font-size:11.5px;line-height:1.5;color:var(--carta-3);text-align:center}
+.oggi-meteo-chiedi{display:block;width:100%;margin-top:12px;padding:11px 14px;cursor:pointer;border-radius:var(--r-s);
+  background:rgba(127,168,207,.1);border:1px dashed rgba(127,168,207,.45);color:#a9c6e2;font:500 13.5px 'Manrope',sans-serif}
+.oggi-meteo-chiedi:disabled{opacity:.6;cursor:default}
+.collegamento{background:none;border:0;padding:0;cursor:pointer;color:var(--ottone);font:inherit;text-decoration:underline;text-underline-offset:2px}
+
 /* — Il diario, nei Numeri — */
 .diario-tavola{grid-column:1/-1}
 .diario-invito{font-size:13.5px;color:var(--carta-2);line-height:1.6}
