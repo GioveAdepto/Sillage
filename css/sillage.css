@@ -734,3 +734,6 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .piramide-legenda{display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--carta-3)}
 .piramide-legenda .nota-t{width:auto}
 .piramide-legenda .nota-i{width:12px;height:12px;border-radius:4px}
+
+/* Vetrina a colonne: ogni colonna cresce per conto suo quando una card si apre */
+.colonna-vetrina{display:flex;flex-direction:column;gap:12px;min-width:0}

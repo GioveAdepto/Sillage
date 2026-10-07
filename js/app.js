@@ -634,7 +634,24 @@ function apriTeca(id){
   }
 }
 
+/* Le card stanno in colonne indipendenti: aprendone una si allunga solo la sua
+   colonna, mentre le card accanto restano ferme e della loro altezza. Con la
+   griglia a righe, la riga intera si allungava e la vicina sembrava aperta.
+   L'ordine resta per righe: la prima card nella prima colonna, la seconda nella
+   seconda, e cosi' via. */
+const colonneVetrina=()=>matchMedia("(min-width:980px)").matches?3:matchMedia("(min-width:680px)").matches?2:1;
+function inColonne(lista,da){
+  const n=colonneVetrina();
+  if(n===1)return lista.map((p,i)=>costruisciTeca(p,da+i)).join("");
+  const col=Array.from({length:n},()=>[]);
+  lista.forEach((p,i)=>col[i%n].push(costruisciTeca(p,da+i)));
+  return col.map(c=>`<div class="colonna-vetrina">${c.join("")}</div>`).join("");
+}
+let colonneDisegnate=null;
+addEventListener("resize",()=>{const n=colonneVetrina();if(colonneDisegnate!==null&&n!==colonneDisegnate&&profumi.length)disegna()});
+
 function disegna(){
+  colonneDisegnate=colonneVetrina();
   numera();
   strati=indiceStrati();
   const lista=selezione();
@@ -645,10 +662,10 @@ function disegna(){
   const extra=vetrina==="boccette"&&cercando?campioni().filter(p=>passa(p,filtriAttivi,noteAttive))
     .sort((a,b)=>{const fn=ordinamenti[ordine].fn,va=fn(a),vb=fn(b);return typeof va==="number"?va-vb:va<vb?-1:va>vb?1:0}):[];
   document.getElementById("vista-collezione").innerHTML=(lista.length
-    ? lista.map(costruisciTeca).join("")
+    ? inColonne(lista,0)
     : `<div class="deserto">Nessuna boccetta con questi filtri.<span>${extra.length?"Ma qualcosa c'è tra i campioni, qui sotto.":"Togli un filtro per allargare la ricerca."}</span></div>`)+
     (extra.length?`<div class="divisorio incisa tra-campioni">Anche tra i campioni · ${extra.length}</div>`+
-      extra.map((p,i)=>costruisciTeca(p,lista.length+i)).join(""):"");
+      inColonne(extra,lista.length):"");
   const tot=inVetrina().length;
   const parola=vetrina==="campioni"?" campioni":" boccette";
   scriviConteggio(lista.length, lista.length===tot?parola:` di ${tot}`);
