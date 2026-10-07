@@ -749,3 +749,96 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .pannello-dettaglio.con-piramide .scheda-int-int > .lato-piramide:not(.titolo){grid-column:1;grid-row:2/span 40}
 .pannello-dettaglio .usi{grid-template-columns:repeat(3,1fr)}
 @media(max-width:979px){.pannello-dettaglio .usi{grid-template-columns:1fr 1fr}}
+
+/* ─────────── DIARIO ─────────── */
+.diario-griglia{display:grid;gap:12px}
+@media(min-width:900px){.diario-griglia{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start}}
+.cal,.diario-giorno{border:1px solid var(--filo);border-radius:var(--r);background:var(--lastra);padding:14px}
+.cal-testa{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-mese{font-family:'Marcellus',serif;font-size:22px;color:var(--ottone-chiaro)}
+.cal-mese span{color:var(--carta-3);font-size:17px}
+.cal-freccia{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--vetro);border:1px solid var(--filo-2);color:var(--carta-2)}
+.cal-freccia svg{width:16px;height:16px}
+.cal-freccia:disabled{opacity:.3;cursor:default}
+.cal-riassunto{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;font-size:12px;color:var(--carta-3);margin:0 0 12px}
+.cal-riassunto b{color:var(--carta);font-weight:600}
+.cal-giorni{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-sett{text-align:center;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--carta-3);padding:2px 0 6px}
+.cal-g{position:relative;aspect-ratio:1/1.2;border-radius:9px;border:1px solid transparent;background:rgba(255,255,255,.02);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;padding:4px 2px;color:var(--carta-2);font:inherit;min-width:0}
+.cal-g:hover:not(:disabled){border-color:var(--filo-2)}
+.cal-g:disabled{opacity:.28;cursor:default}
+.cal-n{font-size:12px;line-height:1;font-variant-numeric:tabular-nums}
+.cal-g.oggi .cal-n{color:var(--ottone-chiaro);font-weight:700}
+.cal-g.oggi{border-color:rgba(200,163,94,.4)}
+.cal-g.scelto{border-color:var(--ottone);background:var(--ottone-velo);box-shadow:0 0 16px -6px rgba(240,217,164,.6)}
+.cal-g.pieno{background:rgba(255,255,255,.05)}
+.cal-foto{position:relative;display:flex;justify-content:center;width:100%;flex:1;min-height:0}
+.cal-foto .mini{width:auto;height:100%;max-height:44px;aspect-ratio:40/48;border-radius:6px}
+.cal-foto i{position:absolute;right:1px;bottom:-2px;font-style:normal;font-size:9.5px;font-weight:700;padding:1px 4px;border-radius:99px;
+  background:var(--ottone);color:#17130b}
+.diario-giorno-t{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.diario-giorno-t b{font-family:'Marcellus',serif;font-weight:400;font-size:20px;color:var(--carta)}
+.diario-voce{display:flex;align-items:center;gap:8px;width:100%;padding:6px 0;border-bottom:1px solid var(--filo)}
+.diario-voce-apri{flex:1;display:flex;align-items:center;gap:12px;min-width:0;background:none;border:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:2px 0}
+.diario-voce-testo{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.diario-voce-testo b{font-weight:500;font-size:14.5px;color:var(--carta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diario-voce-testo small{font-size:11.5px;color:var(--carta-3)}
+.diario-togli{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:1px solid var(--filo);background:none;color:var(--carta-3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.diario-togli:hover{color:var(--ambra);border-color:var(--ambra)}
+.diario-togli svg{width:13px;height:13px}
+.diario-vuoto{padding:14px 2px;font-size:13px;color:var(--carta-3);font-style:italic}
+.diario-aggiungi{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:11px 14px;border-radius:var(--r-s);cursor:pointer;
+  font:inherit;font-size:13.5px;font-weight:600;background:var(--ottone-velo);border:1px solid rgba(200,163,94,.4);color:var(--ottone-chiaro)}
+.diario-aggiungi svg{width:15px;height:15px}
+.diario-aggiungi.aperto{background:none;border-color:var(--filo-2);color:var(--carta-2)}
+.diario-scelta{margin-top:10px}
+.diario-cerca{width:100%;padding:10px 12px;border-radius:var(--r-s);border:1px solid var(--filo-2);background:rgba(0,0,0,.25);color:var(--carta);font:inherit;font-size:14px}
+.diario-elenco{max-height:340px;overflow-y:auto;margin-top:6px;-webkit-overflow-scrolling:touch}
+.scelta-voce{background:none;border:none;border-bottom:1px solid var(--filo);color:inherit;font:inherit;text-align:left;cursor:pointer;gap:12px}
+.scelta-voce:disabled{opacity:.45;cursor:default}
+.diario-azione{width:26px;height:26px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ottone);border:1px solid rgba(200,163,94,.35)}
+.diario-azione svg{width:13px;height:13px}
+.diario-sez{margin:22px 4px 10px}
+.diario-storia{border:1px solid var(--filo);border-radius:var(--r);background:var(--lastra);padding:4px 14px 8px}
+.diario-storia-mese{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ottone);padding:12px 0 6px}
+.diario-riga{display:flex;align-items:center;gap:12px;width:100%;padding:7px 0;background:none;border:none;border-bottom:1px solid var(--filo);
+  color:inherit;font:inherit;text-align:left;cursor:pointer}
+.diario-riga:last-child{border-bottom:none}
+.diario-data{width:34px;display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.diario-data b{font-family:'Marcellus',serif;font-weight:400;font-size:19px;line-height:1;color:var(--carta)}
+.diario-data small{font-size:10px;color:var(--carta-3);text-transform:uppercase;letter-spacing:.08em}
+.diario-tavola .tavola-t{display:flex;align-items:center;justify-content:space-between}
+.diario-apri{font-size:12px;letter-spacing:0;text-transform:none}
+
+/* ─────────── CONFRONTO ─────────── */
+.torna{display:inline-flex;align-items:center;gap:4px;margin:0 0 6px;padding:6px 10px 6px 4px;background:none;border:none;color:var(--carta-3);
+  font:inherit;font-size:13px;cursor:pointer}
+.torna svg{width:16px;height:16px}
+.torna:hover{color:var(--ottone)}
+.cf-comune{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 2px 14px}
+.cf-comune .incisa{margin-right:4px}
+.cf-comune-niente{font-size:12.5px;color:var(--carta-3);font-style:italic}
+.cf-comune-x{text-decoration:underline;text-decoration-color:rgba(200,163,94,.6);text-underline-offset:3px}
+.cf-note{flex-wrap:wrap;gap:4px;justify-content:center}
+.cf-note .nota-c{font-size:11.5px;padding:4px 8px 4px 5px}
+.nota-c.comune{border-color:rgba(200,163,94,.6);color:var(--ottone-chiaro);background:var(--ottone-velo)}
+.cf-eti{position:sticky;left:0;z-index:1;background:#16130e}
+@media(max-width:560px){
+  .cf-griglia.col2{grid-template-columns:92px 1fr 1fr;min-width:0}
+  .cf-griglia.col3{grid-template-columns:92px repeat(3,minmax(128px,1fr));min-width:476px}
+  .cf-eti{padding:12px 9px;font-size:11.5px}
+}
+
+/* Accordion chiusi (Layering, Acquisti): niente bordo e margine sotto la testata */
+.t-acc:not([data-open="true"]) > .ricetta-corpo > .ricetta-corpo-int{padding-bottom:0;border-top-color:transparent}
+.ricetta-corpo-int{transition:padding .25s ease,border-color .25s ease}
+.diario-cerca{padding-left:12px!important;background-image:none}
+.cf-note .nota-c{white-space:nowrap}
+@media(min-width:900px){
+  .diario-storia{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+  .diario-storia-mese{grid-column:1/-1}
+  .diario-riga:last-child{border-bottom:1px solid var(--filo)}
+}

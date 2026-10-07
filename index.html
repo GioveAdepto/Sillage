@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/sillage.css?v=202610071136">
-<link rel="stylesheet" href="css/transitions.css?v=202610071136">
+<link rel="stylesheet" href="css/sillage.css?v=202610071205">
+<link rel="stylesheet" href="css/transitions.css?v=202610071205">
 </head>
 <body>
 
@@ -60,6 +60,7 @@
   </div>
   <main id="vista-collezione" class="t-skel-content"></main>
 </div>
+<section id="vista-diario" class="vista"></section>
 <section id="vista-confronta" class="vista">
   <div class="cf-vuoto" id="cf-vuoto" style="display:none">
     Il tavolo del confronto è vuoto.
@@ -116,13 +117,13 @@
 <nav class="timone">
   <span class="t-tabs-pill" aria-hidden="true"></span>
   <button class="remo attivo" id="remo-collezione" onclick="cambiaVista('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Collezione</button>
-  <button class="remo" id="remo-confronta" onclick="cambiaVista('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>Confronta<span class="pallino t-badge" id="pallino" data-open="false"><span class="t-badge-dot"></span></span></button>
+  <button class="remo" id="remo-diario" onclick="cambiaVista('diario')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 2.5v4M16 2.5v4"/><path d="M8 14h3M8 17h6"/></svg>Diario</button>
   <button class="remo" id="remo-layering" onclick="cambiaVista('layering')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 3 7l9 5 9-5-9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg>Layering</button>
   <button class="remo" id="remo-guida" onclick="cambiaVista('guida')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Guida</button>
   <button class="remo" id="remo-acquisti" onclick="cambiaVista('acquisti')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v4.5M12 16h.01"/></svg>Acquisti</button>
   <button class="remo" id="remo-numeri" onclick="cambiaVista('numeri')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Numeri</button>
 </nav>
 
-<script src="js/app.js?v=202610071136"></script>
+<script src="js/app.js?v=202610071205"></script>
 </body>
 </html>

@@ -345,7 +345,7 @@ function diario(){
   coda.filter(o=>o.op==="metti").forEach(o=>m.set(String(o.t),o));
   return [...m.values()].filter(v=>!tolte.has(String(v.t)));
 }
-const vociDi=id=>diario().filter(v=>+v.id===id).map(v=>v.data).sort();
+const vociDi=id=>diario().filter(v=>+v.id===id&&v.data<=oggiISO()).map(v=>v.data).sort();
 function giorniDa(id){
   const v=vociDi(id);
   if(!v.length)return null;
@@ -354,14 +354,17 @@ function giorniDa(id){
 const indossatoOggi=id=>diario().some(v=>+v.id===id&&v.data===oggiISO());
 const quandoFu=g=>g===0?"oggi":g===1?"ieri":g<45?`${g} giorni fa`:g<365?`${Math.round(g/30)} mesi fa`:"più di un anno fa";
 
-function indossa(id){
-  const oggi=oggiISO(),coda=leggiCoda();
-  const gia=diario().find(v=>+v.id===id&&v.data===oggi);
+function indossa(id){segna(id,oggiISO())}
+/* Mette o toglie un profumo in un giorno: oggi dal pulsante della scheda,
+   un giorno passato dal Diario. */
+function segna(id,data){
+  const coda=leggiCoda();
+  const gia=diario().find(v=>+v.id===id&&v.data===data);
   if(gia){
     // tolta prima che il foglio la vedesse: basta cancellarla dalla coda
     const i=coda.findIndex(o=>o.op==="metti"&&String(o.t)===String(gia.t));
-    if(i>=0)coda.splice(i,1);else coda.push({op:"togli",id,data:oggi,t:String(gia.t)});
-  }else coda.push({op:"metti",id,data:oggi,t:String(Date.now())});
+    if(i>=0)coda.splice(i,1);else coda.push({op:"togli",id,data,t:String(gia.t)});
+  }else coda.push({op:"metti",id,data,t:String(Date.now())});
   scriviCoda(coda);
   dopoDiario(id);
   sincronizzaDiario();
@@ -369,7 +372,7 @@ function indossa(id){
 function dopoDiario(id){
   const r=document.getElementById("diario-"+id);
   if(r)r.innerHTML=rigaDiario(profumi.find(p=>p.id===id));
-  disegnaNumeri();
+  disegnaNumeri();disegnaDiario();
   if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
 }
 
@@ -1057,19 +1060,26 @@ function aggiornaVassoio(){
   document.getElementById("vassoio-conto").textContent=n+" / 3";
   document.getElementById("btn-confronta").disabled=n<2;
   const pal=document.getElementById("pallino");
-  if(n>0)pal.querySelector(".t-badge-dot").textContent=n;
-  pal.dataset.open=n>0?"true":"false";
+  if(pal){if(n>0)pal.querySelector(".t-badge-dot").textContent=n;pal.dataset.open=n>0?"true":"false"}
   if(document.getElementById("vista-confronta").classList.contains("attiva"))disegnaConfronto();
 }
 function disegnaConfronto(){
   const ids=[...insiemeConfronto],cont=document.getElementById("cf-contenuto"),vuoto=document.getElementById("cf-vuoto");
-  if(ids.length<2){cont.innerHTML="";vuoto.style.display="block";return}
+  const torna=`<button class="torna" onclick="cambiaVista('collezione')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 6-6 6 6 6"/></svg>Collezione</button>`;
+  if(ids.length<2){cont.innerHTML=torna;vuoto.style.display="block";return}
   vuoto.style.display="none";
   const lista=ids.map(id=>profumi.find(p=>p.id===id)).filter(Boolean);
   const votati=lista.filter(p=>p.rating);
   const megR=votati.length?Math.max(...votati.map(p=>p.rating)):null,
         megL=Math.max(...lista.filter(p=>p.longevita).map(p=>p.longevita),0);
-  let h=`<div class="cf-tabella"><div class="cf-griglia col${lista.length}">`;
+  /* Cosa hanno in comune: accordi e note principali presenti in tutti. */
+  const tutti=f=>lista.map(f).reduce((a,b)=>a.filter(x=>b.some(y=>y.toLowerCase()===x.toLowerCase())));
+  const accComuni=tutti(p=>p.accordi),noteComuni=tutti(p=>p.noteElenco||[]);
+  let h=torna+intesta("Confronto","Fianco a fianco. In oro il migliore su rating e durata, e quello che hanno in comune.");
+  h+=`<div class="cf-comune"><span class="incisa">In comune</span>${accComuni.length||noteComuni.length
+    ?accComuni.map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("")+noteComuni.map(n=>`<span class="nota-c"><i>${iconaNota(n)||"·"}</i>${esc(n)}</span>`).join("")
+    :`<span class="cf-comune-niente">niente: sono profumi lontani tra loro</span>`}</div>`;
+  h+=`<div class="cf-tabella"><div class="cf-griglia col${lista.length}">`;
   h+=`<div class="cf-eti" style="border-bottom:1px solid var(--filo-2)"></div>`;
   lista.forEach(p=>{
     h+=`<div class="cf-testa">
@@ -1089,8 +1099,10 @@ function disegnaConfronto(){
   riga("Famiglia",p=>`<div class="cf-cella"><span class="cf-segno">${p.famiglia}</span></div>`);
   riga("Copia di",p=>`<div class="cf-cella" style="font-size:12px">${p.dupe?esc(p.dupe.split(" (")[0]):"—"}</div>`);
   h+=`<div class="cf-sez incisa">Accordi principali</div>`;
-  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map(a=>`<span style="font-size:12px;color:${coloreAccordo(a)}">${a}</span>`).join("")}</div>`);
-  riga("Note",p=>`<div class="cf-cella" style="font-size:12px;text-align:left;line-height:1.6;align-items:flex-start">${esc(p.note)}</div>`);
+  const comuneA=new Set(accComuni.map(x=>x.toLowerCase())),comuneN=new Set(noteComuni.map(x=>x.toLowerCase()));
+  riga("Top accordi",p=>`<div class="cf-cella" style="flex-direction:column;gap:4px">${p.accordi.slice(0,4).map(a=>`<span class="${comuneA.has(a.toLowerCase())?"cf-comune-x":""}" style="font-size:12px;color:${coloreAccordo(a)}">${a}</span>`).join("")}</div>`);
+  riga("Note",p=>`<div class="cf-cella cf-note">${(p.noteElenco&&p.noteElenco.length?p.noteElenco:piramideDi(p).flatMap(l=>l.note).slice(0,6))
+    .map(n=>`<span class="nota-c${comuneN.has(n.toLowerCase())?" comune":""}"><i>${iconaNota(n)||"·"}</i>${esc(n)}</span>`).join("")}</div>`);
   h+=`<div class="cf-sez incisa">Quando indossarlo</div>`;
   Object.keys(usoLabels).forEach(k=>{
     riga(usoLabels[k],p=>{
@@ -1395,7 +1407,7 @@ function disegnaNumeri(){
   // il diario conta tutto quello che indossi, campioni compresi; "da
   // riprendere" invece guarda solo le boccette: un 2 ml non si riprende
   const D=diario().filter(v=>profumi.some(p=>p.id===+v.id));
-  h+=`<div class="tavola diario-tavola"><div class="tavola-t incisa">Diario d'uso</div>`;
+  h+=`<div class="tavola diario-tavola"><div class="tavola-t incisa">Diario d'uso<button class="collegamento diario-apri" onclick="cambiaVista('diario')">Apri il diario →</button></div>`;
   if(!D.length){
     h+=`<p class="diario-invito">Segna quello che indossi con «Lo metto oggi», nella scheda di ogni boccetta o da «Cosa metto oggi». Qui compariranno le più usate e quelle dimenticate.</p>`;
   }else{
@@ -1411,6 +1423,100 @@ function disegnaNumeri(){
   }
   h+=`</div></div>`+collegamentoProfilo;
   document.getElementById("vista-numeri").innerHTML=h;
+}
+
+// ── DIARIO ────────────────────────────────────────────────────────────────
+/* Il calendario del mese con quello che hai indossato, il giorno scelto con
+   le sue voci (da togliere o aggiungere, anche a posteriori) e la cronologia.
+   Le voci passano dalla stessa coda del pulsante «Lo metto oggi». */
+let meseDiario=null,giornoDiario=null,sceltaDiario=false,cercaDiario="";
+const nomiMesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const maiuscola=t=>t.replace(/^./,c=>c.toUpperCase());
+const dataLunga=iso=>{const [y,m,d]=iso.split("-").map(Number);return maiuscola(new Date(y,m-1,d).toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))};
+function vociPerGiorno(){
+  const m=new Map();
+  diario().filter(v=>profumi.some(p=>p.id===+v.id)).sort((a,b)=>+a.t-+b.t).forEach(v=>{if(!m.has(v.data))m.set(v.data,[]);m.get(v.data).push(v)});
+  return m;
+}
+function spostaMese(d){
+  const [y,m]=meseDiario.split("-").map(Number),n=new Date(y,m-1+d,1);
+  const nuovo=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0");
+  if(nuovo>oggiISO().slice(0,7))return;
+  meseDiario=nuovo;disegnaDiario();
+}
+function scegliGiorno(iso){
+  if(iso>oggiISO())return;
+  giornoDiario=iso;meseDiario=iso.slice(0,7);sceltaDiario=false;cercaDiario="";disegnaDiario();
+  document.getElementById("diario-giorno")?.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+function apriSceltaDiario(){sceltaDiario=!sceltaDiario;cercaDiario="";disegnaDiario();if(sceltaDiario)document.getElementById("diario-cerca")?.focus()}
+function filtraSceltaDiario(t){cercaDiario=t;document.getElementById("diario-elenco").innerHTML=elencoSceltaDiario()}
+function aggiungiDiario(id){segna(id,giornoDiario)}
+function elencoSceltaDiario(){
+  const q=cercaDiario.trim().toLowerCase(),gia=new Set((vociPerGiorno().get(giornoDiario)||[]).map(v=>+v.id));
+  const lista=[...profumi].filter(p=>!q||(p.name+" "+p.brand).toLowerCase().includes(q))
+    .sort((a,b)=>eCampione(a)-eCampione(b)||a.name.localeCompare(b.name,"it"));
+  if(!lista.length)return `<div class="diario-vuoto">Nessun profumo con questo nome.</div>`;
+  return lista.map(p=>`<button class="diario-voce scelta-voce" onclick="aggiungiDiario(${p.id})"${gia.has(p.id)?" disabled":""}>
+      ${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)} · ${p.conc}${eCampione(p)?" · campione":""}</small></span>
+      <span class="diario-azione">${gia.has(p.id)?spunta:piu}</span></button>`).join("");
+}
+function disegnaDiario(){
+  const el=document.getElementById("vista-diario");
+  if(!el||!profumi.length)return;
+  const oggi=oggiISO();
+  meseDiario=meseDiario||oggi.slice(0,7);giornoDiario=giornoDiario||oggi;
+  const g=vociPerGiorno(),[Y,M]=meseDiario.split("-").map(Number);
+  const primo=(new Date(Y,M-1,1).getDay()+6)%7,giorni=new Date(Y,M,0).getDate();
+  const delMese=[...g.entries()].filter(([d])=>d.startsWith(meseDiario)).flatMap(([,v])=>v);
+  const conta=new Map();delMese.forEach(v=>conta.set(+v.id,(conta.get(+v.id)||0)+1));
+  const top=[...conta.entries()].sort((a,b)=>b[1]-a[1])[0],pTop=top&&profumi.find(p=>p.id===top[0]);
+  let h=intesta("Diario","Cosa hai indossato, giorno per giorno. Tocca un giorno per vederlo, o per segnare quello che avevi addosso.");
+  h+=`<div class="diario-griglia"><div class="cal">
+    <div class="cal-testa">
+      <button class="cal-freccia" onclick="spostaMese(-1)" aria-label="Mese prima"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 6-6 6 6 6"/></svg></button>
+      <div class="cal-mese">${maiuscola(nomiMesi[M-1])} <span>${Y}</span></div>
+      <button class="cal-freccia" onclick="spostaMese(1)" aria-label="Mese dopo"${meseDiario>=oggi.slice(0,7)?" disabled":""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <div class="cal-riassunto"><span><b>${delMese.length}</b> ${delMese.length===1?"voce":"voci"}</span><span><b>${conta.size}</b> ${conta.size===1?"profumo":"profumi"}</span>
+      ${pTop?`<span>il più messo: <b>${esc(pTop.name)}</b>${top[1]>1?` · ${top[1]}×`:""}</span>`:""}</div>
+    <div class="cal-giorni">${["lun","mar","mer","gio","ven","sab","dom"].map(x=>`<span class="cal-sett">${x}</span>`).join("")}
+    ${"<span></span>".repeat(primo)}
+    ${Array.from({length:giorni},(_,i)=>{
+      const iso=meseDiario+"-"+String(i+1).padStart(2,"0"),v=g.get(iso)||[],fut=iso>oggi;
+      const ps=v.map(x=>profumi.find(p=>p.id===+x.id)).filter(Boolean);
+      return `<button class="cal-g${iso===oggi?" oggi":""}${iso===giornoDiario?" scelto":""}${v.length?" pieno":""}" onclick="scegliGiorno('${iso}')"${fut?" disabled":""} aria-label="${dataLunga(iso)}${v.length?`: ${ps.map(p=>p.name).join(", ")}`:""}">
+        <span class="cal-n">${i+1}</span>${ps.length?`<span class="cal-foto">${miniatura(ps[0])}${ps.length>1?`<i>+${ps.length-1}</i>`:""}</span>`:""}</button>`;
+    }).join("")}</div>
+  </div>`;
+  // il giorno scelto
+  const v=(g.get(giornoDiario)||[]).map(x=>({x,p:profumi.find(p=>p.id===+x.id)})).filter(o=>o.p);
+  h+=`<div class="diario-giorno" id="diario-giorno">
+    <div class="diario-giorno-t"><span class="incisa">${giornoDiario===oggi?"Oggi":giornoDiario===oggiISO(new Date(Date.now()-864e5))?"Ieri":"Giorno"}</span><b>${dataLunga(giornoDiario)}</b></div>
+    ${v.length?v.map(({p})=>`<div class="diario-voce">
+        <button class="diario-voce-apri" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span></button>
+        <button class="diario-togli" onclick="segna(${p.id},'${giornoDiario}')" aria-label="Togli ${esc(p.name)} da questo giorno"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>`).join(""):`<div class="diario-vuoto">${giornoDiario===oggi?"Oggi non hai ancora segnato niente.":"Niente segnato in questo giorno."}</div>`}
+    <button class="diario-aggiungi${sceltaDiario?" aperto":""}" onclick="apriSceltaDiario()">${sceltaDiario?"Chiudi":`${piu}Aggiungi un profumo`}</button>
+    ${sceltaDiario?`<div class="diario-scelta">
+      <input id="diario-cerca" class="diario-cerca" type="search" placeholder="Cerca per nome o marca…" value="${esc(cercaDiario)}" oninput="filtraSceltaDiario(this.value)" autocomplete="off">
+      <div class="diario-elenco" id="diario-elenco">${elencoSceltaDiario()}</div></div>`:""}
+  </div></div>`;
+  // cronologia: le ultime voci, raggruppate per mese
+  const tutte=[...g.entries()].sort((a,b)=>a[0]<b[0]?1:-1).flatMap(([d,vs])=>vs.slice().reverse().map(x=>({d,p:profumi.find(p=>p.id===+x.id)}))).filter(o=>o.p);
+  h+=`<div class="incisa diario-sez">Cronologia</div>`;
+  if(!tutte.length)h+=`<p class="diario-invito">Ancora nessuna voce. Segna quello che indossi con «Lo metto oggi» nella scheda di un profumo, da «Cosa metto oggi» o qui sopra, scegliendo un giorno.</p>`;
+  else{
+    let mese="";
+    h+=`<div class="diario-storia">`+tutte.slice(0,90).map(({d,p})=>{
+      const [y,m,gg]=d.split("-").map(Number),testa=d.slice(0,7)!==mese?(mese=d.slice(0,7),`<div class="diario-storia-mese">${maiuscola(nomiMesi[m-1])} ${y}</div>`):"";
+      return testa+`<button class="diario-riga" onclick="scegliGiorno('${d}');document.getElementById('vista-diario').scrollIntoView({behavior:'smooth'})">
+        <span class="diario-data"><b>${gg}</b><small>${new Date(y,m-1,gg).toLocaleDateString("it-IT",{weekday:"short"})}</small></span>
+        ${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span></button>`;
+    }).join("")+`</div>`;
+    if(tutte.length>90)h+=`<p class="diario-invito">Le voci più vecchie restano nel foglio, nella tab Diario.</p>`;
+  }
+  el.innerHTML=h;
 }
 
 // ── NAVIGAZIONE ───────────────────────────────────────────────────────────
@@ -1436,15 +1542,17 @@ function muoviPillola(animata){
 window.addEventListener("resize",()=>{muoviPillola(false);muoviVetrina(false)});
 
 function cambiaVista(v){
-  ["collezione","confronta","layering","guida","acquisti","numeri"].forEach(n=>{
+  ["collezione","diario","confronta","layering","guida","acquisti","numeri"].forEach(n=>{
     document.getElementById("vista-"+n).classList.toggle("attiva",n===v);
-    document.getElementById("remo-"+n)?.classList.toggle("attivo",n===v);
+    // il confronto nasce dalla collezione: in barra resta accesa quella
+    document.getElementById("remo-"+n)?.classList.toggle("attivo",n===v||(v==="confronta"&&n==="collezione"));
   });
   const inCollezione=v==="collezione";
   document.getElementById("testata").style.display=inCollezione?"flex":"none";
   document.getElementById("strumenti").style.display=inCollezione?"block":"none";
   document.getElementById("vassoio").classList.toggle("mostra",insiemeConfronto.size>0&&inCollezione);
   if(v==="confronta")disegnaConfronto();
+  if(v==="diario")disegnaDiario();
   muoviPillola(true);
   window.scrollTo({top:0,behavior:"instant"});
 }
@@ -1487,7 +1595,7 @@ async function avvia() {
   let primo = true;
   const mostra = () => {
     costruisciFoglio();
-    disegna(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
+    disegna(); disegnaDiario(); disegnaGuida(); disegnaLayering(); disegnaAcquisti(); disegnaNumeri();
     sincronizzaDiario();
     usaMeteo(false);
     if (primo) { cambiaVista("collezione"); primo = false;
