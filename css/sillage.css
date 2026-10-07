@@ -675,3 +675,14 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   .passo-testo,.voce-testo{font-size:14.5px}
   .ricetta-sotto,.voce-nota,.ct-sotto{font-size:14px}
 }
+
+/* Cosa metto oggi / domani: scelta del giorno e ore sulla pelle */
+.oggi-quando{padding:14px 0 0}
+.oggi-quando + .oggi-occasioni{padding-top:10px}
+.oggi-ore{margin:-2px 0 14px;padding:10px 12px;border-radius:var(--r-s);border:1px solid var(--filo)}
+.oggi-ore .incisa{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--carta-3);margin-bottom:8px}
+.oggi-ore .tacche{display:flex;justify-content:space-between;gap:4px}
+.oggi-ore .ora{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--carta-2);font-variant-numeric:tabular-nums}
+.oggi-ore .ora small{font-size:10.5px;color:var(--carta-3)}
+.oggi-ore .ora.pioggia{color:var(--ottone-chiaro)}
+.oggi-ore .ora.pioggia small::after{content:" ☂";font-size:9px}
