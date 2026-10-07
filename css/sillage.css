@@ -686,3 +686,27 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .oggi-ore .ora small{font-size:10.5px;color:var(--carta-3)}
 .oggi-ore .ora.pioggia{color:var(--ottone-chiaro)}
 .oggi-ore .ora.pioggia small::after{content:" ☂";font-size:9px}
+
+/* Cosa metto: tutte le adatte in vista — la prima in rilievo, 2ª e 3ª affiancate, le altre in elenco */
+.oggi-scelta .oggi-conto{margin:0 0 6px;color:var(--ottone)}
+.oggi-sezione{margin:20px 2px 10px}
+.oggi-podio{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.oggi-medaglia{display:flex;flex-direction:column;border-radius:var(--r);border:1px solid var(--filo-2);background:var(--lastra);overflow:hidden}
+.oggi-medaglia-corpo{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px;text-align:left;cursor:pointer;
+  background:none;border:none;color:inherit;font:inherit;position:relative}
+.oggi-medaglia-corpo .mini.grande{width:64px;height:76px;margin-bottom:6px}
+.oggi-medaglia-corpo b{font-family:'Marcellus',serif;font-weight:400;font-size:17px;line-height:1.15;color:var(--carta)}
+.oggi-medaglia-corpo small{font-size:11.5px;line-height:1.35;color:var(--carta-3)}
+.oggi-medaglia .oggi-posto{position:absolute;top:10px;right:12px}
+.oggi-medaglia-metto{margin:0 12px 12px;padding:8px 10px;border-radius:var(--r-s);cursor:pointer;font:inherit;font-size:12.5px;font-weight:600;
+  background:var(--ottone-velo);border:1px solid rgba(200,163,94,.4);color:var(--ottone-chiaro)}
+.oggi-medaglia-metto.fatto{opacity:.55;cursor:default}
+.oggi-posto{font-family:'Marcellus',serif;font-size:15px;color:var(--ottone);min-width:16px;text-align:center}
+.oggi-altri{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.oggi-riga{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px 8px 8px;border-radius:var(--r-s);border:1px solid var(--filo);
+  background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.oggi-riga:hover,.oggi-medaglia-corpo:hover{background:rgba(255,255,255,.02)}
+.oggi-riga .oggi-posto{color:var(--carta-3)}
+.oggi-riga-testo{display:flex;flex-direction:column;gap:1px;min-width:0}
+.oggi-riga-testo b{font-weight:500;font-size:14.5px;color:var(--carta)}
+.oggi-riga-testo small{font-size:11.5px;color:var(--carta-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -751,7 +751,7 @@ function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"
 const occasioniOggi=[["ufficio","Ufficio"],["quotidiano","Quotidiano"],["appuntamento","Appuntamento"],["formale","Formale"],["casa","In casa"],["festivita","Festività"],["palestra","Palestra"]];
 // a che ora, domani, si mette il profumo per quell'occasione
 const oraPerOccasione={ufficio:8,quotidiano:9,casa:10,palestra:18,appuntamento:19,formale:19,festivita:19};
-let occOggi=null,giroOggi=0,quandoOggi="oggi";
+let occOggi=null,quandoOggi="oggi";
 function inizioPer(quando,occ){
   if(quando==="oggi")return new Date();
   const d=new Date();d.setDate(d.getDate()+1);d.setHours(oraPerOccasione[occ]??9,0,0,0);
@@ -803,7 +803,7 @@ function candidatiOggi(occ,quando=quandoOggi){
     s+=g===null?2.5:g===0?-8:g===1?-2:Math.min(g,30)/10;
     s+=((p.rating||3.9)-3.9)*1.5;
     return {p,s,g:g0,f,perche:mt.perche};
-  }).sort((a,b)=>b.s-a.s).slice(0,6);
+  }).sort((a,b)=>b.s-a.s);           // tutte le adatte, in ordine: la prima e' la scelta
 }
 const tagPerOccasione={ufficio:["uff"],quotidiano:["casa","uff"],appuntamento:["app","sera"],formale:["sera"],casa:["casa"],festivita:["sera"],palestra:[]};
 function ricettaPer(p,occ){
@@ -814,7 +814,7 @@ function ricettaPer(p,occ){
   return r[0]||null;
 }
 function apriOggi(){
-  quandoOggi="oggi";occOggi=occasioneProbabile();giroOggi=0;
+  quandoOggi="oggi";occOggi=occasioneProbabile();
   disegnaOggi();
   usaMeteo(false);          // se la posizione c'e' gia', il meteo si rinfresca da solo
   const f=document.getElementById("fondale-oggi"),s=f.querySelector(".t-modal");
@@ -828,9 +828,8 @@ function chiudiOggi(){
   f.classList.remove("aperto");s.classList.remove("is-open");s.classList.add("is-closing");
   setTimeout(()=>{f.classList.remove("in-scena");s.classList.remove("is-closing")},msChiusuraModale);
 }
-function scegliQuando(q){if(q===quandoOggi)return;quandoOggi=q;occOggi=occasioneProbabile(q);giroOggi=0;disegnaOggi()}
-function scegliOccOggi(k){occOggi=k;giroOggi=0;disegnaOggi()}
-function altraIdea(){giroOggi++;disegnaOggi()}
+function scegliQuando(q){if(q===quandoOggi)return;quandoOggi=q;occOggi=occasioneProbabile(q);disegnaOggi()}
+function scegliOccOggi(k){occOggi=k;disegnaOggi()}
 // le ore sulla pelle, in fila: al massimo sette tacche, la pioggia segnata
 function striscia(f){
   if(!f||f.ore.length<2)return "";
@@ -859,29 +858,42 @@ function disegnaOggi(){
   if(!c.length){
     h+=`<div class="oggi-vuoto">Nessuna boccetta adatta a questa occasione.</div>`;
   }else{
-    const {p,g,f,perche}=c[giroOggi%c.length],cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
-    const diarioTesto=g===null?"mai segnato nel diario":g===0?(domani?"messo oggi":"l'hai già messo oggi"):`l'ultima volta ${quandoFu(g)}`;
-    const motivi=[domani?`domani dalle ${da.getHours()}`:"",stagLbl(p.stagione),momLbl(p.momento),perche,diarioTesto].filter(Boolean);
+    /* Tutto in vista: la prima in rilievo, seconda e terza affiancate, le altre
+       in elenco sotto, sempre nell'ordine del punteggio. */
+    const diarioTesto=g=>g===null?"mai segnato nel diario":g===0?(domani?"messo oggi":"l'hai già messo oggi"):`l'ultima volta ${quandoFu(g)}`;
+    const lometto=(p,cls)=>domani?"":`<button class="${cls}${indossatoOggi(p.id)?" fatto":""}" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>`;
+    const [primo,...resto]=c,podio=resto.slice(0,2),altri=resto.slice(2);
+    const {p,g,f,perche}=primo,cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
+    const motivi=[domani?`domani dalle ${da.getHours()}`:"",stagLbl(p.stagione),momLbl(p.momento),perche,diarioTesto(g)].filter(Boolean);
     const altro=r?profumi.find(x=>x.id===[...r.l.s.matchAll(/№\s*(\d+)/g)].map(m=>+m[1]).find(id=>id!==p.id)):null;
     h+=`<div class="oggi-scelta ${cl}">
       <div class="oggi-nicchia"><div class="faretto acceso">${p.img?`<img src="${p.img}" alt="">`:vetroLettera[p.colore]}</div><div class="ripiano"></div></div>
       <div class="oggi-testo">
+        <div class="oggi-conto">La scelta migliore · su ${c.length}</div>
         <div class="marca">${esc(p.brand)}</div>
         <div class="oggi-nome">${esc(p.name)}</div>
         <div class="oggi-motivi">${motivi.map(m=>`<span>${m}</span>`).join("")}</div>
-        <div class="oggi-conto">${giroOggi%c.length+1} di ${c.length}</div>
       </div>
     </div>
     ${striscia(f)}
     ${r&&altro?`<button class="oggi-strato" onclick="chiudiOggi();vaiAllaRicetta(${r.i})">${miniatura(altro)}
       <span><span class="incisa">Se vuoi osare, con</span><b>${esc(altro.name)}</b><small>${esc(r.nome)}</small></span></button>`:""}
     <div class="oggi-azioni">
-      <button class="btn-ombra" onclick="altraIdea()"${c.length<2?" disabled":""}>Un'altra idea</button>
-      ${domani
-        ?`<button class="btn-oro" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>`
-        :`<button class="btn-ombra" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>
-      <button class="btn-oro" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>`}
+      <button class="${domani?"btn-oro":"btn-ombra"}" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>
+      ${lometto(p,"btn-oro")}
     </div>`;
+    if(podio.length)h+=`<div class="oggi-sezione incisa">Subito dopo</div>
+      <div class="oggi-podio">${podio.map((x,i)=>`<div class="oggi-medaglia ${vetroClasse[x.p.colore]}">
+        <button class="oggi-medaglia-corpo" onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">
+          <span class="oggi-posto">${i+2}</span>${miniatura(x.p,"grande")}
+          <span class="marca">${esc(x.p.brand)}</span><b>${esc(x.p.name)}</b>
+          <small>${x.perche||diarioTesto(x.g)}</small>
+        </button>${lometto(x.p,"oggi-medaglia-metto")}</div>`).join("")}</div>`;
+    if(altri.length)h+=`<div class="oggi-sezione incisa">Le altre adatte</div>
+      <div class="oggi-altri">${altri.map((x,i)=>`<button class="oggi-riga" onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">
+        <span class="oggi-posto">${i+4}</span>${miniatura(x.p)}
+        <span class="oggi-riga-testo"><b>${esc(x.p.name)}</b><small>${esc(x.p.brand)} · ${x.perche||diarioTesto(x.g)}</small></span>
+      </button>`).join("")}</div>`;
   }
   h+=meteo
     ?`<div class="oggi-meteo">Meteo di dove sei, ora per ora, da Open-Meteo · <button class="collegamento" onclick="scordaPosto()">non usarlo più</button></div>`
