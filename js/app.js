@@ -435,7 +435,7 @@ function vaiAlProfumo(id){
   // che in una scheda del browser in secondo piano potrebbe non arrivare mai
   const t=document.getElementById("teca-"+id);
   if(!t)return;
-  if(t.getAttribute("data-open")!=="true")apriTeca(id);
+  if(t.getAttribute("data-open")!=="true"&&tecaNelPannello!==t)apriTeca(id);
   t.scrollIntoView({block:"start",behavior:"smooth"});
 }
 
@@ -600,8 +600,8 @@ function costruisciTeca(p,i){
       </div>
       <div class="scheda-int t-acc-panel">
         <div class="scheda-int-int t-acc-panel-inner t-stagger">
-          ${piramideDi(p).length?`<div class="incisa t-stagger-line t-stagger-line--1">Piramide olfattiva</div>
-          <div class="t-stagger-line t-stagger-line--1">${bloccoPiramide(p)}</div>`:""}
+          ${piramideDi(p).length?`<div class="incisa t-stagger-line t-stagger-line--1 lato-piramide titolo">Piramide olfattiva</div>
+          <div class="t-stagger-line t-stagger-line--1 lato-piramide">${bloccoPiramide(p)}</div>`:""}
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
           <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>
@@ -618,6 +618,7 @@ function costruisciTeca(p,i){
 function apriTeca(id){
   const c=document.getElementById("teca-"+id);
   if(!c)return;
+  if(c.closest("#vista-collezione")&&colonneVetrina()>1)return apriNelPannello(c);
   const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
   c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
@@ -634,24 +635,65 @@ function apriTeca(id){
   }
 }
 
-/* Le card stanno in colonne indipendenti: aprendone una si allunga solo la sua
-   colonna, mentre le card accanto restano ferme e della loro altezza. Con la
-   griglia a righe, la riga intera si allungava e la vicina sembrava aperta.
-   L'ordine resta per righe: la prima card nella prima colonna, la seconda nella
-   seconda, e cosi' via. */
+/* Su schermo largo la griglia resta a righe allineate e la card aperta non si
+   allunga: i suoi dettagli scendono in un pannello a tutta larghezza, inserito
+   sotto la sua riga. Sul telefono, una colonna sola, la card si apre in se'. */
 const colonneVetrina=()=>matchMedia("(min-width:980px)").matches?3:matchMedia("(min-width:680px)").matches?2:1;
-function inColonne(lista,da){
-  const n=colonneVetrina();
-  if(n===1)return lista.map((p,i)=>costruisciTeca(p,da+i)).join("");
-  const col=Array.from({length:n},()=>[]);
-  lista.forEach((p,i)=>col[i%n].push(costruisciTeca(p,da+i)));
-  return col.map(c=>`<div class="colonna-vetrina">${c.join("")}</div>`).join("");
-}
+const inColonne=(lista,da)=>lista.map((p,i)=>costruisciTeca(p,da+i)).join("");
 let colonneDisegnate=null;
-addEventListener("resize",()=>{const n=colonneVetrina();if(colonneDisegnate!==null&&n!==colonneDisegnate&&profumi.length)disegna()});
+addEventListener("resize",()=>{
+  const n=colonneVetrina();
+  if(colonneDisegnate!==null&&n!==colonneDisegnate&&profumi.length){disegna();return}
+  puntaFreccia();
+});
+
+// ── PANNELLO DI DETTAGLIO (schermo largo) ─────────────────────────────────
+let tecaNelPannello=null;
+function chiudiPannello(){
+  const pan=document.getElementById("pannello-dettaglio");
+  if(tecaNelPannello){
+    const c=tecaNelPannello,int=pan&&pan.querySelector(".scheda-int-int");
+    if(int){int.classList.remove("is-shown","is-hiding");c.querySelector(".scheda-int").appendChild(int)}  // il contenuto torna nella sua card
+    c.classList.remove("aperta");c.setAttribute("aria-expanded","false");
+    tecaNelPannello=null;
+  }
+  if(pan)pan.remove();
+}
+function apriNelPannello(c){
+  const gia=tecaNelPannello===c;
+  chiudiPannello();
+  if(gia)return;
+  // l'ultima card della stessa riga: il pannello va subito dopo
+  let fine=c;
+  for(let x=c.nextElementSibling;x&&x.classList.contains("teca")&&x.offsetTop===c.offsetTop;x=x.nextElementSibling)fine=x;
+  const int=c.querySelector(".scheda-int-int");
+  const pan=document.createElement("section");
+  pan.id="pannello-dettaglio";
+  pan.className="pannello-dettaglio t-acc "+[...c.classList].filter(k=>/^(acqua|bosco|ambra)$/.test(k)).join(" ");
+  pan.setAttribute("data-open","true");
+  pan.setAttribute("aria-label","Dettagli di "+c.querySelector(".nome").textContent);
+  pan.innerHTML=`<span class="pannello-freccia"></span>
+    <button class="foglio-chiudi pannello-chiudi" onclick="chiudiPannello()" aria-label="Chiudi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+  pan.classList.toggle("con-piramide",!!int.querySelector(".piramide"));
+  pan.appendChild(int);
+  fine.after(pan);
+  tecaNelPannello=c;
+  c.classList.add("aperta");c.setAttribute("aria-expanded","true");
+  puntaFreccia();
+  int.classList.remove("is-hiding","is-shown");void int.offsetHeight;int.classList.add("is-shown");
+  const r=pan.getBoundingClientRect();
+  if(r.bottom>innerHeight)window.scrollBy({top:Math.min(r.bottom-innerHeight+24,c.getBoundingClientRect().top-90),behavior:"smooth"});
+}
+function puntaFreccia(){
+  const pan=document.getElementById("pannello-dettaglio");
+  if(!pan||!tecaNelPannello)return;
+  pan.style.setProperty("--freccia-x",(tecaNelPannello.offsetLeft+tecaNelPannello.offsetWidth/2-pan.offsetLeft)+"px");
+}
 
 function disegna(){
   colonneDisegnate=colonneVetrina();
+  tecaNelPannello=null;
   numera();
   strati=indiceStrati();
   const lista=selezione();
