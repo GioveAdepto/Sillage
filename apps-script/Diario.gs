@@ -6,6 +6,9 @@
  * prima voce. Si può anche correggere a mano: basta lasciare le colonne
  * data (AAAA-MM-GG), id e t.
  *
+ * Un layering sono due righe con lo stesso t a 13 cifre più una cifra di
+ * ruolo (1 sotto, 2 sopra): l'app le riconosce da sola e le mostra come coppia.
+ *
  * Il link del Web App è pubblico, quindi ogni voce viene controllata: il
  * profumo deve esistere, la data dev'essere una data, e in un giorno non
  * entrano più di dieci voci.
@@ -57,6 +60,8 @@ function scriviDiario_(p) {
 
   var nelGiorno = g.filter(function (r) { return r[cData] === data; }).length;
   if (nelGiorno >= 10) return { errore: 'troppe voci per il ' + data };
-  f.appendRow([data, String(id), profumo.marchio + ' ' + profumo.profumo, t]);
+  // un t di 14 cifre e' meta' di un layering: l'ultima cifra dice il ruolo
+  var ruolo = t.length === 14 ? (t.slice(-1) === '1' ? ' (layering, sotto)' : ' (layering, sopra)') : '';
+  f.appendRow([data, String(id), profumo.marchio + ' ' + profumo.profumo + ruolo, t]);
   return { ok: true };
 }

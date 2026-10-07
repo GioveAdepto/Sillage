@@ -842,3 +842,52 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   .diario-storia-mese{grid-column:1/-1}
   .diario-riga:last-child{border-bottom:1px solid var(--filo)}
 }
+
+/* Diario: layering, limite di due, avviso */
+.cal-coppia{width:40px;height:44px}
+.cal-coppia .mini{width:26px;height:32px;border-radius:5px}
+.diario-strato .coppia{margin-right:4px}
+.diario-strato .diario-voce-testo{font-size:13.5px;color:var(--carta);line-height:1.5}
+.diario-strato .diario-voce-testo .incisa{color:var(--ottone)}
+.diario-strato .collegamento{font-size:14px;color:var(--carta);text-decoration:none;padding:0}
+.diario-strato .collegamento:hover{color:var(--ottone-chiaro)}
+.diario-strato small{font-size:11px;color:var(--carta-3)}
+.diario-pulsanti{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.diario-pulsanti .diario-aggiungi{margin-top:0}
+.diario-aggiungi:disabled{opacity:.35;cursor:default}
+.diario-limite{margin-top:12px;font-size:12.5px;color:var(--carta-3);text-align:center;font-style:italic}
+.strato-slot-coppia{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:6px;align-items:center}
+.strato-slot{grid-column:1;display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:var(--r-s);border:1px solid var(--filo-2);
+  background:rgba(255,255,255,.02);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.strato-slot.attivo{border-color:var(--ottone);background:var(--ottone-velo)}
+.strato-slot .incisa{font-size:9.5px}
+.strato-inverti{grid-column:2;grid-row:1/3;width:38px;height:38px;border-radius:50%;border:1px solid var(--filo-2);background:var(--vetro);
+  color:var(--carta-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.strato-inverti svg{width:16px;height:16px}
+.strato-inverti:disabled{opacity:.3;cursor:default}
+.mini.vuota{display:flex;align-items:center;justify-content:center;color:var(--carta-3);border:1px dashed var(--filo-2);background:none}
+.mini.vuota svg{width:14px;height:14px}
+.diario-ricette-t{margin:14px 2px 8px}
+.diario-ricette{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch}
+.diario-ricette .scelta{font-size:12px;height:32px;white-space:nowrap}
+.strato-conferma{width:100%;margin-top:10px;padding:12px 14px}
+.strato-conferma:disabled{opacity:.4;cursor:default}
+.strato-oggi{margin-top:12px}
+.oggi-strato-riga{display:flex;gap:8px;align-items:stretch;margin-bottom:14px}
+.oggi-strato-riga .oggi-strato{margin-bottom:0;flex:1;min-width:0}
+.oggi-strato-metto{flex-shrink:0;padding:0 14px;border-radius:var(--r-s);cursor:pointer;font:inherit;font-size:13px;font-weight:600;
+  background:var(--ottone-velo);border:1px solid rgba(200,163,94,.4);color:var(--ottone-chiaro)}
+.oggi-strato-metto.fatto{opacity:.6}
+.avviso{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:300;max-width:min(92vw,440px);
+  padding:11px 16px;border-radius:12px;background:#2a241b;border:1px solid rgba(200,163,94,.45);color:var(--carta);font-size:13.5px;line-height:1.45;
+  box-shadow:0 14px 30px -12px #000;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center}
+.avviso.mostra{opacity:1;transform:translate(-50%,0)}
+.diario-griglia{grid-template-columns:minmax(0,1fr)}
+.diario-griglia > *,.diario-scelta{min-width:0}
+@media(min-width:900px){.diario-griglia{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.riga-strato{display:flex;align-items:baseline;gap:8px;min-width:0}
+.riga-strato small{width:38px;flex-shrink:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--carta-3)}
+.riga-strato button{background:none;border:none;padding:1px 0;font:inherit;font-size:14.5px;font-weight:500;color:var(--carta);cursor:pointer;
+  text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.riga-strato button:hover{color:var(--ottone-chiaro)}
+.diario-strato .diario-voce-testo .incisa{margin-bottom:2px}

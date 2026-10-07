@@ -355,24 +355,73 @@ const indossatoOggi=id=>diario().some(v=>+v.id===id&&v.data===oggiISO());
 const quandoFu=g=>g===0?"oggi":g===1?"ieri":g<45?`${g} giorni fa`:g<365?`${Math.round(g/30)} mesi fa`:"più di un anno fa";
 
 function indossa(id){segna(id,oggiISO())}
+/* Al massimo due profumi al giorno: o due singoli, o un layering (sotto e
+   sopra). Il layering si riconosce dal t, senza toccare il foglio: un t di 14
+   cifre e' la coppia (le prime 13, uguali per i due) piu' il ruolo, 1 sotto e
+   2 sopra. Il Web App accetta t da 10 a 16 cifre, quindi va bene cosi'. */
+const MAX_GIORNO=2;
+const ruoloStrato=v=>String(v.t).length===14?+String(v.t).slice(-1):0;
+const coppiaDi=v=>String(v.t).slice(0,13);
+const vociDelGiorno=data=>diario().filter(v=>v.data===data&&profumi.some(p=>p.id===+v.id));
+function togliDallaCoda(coda,v){
+  // tolta prima che il foglio la vedesse: basta cancellarla dalla coda
+  const i=coda.findIndex(o=>o.op==="metti"&&String(o.t)===String(v.t));
+  if(i>=0)coda.splice(i,1);else coda.push({op:"togli",id:+v.id,data:v.data,t:String(v.t)});
+}
 /* Mette o toglie un profumo in un giorno: oggi dal pulsante della scheda,
-   un giorno passato dal Diario. */
+   un giorno passato dal Diario. Togliere meta' di un layering lo toglie tutto. */
 function segna(id,data){
-  const coda=leggiCoda();
-  const gia=diario().find(v=>+v.id===id&&v.data===data);
+  const coda=leggiCoda(),giorno=vociDelGiorno(data),gia=giorno.find(v=>+v.id===id);
   if(gia){
-    // tolta prima che il foglio la vedesse: basta cancellarla dalla coda
-    const i=coda.findIndex(o=>o.op==="metti"&&String(o.t)===String(gia.t));
-    if(i>=0)coda.splice(i,1);else coda.push({op:"togli",id,data,t:String(gia.t)});
-  }else coda.push({op:"metti",id,data,t:String(Date.now())});
-  scriviCoda(coda);
-  dopoDiario(id);
+    const insieme=ruoloStrato(gia)?giorno.filter(v=>ruoloStrato(v)&&coppiaDi(v)===coppiaDi(gia)):[gia];
+    insieme.forEach(v=>togliDallaCoda(coda,v));
+    scriviCoda(coda);insieme.forEach(v=>dopoDiario(+v.id));
+  }else{
+    if(giorno.length>=MAX_GIORNO){avvisa(`${data===oggiISO()?"Oggi":"Quel giorno"} hai già segnato due profumi: togline uno prima.`);return false}
+    coda.push({op:"metti",id,data,t:String(Date.now())});
+    scriviCoda(coda);dopoDiario(id);
+  }
   sincronizzaDiario();
+  return true;
+}
+/* Il layering occupa il giorno intero. Se quel giorno c'era gia' uno dei due
+   come singolo, diventa parte della coppia; un terzo profumo invece va tolto prima. */
+function segnaLayering(sotto,sopra,data){
+  if(!sotto||!sopra||sotto===sopra)return false;
+  const coda=leggiCoda(),giorno=vociDelGiorno(data);
+  const altro=giorno.find(v=>+v.id!==sotto&&+v.id!==sopra);
+  if(altro){avvisa(`Quel giorno c'è già ${profumi.find(p=>p.id===+altro.id)?.name||"un altro profumo"}: toglilo prima di segnare un layering.`);return false}
+  giorno.forEach(v=>togliDallaCoda(coda,v));
+  const base=String(Date.now());
+  coda.push({op:"metti",id:sotto,data,t:base+"1"},{op:"metti",id:sopra,data,t:base+"2"});
+  scriviCoda(coda);dopoDiario(sotto);dopoDiario(sopra);
+  sincronizzaDiario();
+  return true;
+}
+// il layering di un giorno, se c'e': {sotto, sopra} come profumi
+function layeringDel(data){
+  const v=vociDelGiorno(data).filter(ruoloStrato);
+  const sotto=v.find(x=>ruoloStrato(x)===1),sopra=v.find(x=>ruoloStrato(x)===2);
+  return sotto&&sopra?{sotto:profumi.find(p=>p.id===+sotto.id),sopra:profumi.find(p=>p.id===+sopra.id)}:null;
+}
+const layeringFatto=(sotto,sopra,data=oggiISO())=>{const l=layeringDel(data);return !!l&&l.sotto?.id===sotto&&l.sopra?.id===sopra};
+function faiLayering(sotto,sopra){
+  if(layeringFatto(sotto,sopra)){segna(sotto,oggiISO());return}   // di nuovo: lo toglie
+  if(segnaLayering(sotto,sopra,oggiISO()))avvisa("Layering segnato nel diario di oggi.");
+}
+// un avviso breve in basso, sopra la barra
+let timerAvviso=null;
+function avvisa(t){
+  let el=document.getElementById("avviso");
+  if(!el){el=document.createElement("div");el.id="avviso";el.className="avviso";el.setAttribute("role","status");document.body.appendChild(el)}
+  el.textContent=t;el.classList.add("mostra");
+  clearTimeout(timerAvviso);timerAvviso=setTimeout(()=>el.classList.remove("mostra"),3200);
 }
 function dopoDiario(id){
   const r=document.getElementById("diario-"+id);
   if(r)r.innerHTML=rigaDiario(profumi.find(p=>p.id===id));
   disegnaNumeri();disegnaDiario();
+  if(document.getElementById("vista-layering")?.classList.contains("attiva"))disegnaLayering();
   if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
 }
 
@@ -402,7 +451,8 @@ const goccia='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function rigaDiario(p){
   if(!p)return "";
   const oggi=indossatoOggi(p.id),n=vociDi(p.id).length,g=giorniDa(p.id);
-  return `<button class="btn-indossa${oggi?" fatto":""}" onclick="event.stopPropagation();indossa(${p.id})">${oggi?spunta+"Indossato oggi":goccia+"Lo metto oggi"}</button>
+  const lay=oggi&&layeringDel(oggiISO()),inLay=lay&&(lay.sotto?.id===p.id||lay.sopra?.id===p.id);
+  return `<button class="btn-indossa${oggi?" fatto":""}" onclick="event.stopPropagation();indossa(${p.id})">${oggi?spunta+(inLay?"In layering oggi":"Indossato oggi"):goccia+"Lo metto oggi"}</button>
     <span class="diario-nota">${n?`${n} ${n===1?"volta":"volte"} · l'ultima ${quandoFu(g)}`:"Mai segnato nel diario"}</span>`;
 }
 
@@ -996,8 +1046,10 @@ function disegnaOggi(){
       </div>
     </div>
     ${striscia(f)}
-    ${r&&altro?`<button class="oggi-strato" onclick="chiudiOggi();vaiAllaRicetta(${r.i})">${miniatura(altro)}
-      <span><span class="incisa">Se vuoi osare, con</span><b>${esc(altro.name)}</b><small>${esc(r.nome)}</small></span></button>`:""}
+    ${r&&altro?(()=>{const pr=partiRicetta(r.l),fatto=pr.sotto&&pr.sopra&&layeringFatto(pr.sotto.id,pr.sopra.id);
+      return `<div class="oggi-strato-riga"><button class="oggi-strato" onclick="chiudiOggi();vaiAllaRicetta(${r.i})">${miniatura(altro)}
+      <span><span class="incisa">Se vuoi osare, con</span><b>${esc(altro.name)}</b><small>${esc(r.nome)}</small></span></button>
+      ${!domani&&pr.sotto&&pr.sopra?`<button class="oggi-strato-metto${fatto?" fatto":""}" onclick="faiLayering(${pr.sotto.id},${pr.sopra.id})">${fatto?"Segnato":"Lo faccio"}</button>`:""}</div>`})():""}
     <div class="oggi-azioni">
       <button class="${domani?"btn-oro":"btn-ombra"}" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>
       ${lometto(p,"btn-oro")}
@@ -1275,6 +1327,7 @@ function disegnaLayering(){
       </div>
       <div class="ricetta-corpo t-acc-panel"><div class="ricetta-corpo-int t-acc-panel-inner">
         <div class="pila">${riga("Sopra",r.sopra,r.dSopra)}${riga("Sotto",r.sotto,r.dSotto)}</div>
+        ${r.sotto&&r.sopra?`<button class="btn-indossa strato-oggi${layeringFatto(r.sotto.id,r.sopra.id)?" fatto":""}" onclick="event.stopPropagation();faiLayering(${r.sotto.id},${r.sopra.id})">${layeringFatto(r.sotto.id,r.sopra.id)?spunta+"Fatto oggi":goccia+"Lo faccio oggi"}</button>`:""}
         <div class="passo"><span class="passo-nome">Come si fa</span><span class="passo-testo">${rinumera(l.come)}</span></div>
         <div class="passo"><span class="passo-nome">Risultato</span><span class="passo-testo">${rinumera(l.ris)}</span></div>
         <div class="passo"><span class="passo-nome">Perché funziona</span><span class="passo-testo">${rinumera(l.perche)}</span></div>
@@ -1429,7 +1482,7 @@ function disegnaNumeri(){
 /* Il calendario del mese con quello che hai indossato, il giorno scelto con
    le sue voci (da togliere o aggiungere, anche a posteriori) e la cronologia.
    Le voci passano dalla stessa coda del pulsante «Lo metto oggi». */
-let meseDiario=null,giornoDiario=null,sceltaDiario=false,cercaDiario="";
+let meseDiario=null,giornoDiario=null,sceltaDiario=false,cercaDiario="",strato={sotto:null,sopra:null,slot:"sotto"};
 const nomiMesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 const maiuscola=t=>t.replace(/^./,c=>c.toUpperCase());
 const dataLunga=iso=>{const [y,m,d]=iso.split("-").map(Number);return maiuscola(new Date(y,m-1,d).toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))};
@@ -1449,11 +1502,31 @@ function scegliGiorno(iso){
   giornoDiario=iso;meseDiario=iso.slice(0,7);sceltaDiario=false;cercaDiario="";disegnaDiario();
   document.getElementById("diario-giorno")?.scrollIntoView({block:"nearest",behavior:"smooth"});
 }
-function apriSceltaDiario(){sceltaDiario=!sceltaDiario;cercaDiario="";disegnaDiario();if(sceltaDiario)document.getElementById("diario-cerca")?.focus()}
+/* sceltaDiario: false, "uno" (un profumo) o "strati" (un layering) */
+function apriSceltaDiario(modo="uno"){
+  sceltaDiario=sceltaDiario===modo?false:modo;cercaDiario="";
+  if(sceltaDiario==="strati"){
+    // il singolo gia' segnato quel giorno parte come base
+    const v=vociDelGiorno(giornoDiario);strato={sotto:v.length===1?+v[0].id:null,sopra:null,slot:v.length===1?"sopra":"sotto"};
+  }
+  disegnaDiario();if(sceltaDiario)document.getElementById("diario-cerca")?.focus();
+}
+function slotStrato(k){strato.slot=k;disegnaDiario()}
+function invertiStrato(){strato={sotto:strato.sopra,sopra:strato.sotto,slot:strato.slot};disegnaDiario()}
+function ricettaStrato(i){const r=partiRicetta(layering[i]);if(r.sotto&&r.sopra){strato={sotto:r.sotto.id,sopra:r.sopra.id,slot:"sotto"};disegnaDiario()}}
+function confermaStrato(){if(segnaLayering(strato.sotto,strato.sopra,giornoDiario)){sceltaDiario=false;disegnaDiario()}}
 function filtraSceltaDiario(t){cercaDiario=t;document.getElementById("diario-elenco").innerHTML=elencoSceltaDiario()}
-function aggiungiDiario(id){segna(id,giornoDiario)}
+function aggiungiDiario(id){
+  if(sceltaDiario==="strati"){
+    strato[strato.slot]=id;
+    if(strato.sotto===strato.sopra)strato[strato.slot==="sotto"?"sopra":"sotto"]=null;
+    strato.slot=strato.sotto&&!strato.sopra?"sopra":!strato.sotto?"sotto":strato.slot;
+    disegnaDiario();return;
+  }
+  if(segna(id,giornoDiario)!==false&&vociDelGiorno(giornoDiario).length>=MAX_GIORNO)sceltaDiario=false,disegnaDiario();
+}
 function elencoSceltaDiario(){
-  const q=cercaDiario.trim().toLowerCase(),gia=new Set((vociPerGiorno().get(giornoDiario)||[]).map(v=>+v.id));
+  const q=cercaDiario.trim().toLowerCase(),gia=new Set(sceltaDiario==="strati"?[strato.sotto,strato.sopra].filter(Boolean):(vociPerGiorno().get(giornoDiario)||[]).map(v=>+v.id));
   const lista=[...profumi].filter(p=>!q||(p.name+" "+p.brand).toLowerCase().includes(q))
     .sort((a,b)=>eCampione(a)-eCampione(b)||a.name.localeCompare(b.name,"it"));
   if(!lista.length)return `<div class="diario-vuoto">Nessun profumo con questo nome.</div>`;
@@ -1484,35 +1557,63 @@ function disegnaDiario(){
     ${"<span></span>".repeat(primo)}
     ${Array.from({length:giorni},(_,i)=>{
       const iso=meseDiario+"-"+String(i+1).padStart(2,"0"),v=g.get(iso)||[],fut=iso>oggi;
-      const ps=v.map(x=>profumi.find(p=>p.id===+x.id)).filter(Boolean);
+      const ps=v.map(x=>profumi.find(p=>p.id===+x.id)).filter(Boolean),lay=layeringDel(iso);
       return `<button class="cal-g${iso===oggi?" oggi":""}${iso===giornoDiario?" scelto":""}${v.length?" pieno":""}" onclick="scegliGiorno('${iso}')"${fut?" disabled":""} aria-label="${dataLunga(iso)}${v.length?`: ${ps.map(p=>p.name).join(", ")}`:""}">
-        <span class="cal-n">${i+1}</span>${ps.length?`<span class="cal-foto">${miniatura(ps[0])}${ps.length>1?`<i>+${ps.length-1}</i>`:""}</span>`:""}</button>`;
+        <span class="cal-n">${i+1}</span>${lay?`<span class="cal-foto"><span class="coppia cal-coppia">${miniatura(lay.sotto,"sotto")}${miniatura(lay.sopra,"sopra")}</span></span>`
+          :ps.length?`<span class="cal-foto">${miniatura(ps[0])}${ps.length>1?`<i>+${ps.length-1}</i>`:""}</span>`:""}</button>`;
     }).join("")}</div>
   </div>`;
   // il giorno scelto
   const v=(g.get(giornoDiario)||[]).map(x=>({x,p:profumi.find(p=>p.id===+x.id)})).filter(o=>o.p);
+  const layG=layeringDel(giornoDiario),singoli=v.filter(o=>!ruoloStrato(o.x)),pieno=v.length>=MAX_GIORNO;
+  const xTogli=(p,et)=>`<button class="diario-togli" onclick="segna(${p.id},'${giornoDiario}')" aria-label="${et}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
   h+=`<div class="diario-giorno" id="diario-giorno">
     <div class="diario-giorno-t"><span class="incisa">${giornoDiario===oggi?"Oggi":giornoDiario===oggiISO(new Date(Date.now()-864e5))?"Ieri":"Giorno"}</span><b>${dataLunga(giornoDiario)}</b></div>
-    ${v.length?v.map(({p})=>`<div class="diario-voce">
+    ${layG?`<div class="diario-voce diario-strato">
+        <span class="coppia">${miniatura(layG.sotto,"sotto")}${miniatura(layG.sopra,"sopra")}</span>
+        <span class="diario-voce-testo"><span class="incisa">Layering</span>
+          <span class="riga-strato"><small>sopra</small><button onclick="vaiAlProfumo(${layG.sopra.id})">${esc(layG.sopra.name)}</button></span>
+          <span class="riga-strato"><small>sotto</small><button onclick="vaiAlProfumo(${layG.sotto.id})">${esc(layG.sotto.name)}</button></span></span>
+        ${xTogli(layG.sotto,"Togli il layering da questo giorno")}</div>`:""}
+    ${singoli.map(({p})=>`<div class="diario-voce">
         <button class="diario-voce-apri" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span></button>
-        <button class="diario-togli" onclick="segna(${p.id},'${giornoDiario}')" aria-label="Togli ${esc(p.name)} da questo giorno"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-      </div>`).join(""):`<div class="diario-vuoto">${giornoDiario===oggi?"Oggi non hai ancora segnato niente.":"Niente segnato in questo giorno."}</div>`}
-    <button class="diario-aggiungi${sceltaDiario?" aperto":""}" onclick="apriSceltaDiario()">${sceltaDiario?"Chiudi":`${piu}Aggiungi un profumo`}</button>
-    ${sceltaDiario?`<div class="diario-scelta">
+        ${xTogli(p,"Togli "+esc(p.name)+" da questo giorno")}</div>`).join("")}
+    ${!v.length?`<div class="diario-vuoto">${giornoDiario===oggi?"Oggi non hai ancora segnato niente.":"Niente segnato in questo giorno."}</div>`:""}
+    ${pieno&&!sceltaDiario?`<div class="diario-limite">Due profumi al giorno al massimo: per cambiarli, togline uno.</div>`:`<div class="diario-pulsanti">
+      <button class="diario-aggiungi${sceltaDiario==="uno"?" aperto":""}" onclick="apriSceltaDiario('uno')"${pieno&&sceltaDiario!=="uno"?" disabled":""}>${sceltaDiario==="uno"?"Chiudi":`${piu}Un profumo`}</button>
+      <button class="diario-aggiungi${sceltaDiario==="strati"?" aperto":""}" onclick="apriSceltaDiario('strati')"${layG||(singoli.length>1)?" disabled":""}>${sceltaDiario==="strati"?"Chiudi":`${iconaStrati}Un layering`}</button></div>`}
+    ${sceltaDiario==="strati"?(()=>{
+      const pS=profumi.find(p=>p.id===strato.sotto),pP=profumi.find(p=>p.id===strato.sopra);
+      const slot=(k,p,et)=>`<button class="strato-slot${strato.slot===k?" attivo":""}" onclick="slotStrato('${k}')">
+          ${p?miniatura(p):`<span class="mini vuota">${piu}</span>`}<span class="diario-voce-testo"><span class="incisa">${et}</span><b>${p?esc(p.name):"Scegli dall'elenco"}</b></span></button>`;
+      const ricette=layering.map((l,i)=>({i,r:partiRicetta(l)})).filter(({r})=>r.sotto&&r.sopra&&(!strato.sotto||strato.sopra||r.sotto.id===strato.sotto||r.sopra.id===strato.sotto)).slice(0,12);
+      return `<div class="diario-scelta strati-scelta">
+        <div class="strato-slot-coppia">${slot("sotto",pS,"Sotto · il più denso")}${slot("sopra",pP,"Sopra · il più leggero")}
+          <button class="strato-inverti" onclick="invertiStrato()" aria-label="Inverti sotto e sopra"${!pS&&!pP?" disabled":""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg></button></div>
+        ${ricette.length?`<div class="incisa diario-ricette-t">Dalle tue ricette</div><div class="diario-ricette">${ricette.map(({i,r})=>
+          `<button class="scelta" onclick="ricettaStrato(${i})">${esc(r.sotto.name)} → ${esc(r.sopra.name)}</button>`).join("")}</div>`:""}
+        <input id="diario-cerca" class="diario-cerca" type="search" placeholder="Cerca per nome o marca…" value="${esc(cercaDiario)}" oninput="filtraSceltaDiario(this.value)" autocomplete="off">
+        <div class="diario-elenco" id="diario-elenco">${elencoSceltaDiario()}</div>
+        <button class="btn-oro strato-conferma" onclick="confermaStrato()"${pS&&pP?"":" disabled"}>Segna il layering</button></div>`;
+    })():sceltaDiario==="uno"?`<div class="diario-scelta">
       <input id="diario-cerca" class="diario-cerca" type="search" placeholder="Cerca per nome o marca…" value="${esc(cercaDiario)}" oninput="filtraSceltaDiario(this.value)" autocomplete="off">
       <div class="diario-elenco" id="diario-elenco">${elencoSceltaDiario()}</div></div>`:""}
   </div></div>`;
   // cronologia: le ultime voci, raggruppate per mese
-  const tutte=[...g.entries()].sort((a,b)=>a[0]<b[0]?1:-1).flatMap(([d,vs])=>vs.slice().reverse().map(x=>({d,p:profumi.find(p=>p.id===+x.id)}))).filter(o=>o.p);
+  const tutte=[...g.entries()].sort((a,b)=>a[0]<b[0]?1:-1).flatMap(([d,vs])=>{
+    const lay=layeringDel(d),fuori=vs.filter(x=>!ruoloStrato(x)).slice().reverse().map(x=>({d,p:profumi.find(p=>p.id===+x.id)}));
+    return (lay?[{d,lay}]:[]).concat(fuori);
+  }).filter(o=>o.p||o.lay);
   h+=`<div class="incisa diario-sez">Cronologia</div>`;
   if(!tutte.length)h+=`<p class="diario-invito">Ancora nessuna voce. Segna quello che indossi con «Lo metto oggi» nella scheda di un profumo, da «Cosa metto oggi» o qui sopra, scegliendo un giorno.</p>`;
   else{
     let mese="";
-    h+=`<div class="diario-storia">`+tutte.slice(0,90).map(({d,p})=>{
+    h+=`<div class="diario-storia">`+tutte.slice(0,90).map(({d,p,lay})=>{
       const [y,m,gg]=d.split("-").map(Number),testa=d.slice(0,7)!==mese?(mese=d.slice(0,7),`<div class="diario-storia-mese">${maiuscola(nomiMesi[m-1])} ${y}</div>`):"";
       return testa+`<button class="diario-riga" onclick="scegliGiorno('${d}');document.getElementById('vista-diario').scrollIntoView({behavior:'smooth'})">
         <span class="diario-data"><b>${gg}</b><small>${new Date(y,m-1,gg).toLocaleDateString("it-IT",{weekday:"short"})}</small></span>
-        ${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span></button>`;
+        ${lay?`<span class="coppia">${miniatura(lay.sotto,"sotto")}${miniatura(lay.sopra,"sopra")}</span><span class="diario-voce-testo"><b>${esc(lay.sotto.name)} + ${esc(lay.sopra.name)}</b><small>layering</small></span>`
+          :`${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span>`}</button>`;
     }).join("")+`</div>`;
     if(tutte.length>90)h+=`<p class="diario-invito">Le voci più vecchie restano nel foglio, nella tab Diario.</p>`;
   }
