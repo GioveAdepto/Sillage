@@ -468,6 +468,62 @@ const selezione=()=>inVetrina().filter(p=>passa(p,filtriAttivi,noteAttive))
   .sort((a,b)=>{const fn=ordinamenti[ordine].fn,va=fn(a),vb=fn(b);return typeof va==="number"?va-vb:va<vb?-1:va>vb?1:0});
 const quanti=(f,n)=>inVetrina().filter(p=>passa(p,f,n)).length;
 
+// ── PIRAMIDE OLFATTIVA ────────────────────────────────────────────────────
+/* La piramide arriva dal foglio come testo ("Testa: a, b · Cuore: … · Fondo: …")
+   e diventa tre file di tessere, come su Fragrantica. Le icone sono emoji
+   scelte nota per nota: le illustrazioni di Fragrantica non sono nostre.
+   L'ordine conta, vince la prima regola che combacia: "legno di cedro" e'
+   un legno, "cedro" da solo e' l'agrume. */
+const iconeNote=[
+  [/pepe|pimento|peperoncino|timur|timut|pepperwood/,"🌶️"],          // prima della rosa: "pepe rosa" e' un pepe
+  [/legno di cedro|cedro (del|della|dell)|cipresso|pino|abete/,"🌲"],[/bacche di ginepro|ginepro|ribes|mirtill/,"🫐"],
+  [/cedro|limone|lime|bergamotto|yuzu/,"🍋"],[/mandarino|arancia|pompelmo|chinotto|agrumi|clementin/,"🍊"],
+  [/fiore d'arancio|neroli|zagara|mimosa|gelsomino|tuberosa|ylang/,"🌼"],[/rosa/,"🌹"],[/iris/,"⚜️"],[/lavanda/,"🪻"],
+  [/violetta|eliotropio/,"🌸"],[/orchidea|geranio|pelargonio/,"🌺"],
+  [/mela caramellata/,"🍎"],[/mela/,"🍏"],[/ananas/,"🍍"],[/melone/,"🍈"],[/cocco/,"🥥"],[/lampone|fragola/,"🍓"],
+  [/prugna|frutti|fruttat/,"🍑"],[/frutto della passione|mango/,"🥭"],[/castagna/,"🌰"],
+  [/rum|cognac|whisky|brandy|liquore/,"🥃"],[/aceto/,"🍷"],[/caffè/,"☕"],[/cacao|cioccolat|pralina/,"🍫"],
+  [/vaniglia/,"🍦"],[/tonka/,"🫘"],[/miele/,"🍯"],[/gourmand|caramell/,"🍬"],[/sesamo/,"🌾"],
+  [/zenzero/,"🫚"],[/cardamomo/,"🫛"],[/zafferano/,"🏵️"],
+  [/cannella|noce moscata|chiodi di garofano|spezie|speziat/,"🌰"],
+  [/erba mate|maté/,"🧉"],[/foglia di tè|tè /,"🍵"],[/menta/,"🌱"],[/tabacco/,"🍂"],[/foglia|patchouli/,"🍃"],
+  [/rosmarino|salvia|timo|basilico|coriandolo|artemisia|davana|note verdi|cannabis|muschio di quercia|mastice|lentisco/,"🌿"],
+  [/vetiver|papiro/,"🌾"],[/betulla|fumo|affumicat/,"🔥"],[/incenso|olibano|mirra|elemi/,"🕯️"],
+  [/benzoino|labdano|resin|balsam/,"🍯"],[/ambra grigia|ambroxan/,"🐋"],[/ambra/,"🔶"],
+  [/agar|oud|sandalo|quercia|guaiaco|legn|boschiv/,"🪵"],[/cuoio|pelle|scamosciata/,"🧤"],[/animal/,"🐾"],
+  [/cashmeran|muschio/,"☁️"],[/acqua di mare|marin|aquozone|calone|acquatic/,"🌊"],[/acqua/,"💧"],[/sale/,"🧂"],[/minerali/,"🪨"],[/ozon/,"💨"]
+];
+const iconaNota=n=>{const t=n.toLowerCase();const r=iconeNote.find(([re])=>re.test(t));return r?r[1]:""};
+function piramideDi(p){
+  const testo=(p.note||"").trim();
+  if(!testo)return [];
+  const livelli=testo.split(/\s*·\s*/).map(pezzo=>{
+    const m=pezzo.match(/^(testa|cuore|fondo|note)\s*:\s*(.*)$/i);
+    return {nome:m?m[1][0].toUpperCase()+m[1].slice(1).toLowerCase():"Note",
+      note:(m?m[2]:pezzo).split(/\s*,\s*/).map(x=>x.trim()).filter(Boolean)};
+  }).filter(l=>l.note.length);
+  return livelli;
+}
+const principale=(p,n)=>(p.noteElenco||[]).some(x=>{const a=x.toLowerCase(),b=n.toLowerCase();return a===b||b.includes(a)||a.includes(b)});
+const accesa=n=>[...noteAttive].some(x=>n.toLowerCase().includes(x));
+const tesseraNota=(p,n)=>`<span class="nota-t${principale(p,n)?" chiave":""}${accesa(n)?" accesa":""}">
+  <span class="nota-i">${iconaNota(n)||`<b>${esc(n[0].toUpperCase())}</b>`}</span><span class="nota-n">${esc(n)}</span></span>`;
+const sottoLivello={Testa:"apertura",Cuore:"dopo la prima mezz'ora",Fondo:"quello che resta"};
+function bloccoPiramide(p){
+  const l=piramideDi(p);
+  if(!l.length)return "";
+  return `<div class="piramide">${l.map(x=>`<div class="piramide-livello">
+      <div class="piramide-nome"><span class="incisa">${x.nome}</span>${sottoLivello[x.nome]?`<small>${sottoLivello[x.nome]}</small>`:""}</div>
+      <div class="piramide-note">${x.note.map(n=>tesseraNota(p,n)).join("")}</div></div>`).join("")}
+    ${(p.noteElenco||[]).length?`<div class="piramide-legenda"><span class="nota-t chiave mini-l"><span class="nota-i"></span></span>note principali secondo Fragrantica</div>`:""}</div>`;
+}
+// sulla card chiusa: le note principali, con icona; se mancano, la piramide come testo
+function rigaNote(p){
+  const el=p.noteElenco||[];
+  if(!el.length)return `<p class="note-riga">${evidenzia(p.note)}</p>`;
+  return `<div class="note-chiave">${el.map(n=>`<span class="nota-c${accesa(n)?" accesa":""}"><i>${iconaNota(n)||"·"}</i>${esc(n)}</span>`).join("")}</div>`;
+}
+
 function evidenzia(testo){
   if(!noteAttive.size)return esc(testo);
   let o=esc(testo);
@@ -534,7 +590,7 @@ function costruisciTeca(p,i){
           <span class="t-tt" role="tooltip">${vetroNome[p.colore]}</span>
         </span>
       </div>
-      <p class="note-riga">${evidenzia(p.note)}</p>
+      ${rigaNote(p)}
       <div class="accordi">${accordi}</div>
       <div class="contrassegni">
         <span class="segno stag">${stagLbl(p.stagione)}</span>
@@ -544,6 +600,8 @@ function costruisciTeca(p,i){
       </div>
       <div class="scheda-int t-acc-panel">
         <div class="scheda-int-int t-acc-panel-inner t-stagger">
+          ${piramideDi(p).length?`<div class="incisa t-stagger-line t-stagger-line--1">Piramide olfattiva</div>
+          <div class="t-stagger-line t-stagger-line--1">${bloccoPiramide(p)}</div>`:""}
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
           <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>

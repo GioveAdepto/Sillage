@@ -710,3 +710,27 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .oggi-riga-testo{display:flex;flex-direction:column;gap:1px;min-width:0}
 .oggi-riga-testo b{font-weight:500;font-size:14.5px;color:var(--carta)}
 .oggi-riga-testo small{font-size:11.5px;color:var(--carta-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Note principali sulla card e piramide olfattiva nella scheda */
+.note-chiave{display:flex;flex-wrap:wrap;gap:5px 6px;margin-bottom:11px}
+.nota-c{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;line-height:1;padding:5px 9px 5px 6px;border-radius:99px;
+  background:rgba(255,255,255,.035);border:1px solid var(--filo);color:var(--carta-2)}
+.nota-c i{font-style:normal;font-size:13px}
+.nota-c.accesa{background:rgba(190,150,220,.18);border-color:rgba(190,150,220,.45);color:#e2cdf5}
+.piramide{margin:10px 0 18px;display:flex;flex-direction:column;gap:14px}
+.piramide-livello{padding-bottom:14px;border-bottom:1px solid var(--filo)}
+.piramide-livello:last-of-type{border-bottom:none;padding-bottom:0}
+.piramide-nome{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:10px}
+.piramide-nome small{font-size:11px;color:var(--carta-3);font-style:italic}
+.piramide-note{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 6px}
+.nota-t{width:68px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.nota-i{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:25px;line-height:1;
+  background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid var(--filo-2)}
+.nota-i b{font-family:'Marcellus',serif;font-weight:400;font-size:19px;color:var(--carta-3)}
+.nota-n{font-size:11px;line-height:1.25;color:var(--carta-2);overflow-wrap:anywhere}
+.nota-t.chiave .nota-i{border-color:rgba(200,163,94,.75);box-shadow:0 0 0 1px rgba(200,163,94,.25),0 0 14px -4px rgba(240,217,164,.5)}
+.nota-t.chiave .nota-n{color:var(--ottone-chiaro)}
+.nota-t.accesa .nota-i{background:rgba(190,150,220,.2);border-color:rgba(190,150,220,.6)}
+.piramide-legenda{display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--carta-3)}
+.piramide-legenda .nota-t{width:auto}
+.piramide-legenda .nota-i{width:12px;height:12px;border-radius:4px}
