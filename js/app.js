@@ -180,8 +180,8 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"
 let filtriAttivi=new Set(), noteAttive=new Set(), testoCerca="", ordine="alpha", noteEspanse=false;
 
 // ── ADESSO: stagione, ora, meteo ──────────────────────────────────────────
-/* Una fonte sola per "adesso": il filtro rapido, la Guida e «Cosa metto
-   oggi» leggono tutti da qui. Prima ognuno aveva la sua regola, e il filtro
+/* Una fonte sola per "adesso": il filtro rapido, la Guida e
+   «Consigliami» leggono tutti da qui. Prima ognuno aveva la sua regola, e il filtro
    chiamava "inverno" tutto quello che non era estate.
    Le stagioni cambiano agli equinozi e ai solstizi. La sera comincia mezz'ora
    dopo il tramonto, e comunque alle 19: d'inverno alle cinque e mezza e' gia'
@@ -205,8 +205,8 @@ const stagioneOra=()=>adesso().stagione;
 const moment0Ora=()=>adesso().momento;
 
 /* Il meteo viene da Open-Meteo: gratuito, senza chiave. La posizione la
-   chiede il browser, e solo quando la chiedi tu dal pulsante in «Cosa metto
-   oggi»; poi resta sul telefono, arrotondata a una decina di chilometri, e il
+   chiede il browser, e solo quando la chiedi tu dal pulsante in
+   «Consigliami»; poi resta sul telefono, arrotondata a una decina di chilometri, e il
    meteo si aggiorna da solo ogni mezz'ora. */
 const CHIAVE_POSTO="sillage:posto",CHIAVE_METEO="sillage:meteo";
 const cieli={0:"sereno",1:"quasi sereno",2:"poco nuvoloso",3:"coperto",45:"nebbia",48:"nebbia",51:"pioviggine",53:"pioviggine",55:"pioviggine",
@@ -631,7 +631,6 @@ function costruisciTeca(p,i){
           <div class="riga-marca"><span class="marca">${esc(p.brand)}</span><span class="catalogo">№ ${numeroDi(p.id)}</span></div>
           <h2 class="nome">${esc(p.name)}</h2>
           <div class="targhette">
-            ${p.nuovo?`<span class="targa nuovo">Nuovo</span>`:""}
             <span class="targa grado">${p.conc}${formato(p)}</span>
             <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
@@ -809,7 +808,7 @@ function scelta(f,extra,etichetta){
 }
 function disegnaRapidi(){
   const a=adesso();
-  const oggi=vetrina==="boccette"?`<button class="scelta oggi" onclick="apriOggi()">${ic.stella}Cosa metto oggi</button>`:"";
+  const oggi=vetrina==="boccette"?`<button class="scelta oggi" onclick="apriOggi()">${ic.stella}Consigliami</button>`:"";
   document.getElementById("rapidi").innerHTML=oggi+
     scelta("adesso","ora",`Adesso · ${a.nome}, ${a.momento}${a.meteo?` · ${a.meteo.temperatura}°`:""}`)+
     scelta("ufficio","","Ufficio")+
@@ -913,9 +912,9 @@ function chiudiFiltri(){
 }
 function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"))chiudiFiltri()}
 
-// ── COSA METTO OGGI / DOMANI ──────────────────────────────────────────────
-/* Un consiglio alla volta, scelto fra le boccette adatte all'occasione, alla
-   stagione e all'ora. A parita', vince quella che non metti da piu' tempo:
+// ── CONSIGLIAMI ───────────────────────────────────────────────────────────
+/* Le cinque boccette migliori per l'occasione, la stagione, l'ora e il
+   meteo, ognuna con il suo perche'. A parita', vince quella che non metti da piu' tempo:
    il diario serve anche a questo. Per domani vale lo stesso ragionamento,
    spostato all'ora in cui lo metterai. */
 const occasioniOggi=[["ufficio","Ufficio"],["quotidiano","Quotidiano"],["appuntamento","Appuntamento"],["formale","Formale"],["casa","In casa"],["festivita","Festività"],["palestra","Palestra"]];
@@ -941,18 +940,24 @@ const durataSullaPelle=p=>Math.min(p.longevita||6,12);
    Si guarda la finestra oraria: il caldo si misura sul picco, il freddo
    sulla minima, la mezza stagione sulla media. */
 function effettoMeteo(p,f){
-  if(!f)return {s:0,perche:""};
+  if(!f)return {s:0,perche:"",contro:""};
   const densi=p.colore==="rosso",freschi=p.colore==="blu";
-  let s=0,perche="";
+  let s=0,perche="",contro="";
   if(f.max>=26){s+=freschi?2.5:densi?-3:0;if(f.umid>=70&&densi)s-=1.5;
-    if(freschi)perche=`picco di ${f.max}° alle ${f.oraMax}: serve fresco`;}
+    if(freschi)perche=`con un picco di ${f.max}° alle ${f.oraMax} serve un fresco`;
+    if(densi)contro=`con ${f.max}° rischia di pesare${f.umid>=70?", e l'aria è umida":""}`;}
   else if(f.min<=10){s+=densi?2.5:freschi?-2:0;if(p.stagione==="ai")s+=1;
-    if(densi)perche=`${f.min}° alle ${f.oraMin}: al freddo regge un intenso`;}
-  else if(f.media>=21){s+=freschi?1:densi?-1:0;if(p.stagione==="pe")s+=1;if(freschi)perche=`${f.min}–${f.max}°, clima mite`;}
-  else if(f.media<=15){s+=densi?1.2:freschi?-1:0;if(p.stagione==="ai")s+=.8;if(densi)perche=`${f.min}–${f.max}°, aria fresca`;}
+    if(densi)perche=`con ${f.min}° alle ${f.oraMin} un intenso si sente e dura`;
+    if(freschi)contro=`a ${f.min}° un fresco svanisce in fretta`;}
+  else if(f.media>=21){s+=freschi?1:densi?-1:0;if(p.stagione==="pe")s+=1;
+    if(freschi)perche=`${f.min}–${f.max}°, clima mite: un fresco sta bene`;
+    if(densi)contro=`a ${f.min}–${f.max}° è un po' denso`;}
+  else if(f.media<=15){s+=densi?1.2:freschi?-1:0;if(p.stagione==="ai")s+=.8;
+    if(densi)perche=`${f.min}–${f.max}°, aria fresca: un caldo avvolge bene`;
+    if(freschi)contro=`a ${f.min}–${f.max}° un fresco dura poco`;}
   if(f.pioggia!==null&&p.accordi.some(a=>/Legnoso|Terroso|Fumoso|Ambra|Balsamico/.test(a))){s+=1;
-    perche=perche||`pioggia dalle ${f.pioggia}: i legni rendono bene`}
-  return {s,perche};
+    perche=perche||`pioggia dalle ${f.pioggia}: legni e resine rendono bene`}
+  return {s,perche,contro};
 }
 // senza previsione oraria (posizione mai data, o rete assente) vale il meteo di adesso, solo per oggi
 function finestraPer(p,da,quando){
@@ -966,15 +971,37 @@ function candidatiOggi(occ,quando=quandoOggi){
   const da=inizioPer(quando,occ),a=adesso(da),st=a.stagione,mo=a.momento,spost=quando==="domani"?1:0;
   return boccette().filter(p=>p[occ]==="si"||p[occ]==="si-mod").map(p=>{
     const g0=giorniDa(p.id),g=g0===null?null:g0+spost,f=finestraPer(p,da,quando),mt=effettoMeteo(p,f);
+    /* Il punteggio e i motivi nascono insieme: ogni voce che sposta la
+       classifica lascia una frase, a favore o contro. */
+    const pro=[],contro=[],nomeSt=st==="pe"?"primavera ed estate":"autunno e inverno";
     let s=mt.s;
-    s+=p.stagione===st?3:p.stagione==="tutto"?2:-3;
-    s+=(p.momento===mo||p.momento==="entrambi")?2:-2;
-    s+=p[occ]==="si"?2:.5;
-    s+=g===null?2.5:g===0?-8:g===1?-2:Math.min(g,30)/10;
+    if(p[occ]==="si"){s+=2;pro.push(fraseOccasione[occ])}
+    else{s+=.5;contro.push(`${dosatoPer[occ]} va dosato: uno spray`)}
+    if(p.stagione===st){s+=3;pro.push(`è di stagione, nato per ${nomeSt}`)}
+    else if(p.stagione==="tutto"){s+=2;pro.push("va bene tutto l'anno")}
+    else{s-=3;contro.push(`è più da ${p.stagione==="pe"?"primavera ed estate":"autunno e inverno"}`)}
+    if(p.momento===mo){s+=2;pro.push(mo==="sera"?"è pensato per la sera":"è pensato per il giorno")}
+    else if(p.momento==="entrambi"){s+=2;pro.push("regge giorno e sera")}
+    else{s-=2;contro.push(p.momento==="sera"?"darebbe il meglio di sera":"è più da giorno")}
+    if(mt.perche)pro.push(mt.perche);
+    if(mt.contro)contro.push(mt.contro);
+    if(g===null){s+=2.5;pro.push("non l'hai ancora segnato nel diario")}
+    else if(g===0){s-=8;contro.push(spost?"lo metti oggi":"l'hai già messo oggi")}
+    else if(g===1){s-=2;contro.push(spost?"l'hai messo ieri":"l'hai messo ieri")}
+    else{s+=Math.min(g,30)/10;if(g0>=7)pro.push(`non lo metti da ${quandoFu(g0).replace(" fa","")}`)}
     s+=((p.rating||3.9)-3.9)*1.5;
-    return {p,s,g:g0,f,perche:mt.perche};
+    if(p.rating>=4.3)pro.push(`è tra i più amati su Fragrantica (★ ${voto(p.rating)})`);
+    if(p.longevita>=9&&(occ==="appuntamento"||occ==="festivita"||occ==="formale"))pro.push(`dura ${p.longevita}h: arriva a fine serata`);
+    return {p,s,g:g0,f,perche:mt.perche,pro,contro};
   }).sort((a,b)=>b.s-a.s);           // tutte le adatte, in ordine: la prima e' la scelta
 }
+const fraseOccasione={ufficio:"va bene in ufficio",quotidiano:"è da tutti i giorni",appuntamento:"è fatto per un appuntamento",
+  formale:"regge un'occasione formale",casa:"è piacevole da tenere in casa",festivita:"ha il tono giusto per una festa",palestra:"è abbastanza leggero per la palestra"};
+const dosatoPer={ufficio:"in ufficio",quotidiano:"di giorno",appuntamento:"a un appuntamento",formale:"in un'occasione formale",
+  casa:"in casa",festivita:"a una festa",palestra:"in palestra"};
+const segnoSi='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>';
+const segnoMa='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 7v6M12 16.5v.5"/></svg>';
+const elencoMotivi=(pro,contro)=>`<ul class="motivi">${pro.map(m=>`<li class="si">${segnoSi}<span>${maiuscola(m)}</span></li>`).join("")}${contro.map(m=>`<li class="ma">${segnoMa}<span>${maiuscola(m)}</span></li>`).join("")}</ul>`;
 const tagPerOccasione={ufficio:["uff"],quotidiano:["casa","uff"],appuntamento:["app","sera"],formale:["sera"],casa:["casa"],festivita:["sera"],palestra:[]};
 function ricettaPer(p,occ){
   const st=adesso(inizioPer(quandoOggi,occ)).stagione,adatta=g=>st==="pe"?!/autunno|inverno/i.test(g):!/estate/i.test(g);
@@ -1011,7 +1038,7 @@ function striscia(f){
 function disegnaOggi(){
   const giorni=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
   const domani=quandoOggi==="domani",da=inizioPer(quandoOggi,occOggi),a=adesso(da);
-  document.getElementById("oggi-titolo").textContent=domani?"Cosa metto domani":"Cosa metto oggi";
+  document.getElementById("oggi-titolo").textContent=domani?"Consigliami per domani":"Consigliami";
   const mezzanotte=new Date(da).setHours(24,0,0,0);   // il resto di oggi finisce a mezzanotte, non 24 ore dopo
   const giornata=finestraMeteo(domani?new Date(new Date(da).setHours(7,0,0,0)):da,domani?16:Math.max(1,(mezzanotte-da)/36e5));
   const testa=domani
@@ -1032,19 +1059,22 @@ function disegnaOggi(){
        in elenco sotto, sempre nell'ordine del punteggio. */
     const diarioTesto=g=>g===null?"mai segnato nel diario":g===0?(domani?"messo oggi":"l'hai già messo oggi"):`l'ultima volta ${quandoFu(g)}`;
     const lometto=(p,cls)=>domani?"":`<button class="${cls}${indossatoOggi(p.id)?" fatto":""}" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>`;
-    const [primo,...resto]=c,podio=resto.slice(0,2),altri=resto.slice(2);
-    const {p,g,f,perche}=primo,cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
-    const motivi=[domani?`domani dalle ${da.getHours()}`:"",stagLbl(p.stagione),momLbl(p.momento),perche,diarioTesto(g)].filter(Boolean);
+    /* Cinque, non tutte: la prima con tutti i suoi perche', le altre quattro
+       con i tre motivi piu' forti e il contro principale. */
+    const [primo,...resto]=c.slice(0,5);
+    const {p,f}=primo,cl=vetroClasse[p.colore],r=ricettaPer(p,occOggi);
     const altro=r?profumi.find(x=>x.id===[...r.l.s.matchAll(/№\s*(\d+)/g)].map(m=>+m[1]).find(id=>id!==p.id)):null;
     h+=`<div class="oggi-scelta ${cl}">
       <div class="oggi-nicchia"><div class="faretto acceso">${p.img?`<img src="${p.img}" alt="">`:vetroLettera[p.colore]}</div><div class="ripiano"></div></div>
       <div class="oggi-testo">
-        <div class="oggi-conto">La scelta migliore · su ${c.length}</div>
+        <div class="oggi-conto">Il primo consiglio · su ${c.length} adatte</div>
         <div class="marca">${esc(p.brand)}</div>
         <div class="oggi-nome">${esc(p.name)}</div>
-        <div class="oggi-motivi">${motivi.map(m=>`<span>${m}</span>`).join("")}</div>
+        <div class="oggi-sotto2">${p.conc} · ${esc(p.famiglia)}${domani?` · domani dalle ${da.getHours()}`:""}</div>
       </div>
     </div>
+    <div class="incisa oggi-perche">Perché questo</div>
+    ${elencoMotivi(primo.pro,primo.contro)}
     ${striscia(f)}
     ${r&&altro?(()=>{const pr=partiRicetta(r.l),fatto=pr.sotto&&pr.sopra&&layeringFatto(pr.sotto.id,pr.sopra.id);
       return `<div class="oggi-strato-riga"><button class="oggi-strato" onclick="chiudiOggi();vaiAllaRicetta(${r.i})">${miniatura(altro)}
@@ -1054,18 +1084,16 @@ function disegnaOggi(){
       <button class="${domani?"btn-oro":"btn-ombra"}" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>
       ${lometto(p,"btn-oro")}
     </div>`;
-    if(podio.length)h+=`<div class="oggi-sezione incisa">Subito dopo</div>
-      <div class="oggi-podio">${podio.map((x,i)=>`<div class="oggi-medaglia ${vetroClasse[x.p.colore]}">
-        <button class="oggi-medaglia-corpo" onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">
-          <span class="oggi-posto">${i+2}</span>${miniatura(x.p,"grande")}
-          <span class="marca">${esc(x.p.brand)}</span><b>${esc(x.p.name)}</b>
-          <small>${x.perche||diarioTesto(x.g)}</small>
-        </button>${lometto(x.p,"oggi-medaglia-metto")}</div>`).join("")}</div>`;
-    if(altri.length)h+=`<div class="oggi-sezione incisa">Le altre adatte</div>
-      <div class="oggi-altri">${altri.map((x,i)=>`<button class="oggi-riga" onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">
-        <span class="oggi-posto">${i+4}</span>${miniatura(x.p)}
-        <span class="oggi-riga-testo"><b>${esc(x.p.name)}</b><small>${esc(x.p.brand)} · ${x.perche||diarioTesto(x.g)}</small></span>
-      </button>`).join("")}</div>`;
+    if(resto.length)h+=`<div class="oggi-sezione incisa">Le alternative</div>`+resto.map((x,i)=>`
+      <div class="oggi-alt">
+        <button class="oggi-alt-corpo" onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">
+          <span class="oggi-posto">${i+2}</span>${miniatura(x.p)}
+          <span class="oggi-alt-testo">
+            <span class="oggi-alt-nome">${esc(x.p.name)}<small>${esc(x.p.brand)} · ${x.p.conc}</small></span>
+            <span class="oggi-alt-perche">${x.pro.slice(0,3).map(maiuscola).join(" · ")}${x.contro.length?`<em> · ma ${x.contro[0]}</em>`:""}</span>
+          </span>
+        </button>${lometto(x.p,"oggi-alt-metto")}
+      </div>`).join("");
   }
   h+=meteo
     ?`<div class="oggi-meteo">Meteo di dove sei, ora per ora, da Open-Meteo · <button class="collegamento" onclick="scordaPosto()">non usarlo più</button></div>`
@@ -1462,7 +1490,7 @@ function disegnaNumeri(){
   const D=diario().filter(v=>profumi.some(p=>p.id===+v.id));
   h+=`<div class="tavola diario-tavola"><div class="tavola-t incisa">Diario d'uso<button class="collegamento diario-apri" onclick="cambiaVista('diario')">Apri il diario →</button></div>`;
   if(!D.length){
-    h+=`<p class="diario-invito">Segna quello che indossi con «Lo metto oggi», nella scheda di ogni boccetta o da «Cosa metto oggi». Qui compariranno le più usate e quelle dimenticate.</p>`;
+    h+=`<p class="diario-invito">Segna quello che indossi con «Lo metto oggi», nella scheda di ogni profumo o da «Consigliami». Qui compariranno le più usate e quelle dimenticate.</p>`;
   }else{
     const mese=oggiISO().slice(0,7),n=id=>D.filter(v=>+v.id===id).length;
     const usate=profumi.filter(p=>n(p.id)).sort((a,b)=>n(b.id)-n(a.id)||giorniDa(a.id)-giorniDa(b.id));
@@ -1605,7 +1633,7 @@ function disegnaDiario(){
     return (lay?[{d,lay}]:[]).concat(fuori);
   }).filter(o=>o.p||o.lay);
   h+=`<div class="incisa diario-sez">Cronologia</div>`;
-  if(!tutte.length)h+=`<p class="diario-invito">Ancora nessuna voce. Segna quello che indossi con «Lo metto oggi» nella scheda di un profumo, da «Cosa metto oggi» o qui sopra, scegliendo un giorno.</p>`;
+  if(!tutte.length)h+=`<p class="diario-invito">Ancora nessuna voce. Segna quello che indossi con «Lo metto oggi» nella scheda di un profumo, da «Consigliami» o qui sopra, scegliendo un giorno.</p>`;
   else{
     let mese="";
     h+=`<div class="diario-storia">`+tutte.slice(0,90).map(({d,p,lay})=>{
