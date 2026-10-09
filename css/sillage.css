@@ -1020,3 +1020,18 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   20%{box-shadow:0 0 0 2px rgba(240,217,164,.55),0 0 34px -4px rgba(255,214,146,.45);border-color:rgba(240,217,164,.7)}
   100%{box-shadow:0 0 0 0 rgba(240,217,164,0);border-color:var(--filo)}}
 @media(prefers-reduced-motion:reduce){.teca.ancorata{animation:none;border-color:rgba(240,217,164,.7)}}
+
+/* ─────────── APP SULLA SCHERMATA HOME (iPhone) ───────────
+   Aperta dalla schermata Home la pagina va sotto la barra di stato (stile
+   black-translucent): senza margine il titolo finiva dietro la Dynamic
+   Island. Nel browser normale env() vale zero e non cambia niente.
+   Una fascia del colore di fondo copre la barra di stato, cosi' quello che
+   scorre sotto non si legge dietro l'ora e la batteria. */
+:root{--sicuro-alto:env(safe-area-inset-top,0px)}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:var(--sicuro-alto);background:var(--lacca);z-index:150;pointer-events:none}
+.testata{padding-top:calc(22px + var(--sicuro-alto))}
+.strumenti{top:var(--sicuro-alto)}
+.vista{padding-top:calc(16px + var(--sicuro-alto))}
+.teca{scroll-margin-top:calc(var(--altezza-strumenti,150px) + 10px + var(--sicuro-alto))}
+.pannello-dettaglio .scheda-int-int > .esame{top:calc(180px + var(--sicuro-alto))}
+.foglio{max-height:calc(88dvh - var(--sicuro-alto))}

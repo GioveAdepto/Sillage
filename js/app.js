@@ -631,7 +631,9 @@ const immagineEsame=c=>document.getElementById("esame-"+c.id.slice(5));
    pagina accompagna la boccetta, scorrendo insieme al volo finche' il banco
    arriva sotto la barra degli strumenti. Chiudendo fa il contrario, se la
    card e' rimasta sopra lo schermo. Su schermo largo ci pensa il pannello. */
-const cimaLibera=()=>{const b=document.getElementById("strumenti");return (b&&b.offsetParent?b.offsetHeight:0)+14};
+// la fascia della barra di stato (Dynamic Island) quando Sillage e' aperta dalla schermata Home
+const sicuroAlto=()=>{const s=getComputedStyle(document.body,"::before").height;return parseFloat(s)||0};
+const cimaLibera=()=>{const b=document.getElementById("strumenti");return (b&&b.offsetParent?b.offsetHeight:0)+14+sicuroAlto()};
 function accompagna(versoY){
   if(colonneVetrina()>1)return;
   const d=versoY-cimaLibera();
@@ -976,7 +978,7 @@ function apriNelPannello(c){
   /* Si scorre per mostrare il pannello, ma la card resta sempre visibile,
      sotto la barra degli strumenti (che e' fissa): meglio un pannello da
      scorrere che una card scappata in alto. */
-  const barra=document.getElementById("strumenti"),cimaLibera=(barra&&barra.offsetHeight||0)+12;
+  const barra=document.getElementById("strumenti"),cimaLibera=(barra&&barra.offsetHeight||0)+12+sicuroAlto();
   const top=c.getBoundingClientRect().top,serve=r.bottom-innerHeight+24,margine=top-cimaLibera;
   const d=margine<0?margine:Math.min(serve,margine);
   if(d>0||margine<0)window.scrollBy({top:d,behavior:"smooth"});
