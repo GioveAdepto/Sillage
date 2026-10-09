@@ -951,10 +951,10 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .nicchia{position:relative}
 /* sopra il vetro, in schermo: la card taglia quello che esce dai suoi bordi,
    quindi la scia nasce dalle spalle della boccetta e sale fino alla cima */
-.nicchia .scia{position:absolute;left:-30px;top:-14px;width:calc(100% + 60px);height:calc(100% + 14px);pointer-events:none;z-index:2;mix-blend-mode:screen}
+.nicchia .scia{position:absolute;left:-30px;top:-14px;width:calc(100% + 60px);height:calc(100% + 14px);pointer-events:none;z-index:2}
 .nicchia > .faretto,.nicchia > .specchio,.nicchia > .ripiano{position:relative;z-index:1}
 .oggi-nicchia{position:relative}
-.oggi-nicchia .scia{position:absolute;left:-40px;top:-50px;width:calc(100% + 80px);height:calc(100% + 50px);pointer-events:none;z-index:2;mix-blend-mode:screen}
+.oggi-nicchia .scia{position:absolute;left:-40px;top:-50px;width:calc(100% + 80px);height:calc(100% + 50px);pointer-events:none;z-index:2}
 .oggi-nicchia > .faretto,.oggi-nicchia > .ripiano{position:relative;z-index:1}
 
 /* Il riflesso e' la boccetta capovolta: ha gli stessi angoli tondi del vetro

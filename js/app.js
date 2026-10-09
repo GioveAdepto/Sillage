@@ -590,27 +590,39 @@ function accendiScia(nicchia,p,viva){
   if(!nicchia||riduci.matches||nicchia.querySelector("canvas.scia"))return;
   const cv=document.createElement("canvas");cv.className="scia";cv.setAttribute("aria-hidden","true");
   nicchia.appendChild(cv);
-  const ctx=cv.getContext("2d"),dpr=Math.min(2,devicePixelRatio||1);
-  const colori=(p.accordi||[]).slice(0,4).map(coloreAccordo);if(!colori.length)colori.push("#c8a35e");
-  let w=0,h=0,parti=[],ultimo=0,spenta=false;
-  const misura=()=>{const r=cv.getBoundingClientRect();w=r.width;h=r.height;cv.width=w*dpr;cv.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)};
+  const ctx=cv.getContext("2d"),dpr=Math.min(1.5,devicePixelRatio||1);
+  /* Ogni colore diventa una volta sola un puntino sfumato su una tela a parte;
+     poi si copia e basta. Il bagliore calcolato a ogni particella e a ogni
+     fotogramma (shadowBlur) era quello che rallentava tutto. */
+  const sprite=c=>{const t=document.createElement("canvas");t.width=t.height=24;const x=t.getContext("2d");
+    const g=x.createRadialGradient(12,12,0,12,12,12);g.addColorStop(0,c);g.addColorStop(.35,c+"aa");g.addColorStop(1,c+"00");
+    x.fillStyle=g;x.fillRect(0,0,24,24);return t};
+  const colori=[...new Set((p.accordi||[]).slice(0,4).map(coloreAccordo))];if(!colori.length)colori.push("#c8a35e");
+  const sprites=colori.map(sprite);
+  let w=0,h=0,parti=[],ultimo=0,ultimoDisegno=0,spenta=false;
+  const misura=()=>{w=cv.clientWidth;h=cv.clientHeight;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalCompositeOperation="lighter"};
   misura();
   const nasci=()=>parti.push({x:w/2+(Math.random()-.5)*w*.18,y:h*.6,vx:(Math.random()-.5)*.25,vy:-(.28+Math.random()*.32),
-    r:.8+Math.random()*1.9,vita:0,durata:2200+Math.random()*1800,fase:Math.random()*6.3,c:colori[Math.floor(Math.random()*colori.length)]});
+    r:3+Math.random()*4,vita:0,durata:2200+Math.random()*1800,fase:Math.random()*6.3,s:sprites[Math.floor(Math.random()*sprites.length)]});
   const passo=t=>{
     if(!cv.isConnected)return;
     if(!spenta&&!viva())spenta=true;
-    // si rimisura se la card ha cambiato forma (o se all'accensione era nascosta)
-    if(cv.clientWidth!==Math.round(w)||cv.clientHeight!==Math.round(h))misura();
-    const dt=Math.min(50,t-(ultimo||t));ultimo=t;
-    if(!spenta&&Math.random()<dt/85)nasci();
+    const dt=Math.min(80,t-(ultimo||t));ultimo=t;
+    // trenta fotogrammi al secondo bastano a una scia lenta; fuori schermo non si disegna
+    if(t-ultimoDisegno<32){requestAnimationFrame(passo);return}
+    ultimoDisegno=t;
+    const r=cv.getBoundingClientRect();
+    const vh=innerHeight||document.documentElement.clientHeight;
+    if(vh&&(r.bottom<0||r.top>vh)){if(spenta){cv.remove();return}requestAnimationFrame(passo);return}
+    if(cv.clientWidth!==w||cv.clientHeight!==h)misura();
+    if(!spenta&&parti.length<28&&Math.random()<dt/85)nasci();
     ctx.clearRect(0,0,w,h);
     parti=parti.filter(q=>(q.vita+=dt)<q.durata);
     for(const q of parti){
-      const k=q.vita/q.durata,a=Math.sin(Math.PI*Math.min(1,k*1.15))*.75;
+      const k=q.vita/q.durata,d=q.r*(1+k*.6)*2;
       q.x+=q.vx*dt/16+Math.sin(q.fase+q.vita/520)*.18;q.y+=q.vy*dt/16;
-      ctx.globalAlpha=a;ctx.fillStyle=q.c;ctx.shadowColor=q.c;ctx.shadowBlur=6;
-      ctx.beginPath();ctx.arc(q.x,q.y,q.r*(1+k*.6),0,6.283);ctx.fill();
+      ctx.globalAlpha=Math.sin(Math.PI*Math.min(1,k*1.15))*.7;
+      ctx.drawImage(q.s,q.x-d/2,q.y-d/2,d,d);
     }
     if(spenta&&!parti.length){cv.remove();return}
     requestAnimationFrame(passo);
