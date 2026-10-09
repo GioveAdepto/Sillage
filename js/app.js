@@ -614,9 +614,23 @@ function vola(da,a,{alla_fine}={}){
   requestAnimationFrame(passo);
 }
 const immagineEsame=c=>document.getElementById("esame-"+c.id.slice(5));
+/* Sul telefono la card si apre in se' e il banco d'esame sta sotto: la
+   pagina accompagna la boccetta, scorrendo insieme al volo finche' il banco
+   arriva sotto la barra degli strumenti. Chiudendo fa il contrario, se la
+   card e' rimasta sopra lo schermo. Su schermo largo ci pensa il pannello. */
+const cimaLibera=()=>{const b=document.getElementById("strumenti");return (b&&b.offsetParent?b.offsetHeight:0)+14};
+function accompagna(versoY){
+  if(colonneVetrina()>1)return;
+  const d=versoY-cimaLibera();
+  if(Math.abs(d)<8)return;
+  const da=scrollY,t0=performance.now(),ease=x=>1-Math.pow(1-x,4);
+  const passo=t=>{const k=Math.min(1,(t-t0)/DURATA_MANO);scrollTo(0,da+d*ease(k));if(k<1)requestAnimationFrame(passo)};
+  requestAnimationFrame(passo);
+}
 function prendiInMano(c){
   const scaffale=c.querySelector(".faretto img"),esame=immagineEsame(c);
   if(!scaffale||!esame)return;
+  if(!presaDiretta)accompagna(esame.closest(".esame").getBoundingClientRect().top);
   c.classList.add("in-mano");                 // la nicchia resta vuota, illuminata
   // arrivando da un'altra vista la boccetta vola gia' (View Transitions): qui si posa e basta
   if(riduci.matches||presaDiretta){esame.classList.add("posata");return}
@@ -625,6 +639,8 @@ function prendiInMano(c){
 }
 function riponi(c,daRett){
   const scaffale=c.querySelector(".faretto img");
+  const cima=c.getBoundingClientRect().top;
+  if(cima<cimaLibera())accompagna(cima);
   if(!scaffale||riduci.matches||!daRett||!daRett.width){c.classList.remove("in-mano");return}
   vola(daRett,scaffale,{alla_fine:()=>c.classList.remove("in-mano")});
   // durante il ritorno la nicchia e' ancora vuota: la boccetta e' quella in volo
