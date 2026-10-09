@@ -771,9 +771,26 @@
    page slide della skill. La pillola del timone resta la sua animazione. */
 .vista.attiva, #vista-collezione.attiva { animation: entra-vista var(--duration-fast) var(--ease-smooth-out) both; }
 @keyframes entra-vista { from { opacity: 0; transform: translateY(var(--distance-base)); filter: blur(var(--blur-medium)); } }
+/* la collezione e' una pagina intera di card: sfocarla tutta costa troppo,
+   entra solo con la salita */
+@keyframes entra-vista-leggera { from { opacity: 0; transform: translateY(var(--distance-base)); } }
+#vista-collezione.attiva { animation-name: entra-vista-leggera; }
 
 @media (prefers-reduced-motion: reduce) {
   .faretto .riflesso.passa::before { animation: none; }
   .vista.attiva, #vista-collezione.attiva { animation: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* — Leggerezza —
+   Gli snippet della skill dichiarano will-change, giusto per un elemento
+   solo; qui pero' ce ne sono decine (31 teche, ognuna con le sue righe, la
+   sua icona, il suo vetro), e decine di livelli tenuti sempre pronti
+   appesantivano il browser. Si accendono solo quando servono. */
+.faretto.t-tilt-card { will-change: auto; transform-style: flat; }
+.faretto.t-tilt-card.is-tilting { will-change: transform; }
+.btn-affianca .t-icon { will-change: auto; }
+/* nelle card chiuse le righe nascoste non tengono la sfocatura: e' lo stato
+   di partenza del rivelo, e serve solo quando la card si apre */
+.teca:not(.aperta) .t-stagger-line { filter: none; will-change: auto; }
+.t-stagger-line.is-shown, .is-shown .t-stagger-line { will-change: auto; }
