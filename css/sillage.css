@@ -928,3 +928,31 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 
 /* il salto a una teca la lascia sotto la barra degli strumenti, non sotto */
 .teca{scroll-margin-top:calc(var(--altezza-strumenti,150px) + 10px)}
+
+/* — La ruota degli accordi — */
+.ruota-box{margin:4px 0 14px}
+.ruota{display:block;width:100%;max-width:340px;height:auto;margin:0 auto;overflow:visible}
+.ruota-anello{fill:none;stroke:var(--filo);stroke-width:1}
+.ruota-raggio{stroke:var(--filo);stroke-width:1}
+.ruota-scala{font:500 9.5px 'Manrope',sans-serif;fill:var(--carta-3);letter-spacing:.06em}
+.ruota-eti text{font:500 11px 'Manrope',sans-serif;fill:var(--carta-2)}
+.ruota-area{fill-opacity:.16;stroke-width:2;stroke-linejoin:round}
+.ruota-punto circle:not(.ruota-presa){stroke:var(--noce);stroke-width:2}
+.ruota-presa{fill:transparent;cursor:help}
+.ruota-punto:hover circle:not(.ruota-presa){r:5.5}
+.ruota-legenda{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin-bottom:8px;font-size:12.5px;color:var(--carta-2)}
+.ruota-legenda span{display:inline-flex;align-items:center;gap:7px}
+.ruota-legenda i{width:14px;height:4px;border-radius:2px}
+.cf-ruota{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);padding:16px 14px 6px;margin-bottom:12px}
+.cf-ruota > .incisa{margin:0 4px 6px}
+.cf-serie{display:block;width:36px;height:4px;border-radius:2px;margin:9px auto 0}
+
+/* — La scia — */
+.nicchia{position:relative}
+/* sopra il vetro, in schermo: la card taglia quello che esce dai suoi bordi,
+   quindi la scia nasce dalle spalle della boccetta e sale fino alla cima */
+.nicchia .scia{position:absolute;left:-30px;top:-14px;width:calc(100% + 60px);height:calc(100% + 14px);pointer-events:none;z-index:2;mix-blend-mode:screen}
+.nicchia > .faretto,.nicchia > .specchio,.nicchia > .ripiano{position:relative;z-index:1}
+.oggi-nicchia{position:relative}
+.oggi-nicchia .scia{position:absolute;left:-40px;top:-50px;width:calc(100% + 80px);height:calc(100% + 50px);pointer-events:none;z-index:2;mix-blend-mode:screen}
+.oggi-nicchia > .faretto,.oggi-nicchia > .ripiano{position:relative;z-index:1}

@@ -524,6 +524,101 @@ function saltaAlProfumo(p,scorri){
   if(t.getAttribute("data-open")!=="true"&&tecaNelPannello!==t)apriTeca(id);
 }
 
+// ── LA RUOTA DEGLI ACCORDI ────────────────────────────────────────────────
+/* Sette raggi, uno per famiglia di accordi (le stesse sette tinte delle
+   etichette). Ogni accordo pesa per posizione, come nelle somiglianze, e il
+   profilo e' la quota di ciascuna famiglia: due profumi si confrontano sulla
+   stessa scala. Gli accordi che non appartengono a nessuna famiglia restano
+   fuori dal conto.
+   Nel confronto le serie hanno tre colori fissi, nell'ordine in cui i profumi
+   sono entrati: oro brunito, blu, rosa. Validati per il fondo scuro (banda di
+   luminosita', croma, separazione anche per i daltonici, contrasto). */
+const raggiRuota=[["acqua","Acquatico"],["agrume","Agrumato"],["spezia","Speziato"],["dolce","Dolce"],["fumo","Cuoio e fumo"],["cipria","Cipriato"],["bosco","Legnoso"]];
+const coloriSerie=["#b8892d","#5685d4","#a63f66"];
+const famigliaDi=(()=>{const m={};for(const f in famigliaAccordo)famigliaAccordo[f].forEach(a=>m[a.toLowerCase()]=f);return a=>m[String(a).toLowerCase()]})();
+function profiloAccordi(p){
+  const q={};raggiRuota.forEach(([k])=>q[k]=0);
+  let tot=0;
+  (p.accordi||[]).forEach((a,i)=>{const f=famigliaDi(a);if(!f)return;const w=1/(1+i*.35);q[f]+=w;tot+=w});
+  if(tot)for(const k in q)q[k]/=tot;
+  return q;
+}
+function ruotaAccordi(lista,{nomi=false}={}){
+  const W=320,H=268,cx=W/2,cy=H/2+4,R=92,n=raggiRuota.length;
+  const profili=lista.map(profiloAccordi);
+  // la scala si adatta al profumo piu' sbilanciato, ma non scende sotto il 40%
+  const max=Math.max(.4,Math.ceil(Math.max(...profili.flatMap(q=>Object.values(q)))*10)/10);
+  const ang=i=>-Math.PI/2+i*2*Math.PI/n;
+  const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v/max,cy+Math.sin(ang(i))*R*v/max];
+  let s=`<svg class="ruota" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ruota degli accordi${lista.length>1?" a confronto":""}">`;
+  // griglia recessiva: tre anelli e i raggi
+  [1/3,2/3,1].forEach(f=>{s+=`<polygon class="ruota-anello" points="${raggiRuota.map((_,i)=>pt(i,max*f).map(x=>x.toFixed(1)).join(",")).join(" ")}"/>`});
+  raggiRuota.forEach((_,i)=>{const [x,y]=pt(i,max);s+=`<line class="ruota-raggio" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`});
+  s+=`<text class="ruota-scala" x="${cx+4}" y="${(cy-R-4).toFixed(1)}">${Math.round(max*100)}%</text>`;
+  // etichette dei raggi: inchiostro di testo, un pallino della tinta della famiglia
+  raggiRuota.forEach(([k,l],i)=>{
+    const [x,y]=pt(i,max*1.2),c=Math.cos(ang(i)),anc=Math.abs(c)<.2?"middle":c>0?"start":"end";
+    s+=`<g class="ruota-eti"><circle cx="${(anc==="start"?x-7:anc==="end"?x+7:x).toFixed(1)}" cy="${(y-(anc==="middle"?11:0)).toFixed(1)}" r="3" fill="${tintaAccordo[k]}"/>
+      <text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anc}">${l}</text></g>`;
+  });
+  // le serie: area tenue, contorno di 2px, vertici con anello del colore di fondo
+  profili.forEach((q,j)=>{
+    const col=coloriSerie[j%coloriSerie.length],punti=raggiRuota.map(([k],i)=>pt(i,q[k]));
+    s+=`<polygon class="ruota-area" points="${punti.map(p=>p.map(x=>x.toFixed(1)).join(",")).join(" ")}" style="fill:${col};stroke:${col}"/>`;
+  });
+  profili.forEach((q,j)=>{
+    const col=coloriSerie[j%coloriSerie.length],nome=lista[j].name;
+    raggiRuota.forEach(([k,l],i)=>{
+      if(!q[k])return;
+      const [x,y]=pt(i,q[k]);
+      s+=`<g class="ruota-punto"><circle class="ruota-presa" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11"/>
+        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" style="fill:${col}"/>
+        <title>${esc(nome)} · ${l}: ${Math.round(q[k]*100)}%</title></g>`;
+    });
+  });
+  s+=`</svg>`;
+  const legenda=lista.length>1?`<div class="ruota-legenda">${lista.map((p,j)=>`<span><i style="background:${coloriSerie[j]}"></i>${esc(p.name)}</span>`).join("")}</div>`:"";
+  return `<div class="ruota-box">${legenda}${s}</div>`;
+}
+
+// ── LA SCIA ───────────────────────────────────────────────────────────────
+/* Quando una boccetta si accende, dalla sua sommita' sale una scia di
+   particelle nei colori dei suoi primi accordi: il sillage, letteralmente.
+   Canvas leggero, un fotogramma per volta; si spegne da sola quando la card
+   si chiude, e non parte con «riduci movimento». */
+function accendiScia(nicchia,p,viva){
+  if(!nicchia||riduci.matches||nicchia.querySelector("canvas.scia"))return;
+  const cv=document.createElement("canvas");cv.className="scia";cv.setAttribute("aria-hidden","true");
+  nicchia.appendChild(cv);
+  const ctx=cv.getContext("2d"),dpr=Math.min(2,devicePixelRatio||1);
+  const colori=(p.accordi||[]).slice(0,4).map(coloreAccordo);if(!colori.length)colori.push("#c8a35e");
+  let w=0,h=0,parti=[],ultimo=0,spenta=false;
+  const misura=()=>{const r=cv.getBoundingClientRect();w=r.width;h=r.height;cv.width=w*dpr;cv.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)};
+  misura();
+  const nasci=()=>parti.push({x:w/2+(Math.random()-.5)*w*.18,y:h*.6,vx:(Math.random()-.5)*.25,vy:-(.28+Math.random()*.32),
+    r:.8+Math.random()*1.9,vita:0,durata:2200+Math.random()*1800,fase:Math.random()*6.3,c:colori[Math.floor(Math.random()*colori.length)]});
+  const passo=t=>{
+    if(!cv.isConnected)return;
+    if(!spenta&&!viva())spenta=true;
+    // si rimisura se la card ha cambiato forma (o se all'accensione era nascosta)
+    if(cv.clientWidth!==Math.round(w)||cv.clientHeight!==Math.round(h))misura();
+    const dt=Math.min(50,t-(ultimo||t));ultimo=t;
+    if(!spenta&&Math.random()<dt/85)nasci();
+    ctx.clearRect(0,0,w,h);
+    parti=parti.filter(q=>(q.vita+=dt)<q.durata);
+    for(const q of parti){
+      const k=q.vita/q.durata,a=Math.sin(Math.PI*Math.min(1,k*1.15))*.75;
+      q.x+=q.vx*dt/16+Math.sin(q.fase+q.vita/520)*.18;q.y+=q.vy*dt/16;
+      ctx.globalAlpha=a;ctx.fillStyle=q.c;ctx.shadowColor=q.c;ctx.shadowBlur=6;
+      ctx.beginPath();ctx.arc(q.x,q.y,q.r*(1+k*.6),0,6.283);ctx.fill();
+    }
+    if(spenta&&!parti.length){cv.remove();return}
+    requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
+}
+const sciaDellaTeca=c=>{const p=profumi.find(x=>"teca-"+x.id===c.id);if(p)accendiScia(c.querySelector(".nicchia"),p,()=>c.isConnected&&c.classList.contains("aperta"))};
+
 // ── LA LUCE SUL VETRO ─────────────────────────────────────────────────────
 /* Col mouse la nicchia si inclina verso il puntatore e un riflesso la segue
    (card hover tilt di transitions.dev). Un solo ascoltatore per tutta la
@@ -733,6 +828,8 @@ function costruisciTeca(p,i){
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
           <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>
+          ${p.accordi&&p.accordi.length?`<div class="incisa t-stagger-line t-stagger-line--3">Ruota degli accordi</div>
+          <div class="t-stagger-line t-stagger-line--3">${ruotaAccordi([p])}</div>`:""}
           <p class="racconto t-stagger-line t-stagger-line--3">${rinumera(esc(p.desc))}</p>${bloccoLegami}${bloccoSimili}${bloccoStrati}
         </div>
       </div>
@@ -764,7 +861,7 @@ function apriTeca(id){
   if(!c)return;
   if(c.closest("#vista-collezione")&&colonneVetrina()>1)return apriNelPannello(c);
   const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
-  if(aperta)riflesso(c);
+  if(aperta){riflesso(c);sciaDellaTeca(c)}
   c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
   const righe=c.querySelector(".t-stagger");
@@ -825,6 +922,7 @@ function apriNelPannello(c){
   fine.after(pan);
   tecaNelPannello=c;
   riflesso(c);
+  requestAnimationFrame(()=>sciaDellaTeca(c));
   c.classList.add("aperta");c.setAttribute("aria-expanded","true");
   puntaFreccia();
   int.classList.remove("is-hiding","is-shown");void int.offsetHeight;int.classList.add("is-shown");
@@ -1194,6 +1292,8 @@ function disegnaOggi(){
     :`<button class="oggi-meteo-chiedi" onclick="usaMeteo(true)"${chiedendoPosto?" disabled":""}>${chiedendoPosto?"Cerco la posizione…":"Usa il meteo di dove sei"}</button>
       <div class="oggi-meteo">Serve la posizione, una volta: resta sul telefono, arrotondata a una decina di chilometri.</div>`;
   document.getElementById("oggi-corpo").innerHTML=h;
+  const prima=c.length&&document.querySelector("#oggi-corpo .oggi-nicchia");
+  if(prima)requestAnimationFrame(()=>accendiScia(prima,c[0].p,()=>prima.isConnected&&document.getElementById("fondale-oggi").classList.contains("aperto")));
 }
 
 // ── CONFRONTO ─────────────────────────────────────────────────────────────
@@ -1253,6 +1353,7 @@ function disegnaConfronto(){
   h+=`<div class="cf-comune"><span class="incisa">In comune</span>${accComuni.length||noteComuni.length
     ?accComuni.map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("")+noteComuni.map(n=>`<span class="nota-c"><i>${iconaNota(n)||"·"}</i>${esc(n)}</span>`).join("")
     :`<span class="cf-comune-niente">niente: sono profumi lontani tra loro</span>`}</div>`;
+  h+=`<div class="cf-ruota"><div class="incisa">Ruota degli accordi</div>${ruotaAccordi(lista)}</div>`;
   h+=`<div class="cf-tabella"><div class="cf-griglia col${lista.length}">`;
   h+=`<div class="cf-eti" style="border-bottom:1px solid var(--filo-2)"></div>`;
   lista.forEach(p=>{
@@ -1262,6 +1363,7 @@ function disegnaConfronto(){
       <div class="cf-marca">${esc(p.brand)}</div>
       <div class="cf-nome">${esc(p.name)}</div>
       <span class="cf-grado">${p.conc} · № ${numeroDi(p.id)}</span>
+      <span class="cf-serie" style="background:${coloriSerie[lista.indexOf(p)%coloriSerie.length]}" title="Colore nella ruota degli accordi"></span>
     </div>`;
   });
   const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
