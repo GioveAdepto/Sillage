@@ -931,11 +931,15 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 
 /* — La ruota degli accordi — */
 .ruota-box{margin:4px 0 14px}
-.ruota{display:block;width:100%;max-width:340px;height:auto;margin:0 auto;overflow:visible}
+.ruota{display:block;width:100%;max-width:380px;height:auto;margin:0 auto;overflow:visible}
 .ruota-anello{fill:none;stroke:var(--filo);stroke-width:1}
 .ruota-raggio{stroke:var(--filo);stroke-width:1}
 .ruota-scala{font:500 9.5px 'Manrope',sans-serif;fill:var(--carta-3);letter-spacing:.06em}
 .ruota-eti text{font:500 11px 'Manrope',sans-serif;fill:var(--carta-2)}
+.ruota-eti .sotto{fill:var(--carta-3);font-weight:400}
+.ruota-eti .valore{fill:var(--carta);font-weight:600;font-size:11.5px}
+.ruota-eti .zero{fill:var(--carta-3)}
+.ruota-nota{margin:6px auto 0;max-width:340px;text-align:center;font-size:11.5px;line-height:1.5;color:var(--carta-3)}
 .ruota-area{fill-opacity:.16;stroke-width:2;stroke-linejoin:round}
 .ruota-punto circle:not(.ruota-presa){stroke:var(--noce);stroke-width:2}
 .ruota-presa{fill:transparent;cursor:help}
