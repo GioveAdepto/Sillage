@@ -927,7 +927,13 @@ function apriNelPannello(c){
   puntaFreccia();
   int.classList.remove("is-hiding","is-shown");void int.offsetHeight;int.classList.add("is-shown");
   const r=pan.getBoundingClientRect();
-  if(r.bottom>innerHeight)window.scrollBy({top:Math.min(r.bottom-innerHeight+24,c.getBoundingClientRect().top-90),behavior:"smooth"});
+  /* Si scorre per mostrare il pannello, ma la card resta sempre visibile,
+     sotto la barra degli strumenti (che e' fissa): meglio un pannello da
+     scorrere che una card scappata in alto. */
+  const barra=document.getElementById("strumenti"),cimaLibera=(barra&&barra.offsetHeight||0)+12;
+  const top=c.getBoundingClientRect().top,serve=r.bottom-innerHeight+24,margine=top-cimaLibera;
+  const d=margine<0?margine:Math.min(serve,margine);
+  if(d>0||margine<0)window.scrollBy({top:d,behavior:"smooth"});
 }
 function puntaFreccia(){
   const pan=document.getElementById("pannello-dettaglio");

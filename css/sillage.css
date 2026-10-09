@@ -150,7 +150,7 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
 .faretto.vuoto{display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:30px;color:var(--carta-3)}
 /* il riflesso sul ripiano */
-.specchio{position:relative;height:22px;overflow:hidden;border-radius:0 0 8px 8px;
+.specchio{position:relative;height:22px;overflow:hidden;border-radius:10px 10px 8px 8px;
   -webkit-mask-image:linear-gradient(#000,transparent 86%);mask-image:linear-gradient(#000,transparent 86%)}
 .specchio img{display:block;width:100%;height:120px;object-fit:cover;transform:scaleY(-1);opacity:.3;filter:blur(.4px)}
 /* Le miniature vengono da schede Fragrantica con fondi diversi — bianco, crema,
@@ -956,3 +956,10 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .oggi-nicchia{position:relative}
 .oggi-nicchia .scia{position:absolute;left:-40px;top:-50px;width:calc(100% + 80px);height:calc(100% + 50px);pointer-events:none;z-index:2;mix-blend-mode:screen}
 .oggi-nicchia > .faretto,.oggi-nicchia > .ripiano{position:relative;z-index:1}
+
+/* Il riflesso e' la boccetta capovolta: ha gli stessi angoli tondi del vetro
+   (quelli di sotto diventano quelli di sopra) e la stessa sfumatura dei bordi,
+   se no il fondo chiaro della foto si vedeva come un rettangolo. */
+.specchio img{
+  -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 52%,#000 52%,transparent 100%);
+  mask-image:radial-gradient(ellipse 74% 80% at 50% 52%,#000 52%,transparent 100%)}
