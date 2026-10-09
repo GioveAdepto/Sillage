@@ -493,10 +493,10 @@ function vaiAlProfumo(id){
        dentro la transizione scorre di colpo: il browser fotografa la pagina
        d'arrivo e la boccetta atterra dove sta davvero. */
     da.style.viewTransitionName="boccetta-in-volo";
-    const arrivo=()=>document.getElementById("esame-"+id)||document.querySelector(`#teca-${id} .faretto img`);
+    const arrivo=()=>document.querySelector(`#teca-${id} .faretto img`);
     const t=document.startViewTransition(()=>{
       da.style.viewTransitionName="";
-      presaDiretta=true;saltaAlProfumo(p,"instant");presaDiretta=false;
+      saltaAlProfumo(p,"instant");
       const a=arrivo();if(a)a.style.viewTransitionName="boccetta-in-volo";
     });
     t.finished.finally(()=>{const a=arrivo();if(a)a.style.viewTransitionName=""});
@@ -514,14 +514,13 @@ function saltaAlProfumo(p,scorri){
   // la barra si misura adesso che e' di nuovo visibile: da un'altra vista e' alta zero
   const barra=document.getElementById("strumenti");
   if(barra)document.documentElement.style.setProperty("--altezza-strumenti",barra.offsetHeight+"px");
-  // la scheda e' gia' nel DOM: si apre subito, senza aspettare un fotogramma
-  // che in una scheda del browser in secondo piano potrebbe non arrivare mai
+  /* Si arriva alla card e ci si ferma: chiusa, con un bagliore che dice
+     quale. Aprirla resta una scelta di chi guarda. */
   const t=document.getElementById("teca-"+id);
   if(!t)return;
-  // prima si arriva, poi si apre: il pannello largo calcola il suo scorrimento
-  // dalla posizione della card, e farlo prima lo sommava al salto
   t.scrollIntoView({block:"start",behavior:scorri});
-  if(t.getAttribute("data-open")!=="true"&&tecaNelPannello!==t)apriTeca(id);
+  t.classList.remove("ancorata");void t.offsetWidth;t.classList.add("ancorata");
+  setTimeout(()=>t.classList.remove("ancorata"),2200);
 }
 
 // ── LA RUOTA DEGLI ACCORDI ────────────────────────────────────────────────
@@ -604,7 +603,6 @@ function ruotaAccordi(lista){
    segue le due posizioni fotogramma per fotogramma, cosi' arriva giusta anche
    se intanto la pagina scorre o il pannello si apre. */
 const DURATA_MANO=640;
-let presaDiretta=false;
 function vola(da,a,{alla_fine}={}){
   // da: elemento o rettangolo di partenza; a: elemento d'arrivo
   const rDa=()=>da instanceof Element?(da.isConnected?da.getBoundingClientRect():r0):da;
@@ -645,10 +643,9 @@ function accompagna(versoY){
 function prendiInMano(c){
   const scaffale=c.querySelector(".faretto img"),esame=immagineEsame(c);
   if(!scaffale||!esame)return;
-  if(!presaDiretta)accompagna(esame.closest(".esame").getBoundingClientRect().top);
+  accompagna(esame.closest(".esame").getBoundingClientRect().top);
   c.classList.add("in-mano");                 // la nicchia resta vuota, illuminata
-  // arrivando da un'altra vista la boccetta vola gia' (View Transitions): qui si posa e basta
-  if(riduci.matches||presaDiretta){esame.classList.add("posata");return}
+  if(riduci.matches){esame.classList.add("posata");return}
   esame.classList.remove("posata");
   vola(scaffale,esame,{alla_fine:()=>esame.classList.add("posata")});
 }

@@ -1011,3 +1011,12 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .oggi-campione{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:99px;font-size:10px;font-weight:600;letter-spacing:.08em;
   text-transform:uppercase;color:#a9c6e2;background:rgba(127,168,207,.12);border:1px dashed rgba(127,168,207,.45)}
 .oggi-alt-nome small .oggi-campione{margin:0 0 0 2px;font-size:9.5px}
+
+/* la card a cui si arriva da un'altra sezione: un bagliore d'ottone che sale
+   e si spegne, per dire "e' questa" senza aprirla */
+.teca.ancorata{animation:ancorata 2s var(--ease-smooth-out)}
+@keyframes ancorata{
+  0%{box-shadow:0 0 0 0 rgba(240,217,164,0);border-color:var(--filo)}
+  20%{box-shadow:0 0 0 2px rgba(240,217,164,.55),0 0 34px -4px rgba(255,214,146,.45);border-color:rgba(240,217,164,.7)}
+  100%{box-shadow:0 0 0 0 rgba(240,217,164,0);border-color:var(--filo)}}
+@media(prefers-reduced-motion:reduce){.teca.ancorata{animation:none;border-color:rgba(240,217,164,.7)}}
