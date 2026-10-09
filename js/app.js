@@ -1055,7 +1055,7 @@ function scelta(f,extra,etichetta){
 }
 function disegnaRapidi(){
   const a=adesso();
-  const oggi=vetrina==="boccette"?`<button class="scelta oggi" onclick="apriOggi()">${ic.stella}Consigliami</button>`:"";
+  const oggi=`<button class="scelta oggi" onclick="apriOggi()">${ic.stella}Consigliami</button>`;
   document.getElementById("rapidi").innerHTML=oggi+
     scelta("adesso","ora",`Adesso · ${a.nome}, ${a.momento}${a.meteo?` · ${a.meteo.temperatura}°`:""}`)+
     scelta("ufficio","","Ufficio")+
@@ -1160,7 +1160,7 @@ function chiudiFiltri(){
 function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"))chiudiFiltri()}
 
 // ── CONSIGLIAMI ───────────────────────────────────────────────────────────
-/* Le cinque boccette migliori per l'occasione, la stagione, l'ora e il
+/* I cinque profumi migliori (boccette e campioni insieme) per l'occasione, la stagione, l'ora e il
    meteo, ognuna con il suo perche'. A parita', vince quella che non metti da piu' tempo:
    il diario serve anche a questo. Per domani vale lo stesso ragionamento,
    spostato all'ora in cui lo metterai. */
@@ -1216,7 +1216,7 @@ function finestraPer(p,da,quando){
 }
 function candidatiOggi(occ,quando=quandoOggi){
   const da=inizioPer(quando,occ),a=adesso(da),st=a.stagione,mo=a.momento,spost=quando==="domani"?1:0;
-  return boccette().filter(p=>p[occ]==="si"||p[occ]==="si-mod").map(p=>{
+  return profumi.filter(p=>p[occ]==="si"||p[occ]==="si-mod").map(p=>{
     const g0=giorniDa(p.id),g=g0===null?null:g0+spost,f=finestraPer(p,da,quando),mt=effettoMeteo(p,f);
     /* Il punteggio e i motivi nascono insieme: ogni voce che sposta la
        classifica lascia una frase, a favore o contro. */
@@ -1232,7 +1232,9 @@ function candidatiOggi(occ,quando=quandoOggi){
     else{s-=2;contro.push(p.momento==="sera"?"darebbe il meglio di sera":"è più da giorno")}
     if(mt.perche)pro.push(mt.perche);
     if(mt.contro)contro.push(mt.contro);
-    if(g===null){s+=2.5;pro.push("non l'hai ancora segnato nel diario")}
+    // un campione mai indossato e' un'occasione per provarlo; uno gia' provato conta come gli altri
+    if(eCampione(p)&&g===null)pro.push(`è un campione${p.formatoMl?` da ${p.formatoMl} ml`:""}: buona occasione per provarlo`);
+    if(g===null){s+=2.5;if(!eCampione(p))pro.push("non l'hai ancora segnato nel diario")}
     else if(g===0){s-=8;contro.push(spost?"lo metti oggi":"l'hai già messo oggi")}
     else if(g===1){s-=2;contro.push(spost?"l'hai messo ieri":"l'hai messo ieri")}
     else{s+=Math.min(g,30)/10;if(g0>=7)pro.push(`non lo metti da ${quandoFu(g0).replace(" fa","")}`)}
@@ -1300,7 +1302,7 @@ function disegnaOggi(){
   h+=`<div class="ventaglio oggi-occasioni">${occasioniOggi.map(([k,l])=>
     `<button class="scelta${k===occOggi?" on":""}" onclick="scegliOccOggi('${k}')">${l}</button>`).join("")}</div>`;
   if(!c.length){
-    h+=`<div class="oggi-vuoto">Nessuna boccetta adatta a questa occasione.</div>`;
+    h+=`<div class="oggi-vuoto">Nessun profumo adatto a questa occasione.</div>`;
   }else{
     /* Tutto in vista: la prima in rilievo, seconda e terza affiancate, le altre
        in elenco sotto, sempre nell'ordine del punteggio. */
@@ -1317,7 +1319,7 @@ function disegnaOggi(){
         <div class="oggi-conto">Il primo consiglio · su ${c.length} adatte</div>
         <div class="marca">${esc(p.brand)}</div>
         <div class="oggi-nome">${esc(p.name)}</div>
-        <div class="oggi-sotto2">${p.conc} · ${esc(p.famiglia)}${domani?` · domani dalle ${da.getHours()}`:""}</div>
+        <div class="oggi-sotto2">${eCampione(p)?`<span class="oggi-campione">Campione</span>`:""}${p.conc} · ${esc(p.famiglia)}${domani?` · domani dalle ${da.getHours()}`:""}</div>
       </div>
     </div>
     <div class="incisa oggi-perche">Perché questo</div>
@@ -1336,7 +1338,7 @@ function disegnaOggi(){
         <button class="oggi-alt-corpo" onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">
           <span class="oggi-posto">${i+2}</span>${miniatura(x.p)}
           <span class="oggi-alt-testo">
-            <span class="oggi-alt-nome">${esc(x.p.name)}<small>${esc(x.p.brand)} · ${x.p.conc}</small></span>
+            <span class="oggi-alt-nome">${esc(x.p.name)}<small>${esc(x.p.brand)} · ${x.p.conc}${eCampione(x.p)?` · <b class="oggi-campione">campione</b>`:""}</small></span>
             <span class="oggi-alt-perche">${x.pro.slice(0,3).map(maiuscola).join(" · ")}${x.contro.length?`<em> · ma ${x.contro[0]}</em>`:""}</span>
           </span>
         </button>${lometto(x.p,"oggi-alt-metto")}
