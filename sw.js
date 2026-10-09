@@ -8,7 +8,7 @@
    - i font di Google: dalla copia, cambiano di rado;
    - il foglio Google e il meteo passano dritti: sono dati vivi, e l'app ha
      già la sua cache per quando mancano. */
-const CASSA = "sillage-v1";
+const CASSA = "sillage-v2";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CASSA).then(c => c.addAll(["./", "manifest.webmanifest", "img/icona-192.png"])));
@@ -39,6 +39,8 @@ self.addEventListener("fetch", e => {
     }).catch(() => caches.match("./")));
     return;
   }
+  // il controllo della versione nuova deve vedere la pagina pubblicata, non la copia
+  if (u.searchParams.has("controllo")) return;
   if (u.origin === location.origin) { e.respondWith(dallaCopia(req, true)); return; }
   if (/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)) { e.respondWith(dallaCopia(req, false)); return; }
   // tutto il resto (foglio Google, meteo) non si tocca

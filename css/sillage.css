@@ -1035,3 +1035,17 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:var(--sicuro-
 .teca{scroll-margin-top:calc(var(--altezza-strumenti,150px) + 10px + var(--sicuro-alto))}
 .pannello-dettaglio .scheda-int-int > .esame{top:calc(180px + var(--sicuro-alto))}
 .foglio{max-height:calc(88dvh - var(--sicuro-alto))}
+
+/* — Versione nuova disponibile — sopra il timone, finche' non si sceglie */
+.aggiornamento{position:fixed;left:12px;right:12px;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px);z-index:310;
+  display:flex;align-items:center;gap:11px;padding:11px 10px 11px 14px;border-radius:var(--r);
+  background:rgba(30,25,19,.97);border:1px solid rgba(200,163,94,.5);box-shadow:0 20px 44px -18px #000;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  opacity:0;transform:translateY(12px);transition:opacity var(--duration-slow) var(--ease-smooth-out),transform var(--duration-slow) var(--ease-smooth-out)}
+.aggiornamento.mostra{opacity:1;transform:none}
+@media(min-width:900px){.aggiornamento{max-width:480px;margin:0 auto}}
+.aggiornamento-punto{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--ottone);box-shadow:0 0 0 4px var(--ottone-velo)}
+.aggiornamento-testo{flex:1;min-width:0;display:flex;flex-direction:column;font-size:12px;color:var(--carta-3);line-height:1.35;cursor:pointer}
+.aggiornamento-testo b{font-size:13.5px;font-weight:600;color:var(--carta)}
+.aggiornamento .btn-oro{padding:9px 14px}
+@media(prefers-reduced-motion:reduce){.aggiornamento{transition:none}}
