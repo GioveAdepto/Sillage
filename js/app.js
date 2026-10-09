@@ -1970,9 +1970,43 @@ function rivela(){
 // ── APP INSTALLABILE ──────────────────────────────────────────────────────
 /* Il service worker rende Sillage un'app da schermata home che si apre anche
    senza rete. Se il browser non lo supporta, il sito funziona come prima. */
+let registrazioneSW=null;
 if("serviceWorker" in navigator&&location.protocol!=="file:"){
-  addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(r=>registrazioneSW=r).catch(()=>{}));
 }
+
+/* ── C'E' UNA VERSIONE NUOVA ──
+   Ogni pubblicazione cambia il ?v= con cui index.html richiama app.js. Si
+   rilegge la pagina pubblicata (all'avvio, quando l'app torna in primo piano
+   e ogni mezz'ora) e, se il numero e' cambiato, compare un avviso: toccandolo
+   si ricarica. Serve soprattutto all'app sulla schermata Home, che non ha un
+   pulsante per ricaricare. */
+const versioneQui=(()=>{const s=document.querySelector('script[src*="app.js"]');const m=s&&s.src.match(/[?&]v=([^&]+)/);return m?m[1]:null})();
+let ultimoControllo=0;
+async function controllaVersione(){
+  if(!versioneQui||!navigator.onLine||Date.now()-ultimoControllo<60e3)return;
+  ultimoControllo=Date.now();
+  try{
+    const r=await fetch("./?controllo="+Date.now(),{cache:"no-store"});
+    const m=(await r.text()).match(/js\/app\.js\?v=([^"'&]+)/);
+    if(m&&m[1]!==versioneQui)mostraAggiornamento();
+    if(registrazioneSW)registrazioneSW.update().catch(()=>{});
+  }catch(e){/* senza rete si riprova la prossima volta */}
+}
+function mostraAggiornamento(){
+  if(document.getElementById("aggiornamento"))return;
+  const el=document.createElement("div");
+  el.id="aggiornamento";el.className="aggiornamento";el.setAttribute("role","status");
+  el.innerHTML=`<span class="aggiornamento-punto"></span><span class="aggiornamento-testo"><b>Versione nuova di Sillage</b>Tocca per aggiornare</span>
+    <button class="btn-oro" onclick="location.reload()">Aggiorna</button>
+    <button class="btn-nudo" onclick="this.parentNode.remove()" aria-label="Più tardi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+  el.querySelector(".aggiornamento-testo").onclick=()=>location.reload();
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add("mostra"));
+}
+addEventListener("load",()=>setTimeout(controllaVersione,4000));
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")controllaVersione()});
+setInterval(controllaVersione,30*60e3);
 
 // ── AVVIO ─────────────────────────────────────────────────────────────────
 async function avvia() {
