@@ -1006,3 +1006,8 @@ input[type=search]::-webkit-search-cancel-button{display:none}
   -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%);
   mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%)}
 @media(prefers-reduced-motion:reduce){.esame-vetro:has(.posata){animation:none}}
+
+/* Consigliami: i campioni si riconoscono a colpo d'occhio */
+.oggi-campione{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:99px;font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:#a9c6e2;background:rgba(127,168,207,.12);border:1px dashed rgba(127,168,207,.45)}
+.oggi-alt-nome small .oggi-campione{margin:0 0 0 2px;font-size:9.5px}
