@@ -476,20 +476,88 @@ const copieDi=p=>profumi.filter(q=>q.id!==p.id&&q.dupe&&chiaveNome(q.dupe)===chi
 
 /* Porta a un profumo da qualunque punto: sceglie la vetrina giusta, toglie i
    filtri che potrebbero nasconderlo, apre la scheda e ci scorre sopra. */
+/* Da dove parte il salto: la miniatura dentro l'elemento toccato. Le chiamate
+   arrivano da onclick in linea, quindi l'evento e' quello globale. */
+function miniaturaToccata(){
+  const e=window.event,t=e&&e.target&&e.target.closest?e.target:null;
+  if(!t)return null;
+  const box=t.closest(".tessera,.oggi-alt,.oggi-medaglia,.oggi-riga,.oggi-scelta,.cl-riga,.clone,.chiuso,.pila-riga,.candidato-gia,.oggi-strato,button,a")||t;
+  return box.querySelector(".mini img,.faretto img,.cf-foto img")||null;
+}
 function vaiAlProfumo(id){
   const p=profumi.find(x=>x.id===id);
   if(!p)return;
+  const da=miniaturaToccata();
+  if(da&&document.startViewTransition&&!riduci.matches){
+    /* Il volo: la miniatura toccata diventa la boccetta della teca. Il salto
+       dentro la transizione scorre di colpo: il browser fotografa la pagina
+       d'arrivo e la boccetta atterra dove sta davvero. */
+    da.style.viewTransitionName="boccetta-in-volo";
+    const arrivo=()=>document.querySelector(`#teca-${id} .faretto img`);
+    const t=document.startViewTransition(()=>{
+      da.style.viewTransitionName="";
+      saltaAlProfumo(p,"instant");
+      const a=arrivo();if(a)a.style.viewTransitionName="boccetta-in-volo";
+    });
+    t.finished.finally(()=>{const a=arrivo();if(a)a.style.viewTransitionName=""});
+    return;
+  }
+  saltaAlProfumo(p,"smooth");
+}
+function saltaAlProfumo(p,scorri){
+  const id=p.id;
   filtriAttivi.clear();noteAttive.clear();testoCerca="";
   const c=document.getElementById("cerca");if(c)c.value="";
   const v=eCampione(p)?"campioni":"boccette";
   if(v!==vetrina)cambiaVetrina(v);else disegna();
   cambiaVista("collezione");
+  // la barra si misura adesso che e' di nuovo visibile: da un'altra vista e' alta zero
+  const barra=document.getElementById("strumenti");
+  if(barra)document.documentElement.style.setProperty("--altezza-strumenti",barra.offsetHeight+"px");
   // la scheda e' gia' nel DOM: si apre subito, senza aspettare un fotogramma
   // che in una scheda del browser in secondo piano potrebbe non arrivare mai
   const t=document.getElementById("teca-"+id);
   if(!t)return;
+  // prima si arriva, poi si apre: il pannello largo calcola il suo scorrimento
+  // dalla posizione della card, e farlo prima lo sommava al salto
+  t.scrollIntoView({block:"start",behavior:scorri});
   if(t.getAttribute("data-open")!=="true"&&tecaNelPannello!==t)apriTeca(id);
-  t.scrollIntoView({block:"start",behavior:"smooth"});
+}
+
+// ── LA LUCE SUL VETRO ─────────────────────────────────────────────────────
+/* Col mouse la nicchia si inclina verso il puntatore e un riflesso la segue
+   (card hover tilt di transitions.dev). Un solo ascoltatore per tutta la
+   pagina: le teche si ridisegnano spesso, e legarne uno a ciascuna vorrebbe
+   dire riattaccarli ogni volta. */
+const riduci=matchMedia("(prefers-reduced-motion: reduce)");
+const INCLINAZIONE=16;      // gradi ai bordi della nicchia
+let nicchiaInclinata=null;
+function raddrizza(n){
+  n.classList.remove("is-hover");
+  const c=n.querySelector(".t-tilt-card");if(!c)return;
+  c.classList.remove("is-tilting");
+  c.style.setProperty("--tilt-rx","0deg");c.style.setProperty("--tilt-ry","0deg");
+}
+document.addEventListener("pointermove",e=>{
+  if(e.pointerType!=="mouse")return;
+  const n=riduci.matches?null:e.target.closest&&e.target.closest(".nicchia.t-tilt");
+  if(n!==nicchiaInclinata){if(nicchiaInclinata)raddrizza(nicchiaInclinata);nicchiaInclinata=n}
+  if(!n)return;
+  const c=n.querySelector(".t-tilt-card");if(!c)return;
+  const r=n.getBoundingClientRect();
+  const px=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),py=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));
+  n.classList.add("is-hover");c.classList.add("is-tilting");
+  c.style.setProperty("--tilt-ry",((px-.5)*INCLINAZIONE).toFixed(2)+"deg");
+  c.style.setProperty("--tilt-rx",((.5-py)*INCLINAZIONE).toFixed(2)+"deg");
+  c.style.setProperty("--tilt-gx",(px*100).toFixed(1)+"%");
+  c.style.setProperty("--tilt-gy",(py*100).toFixed(1)+"%");
+},{passive:true});
+document.addEventListener("pointerleave",()=>{if(nicchiaInclinata){raddrizza(nicchiaInclinata);nicchiaInclinata=null}});
+// all'apertura un riflesso attraversa il vetro: e' la luce che il dito non puo' muovere
+function riflesso(c){
+  const r=c&&c.querySelector(".riflesso");
+  if(!r||riduci.matches)return;
+  r.classList.remove("passa");void r.offsetWidth;r.classList.add("passa");
 }
 
 function cambiaVetrina(v){
@@ -591,7 +659,7 @@ const spunta='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function costruisciTeca(p,i){
   const src=p.img,cl=vetroClasse[p.colore];
   const nicchia=src
-    ?`<div class="faretto"><img src="${src}" alt="Flacone di ${esc(p.brand)} ${esc(p.name)}" loading="lazy" decoding="async"></div>
+    ?`<div class="faretto t-tilt-card"><img src="${src}" alt="Flacone di ${esc(p.brand)} ${esc(p.name)}" loading="lazy" decoding="async"><div class="t-tilt-glare"></div><div class="riflesso"></div></div>
       <div class="specchio" aria-hidden="true"><img src="${src}" alt=""></div>`
     :`<div class="faretto vuoto">${vetroLettera[p.colore]}</div><div class="specchio"></div>`;
   const usi=Object.keys(usoLabels).map(k=>{
@@ -612,6 +680,14 @@ function costruisciTeca(p,i){
               ${copie.map(q=>legame(q,eCampione(q)?"Il suo clone, tra i campioni:":"Il suo clone, in collezione:")).join("")}
             </div>
           </div>`:"";
+  const simili=similiA(p);
+  const bloccoSimili=simili.length?`
+          <div class="strati t-stagger-line t-stagger-line--4">
+            <div class="incisa">Somiglia a</div>
+            <div class="simili">${simili.map(({q,v})=>`<button class="simile" onclick="event.stopPropagation();vaiAlProfumo(${q.id})">
+              ${miniatura(q)}<span class="simile-nome">${esc(q.name)}<small>${eCampione(q)?"campione":esc(q.brand)}</small></span>
+              <span class="simile-affinita" style="--v:${Math.round(v*100)}%">${Math.round(v*100)}%</span></button>`).join("")}</div>
+          </div>`:"";
   const bloccoStrati=ric.length?`
           <div class="strati t-stagger-line t-stagger-line--4">
             <div class="incisa">Layering</div>
@@ -621,12 +697,12 @@ function costruisciTeca(p,i){
               </button>`).join("")}
             </div>
           </div>`:"";
-  return `<article class="teca t-acc ${cl}${presa?" presa":""}" data-open="false" id="teca-${p.id}" style="animation-delay:${Math.min(i*26,320)}ms"
+  return `<article class="teca t-acc ${cl}${presa?" presa":""}" data-open="false" id="teca-${p.id}" style="animation-delay:${Math.min(i*40,280)}ms"
     tabindex="0" role="button" aria-expanded="false" onclick="apriTeca(${p.id})"
     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();apriTeca(${p.id})}">
     <div class="corpo">
       <div class="esposizione">
-        <div class="nicchia">${nicchia}<div class="ripiano"></div></div>
+        <div class="nicchia t-tilt">${nicchia}<div class="ripiano"></div></div>
         <div class="cartellino">
           <div class="riga-marca"><span class="marca">${esc(p.brand)}</span><span class="catalogo">№ ${numeroDi(p.id)}</span></div>
           <h2 class="nome">${esc(p.name)}</h2>
@@ -657,7 +733,7 @@ function costruisciTeca(p,i){
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
           <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>
-          <p class="racconto t-stagger-line t-stagger-line--3">${rinumera(esc(p.desc))}</p>${bloccoLegami}${bloccoStrati}
+          <p class="racconto t-stagger-line t-stagger-line--3">${rinumera(esc(p.desc))}</p>${bloccoLegami}${bloccoSimili}${bloccoStrati}
         </div>
       </div>
     </div>
@@ -667,11 +743,28 @@ function costruisciTeca(p,i){
   </article>`;
 }
 
+/* Quanto si somigliano due profumi: soprattutto gli accordi, pesati per
+   posizione (il primo conta piu' del quinto), poi le note in comune, e un
+   piccolo bonus se la famiglia e' la stessa. Da 0 a 1. Sotto 0,3 non si
+   mostra: due profumi qualsiasi hanno sempre un "legnoso" in comune. */
+function somiglianza(a,b){
+  const pesi=l=>{const m=new Map();(l||[]).forEach((x,i)=>m.set(x.toLowerCase(),1/(1+i*.35)));return m};
+  const A=pesi(a.accordi),B=pesi(b.accordi);
+  let dentro=0,tutto=0;
+  new Set([...A.keys(),...B.keys()]).forEach(k=>{const x=A.get(k)||0,y=B.get(k)||0;dentro+=Math.min(x,y);tutto+=Math.max(x,y)});
+  const na=new Set((a.noteElenco||[]).map(n=>n.toLowerCase())),nb=new Set((b.noteElenco||[]).map(n=>n.toLowerCase()));
+  const comuni=[...na].filter(x=>nb.has(x)).length,unione=new Set([...na,...nb]).size;
+  return (tutto?dentro/tutto:0)*.65+(unione?comuni/unione:0)*.25+(a.famiglia===b.famiglia?.1:0);
+}
+const similiA=(p,quanti=3)=>profumi.filter(q=>q.id!==p.id).map(q=>({q,v:somiglianza(p,q)}))
+  .filter(x=>x.v>=.3).sort((a,b)=>b.v-a.v).slice(0,quanti);
+
 function apriTeca(id){
   const c=document.getElementById("teca-"+id);
   if(!c)return;
   if(c.closest("#vista-collezione")&&colonneVetrina()>1)return apriNelPannello(c);
   const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
+  if(aperta)riflesso(c);
   c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
   const righe=c.querySelector(".t-stagger");
@@ -731,6 +824,7 @@ function apriNelPannello(c){
   pan.appendChild(int);
   fine.after(pan);
   tecaNelPannello=c;
+  riflesso(c);
   c.classList.add("aperta");c.setAttribute("aria-expanded","true");
   puntaFreccia();
   int.classList.remove("is-hiding","is-shown");void int.offsetHeight;int.classList.add("is-shown");
@@ -1715,6 +1809,13 @@ function rivela(){
   const ms=parseFloat(
     getComputedStyle(document.documentElement).getPropertyValue("--reveal-dur"))||400;
   setTimeout(()=>document.getElementById("scheletro")?.remove(),ms);
+}
+
+// ── APP INSTALLABILE ──────────────────────────────────────────────────────
+/* Il service worker rende Sillage un'app da schermata home che si apre anche
+   senza rete. Se il browser non lo supporta, il sito funziona come prima. */
+if("serviceWorker" in navigator&&location.protocol!=="file:"){
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 }
 
 // ── AVVIO ─────────────────────────────────────────────────────────────────
