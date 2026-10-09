@@ -533,7 +533,13 @@ function saltaAlProfumo(p,scorri){
    Nel confronto le serie hanno tre colori fissi, nell'ordine in cui i profumi
    sono entrati: oro brunito, blu, rosa. Validati per il fondo scuro (banda di
    luminosita', croma, separazione anche per i daltonici, contrasto). */
-const raggiRuota=[["acqua","Acquatico"],["agrume","Agrumato"],["spezia","Speziato"],["dolce","Dolce"],["fumo","Cuoio e fumo"],["cipria","Cipriato"],["bosco","Legnoso"]];
+/* I raggi seguono la ruota delle fragranze, dal fresco al caldo: famiglie
+   vicine stanno vicine, cosi' la forma dice qualcosa. Ogni raggio porta il
+   nome di tutto quello che raccoglie (il raggio "bosco" contiene Aromatico e
+   Legnoso: chiamarlo solo "Legnoso" faceva sembrare sbagliato un profumo
+   aromatico). */
+const raggiRuota=[["acqua","Marino e acquatico"],["agrume","Agrumato e fruttato"],["bosco","Aromatico e legnoso"],
+  ["spezia","Speziato e ambrato"],["fumo","Cuoio e tabacco"],["dolce","Dolce e gourmand"],["cipria","Floreale e cipriato"]];
 const coloriSerie=["#b8892d","#5685d4","#a63f66"];
 const famigliaDi=(()=>{const m={};for(const f in famigliaAccordo)famigliaAccordo[f].forEach(a=>m[a.toLowerCase()]=f);return a=>m[String(a).toLowerCase()]})();
 function profiloAccordi(p){
@@ -543,42 +549,51 @@ function profiloAccordi(p){
   if(tot)for(const k in q)q[k]/=tot;
   return q;
 }
-function ruotaAccordi(lista,{nomi=false}={}){
-  const W=320,H=268,cx=W/2,cy=H/2+4,R=92,n=raggiRuota.length;
+function ruotaAccordi(lista){
+  const W=360,H=300,cx=W/2,cy=H/2+2,R=86,n=raggiRuota.length,uno=lista.length===1;
   const profili=lista.map(profiloAccordi);
-  // la scala si adatta al profumo piu' sbilanciato, ma non scende sotto il 40%
-  const max=Math.max(.4,Math.ceil(Math.max(...profili.flatMap(q=>Object.values(q)))*10)/10);
+  // la scala si adatta al valore piu' alto, arrotondato al 10%: il bordo della ruota e' quel valore
+  const max=Math.max(.3,Math.ceil(Math.max(...profili.flatMap(q=>Object.values(q)))*10)/10);
   const ang=i=>-Math.PI/2+i*2*Math.PI/n;
   const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v/max,cy+Math.sin(ang(i))*R*v/max];
-  let s=`<svg class="ruota" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ruota degli accordi${lista.length>1?" a confronto":""}">`;
-  // griglia recessiva: tre anelli e i raggi
-  [1/3,2/3,1].forEach(f=>{s+=`<polygon class="ruota-anello" points="${raggiRuota.map((_,i)=>pt(i,max*f).map(x=>x.toFixed(1)).join(",")).join(" ")}"/>`});
-  raggiRuota.forEach((_,i)=>{const [x,y]=pt(i,max);s+=`<line class="ruota-raggio" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`});
-  s+=`<text class="ruota-scala" x="${cx+4}" y="${(cy-R-4).toFixed(1)}">${Math.round(max*100)}%</text>`;
-  // etichette dei raggi: inchiostro di testo, un pallino della tinta della famiglia
-  raggiRuota.forEach(([k,l],i)=>{
-    const [x,y]=pt(i,max*1.2),c=Math.cos(ang(i)),anc=Math.abs(c)<.2?"middle":c>0?"start":"end";
-    s+=`<g class="ruota-eti"><circle cx="${(anc==="start"?x-7:anc==="end"?x+7:x).toFixed(1)}" cy="${(y-(anc==="middle"?11:0)).toFixed(1)}" r="3" fill="${tintaAccordo[k]}"/>
-      <text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anc}">${l}</text></g>`;
-  });
+  const f1=x=>x.toFixed(1);
+  let s=`<svg class="ruota" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ruota degli accordi${uno?"":" a confronto"}: ${
+    lista.map((p,j)=>esc(p.name)+" "+raggiRuota.filter(([k])=>profili[j][k]).map(([k,l])=>l+" "+Math.round(profili[j][k]*100)+"%").join(", ")).join("; ")}">`;
+  // griglia recessiva: anelli al 10, 20, 30%... fino al bordo, e i raggi
+  for(let v=.1;v<=max+1e-9;v+=.1)s+=`<polygon class="ruota-anello" points="${raggiRuota.map((_,i)=>pt(i,v).map(f1).join(",")).join(" ")}"/>`;
+  raggiRuota.forEach((_,i)=>{const [x,y]=pt(i,max);s+=`<line class="ruota-raggio" x1="${cx}" y1="${cy}" x2="${f1(x)}" y2="${f1(y)}"/>`});
   // le serie: area tenue, contorno di 2px, vertici con anello del colore di fondo
   profili.forEach((q,j)=>{
-    const col=coloriSerie[j%coloriSerie.length],punti=raggiRuota.map(([k],i)=>pt(i,q[k]));
-    s+=`<polygon class="ruota-area" points="${punti.map(p=>p.map(x=>x.toFixed(1)).join(",")).join(" ")}" style="fill:${col};stroke:${col}"/>`;
+    const col=coloriSerie[j%coloriSerie.length];
+    s+=`<polygon class="ruota-area" points="${raggiRuota.map(([k],i)=>pt(i,q[k]).map(f1).join(",")).join(" ")}" style="fill:${col};stroke:${col}"/>`;
   });
   profili.forEach((q,j)=>{
     const col=coloriSerie[j%coloriSerie.length],nome=lista[j].name;
     raggiRuota.forEach(([k,l],i)=>{
       if(!q[k])return;
       const [x,y]=pt(i,q[k]);
-      s+=`<g class="ruota-punto"><circle class="ruota-presa" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11"/>
-        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" style="fill:${col}"/>
+      s+=`<g class="ruota-punto"><circle class="ruota-presa" cx="${f1(x)}" cy="${f1(y)}" r="11"/>
+        <circle cx="${f1(x)}" cy="${f1(y)}" r="4" style="fill:${col}"/>
         <title>${esc(nome)} · ${l}: ${Math.round(q[k]*100)}%</title></g>`;
     });
   });
+  /* Le etichette: nome della famiglia su due righe e, per un profumo solo,
+     la sua quota proprio sotto il nome. Nel confronto i numeri sarebbero
+     tre per raggio: li dice il passaggio del mouse, e la tabella sotto. */
+  raggiRuota.forEach(([k,l],i)=>{
+    const [x,y]=pt(i,max*1.18),c=Math.cos(ang(i)),sn=Math.sin(ang(i));
+    const anc=Math.abs(c)<.25?"middle":c>0?"start":"end";
+    const righe=l.split(" e ");righe[1]="e "+righe[1];
+    const v=uno?Math.round(profili[0][k]*100):null;
+    const tot=righe.length+(uno?1:0),y0=y-(sn<-.5?(tot-1)*12:sn>.5?0:(tot-1)*6)+4;
+    s+=`<g class="ruota-eti"><text x="${f1(x)}" y="${f1(y0)}" text-anchor="${anc}">`+
+      righe.map((r,ri)=>`<tspan x="${f1(x)}" dy="${ri?12:0}"${ri?' class="sotto"':""}>${r}</tspan>`).join("")+
+      (uno?`<tspan x="${f1(x)}" dy="13" class="${v?"valore":"zero"}">${v?v+"%":"—"}</tspan>`:"")+
+      `</text><circle cx="${f1(anc==="start"?x-8:anc==="end"?x+8:x)}" cy="${f1(anc==="middle"?(sn<0?y0-11:y0-15):y0-4)}" r="3" fill="${tintaAccordo[k]}"/></g>`;
+  });
   s+=`</svg>`;
-  const legenda=lista.length>1?`<div class="ruota-legenda">${lista.map((p,j)=>`<span><i style="background:${coloriSerie[j]}"></i>${esc(p.name)}</span>`).join("")}</div>`:"";
-  return `<div class="ruota-box">${legenda}${s}</div>`;
+  const legenda=uno?"":`<div class="ruota-legenda">${lista.map((p,j)=>`<span><i style="background:${coloriSerie[j]}"></i>${esc(p.name)}</span>`).join("")}</div>`;
+  return `<div class="ruota-box">${legenda}${s}<p class="ruota-nota">Quanto pesa ogni famiglia negli accordi principali di Fragrantica: i primi contano più degli ultimi. Il bordo della ruota vale ${Math.round(max*100)}%.</p></div>`;
 }
 
 // ── LA BOCCETTA IN MANO ───────────────────────────────────────────────────
