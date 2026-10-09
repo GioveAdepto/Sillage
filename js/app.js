@@ -493,10 +493,10 @@ function vaiAlProfumo(id){
        dentro la transizione scorre di colpo: il browser fotografa la pagina
        d'arrivo e la boccetta atterra dove sta davvero. */
     da.style.viewTransitionName="boccetta-in-volo";
-    const arrivo=()=>document.querySelector(`#teca-${id} .faretto img`);
+    const arrivo=()=>document.getElementById("esame-"+id)||document.querySelector(`#teca-${id} .faretto img`);
     const t=document.startViewTransition(()=>{
       da.style.viewTransitionName="";
-      saltaAlProfumo(p,"instant");
+      presaDiretta=true;saltaAlProfumo(p,"instant");presaDiretta=false;
       const a=arrivo();if(a)a.style.viewTransitionName="boccetta-in-volo";
     });
     t.finished.finally(()=>{const a=arrivo();if(a)a.style.viewTransitionName=""});
@@ -581,55 +581,55 @@ function ruotaAccordi(lista,{nomi=false}={}){
   return `<div class="ruota-box">${legenda}${s}</div>`;
 }
 
-// ── LA SCIA ───────────────────────────────────────────────────────────────
-/* Quando una boccetta si accende, dalla sua sommita' sale una scia di
-   particelle nei colori dei suoi primi accordi: il sillage, letteralmente.
-   Canvas leggero, un fotogramma per volta; si spegne da sola quando la card
-   si chiude, e non parte con «riduci movimento». */
-function accendiScia(nicchia,p,viva){
-  if(!nicchia||riduci.matches||nicchia.querySelector("canvas.scia"))return;
-  const cv=document.createElement("canvas");cv.className="scia";cv.setAttribute("aria-hidden","true");
-  nicchia.appendChild(cv);
-  const ctx=cv.getContext("2d"),dpr=Math.min(1.5,devicePixelRatio||1);
-  /* Ogni colore diventa una volta sola un puntino sfumato su una tela a parte;
-     poi si copia e basta. Il bagliore calcolato a ogni particella e a ogni
-     fotogramma (shadowBlur) era quello che rallentava tutto. */
-  const sprite=c=>{const t=document.createElement("canvas");t.width=t.height=24;const x=t.getContext("2d");
-    const g=x.createRadialGradient(12,12,0,12,12,12);g.addColorStop(0,c);g.addColorStop(.35,c+"aa");g.addColorStop(1,c+"00");
-    x.fillStyle=g;x.fillRect(0,0,24,24);return t};
-  const colori=[...new Set((p.accordi||[]).slice(0,4).map(coloreAccordo))];if(!colori.length)colori.push("#c8a35e");
-  const sprites=colori.map(sprite);
-  let w=0,h=0,parti=[],ultimo=0,ultimoDisegno=0,spenta=false;
-  const misura=()=>{w=cv.clientWidth;h=cv.clientHeight;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalCompositeOperation="lighter"};
-  misura();
-  const nasci=()=>parti.push({x:w/2+(Math.random()-.5)*w*.18,y:h*.6,vx:(Math.random()-.5)*.25,vy:-(.28+Math.random()*.32),
-    r:3+Math.random()*4,vita:0,durata:2200+Math.random()*1800,fase:Math.random()*6.3,s:sprites[Math.floor(Math.random()*sprites.length)]});
+// ── LA BOCCETTA IN MANO ───────────────────────────────────────────────────
+/* Aprire una scheda e' prendere la boccetta dallo scaffale per guardarla da
+   vicino: si stacca dalla nicchia, si alza inclinandosi un poco, come presa
+   in mano, e si posa in grande accanto ai dettagli. Chiudendo, torna al suo
+   posto. Il volo e' una copia dell'immagine che viaggia sopra la pagina;
+   segue le due posizioni fotogramma per fotogramma, cosi' arriva giusta anche
+   se intanto la pagina scorre o il pannello si apre. */
+const DURATA_MANO=640;
+let presaDiretta=false;
+function vola(da,a,{alla_fine}={}){
+  // da: elemento o rettangolo di partenza; a: elemento d'arrivo
+  const rDa=()=>da instanceof Element?(da.isConnected?da.getBoundingClientRect():r0):da;
+  const r0=da instanceof Element?da.getBoundingClientRect():da;
+  const src=(da instanceof Element?da:a).getAttribute("src");
+  if(!src||!r0.width){alla_fine&&alla_fine();return}
+  const f=document.createElement("img");f.src=src;f.className="boccetta-in-volo";f.alt="";
+  f.style.cssText=`left:${r0.left}px;top:${r0.top}px;width:${r0.width}px;height:${r0.height}px`;
+  document.body.appendChild(f);
+  a.style.visibility="hidden";
+  const t0=performance.now(),ease=x=>1-Math.pow(1-x,4);
   const passo=t=>{
-    if(!cv.isConnected)return;
-    if(!spenta&&!viva())spenta=true;
-    const dt=Math.min(80,t-(ultimo||t));ultimo=t;
-    // trenta fotogrammi al secondo bastano a una scia lenta; fuori schermo non si disegna
-    if(t-ultimoDisegno<32){requestAnimationFrame(passo);return}
-    ultimoDisegno=t;
-    const r=cv.getBoundingClientRect();
-    const vh=innerHeight||document.documentElement.clientHeight;
-    if(vh&&(r.bottom<0||r.top>vh)){if(spenta){cv.remove();return}requestAnimationFrame(passo);return}
-    if(cv.clientWidth!==w||cv.clientHeight!==h)misura();
-    if(!spenta&&parti.length<28&&Math.random()<dt/85)nasci();
-    ctx.clearRect(0,0,w,h);
-    parti=parti.filter(q=>(q.vita+=dt)<q.durata);
-    for(const q of parti){
-      const k=q.vita/q.durata,d=q.r*(1+k*.6)*2;
-      q.x+=q.vx*dt/16+Math.sin(q.fase+q.vita/520)*.18;q.y+=q.vy*dt/16;
-      ctx.globalAlpha=Math.sin(Math.PI*Math.min(1,k*1.15))*.7;
-      ctx.drawImage(q.s,q.x-d/2,q.y-d/2,d,d);
-    }
-    if(spenta&&!parti.length){cv.remove();return}
-    requestAnimationFrame(passo);
+    const k=Math.min(1,(t-t0)/DURATA_MANO),e=ease(k),r1=rDa(),r2=a.getBoundingClientRect();
+    const x=r1.left+(r2.left-r1.left)*e,y=r1.top+(r2.top-r1.top)*e,w=r1.width+(r2.width-r1.width)*e,h=r1.height+(r2.height-r1.height)*e;
+    const su=Math.sin(Math.PI*k);          // a meta' strada e' piu' in alto, inclinata, con l'ombra lunga
+    f.style.left=x+"px";f.style.top=(y-su*34)+"px";f.style.width=w+"px";f.style.height=h+"px";
+    f.style.transform=`rotate(${(-7*su).toFixed(2)}deg) scale(${(1+su*.07).toFixed(3)})`;
+    f.style.filter=`drop-shadow(0 ${(6+su*22).toFixed(1)}px ${(8+su*16).toFixed(1)}px rgba(0,0,0,${(.35+su*.25).toFixed(2)}))`;
+    if(k<1){requestAnimationFrame(passo);return}
+    a.style.visibility="";f.remove();alla_fine&&alla_fine();
   };
   requestAnimationFrame(passo);
 }
-const sciaDellaTeca=c=>{const p=profumi.find(x=>"teca-"+x.id===c.id);if(p)accendiScia(c.querySelector(".nicchia"),p,()=>c.isConnected&&c.classList.contains("aperta"))};
+const immagineEsame=c=>document.getElementById("esame-"+c.id.slice(5));
+function prendiInMano(c){
+  const scaffale=c.querySelector(".faretto img"),esame=immagineEsame(c);
+  if(!scaffale||!esame)return;
+  c.classList.add("in-mano");                 // la nicchia resta vuota, illuminata
+  // arrivando da un'altra vista la boccetta vola gia' (View Transitions): qui si posa e basta
+  if(riduci.matches||presaDiretta){esame.classList.add("posata");return}
+  esame.classList.remove("posata");
+  vola(scaffale,esame,{alla_fine:()=>esame.classList.add("posata")});
+}
+function riponi(c,daRett){
+  const scaffale=c.querySelector(".faretto img");
+  if(!scaffale||riduci.matches||!daRett||!daRett.width){c.classList.remove("in-mano");return}
+  vola(daRett,scaffale,{alla_fine:()=>c.classList.remove("in-mano")});
+  // durante il ritorno la nicchia e' ancora vuota: la boccetta e' quella in volo
+}
+
 
 // ── LA LUCE SUL VETRO ─────────────────────────────────────────────────────
 /* Col mouse la nicchia si inclina verso il puntatore e un riflesso la segue
@@ -835,6 +835,7 @@ function costruisciTeca(p,i){
       </div>
       <div class="scheda-int t-acc-panel">
         <div class="scheda-int-int t-acc-panel-inner t-stagger">
+          ${p.img?`<div class="esame" aria-hidden="true"><div class="esame-luce"></div><div class="esame-vetro"><img class="esame-img" id="esame-${p.id}" src="${p.img}" alt=""></div><div class="esame-ombra"></div></div>`:""}
           ${piramideDi(p).length?`<div class="incisa t-stagger-line t-stagger-line--1 lato-piramide titolo">Piramide olfattiva</div>
           <div class="t-stagger-line t-stagger-line--1 lato-piramide">${bloccoPiramide(p)}</div>`:""}
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
@@ -872,8 +873,9 @@ function apriTeca(id){
   const c=document.getElementById("teca-"+id);
   if(!c)return;
   if(c.closest("#vista-collezione")&&colonneVetrina()>1)return apriNelPannello(c);
+  const esame=immagineEsame(c),rEsame=esame&&esame.getBoundingClientRect();
   const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
-  if(aperta){riflesso(c);sciaDellaTeca(c)}
+  if(aperta)riflesso(c);
   c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
   const righe=c.querySelector(".t-stagger");
@@ -882,7 +884,9 @@ function apriTeca(id){
     righe.classList.remove("is-hiding","is-shown");
     void righe.offsetHeight;          // senza il reflow il rivelo non riparte
     righe.classList.add("is-shown");
+    prendiInMano(c);
   }else{
+    riponi(c,rEsame);
     righe.classList.add("is-hiding");
     righe.classList.remove("is-shown");
     setTimeout(()=>righe.classList.remove("is-hiding"),200);
@@ -907,8 +911,10 @@ function chiudiPannello(){
   const pan=document.getElementById("pannello-dettaglio");
   if(tecaNelPannello){
     const c=tecaNelPannello,int=pan&&pan.querySelector(".scheda-int-int");
+    const esame=immagineEsame(c),rEsame=esame&&esame.getBoundingClientRect();
     if(int){int.classList.remove("is-shown","is-hiding");c.querySelector(".scheda-int").appendChild(int)}  // il contenuto torna nella sua card
     c.classList.remove("aperta");c.setAttribute("aria-expanded","false");
+    riponi(c,rEsame);
     tecaNelPannello=null;
   }
   if(pan)pan.remove();
@@ -934,7 +940,7 @@ function apriNelPannello(c){
   fine.after(pan);
   tecaNelPannello=c;
   riflesso(c);
-  requestAnimationFrame(()=>sciaDellaTeca(c));
+  prendiInMano(c);
   c.classList.add("aperta");c.setAttribute("aria-expanded","true");
   puntaFreccia();
   int.classList.remove("is-hiding","is-shown");void int.offsetHeight;int.classList.add("is-shown");
@@ -1310,8 +1316,6 @@ function disegnaOggi(){
     :`<button class="oggi-meteo-chiedi" onclick="usaMeteo(true)"${chiedendoPosto?" disabled":""}>${chiedendoPosto?"Cerco la posizione…":"Usa il meteo di dove sei"}</button>
       <div class="oggi-meteo">Serve la posizione, una volta: resta sul telefono, arrotondata a una decina di chilometri.</div>`;
   document.getElementById("oggi-corpo").innerHTML=h;
-  const prima=c.length&&document.querySelector("#oggi-corpo .oggi-nicchia");
-  if(prima)requestAnimationFrame(()=>accendiScia(prima,c[0].p,()=>prima.isConnected&&document.getElementById("fondale-oggi").classList.contains("aperto")));
 }
 
 // ── CONFRONTO ─────────────────────────────────────────────────────────────
