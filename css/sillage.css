@@ -947,15 +947,6 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .cf-ruota > .incisa{margin:0 4px 6px}
 .cf-serie{display:block;width:36px;height:4px;border-radius:2px;margin:9px auto 0}
 
-/* — La scia — */
-.nicchia{position:relative}
-/* sopra il vetro, in schermo: la card taglia quello che esce dai suoi bordi,
-   quindi la scia nasce dalle spalle della boccetta e sale fino alla cima */
-.nicchia .scia{position:absolute;left:-30px;top:-14px;width:calc(100% + 60px);height:calc(100% + 14px);pointer-events:none;z-index:2}
-.nicchia > .faretto,.nicchia > .specchio,.nicchia > .ripiano{position:relative;z-index:1}
-.oggi-nicchia{position:relative}
-.oggi-nicchia .scia{position:absolute;left:-40px;top:-50px;width:calc(100% + 80px);height:calc(100% + 50px);pointer-events:none;z-index:2}
-.oggi-nicchia > .faretto,.oggi-nicchia > .ripiano{position:relative;z-index:1}
 
 /* Il riflesso e' la boccetta capovolta: ha gli stessi angoli tondi del vetro
    (quelli di sotto diventano quelli di sopra) e la stessa sfumatura dei bordi,
@@ -963,3 +954,51 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 .specchio img{
   -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 52%,#000 52%,transparent 100%);
   mask-image:radial-gradient(ellipse 74% 80% at 50% 52%,#000 52%,transparent 100%)}
+
+/* — La boccetta in mano —
+   Il banco d'esame: la boccetta in grande, sotto una luce dall'alto, che
+   ondeggia appena come tenuta in mano. Sul telefono apre i dettagli della
+   card; su schermo largo e' la prima colonna del pannello. */
+.esame{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:220px;margin:0 0 14px}
+.esame-luce{position:absolute;inset:-6px 10% auto;height:200px;pointer-events:none;
+  background:radial-gradient(ellipse 60% 70% at 50% 18%,rgba(255,240,208,.16),transparent 70%)}
+/* la boccetta in mano sta in una nicchia piu' grande, la stessa della
+   vetrina: senza cornice il fondo chiaro della foto si vedeva come un riquadro */
+.esame-vetro{position:relative;width:150px;height:177px;border-radius:14px;overflow:hidden;background:#0c0a08;
+  border:1px solid rgba(243,223,175,.5);
+  box-shadow:0 18px 30px -16px #000,inset 0 0 30px rgba(255,238,205,.2),0 0 40px -8px rgba(255,214,146,.35)}
+.esame-vetro::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(ellipse 90% 42% at 50% -6%,rgba(255,243,216,.30) 0%,transparent 70%),
+    linear-gradient(152deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.04) 26%,transparent 48%),
+    linear-gradient(0deg,rgba(12,10,8,.38),transparent 42%)}
+.esame-img{display:block;width:100%;height:100%;object-fit:cover;
+  -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%);
+  mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%);
+  filter:saturate(1.02) contrast(1.06) brightness(1.12)}
+.esame-ombra{width:110px;height:10px;margin-top:4px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%)}
+/* posata, ondeggia: solo un elemento, solo mentre la scheda e' aperta */
+.esame-vetro:has(.posata){animation:in-mano 6s ease-in-out infinite}
+@keyframes in-mano{0%,100%{transform:translateY(0) rotate(-1.2deg)}50%{transform:translateY(-4px) rotate(1.2deg)}}
+.pannello-dettaglio .esame{height:236px;margin:0}
+.pannello-dettaglio .scheda-int-int > .esame{grid-column:1;grid-row:1/span 40;align-self:start;position:sticky;top:180px}
+.pannello-dettaglio.con-piramide .scheda-int-int{grid-template-columns:170px minmax(0,1fr) minmax(0,1.15fr)}
+.pannello-dettaglio.con-piramide .scheda-int-int > *{grid-column:3}
+.pannello-dettaglio.con-piramide .scheda-int-int > .lato-piramide.titolo{grid-column:2}
+.pannello-dettaglio.con-piramide .scheda-int-int > .lato-piramide:not(.titolo){grid-column:2}
+.pannello-dettaglio.con-piramide .scheda-int-int > .esame{grid-column:1}
+.pannello-dettaglio:not(.con-piramide) .scheda-int-int{display:grid;grid-template-columns:170px minmax(0,1fr);column-gap:32px;align-items:start}
+.pannello-dettaglio:not(.con-piramide) .scheda-int-int > *{grid-column:2}
+.pannello-dettaglio:not(.con-piramide) .scheda-int-int > .esame{grid-column:1}
+@media(max-width:979px){
+  .pannello-dettaglio.con-piramide .scheda-int-int{grid-template-columns:140px minmax(0,1fr) minmax(0,1.1fr);column-gap:22px}
+  .pannello-dettaglio .esame-vetro{width:124px;height:146px}
+}
+/* lo scaffale senza la sua boccetta: la nicchia resta accesa e vuota */
+.teca.in-mano .faretto img,.teca.in-mano .specchio img{opacity:0;transition:opacity var(--duration-quick) var(--ease-smooth-out)}
+.teca.in-mano .faretto::after{box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),inset 0 -18px 30px -16px rgba(255,236,200,.25)}
+/* la copia che vola sopra la pagina */
+.boccetta-in-volo{position:fixed;z-index:400;pointer-events:none;object-fit:cover;border-radius:10px;margin:0;
+  transform-origin:50% 60%;will-change:left,top,width,height,transform;
+  -webkit-mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%);
+  mask-image:radial-gradient(ellipse 74% 80% at 50% 48%,#000 52%,transparent 100%)}
+@media(prefers-reduced-motion:reduce){.esame-vetro:has(.posata){animation:none}}
