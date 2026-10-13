@@ -274,10 +274,11 @@ function finestraMeteo(da,ore){
 }
 
 // ── FILTRAGGIO ────────────────────────────────────────────────────────────
+const piega=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 function passa(p,filtri,note){
-  const s=testoCerca.toLowerCase();
-  if(s&&!p.brand.toLowerCase().includes(s)&&!p.name.toLowerCase().includes(s)&&!p.note.toLowerCase().includes(s)
-    &&!p.famiglia.toLowerCase().includes(s)&&!p.accordi.join(" ").toLowerCase().includes(s)&&!(p.dupe||"").toLowerCase().includes(s))return false;
+  // "hermes" trova Hermès, "gio" trova Giò: accenti e maiuscole non contano
+  const s=piega(testoCerca.trim());
+  if(s&&![p.brand,p.name,p.note,p.famiglia,p.accordi.join(" "),p.dupe||"",(p.noteElenco||[]).join(" ")].some(t=>piega(t).includes(s)))return false;
   for(const f of filtri){
     if(f==="adesso"){
       const st=stagioneOra(),mo=moment0Ora();
@@ -520,6 +521,7 @@ function saltaAlProfumo(p,scorri){
   if(!t)return;
   t.scrollIntoView({block:"start",behavior:scorri});
   t.classList.remove("ancorata");void t.offsetWidth;t.classList.add("ancorata");
+  sostituisciStoria({vista:"collezione",profumo:id});
   setTimeout(()=>t.classList.remove("ancorata"),2200);
 }
 
@@ -796,7 +798,7 @@ const spunta='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function costruisciTeca(p,i){
   const src=p.img,cl=vetroClasse[p.colore];
   const nicchia=src
-    ?`<div class="faretto t-tilt-card"><img src="${src}" alt="Flacone di ${esc(p.brand)} ${esc(p.name)}" loading="lazy" decoding="async"><div class="t-tilt-glare"></div><div class="riflesso"></div></div>
+    ?`<div class="faretto t-tilt-card"><img src="${src}" alt="Flacone di ${esc(p.brand)} ${esc(p.name)}" loading="lazy" decoding="async" class="sfuma" onload="this.classList.add('su')" onerror="this.classList.add('su')"><div class="t-tilt-glare"></div><div class="riflesso"></div></div>
       <div class="specchio" aria-hidden="true"><img src="${src}" alt=""></div>`
     :`<div class="faretto vuoto">${vetroLettera[p.colore]}</div><div class="specchio"></div>`;
   const usi=Object.keys(usoLabels).map(k=>{
@@ -845,7 +847,7 @@ function costruisciTeca(p,i){
           <h2 class="nome">${esc(p.name)}</h2>
           <div class="targhette">
             <span class="targa grado">${p.conc}${formato(p)}</span>
-            <span class="targa voto">${p.rating?`★ ${voto(p.rating)}`:"★ n.d."}</span>
+            <span class="targa voto"${p.voti?` title="${Number(p.voti).toLocaleString("it-IT")} voti su Fragrantica"`:""}>${p.rating?`★ ${voto(p.rating)}${p.voti?`<small>${recensioni(p.voti)}</small>`:""}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
             ${ric.length?`<span class="targa strati-conta">${iconaStrati}${ric.length} ${ric.length===1?"ricetta":"ricette"}</span>`:""}
           </div>
@@ -905,6 +907,7 @@ function apriTeca(id){
   if(c.closest("#vista-collezione")&&colonneVetrina()>1)return apriNelPannello(c);
   const esame=immagineEsame(c),rEsame=esame&&esame.getBoundingClientRect();
   const aperta=c.classList.toggle("aperta");   // .aperta accende il faretto
+  if(aperta)segnaStoria({vista:"collezione",teca:id});else togliDallaStoria("teca");
   if(aperta)riflesso(c);
   c.setAttribute("data-open",aperta?"true":"false");  // data-open apre il pannello
   c.setAttribute("aria-expanded",aperta?"true":"false");
@@ -963,12 +966,13 @@ function apriNelPannello(c){
   pan.setAttribute("data-open","true");
   pan.setAttribute("aria-label","Dettagli di "+c.querySelector(".nome").textContent);
   pan.innerHTML=`<span class="pannello-freccia"></span>
-    <button class="foglio-chiudi pannello-chiudi" onclick="chiudiPannello()" aria-label="Chiudi">
+    <button class="foglio-chiudi pannello-chiudi" onclick="chiudiPannello();togliDallaStoria('teca')" aria-label="Chiudi">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
   pan.classList.toggle("con-piramide",!!int.querySelector(".piramide"));
   pan.appendChild(int);
   fine.after(pan);
   tecaNelPannello=c;
+  segnaStoria({vista:"collezione",teca:+c.id.slice(5)},!!(history.state||{}).teca);
   riflesso(c);
   prendiInMano(c);
   c.classList.add("aperta");c.setAttribute("aria-expanded","true");
@@ -1137,6 +1141,7 @@ const msChiusuraModale=parseFloat(
   getComputedStyle(document.documentElement).getPropertyValue("--modal-close-dur"))||150;
 
 function apriFiltri(){
+  segnaStoria({...(history.state||{}),modale:"filtri"});
   const f=document.getElementById("fondale-filtri"),s=f.querySelector(".t-modal");
   f.classList.add("in-scena");
   s.classList.remove("is-closing");
@@ -1148,6 +1153,7 @@ function apriFiltri(){
 function chiudiFiltri(){
   const f=document.getElementById("fondale-filtri"),s=f.querySelector(".t-modal");
   if(!f.classList.contains("aperto"))return;
+  togliDallaStoria("modale");
   f.classList.remove("aperto");
   s.classList.remove("is-open");
   s.classList.add("is-closing");
@@ -1298,6 +1304,7 @@ function ricettaPer(p,occ){
   return r[0]||null;
 }
 function apriOggi(){
+  segnaStoria({...(history.state||{}),modale:"oggi"});
   quandoOggi="oggi";occOggi=occasioneProbabile();
   disegnaOggi();
   usaMeteo(false);          // se la posizione c'e' gia', il meteo si rinfresca da solo
@@ -1309,6 +1316,7 @@ function apriOggi(){
 function chiudiOggi(){
   const f=document.getElementById("fondale-oggi"),s=f.querySelector(".t-modal");
   if(!f.classList.contains("aperto"))return;
+  togliDallaStoria("modale");
   f.classList.remove("aperto");s.classList.remove("is-open");s.classList.add("is-closing");
   setTimeout(()=>{f.classList.remove("in-scena");s.classList.remove("is-closing")},msChiusuraModale);
 }
@@ -1457,7 +1465,7 @@ function disegnaConfronto(){
   lista.forEach(p=>{
     h+=`<div class="cf-testa">
       <div class="cf-x" onclick="togliDalConfronto(${p.id})" title="Togli dal confronto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
-      <div class="cf-foto">${p.img?`<img src="${p.img}" alt="${esc(p.name)}">`:""}</div>
+      <div class="cf-foto">${p.img?`<img src="${p.img}" alt="${esc(p.name)}" class="sfuma" onload="this.classList.add('su')" onerror="this.classList.add('su')">`:""}</div>
       <div class="cf-marca">${esc(p.brand)}</div>
       <div class="cf-nome">${esc(p.name)}</div>
       <span class="cf-grado">${p.conc} · № ${numeroDi(p.id)}</span>
@@ -1466,7 +1474,7 @@ function disegnaConfronto(){
   });
   const riga=(lbl,fn)=>{h+=`<div class="cf-eti">${lbl}</div>`;lista.forEach(p=>{h+=fn(p)})};
   h+=`<div class="cf-sez incisa">Profilo</div>`;
-  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${voto(p.rating)}`:"n.d."}</div>`);
+  riga("Rating",p=>`<div class="cf-cella${p.rating&&p.rating===megR?" meglio":""}">${p.rating?`★ ${voto(p.rating)}${p.voti?`<small class="cf-voti">${Number(p.voti).toLocaleString("it-IT")} voti</small>`:""}`:"n.d."}</div>`);
   riga("Longevità",p=>`<div class="cf-cella${p.longevita&&p.longevita===megL?" meglio":""}">${p.longevita?p.longevita+"h":"n.d."}</div>`);
   riga("Stagione",p=>`<div class="cf-cella"><span class="cf-segno stag">${stagLbl(p.stagione)}</span></div>`);
   riga("Momento",p=>`<div class="cf-cella" style="font-size:12px">${momLbl(p.momento)}</div>`);
@@ -1548,22 +1556,22 @@ function vaiAllaRicetta(i){
    viste di testo nominavano i profumi e basta; adesso li mostrano, e ogni
    miniatura porta alla sua scheda. */
 const miniatura=(p,cls="")=>p?`<span class="mini ${cls}">${p.img
-  ?`<img src="${p.img}" alt="" loading="lazy">`
+  ?`<img src="${p.img}" alt="" loading="lazy" class="sfuma" onload="this.classList.add('su')" onerror="this.classList.add('su')">`
   :`<b class="${vetroClasse[p.colore]||""}">${vetroLettera[p.colore]||"·"}</b>`}</span>`:"";
 const tessera=(p,cls="",nota="")=>`<button class="tessera ${cls}" onclick="vaiAlProfumo(${p.id})">
   ${miniatura(p)}<span class="tessera-nome">${esc(p.name)}</span><span class="tessera-sotto">${nota||p.conc}</span></button>`;
 const intesta=(titolo,testo)=>`<header class="intesta"><h2>${titolo}</h2><p>${testo}</p></header>`;
 const chevron=`<span class="t-acc-chevron"><svg class="freccia" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg></span>`;
-const ricorda=(k,v)=>{try{localStorage.setItem("sillage."+k,v)}catch(e){}};
-const ricordato=(k,d)=>{try{return localStorage.getItem("sillage."+k)||d}catch(e){return d}};
 
 /* Sette occasioni: una alla volta, scelta da una fila di pillole, invece di
    sette cassetti con dentro elenchi di nomi. La stagione in corso viene per
    prima. */
-let occasioneGuida=ricordato("guida","ufficio");
-function scegliOccasione(k){occasioneGuida=k;ricorda("guida",k);disegnaGuida()}
+// ogni apertura riparte da capo: l'occasione proposta e' quella dell'ora
+let occasioneGuida=null;
+function scegliOccasione(k){occasioneGuida=k;disegnaGuida()}
 function disegnaGuida(){
   const B=boccette(),ora=stagioneOra();
+  if(!occasioneGuida)occasioneGuida=occasioneProbabile();
   const s=sezioniGuida.find(x=>x.k===occasioneGuida)||sezioniGuida[0];
   const si=B.filter(p=>p[s.k]==="si"),mod=B.filter(p=>p[s.k]==="si-mod");
   const t=tinta[s.c];
@@ -1607,8 +1615,8 @@ function disegnaGuida(){
 const bolloIcona={uff:ic.ufficio,app:ic.cuore,sera:ic.stella,casa:ic.casa,lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v7.5L4.5 19A2 2 0 0 0 6.2 22h11.6a2 2 0 0 0 1.7-3L14 9.5V2M9 2h6M7.5 15h9"/></svg>'};
 const tintaStrato=t=>t==="app"?tinta.ambra:t==="uff"?tinta.bosco:t==="lab"?"#bd96dc":tinta.oro;
 const tipiStrato=[["tutte","Tutte"],["uff","Ufficio"],["app","Appuntamento"],["sera","Sera"],["casa","Casa"],["lab","Sperimentali"]];
-let filtroStrati=ricordato("strati","tutte");
-function scegliStrati(k){filtroStrati=k;ricorda("strati",k);disegnaLayering()}
+let filtroStrati="tutte";
+function scegliStrati(k){filtroStrati=k;disegnaLayering()}
 
 /* Il sommario dice chi sta sotto e chi sopra ("№ 3 sotto · № 2 sopra — ..."),
    la ricetta dice quanti spray. Da qui la coppia di boccette e le dosi. */
@@ -1982,6 +1990,7 @@ function cambiaVista(v){
   if(v==="diario")disegnaDiario();
   muoviPillola(true);
   window.scrollTo({top:0,behavior:"instant"});
+  if((history.state||{}).vista!==v)segnaStoria({vista:v});
 }
 function commuta(id){
   const el=document.getElementById(id);
@@ -2014,6 +2023,72 @@ function rivela(){
     getComputedStyle(document.documentElement).getPropertyValue("--reveal-dur"))||400;
   setTimeout(()=>document.getElementById("scheletro")?.remove(),ms);
 }
+
+// ── IL TASTO INDIETRO E I LINK DIRETTI ──────────────────────────────────
+/* Ogni sezione, ogni scheda aperta e ogni pannello hanno il loro posto nella
+   cronologia: il tasto indietro (o lo scorrimento da bordo) chiude quello
+   che si e' aperto per ultimo invece di uscire dal sito. L'indirizzo dice
+   dove si e': #guida, #numeri, #profumo-12; incollato altrove, porta li'.
+   Chiudendo a mano si riscrive la voce invece di tornare indietro: un
+   ritorno asincrono, mentre si sta gia' andando altrove, smonterebbe il
+   salto appena fatto. */
+let daStoria=false;
+const indirizzoDi=st=>st.profumo?`#profumo-${st.profumo}`:st.teca?`#profumo-${st.teca}`:st.vista&&st.vista!=="collezione"?`#${st.vista}`:location.pathname+location.search;
+function segnaStoria(st,sostituisci){
+  if(daStoria)return;
+  try{history[sostituisci?"replaceState":"pushState"](st,"",indirizzoDi(st))}catch(e){}
+}
+const sostituisciStoria=st=>segnaStoria(st,true);
+function togliDallaStoria(k){
+  const st={...(history.state||{})};
+  if(!(k in st))return;
+  delete st[k];if(k==="teca")delete st.profumo;
+  sostituisciStoria(st);
+}
+addEventListener("popstate",e=>{
+  const st=e.state||{vista:"collezione"};
+  daStoria=true;
+  try{
+    if(!st.modale){chiudiOggi();chiudiFiltri()}
+    if(!st.teca){
+      if(tecaNelPannello)chiudiPannello();
+      document.querySelectorAll("#vista-collezione .teca.aperta").forEach(c=>apriTeca(+c.id.slice(5)));
+    }
+    const ora=document.querySelector(".vista.attiva,#vista-collezione.attiva");
+    const v=st.vista||"collezione",id=ora&&ora.id.replace("vista-","");
+    if(v!==id)cambiaVista(v);
+  }finally{daStoria=false}
+});
+// letto subito: il primo cambiaVista riscrive l'indirizzo prima che i dati arrivino
+const linkIniziale=location.hash.slice(1);
+function seguiLinkDiretto(){
+  const h=linkIniziale;
+  sostituisciStoria({vista:"collezione"});
+  const m=h.match(/^profumo-(\d+)$/);
+  if(m&&profumi.some(p=>p.id===+m[1])){vaiAlProfumo(+m[1]);return}
+  if(document.getElementById("vista-"+h)&&h!=="collezione")cambiaVista(h);
+}
+
+// ── LA VETRINA SI APRE ────────────────────────────────────────────────────
+/* All'avvio due ante di vetro coprono lo schermo; quando la collezione e'
+   pronta si aprono verso l'esterno, come le porte di una vetrina. Sull'iPhone
+   l'immagine d'avvio dell'app e' la stessa vetrina chiusa, cosi' il passaggio
+   non si vede. Mai meno di mezzo secondo (se no e' un lampo), mai piu' di
+   due e mezzo anche se i dati tardano. */
+const avvioPagina=performance.now();
+function apriVetrina(){
+  const el=document.getElementById("apertura");
+  if(!el||el.classList.contains("apri"))return;
+  if(riduci.matches){el.remove();return}
+  setTimeout(()=>{
+    el.classList.add("apri");
+    setTimeout(()=>el.remove(),1500);
+  },Math.max(0,520-(performance.now()-avvioPagina)));
+}
+setTimeout(apriVetrina,2500);
+// immagini gia' in cache: l'onload puo' arrivare prima che l'attributo ci sia
+setInterval(()=>document.querySelectorAll("img.sfuma:not(.su)").forEach(i=>{if(i.complete)i.classList.add("su")}),700);
+const recensioni=n=>{n=+n;return n>=1000?(n/1000).toLocaleString("it-IT",{maximumFractionDigits:n>=10000?0:1})+"k":String(n)};
 
 // ── APP INSTALLABILE ──────────────────────────────────────────────────────
 /* Il service worker rende Sillage un'app da schermata home che si apre anche
@@ -2067,6 +2142,8 @@ async function avvia() {
     sincronizzaDiario();
     usaMeteo(false);
     if (primo) { cambiaVista("collezione"); primo = false;
+                 seguiLinkDiretto();
+                 apriVetrina();
                  rivela();
                  requestAnimationFrame(() => { muoviPillola(false); muoviVetrina(false); }); }
   };
