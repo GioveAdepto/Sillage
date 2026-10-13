@@ -1104,3 +1104,40 @@ img.sfuma.su{opacity:1}
 /* la forza dell'accordo: un filo sotto il nome, lungo quanto la sua barra su Fragrantica */
 .accordi .accordo[style*="--forza"]{background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;
   background-size:calc(var(--forza) - 18px) 2px;background-position:9px calc(100% - 3px);padding-bottom:5px}
+
+/* ─────────── LA SETTIMANA, IN CIMA AL DIARIO ─────────── */
+.settimana{background:var(--lastra);border:1px solid var(--filo);border-radius:var(--r);padding:14px 12px 12px;margin-bottom:14px;position:relative;overflow:hidden}
+.settimana::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--ottone),transparent);opacity:.6}
+.settimana-testa{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 4px 10px}
+.settimana-testa .incisa{color:var(--ottone)}
+.settimana-nota{font-size:11px;color:var(--carta-3)}
+.settimana-giorni{display:grid;grid-template-columns:repeat(7,minmax(92px,1fr));gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.settimana-giorni::-webkit-scrollbar{display:none}
+.sett-giorno{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px 8px;cursor:pointer;color:inherit;font:inherit;text-align:center;
+  background:var(--vetro);border:1px solid var(--filo);border-radius:var(--r-s);transition:border-color var(--duration-quick) var(--ease-smooth-out),background var(--duration-quick) var(--ease-smooth-out)}
+.sett-giorno:hover{border-color:var(--filo-2)}
+.sett-giorno.oggi{border-color:rgba(200,163,94,.55);background:var(--ottone-velo)}
+.sett-giorno.scelto{box-shadow:0 0 0 1px var(--ottone) inset}
+.sett-giorno.passato{opacity:.62}
+.sett-data{font-size:11px;color:var(--carta-3);text-transform:uppercase;letter-spacing:.08em}
+.sett-data b{color:var(--carta);font-weight:600}
+.sett-cielo{font-size:11px;color:var(--carta-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sett-giorno .mini{width:40px;height:48px}
+.mini.vuota{border-style:dashed;background:transparent;box-shadow:none}
+.sett-nome{font-family:'Marcellus',serif;font-size:12.5px;line-height:1.2;color:var(--carta);min-height:30px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sett-occ{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ottone)}
+.sett-dettaglio{margin-top:12px;padding:12px 6px 2px;border-top:1px solid var(--filo)}
+.sett-dettaglio-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:10px;font-size:12.5px;color:var(--carta-3)}
+.sett-dettaglio-t b{font-family:'Marcellus',serif;font-weight:400;font-size:17px;color:var(--carta)}
+.sett-incerto{padding:1px 8px;border-radius:99px;border:1px dashed var(--filo-3);font-size:10.5px;letter-spacing:.04em}
+.sett-occasioni{margin-bottom:12px}
+.sett-proposta{padding:10px 0;border-top:1px solid var(--filo)}
+.sett-proposta:first-of-type{border-top:0}
+.sett-proposta-testa{display:flex;align-items:center;gap:12px;background:none;border:0;padding:0 0 10px;cursor:pointer;color:inherit;font:inherit;text-align:left}
+.sett-proposta-testa > span{display:flex;flex-direction:column;gap:2px}
+.sett-proposta-testa .incisa{color:var(--ottone)}
+.sett-proposta-testa b{font-family:'Marcellus',serif;font-weight:400;font-size:18px;color:var(--carta)}
+.sett-proposta-testa small{font-size:11.5px;color:var(--carta-3)}
+.sett-proposta .motivi{margin-bottom:10px}
+.sett-passato{font-size:13.5px;color:var(--carta-2)}
