@@ -1100,3 +1100,7 @@ img.sfuma.su{opacity:1}
 /* ─────────── IL VOTO E QUANTI L'HANNO DATO ─────────── */
 .targa.voto small{margin-left:6px;font-size:10px;font-weight:500;color:var(--carta-3);letter-spacing:.02em}
 .cf-voti{display:block;font-size:10.5px;color:var(--carta-3);margin-top:2px}
+
+/* la forza dell'accordo: un filo sotto il nome, lungo quanto la sua barra su Fragrantica */
+.accordi .accordo[style*="--forza"]{background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;
+  background-size:calc(var(--forza) - 18px) 2px;background-position:9px calc(100% - 3px);padding-bottom:5px}
