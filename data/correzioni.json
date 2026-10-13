@@ -1,1 +1,1101 @@
-[]
+[
+ {
+  "id": 1,
+  "colonna": "inverno",
+  "da": "20",
+  "a": "22",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 1,
+  "colonna": "primavera",
+  "da": "30",
+  "a": "29",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 1,
+  "colonna": "estate",
+  "da": "25",
+  "a": "23",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 1,
+  "colonna": "autunno",
+  "da": "25",
+  "a": "26",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 2,
+  "colonna": "estate",
+  "da": "45",
+  "a": "43",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 2,
+  "colonna": "autunno",
+  "da": "15",
+  "a": "12",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 3,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "37",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 3,
+  "colonna": "estate",
+  "da": "45",
+  "a": "39",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 3,
+  "colonna": "autunno",
+  "da": "15",
+  "a": "14",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 3,
+  "colonna": "giorno_pct",
+  "da": "72",
+  "a": "69",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 4,
+  "colonna": "inverno",
+  "da": "10",
+  "a": "9",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 4,
+  "colonna": "primavera",
+  "da": "50",
+  "a": "38",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 4,
+  "colonna": "estate",
+  "da": "35",
+  "a": "37",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 4,
+  "colonna": "autunno",
+  "da": "15",
+  "a": "16",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 4,
+  "colonna": "momento",
+  "da": "entrambi",
+  "a": "giorno",
+  "perche": "giorno 72%"
+ },
+ {
+  "id": 5,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "34",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 5,
+  "colonna": "estate",
+  "da": "35",
+  "a": "36",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 5,
+  "colonna": "momento",
+  "da": "entrambi",
+  "a": "giorno",
+  "perche": "giorno 68%"
+ },
+ {
+  "id": 6,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "34",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 6,
+  "colonna": "autunno",
+  "da": "18",
+  "a": "16",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 7,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "33",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 7,
+  "colonna": "estate",
+  "da": "40",
+  "a": "37",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 8,
+  "colonna": "inverno",
+  "da": "10",
+  "a": "13",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 8,
+  "colonna": "primavera",
+  "da": "30",
+  "a": "32",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 8,
+  "colonna": "estate",
+  "da": "25",
+  "a": "23",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 8,
+  "colonna": "autunno",
+  "da": "30",
+  "a": "32",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 9,
+  "colonna": "inverno",
+  "da": "12",
+  "a": "10",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 9,
+  "colonna": "primavera",
+  "da": "40",
+  "a": "36",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 9,
+  "colonna": "estate",
+  "da": "45",
+  "a": "43",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 9,
+  "colonna": "autunno",
+  "da": "15",
+  "a": "11",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 10,
+  "colonna": "inverno",
+  "da": "45",
+  "a": "44",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 10,
+  "colonna": "primavera",
+  "da": "12",
+  "a": "10",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 10,
+  "colonna": "autunno",
+  "da": "35",
+  "a": "38",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 12,
+  "colonna": "inverno",
+  "da": "35",
+  "a": "36",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 12,
+  "colonna": "primavera",
+  "da": "20",
+  "a": "19",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 13,
+  "colonna": "inverno",
+  "da": "25",
+  "a": "28",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 13,
+  "colonna": "estate",
+  "da": "20",
+  "a": "17",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 13,
+  "colonna": "giorno_pct",
+  "da": "60",
+  "a": "57",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 13,
+  "colonna": "stagione",
+  "da": "ai",
+  "a": "tutto",
+  "perche": "autunno+inverno 58%"
+ },
+ {
+  "id": 13,
+  "colonna": "momento",
+  "da": "giorno",
+  "a": "entrambi",
+  "perche": "giorno 57%"
+ },
+ {
+  "id": 14,
+  "colonna": "inverno",
+  "da": "30",
+  "a": "25",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 14,
+  "colonna": "primavera",
+  "da": "30",
+  "a": "27",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 14,
+  "colonna": "estate",
+  "da": "25",
+  "a": "22",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 14,
+  "colonna": "autunno",
+  "da": "28",
+  "a": "26",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 14,
+  "colonna": "momento",
+  "da": "sera",
+  "a": "entrambi",
+  "perche": "giorno 48%"
+ },
+ {
+  "id": 15,
+  "colonna": "inverno",
+  "da": "30",
+  "a": "24",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 15,
+  "colonna": "primavera",
+  "da": "30",
+  "a": "27",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 15,
+  "colonna": "autunno",
+  "da": "28",
+  "a": "27",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 15,
+  "colonna": "momento",
+  "da": "sera",
+  "a": "entrambi",
+  "perche": "giorno 50%"
+ },
+ {
+  "id": 16,
+  "colonna": "inverno",
+  "da": "35",
+  "a": "29",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 16,
+  "colonna": "estate",
+  "da": "15",
+  "a": "16",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 16,
+  "colonna": "autunno",
+  "da": "32",
+  "a": "30",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 16,
+  "colonna": "stagione",
+  "da": "ai",
+  "a": "tutto",
+  "perche": "autunno+inverno 59%"
+ },
+ {
+  "id": 16,
+  "colonna": "momento",
+  "da": "sera",
+  "a": "entrambi",
+  "perche": "giorno 49%"
+ },
+ {
+  "id": 17,
+  "colonna": "inverno",
+  "da": "15",
+  "a": "17",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 17,
+  "colonna": "primavera",
+  "da": "28",
+  "a": "29",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 17,
+  "colonna": "estate",
+  "da": "25",
+  "a": "29",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 17,
+  "colonna": "momento",
+  "da": "sera",
+  "a": "entrambi",
+  "perche": "giorno 54%"
+ },
+ {
+  "id": 18,
+  "colonna": "inverno",
+  "da": "15",
+  "a": "10",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 18,
+  "colonna": "primavera",
+  "da": "45",
+  "a": "32",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 18,
+  "colonna": "estate",
+  "da": "55",
+  "a": "47",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 18,
+  "colonna": "autunno",
+  "da": "18",
+  "a": "11",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 19,
+  "colonna": "inverno",
+  "da": "25",
+  "a": "22",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 19,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "30",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 19,
+  "colonna": "estate",
+  "da": "15",
+  "a": "18",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 20,
+  "colonna": "inverno",
+  "da": "45",
+  "a": "41",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 20,
+  "colonna": "autunno",
+  "da": "40",
+  "a": "39",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 21,
+  "colonna": "autunno",
+  "da": "38",
+  "a": "37",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 22,
+  "colonna": "inverno",
+  "da": "35",
+  "a": "33",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 22,
+  "colonna": "primavera",
+  "da": "25",
+  "a": "23",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 22,
+  "colonna": "estate",
+  "da": "10",
+  "a": "9",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 22,
+  "colonna": "autunno",
+  "da": "38",
+  "a": "35",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 23,
+  "colonna": "inverno",
+  "da": "40",
+  "a": "50",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 23,
+  "colonna": "autunno",
+  "da": "38",
+  "a": "30",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 24,
+  "colonna": "inverno",
+  "da": "35",
+  "a": "33",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 24,
+  "colonna": "primavera",
+  "da": "22",
+  "a": "18",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 24,
+  "colonna": "estate",
+  "da": "12",
+  "a": "11",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 24,
+  "colonna": "autunno",
+  "da": "40",
+  "a": "38",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 25,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "33",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 25,
+  "colonna": "estate",
+  "da": "30",
+  "a": "29",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 25,
+  "colonna": "autunno",
+  "da": "30",
+  "a": "28",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 25,
+  "colonna": "stagione",
+  "da": "tutto",
+  "a": "pe",
+  "perche": "autunno+inverno 38%"
+ },
+ {
+  "id": 26,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "32",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 26,
+  "colonna": "estate",
+  "da": "40",
+  "a": "41",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 26,
+  "colonna": "autunno",
+  "da": "18",
+  "a": "17",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 26,
+  "colonna": "momento",
+  "da": "entrambi",
+  "a": "giorno",
+  "perche": "giorno 66%"
+ },
+ {
+  "id": 27,
+  "colonna": "inverno",
+  "da": "25",
+  "a": "22",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 27,
+  "colonna": "primavera",
+  "da": "30",
+  "a": "28",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 27,
+  "colonna": "autunno",
+  "da": "28",
+  "a": "25",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 28,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "34",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 28,
+  "colonna": "estate",
+  "da": "40",
+  "a": "38",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 28,
+  "colonna": "autunno",
+  "da": "20",
+  "a": "18",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 29,
+  "colonna": "inverno",
+  "da": "15",
+  "a": "10",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 29,
+  "colonna": "primavera",
+  "da": "35",
+  "a": "34",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 29,
+  "colonna": "estate",
+  "da": "45",
+  "a": "43",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 29,
+  "colonna": "autunno",
+  "da": "18",
+  "a": "13",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 30,
+  "colonna": "inverno",
+  "da": "35",
+  "a": "39",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 30,
+  "colonna": "primavera",
+  "da": "22",
+  "a": "17",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 30,
+  "colonna": "estate",
+  "da": "12",
+  "a": "11",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 30,
+  "colonna": "autunno",
+  "da": "38",
+  "a": "33",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 31,
+  "colonna": "giorno_pct",
+  "da": "35",
+  "a": "38",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 32,
+  "colonna": "inverno",
+  "da": "41",
+  "a": "38",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 32,
+  "colonna": "primavera",
+  "da": "17",
+  "a": "15",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 32,
+  "colonna": "estate",
+  "da": "11",
+  "a": "10",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 32,
+  "colonna": "autunno",
+  "da": "41",
+  "a": "37",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 32,
+  "colonna": "momento",
+  "da": "entrambi",
+  "a": "sera",
+  "perche": "giorno 42%"
+ },
+ {
+  "id": 33,
+  "colonna": "primavera",
+  "da": "33",
+  "a": "32",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 33,
+  "colonna": "momento",
+  "da": "giorno",
+  "a": "entrambi",
+  "perche": "giorno 61%"
+ },
+ {
+  "id": 34,
+  "colonna": "autunno",
+  "da": "32",
+  "a": "31",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 34,
+  "colonna": "giorno_pct",
+  "da": "46",
+  "a": "49",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 35,
+  "colonna": "giorno_pct",
+  "da": "37",
+  "a": "42",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 36,
+  "colonna": "autunno",
+  "da": "38",
+  "a": "37",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 36,
+  "colonna": "giorno_pct",
+  "da": "40",
+  "a": "45",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 36,
+  "colonna": "momento",
+  "da": "sera",
+  "a": "entrambi",
+  "perche": "giorno 45%"
+ },
+ {
+  "id": 37,
+  "colonna": "giorno_pct",
+  "da": "27",
+  "a": "36",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 38,
+  "colonna": "autunno",
+  "da": "33",
+  "a": "34",
+  "perche": "stagioni dalla scheda Fragrantica (barre misurate)"
+ },
+ {
+  "id": 38,
+  "colonna": "giorno_pct",
+  "da": "33",
+  "a": "41",
+  "perche": "giorno/notte dalla scheda Fragrantica"
+ },
+ {
+  "id": 35,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|97|90|84|80",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 5,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|66|66|62|61",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 36,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|84|82|75|65",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 8,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|78|74|73|66",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 18,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|76|73|69|61",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 31,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|100|92|84|82",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 10,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|94|86|82|79",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 3,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|74|67|65|57",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 11,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|98|83|71|70",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 20,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|83|75|70|70",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 4,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|99|85|75|58",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 1,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|96|86|82|82",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 2,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|79|76|72|63",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 29,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|93|89|77|75",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 13,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|94|80|72|64",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 24,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|82|60|58|51",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 25,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|97|78|76|61",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 30,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|92|88|86|84",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 26,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|92|77|70|59",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 9,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|93|72|62|57",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 37,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|81|80|75|70",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 22,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|89|87|84|73",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 6,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|98|88|82|70",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 21,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|68|67|65|62",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 15,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|96|83|78|77",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 14,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|94|91|71|68",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 16,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|75|75|74|68",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 33,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|100|86|78|72",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 34,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|90|88|76|75",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 28,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|69|59|56|52",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 27,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|94|78|76|76",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 17,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|76|67|62|62",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 12,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|94|87|87|86",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 38,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|89|84|83|80",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 19,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|90|81|80|77",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 32,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|87|87|77|75",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 23,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|73|64|62|58",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 7,
+  "colonna": "accordi_forza",
+  "da": "",
+  "a": "100|78|75|70|68",
+  "perche": "forza degli accordi misurata sulla scheda Fragrantica"
+ },
+ {
+  "id": 33,
+  "colonna": "rating",
+  "da": "4.18",
+  "a": "3.78",
+  "perche": "la scheda Fragrantica dice 3,8"
+ },
+ {
+  "id": 38,
+  "colonna": "rating",
+  "da": "4.15",
+  "a": "3.75",
+  "perche": "la scheda Fragrantica dice 3,8"
+ }
+]
