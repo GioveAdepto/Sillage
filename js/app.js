@@ -235,12 +235,12 @@ async function aggiornaMeteo(chiedi){
     const u=`https://api.open-meteo.com/v1/forecast?latitude=${posto.lat}&longitude=${posto.lon}`+
       `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code`+
       `&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,precipitation,weather_code`+
-      `&daily=sunset&timezone=auto&forecast_days=2`;
+      `&daily=sunset&timezone=auto&forecast_days=8`;
     const d=await (await fetch(u)).json(),o=d.hourly;
     meteo={quando:Date.now(),temperatura:Math.round(d.current.temperature_2m),percepita:Math.round(d.current.apparent_temperature),
       umidita:d.current.relative_humidity_2m,precipitazioni:d.current.precipitation,codice:d.current.weather_code,
       tramonto:d.daily&&d.daily.sunset?d.daily.sunset[0]:null,tramonti:d.daily&&d.daily.sunset||[],
-      // oggi e domani, ora per ora: t e' l'ora locale del posto ("2026-10-07T15:00")
+      // otto giorni, ora per ora: t e' l'ora locale del posto ("2026-10-07T15:00")
       ore:o?o.time.map((t,i)=>({t,T:Math.round(o.temperature_2m[i]),P:Math.round(o.apparent_temperature[i]),
         u:o.relative_humidity_2m[i],pp:o.precipitation_probability[i]??0,mm:o.precipitation[i]??0,c:o.weather_code[i]})):null};
     scriviJSON(CHIAVE_METEO,meteo);
@@ -248,7 +248,8 @@ async function aggiornaMeteo(chiedi){
   }catch(e){return false}
 }
 async function usaMeteo(chiedi){
-  if(await aggiornaMeteo(chiedi)){disegnaRapidi();if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi()}
+  if(await aggiornaMeteo(chiedi)){disegnaRapidi();if(document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
+    if(document.getElementById("vista-diario")?.classList.contains("attiva"))disegnaDiario()}
   else if(chiedi&&document.getElementById("fondale-oggi")?.classList.contains("aperto"))disegnaOggi();
 }
 function scordaPosto(){try{localStorage.removeItem(CHIAVE_POSTO);localStorage.removeItem(CHIAVE_METEO)}catch(e){}meteo=null;disegnaRapidi();disegnaOggi()}
@@ -1184,6 +1185,7 @@ const occasioniOggi=[["ufficio","Ufficio"],["quotidiano","Quotidiano"],["appunta
 const oraPerOccasione={ufficio:8,quotidiano:9,casa:10,palestra:18,appuntamento:19,formale:19,festivita:19};
 let occOggi=null,quandoOggi="oggi";
 function inizioPer(quando,occ){
+  if(quando instanceof Date)return quando;          // un giorno preciso: il piano della settimana
   if(quando==="oggi")return new Date();
   const d=new Date();d.setDate(d.getDate()+1);d.setHours(oraPerOccasione[occ]??9,0,0,0);
   return d;
@@ -1244,12 +1246,14 @@ function stagioneDelMomento(da,f){
   temp.primavera=verso==="primavera"?mite:0;temp.autunno=verso==="autunno"?mite:0;
   if(T<=-3)temp.inverno=1;if(T>=33)temp.estate=1;
   norm(temp);
-  const w={};STAGIONI.forEach(k=>w[k]=.4*cal[k]+.6*temp[k]);
+  const kt=f.incerto?.35:.6,w={};STAGIONI.forEach(k=>w[k]=(1-kt)*cal[k]+kt*temp[k]);
   return {w:norm(w),T};
 }
 // senza previsione oraria (posizione mai data, o rete assente) vale il meteo di adesso, solo per oggi
 function finestraPer(p,da,quando){
-  const f=finestraMeteo(da,durataSullaPelle(p));
+  let f=finestraMeteo(da,durataSullaPelle(p));
+  // oltre i tre giorni e mezzo la previsione e' meno affidabile: la temperatura pesa meno del calendario
+  if(f&&da-Date.now()>3.5*864e5)f={...f,incerto:true};
   if(f||quando!=="oggi")return f;
   const m=adesso().meteo;if(!m)return null;
   return {ore:[],max:m.percepita,min:m.percepita,media:m.percepita,umid:m.umidita,oraMax:da.getHours(),oraMin:da.getHours(),
@@ -1875,6 +1879,93 @@ function elencoSceltaDiario(){
       ${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)} · ${p.conc}${eCampione(p)?" · campione":""}</small></span>
       <span class="diario-azione">${gia.has(p.id)?spunta:piu}</span></button>`).join("");
 }
+// ── LA SETTIMANA ──────────────────────────────────────────────────────────
+/* Un suggerimento al giorno, da lunedi' a domenica, con gli stessi criteri di
+   Consigliami: la stagione (voti di Fragrantica contro calendario e
+   temperatura percepita nelle ore in cui lo porti), poi l'occasione, poi
+   giorno o sera. I giorni passati mostrano quello che hai messo davvero.
+   Il piano distribuisce: un profumo gia' proposto o indossato in settimana
+   non torna, finche' c'e' un'alternativa che sta in piedi. Non e' il diario
+   che pesa sulla classifica, e' il piano che evita sette volte lo stesso.
+   Si ricalcola a ogni apertura con l'ultima previsione. */
+const occSettimana={};           // l'occasione cambiata a mano, solo finche' resta aperto
+let giornoSettimana=null;
+const ciclo=["ufficio","quotidiano","appuntamento","formale","casa","festivita","palestra"];
+const nomeOcc=Object.fromEntries(occasioniOggi);
+function iconaCielo(f){
+  if(!f)return "";
+  const h=f.ore.filter(o=>{const x=new Date(o.t).getHours();return x>=8&&x<=21});
+  if(h.some(piovosa))return h.some(o=>o.c>=71&&o.c<=77)?"❄":"☂";
+  const c=h.map(o=>o.c).sort((a,b)=>a-b)[Math.floor(h.length/2)]??0;
+  return c<=1?"☀":c<=3?"⛅":c===45||c===48?"≋":"☁";
+}
+function pianoSettimana(){
+  const oggi=new Date();oggi.setHours(0,0,0,0);
+  const lun=new Date(oggi);lun.setDate(oggi.getDate()-((oggi.getDay()+6)%7));
+  const g=vociPerGiorno(),usati=new Set(),giorni=[];
+  for(let i=0;i<7;i++){const d=new Date(lun);d.setDate(lun.getDate()+i);(g.get(oggiISO(d))||[]).forEach(v=>usati.add(+v.id))}
+  const scegli=(occ,quando)=>{
+    const c=candidatiOggi(occ,quando);
+    const x=c.find(y=>!usati.has(y.p.id)&&y.s>(c[0].s-4))||c[0];   // un'alternativa, ma non una cattiva
+    if(x)usati.add(x.p.id);
+    return x||null;
+  };
+  for(let i=0;i<7;i++){
+    const d=new Date(lun);d.setDate(lun.getDate()+i);
+    const iso=oggiISO(d),eOggi=iso===oggiISO(),passato=d<oggi,fine=d.getDay()===0||d.getDay()===6;
+    const occ=occSettimana[iso]||(fine?"quotidiano":"ufficio");
+    const indossati=(g.get(iso)||[]).map(v=>profumi.find(p=>p.id===+v.id)).filter(Boolean);
+    const cielo=finestraMeteo(new Date(new Date(d).setHours(7,0,0,0)),16);
+    let prop=null,sera=null;
+    if(!passato){
+      const ora=new Date(d);ora.setHours(oraPerOccasione[occ]??9,0,0,0);
+      prop=scegli(occ,eOggi&&ora<new Date()?new Date():ora);
+      if(fine){const s=new Date(d);s.setHours(19,0,0,0);if(!eOggi||s>new Date())sera=scegli("appuntamento",s)}
+    }
+    giorni.push({d,iso,eOggi,passato,fine,occ,indossati,cielo,prop,sera,incerto:(d-oggi)/864e5>=4});
+  }
+  return giorni;
+}
+function settimanaHTML(){
+  if(!profumi.length)return "";
+  const gs=pianoSettimana(),nomiG=["dom","lun","mar","mer","gio","ven","sab"];
+  if(!giornoSettimana||!gs.some(x=>x.iso===giornoSettimana))giornoSettimana=oggiISO();
+  let h=`<section class="settimana"><div class="settimana-testa"><span class="incisa">Questa settimana</span>
+    <span class="settimana-nota">${meteo?"con il meteo ora per ora":"senza meteo: solo la stagione"}</span></div><div class="settimana-giorni">`;
+  gs.forEach(x=>{
+    const p=x.passato?x.indossati[0]:x.prop&&x.prop.p;
+    h+=`<button class="sett-giorno${x.eOggi?" oggi":""}${x.passato?" passato":""}${x.iso===giornoSettimana?" scelto":""}" onclick="scegliGiornoSettimana('${x.iso}')">
+      <span class="sett-data"><b>${nomiG[x.d.getDay()]}</b> ${x.d.getDate()}</span>
+      <span class="sett-cielo">${x.cielo?`${iconaCielo(x.cielo)} ${x.cielo.min}–${x.cielo.max}°`:"&nbsp;"}</span>
+      ${p?miniatura(p):`<span class="mini vuota"></span>`}
+      <span class="sett-nome">${p?esc(p.name):x.passato?"niente":"—"}</span>
+      <span class="sett-occ">${x.passato?(x.indossati.length>1?`+${x.indossati.length-1}`:"&nbsp;"):nomeOcc[x.occ]}${x.sera?" · sera":""}</span>
+    </button>`;
+  });
+  h+=`</div>`;
+  const x=gs.find(y=>y.iso===giornoSettimana);
+  if(x&&!x.passato&&x.prop){
+    const blocco=(c,titolo)=>`<div class="sett-proposta">
+      <button class="sett-proposta-testa" onclick="vaiAlProfumo(${c.p.id})">${miniatura(c.p)}
+        <span><span class="incisa">${titolo}</span><b>${esc(c.p.name)}</b><small>${esc(c.p.brand)} · ${c.p.conc}${eCampione(c.p)?" · campione":""}</small></span></button>
+      ${elencoMotivi(c.pro.slice(0,4),c.contro.slice(0,2))}
+      ${x.eOggi?`<button class="oggi-alt-metto${indossatoOggi(c.p.id)?" fatto":""}" onclick="indossa(${c.p.id});disegnaDiario()">${indossatoOggi(c.p.id)?"Già segnato":"Lo metto"}</button>`:""}
+    </div>`;
+    h+=`<div class="sett-dettaglio">
+      <div class="sett-dettaglio-t"><b>${maiuscola(x.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))}</b>
+        ${x.cielo?`<span>${x.cielo.min}–${x.cielo.max}° percepiti${x.cielo.pioggia!==null?`, pioggia dalle ${x.cielo.pioggia}`:""}</span>`:""}
+        ${x.incerto&&x.cielo?`<span class="sett-incerto">previsione incerta</span>`:""}</div>
+      <div class="ventaglio sett-occasioni">${ciclo.map(k=>`<button class="scelta${k===x.occ?" on":""}" onclick="occasioneSettimana('${x.iso}','${k}')">${nomeOcc[k]}</button>`).join("")}</div>
+      ${blocco(x.prop,nomeOcc[x.occ])}${x.sera?blocco(x.sera,"La sera"):""}
+    </div>`;
+  }else if(x&&x.passato){
+    h+=`<div class="sett-dettaglio sett-passato">${x.indossati.length?`Hai indossato ${x.indossati.map(p=>`<button class="collegamento" onclick="vaiAlProfumo(${p.id})">${esc(p.name)}</button>`).join(" e ")}.`:"Niente segnato in questo giorno."}</div>`;
+  }
+  return h+`</section>`;
+}
+function scegliGiornoSettimana(iso){giornoSettimana=iso;disegnaDiario()}
+function occasioneSettimana(iso,k){occSettimana[iso]=k;giornoSettimana=iso;disegnaDiario()}
+
 function disegnaDiario(){
   const el=document.getElementById("vista-diario");
   if(!el||!profumi.length)return;
@@ -1886,6 +1977,7 @@ function disegnaDiario(){
   const conta=new Map();delMese.forEach(v=>conta.set(+v.id,(conta.get(+v.id)||0)+1));
   const top=[...conta.entries()].sort((a,b)=>b[1]-a[1])[0],pTop=top&&profumi.find(p=>p.id===top[0]);
   let h=intesta("Diario","Cosa hai indossato, giorno per giorno. Tocca un giorno per vederlo, o per segnare quello che avevi addosso.");
+  h+=settimanaHTML();
   h+=`<div class="diario-griglia"><div class="cal">
     <div class="cal-testa">
       <button class="cal-freccia" onclick="spostaMese(-1)" aria-label="Mese prima"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 6-6 6 6 6"/></svg></button>
