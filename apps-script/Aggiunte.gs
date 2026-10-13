@@ -94,7 +94,7 @@ function aggiungi(soloProva) {
       return;
     }
 
-    var riga = t.testa.map(function (c) { return v.riga[c] !== undefined ? v.riga[c] : ''; });
+    var riga = t.testa.map(function (c) { return v.riga[c] !== undefined ? valoreFoglio_(v.riga[c]) : ''; });   // vedi Codice.gs
     if (soloProva) { esiti.push(etichetta + ': (prova) riga nuova in fondo'); return; }
 
     t.foglio.appendRow(riga);

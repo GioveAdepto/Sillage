@@ -1,0 +1,29 @@
+# A ogni pubblicazione apre il sito in un browser vero (Chromium) e controlla
+# che non ci siano errori e che le sezioni principali si aprano. Se qualcosa
+# si rompe, GitHub lo segnala sul commit con una X rossa.
+name: Prova del sito
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  prova:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Prepara il browser
+        run: |
+          npm install --no-save --no-package-lock playwright@1
+          npx playwright install --with-deps chromium
+      - name: Controllo della sintassi
+        run: node -e "new Function(require('fs').readFileSync('js/app.js','utf8'))"
+      - name: Apre il sito e lo percorre
+        run: |
+          python3 -m http.server 8800 --bind 127.0.0.1 &
+          sleep 1
+          node prove/prova.mjs http://127.0.0.1:8800/

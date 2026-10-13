@@ -6,7 +6,8 @@
  *           tradotte nei nomi di campo usati da js/app.js).
  * installa() da lanciare UNA VOLTA dall'editor: aggiunge al foglio le colonne
  *           e le tab che ancora non ci sono, riempiendole con i dati del repo.
- * doPost()  con azione=diario segna (o toglie) un profumo indossato: vedi
+ * doPost()  con azione=residuo salva quanto resta in una boccetta.
+ *           Con azione=diario segna (o toglie) un profumo indossato: vedi
  *           Diario.gs. Con azione=applica lancia aggiungi() e poi correggi(): chi lavora
  *           al repo applica le sue modifiche al foglio senza passare
  *           dall'editor. Scrive solo quello che sta in data/aggiunte.json e
@@ -167,13 +168,17 @@ function doGet(e) {
 function doPost(e) {
   var azione = e && e.parameter && e.parameter.azione;
   var esito;
-  if (azione !== 'applica' && azione !== 'diario') {
+  if (['applica', 'diario', 'residuo'].indexOf(azione) < 0) {
     esito = { errore: 'azione sconosciuta: ' + azione };
   } else {
     var lucchetto = LockService.getScriptLock();
     lucchetto.waitLock(30000);            // due lanci insieme non si pestano
     try {
       if (azione === 'applica') esito = applica();
+      else if (azione === 'residuo') {
+        esito = scriviResiduo_(e.parameter);
+        CacheService.getScriptCache().remove('dati');
+      }
       else {
         esito = scriviDiario_(e.parameter);   // vedi Diario.gs
         CacheService.getScriptCache().remove('dati');
@@ -182,6 +187,29 @@ function doPost(e) {
   }
   return ContentService.createTextOutput(JSON.stringify(esito))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/** Quanto resta in una boccetta, scelto a mano nell'app: uno dei sette tagli
+    (piena 100, usata poco 90, tre quarti 75, mezza 50, un quarto 25, in fine
+    10, finita 0). Altri valori vengono rifiutati: il link e' pubblico. */
+function scriviResiduo_(p) {
+  var id = Number(p.id), v = Number(p.valore);
+  if (!id || [100, 90, 75, 50, 25, 10, 0].indexOf(v) < 0) return { errore: 'valore non valido' };
+  var f = foglio_(TAB.profumi), g = f.getDataRange().getDisplayValues();
+  var testa = g[0].map(function (c) { return String(c).trim(); });
+  var cId = testa.indexOf('id'), cR = testa.indexOf('residuo_pct');
+  if (cR < 0) return { errore: 'manca la colonna residuo_pct' };
+  for (var i = 1; i < g.length; i++) {
+    if (Number(g[i][cId]) === id) { f.getRange(i + 1, cR + 1).setValue(v); return { ok: true }; }
+  }
+  return { errore: 'profumo sconosciuto: ' + id };
+}
+
+/* Il foglio e' in italiano: una stringa come "3.78" scritta con setValue viene
+   letta come un orario (3 ore e 78 minuti, cioe' 4:18). I numeri con il punto
+   decimale si scrivono quindi come testo, con l'apostrofo davanti. */
+function valoreFoglio_(v) {
+  return (typeof v === 'string' && /^-?\d+\.\d+$/.test(v.trim())) ? "'" + v.trim() : v;
 }
 
 /** Prima le righe nuove, poi le correzioni: una correzione può toccare una

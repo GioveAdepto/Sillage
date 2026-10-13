@@ -92,7 +92,7 @@ function correggi(soloProva) {
       esiti.push(etichetta + ': (prova) "' + breve(attuale) + '" → "' + breve(c.a) + '"');
       return;
     }
-    t.foglio.getRange(r, colonna + 1).setValue(c.a);
+    t.foglio.getRange(r, colonna + 1).setValue(valoreFoglio_(c.a));   // vedi Codice.gs
     t.griglia[r - 1][colonna] = c.a;
     scritte++;
     esiti.push(etichetta + ': "' + breve(attuale) + '" → "' + breve(c.a) + '" — ' + c.perche);
