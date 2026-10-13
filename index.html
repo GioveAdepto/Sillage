@@ -9,15 +9,32 @@
 <meta name="theme-color" content="#12100d">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="img/icona-180.png">
+<!-- immagini d'avvio dell'app su iPhone: la vetrina chiusa, una per schermo -->
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="img/avvio/avvio-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
 <link rel="icon" href="img/icona-192.png">
 <title>Sillage — collezione privata</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/sillage.css?v=202610131600">
-<link rel="stylesheet" href="css/transitions.css?v=202610131600">
+<link rel="stylesheet" href="css/sillage.css?v=202610131900">
+<link rel="stylesheet" href="css/transitions.css?v=202610131900">
 </head>
 <body>
+<!-- La vetrina chiusa: si apre quando la collezione e' pronta (vedi apriVetrina) -->
+<div class="apertura" id="apertura" aria-hidden="true">
+  <div class="anta sinistra"><span class="maniglia-anta"></span></div>
+  <div class="anta destra"><span class="maniglia-anta"></span></div>
+  <div class="apertura-marchio"><span class="apertura-s">S</span><span class="apertura-nome">Sillage</span></div>
+</div>
 
 <header class="testata" id="testata">
   <div class="marca-app">
@@ -127,6 +144,6 @@
   <button class="remo" id="remo-numeri" onclick="cambiaVista('numeri')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Numeri</button>
 </nav>
 
-<script src="js/app.js?v=202610131600"></script>
+<script src="js/app.js?v=202610131900"></script>
 </body>
 </html>

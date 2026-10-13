@@ -1061,3 +1061,42 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:var(--sicuro-
 .os-altri summary::after{content:'+';margin-left:8px;color:var(--carta-3)}
 .os-altri[open] summary{margin-bottom:11px}
 .os-altri[open] summary::after{content:'−'}
+
+/* ─────────── LA VETRINA SI APRE ─────────── */
+.apertura{position:fixed;inset:0;z-index:1000;background:var(--lacca);perspective:1600px;overflow:hidden;
+  transition:background-color 600ms var(--ease-smooth-out) 450ms}
+.apertura::before{content:'';position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;z-index:3;
+  background:linear-gradient(180deg,transparent,rgba(240,217,164,.85) 30%,rgba(240,217,164,.85) 70%,transparent);
+  box-shadow:0 0 24px 4px rgba(255,214,146,.35);transition:opacity 300ms var(--ease-smooth-out)}
+.anta{position:absolute;top:0;bottom:0;width:50%;z-index:2;
+  background:
+    linear-gradient(118deg,transparent 30%,rgba(255,255,255,.07) 38%,transparent 46%),
+    linear-gradient(180deg,rgba(255,238,205,.06),transparent 30%,rgba(0,0,0,.25)),
+    #17130f;
+  box-shadow:inset 0 0 0 12px #1d1813,inset 0 0 0 13px rgba(200,163,94,.38),inset 0 0 60px rgba(0,0,0,.6);
+  transition:transform 1100ms var(--ease-smooth-out),opacity 900ms var(--ease-smooth-out) 300ms;will-change:transform}
+.anta.sinistra{left:0;transform-origin:left center}
+.anta.destra{right:0;transform-origin:right center}
+.maniglia-anta{position:absolute;top:68%;width:4px;height:84px;margin-top:-42px;border-radius:2px;
+  background:linear-gradient(180deg,#f0d9a4,#8a6f3c);box-shadow:0 0 12px rgba(255,214,146,.35)}
+.sinistra .maniglia-anta{right:22px}.destra .maniglia-anta{left:22px}
+.apertura-marchio{position:absolute;left:50%;top:50%;z-index:4;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:14px;
+  transition:opacity 500ms var(--ease-smooth-out),transform 900ms var(--ease-smooth-out)}
+.apertura-s{width:74px;height:74px;border-radius:50%;border:1.5px solid rgba(200,163,94,.8);display:flex;align-items:center;justify-content:center;
+  font-family:'Marcellus',serif;font-size:38px;color:var(--ottone-chiaro);background:rgba(18,16,13,.92);box-shadow:0 0 30px rgba(255,214,146,.18)}
+.apertura-nome{font-family:'Marcellus',serif;font-size:15px;letter-spacing:.42em;text-transform:uppercase;color:var(--ottone-chiaro);padding:4px 10px 4px calc(10px + .42em);border-radius:4px;background:var(--lacca)}
+.apertura.apri{background-color:transparent;pointer-events:none}
+.apertura.apri::before{opacity:0}
+.apertura.apri .sinistra{transform:rotateY(-82deg);opacity:0}
+.apertura.apri .destra{transform:rotateY(82deg);opacity:0}
+.apertura.apri .apertura-marchio{opacity:0;transform:translate(-50%,-50%) scale(1.08)}
+@media(prefers-reduced-motion:reduce){.apertura{display:none}}
+
+/* ─────────── FOTO IN DISSOLVENZA ─────────── */
+img.sfuma{opacity:0;transition:opacity var(--duration-slow) var(--ease-smooth-out)}
+img.sfuma.su{opacity:1}
+.faretto img.sfuma{transition:opacity var(--duration-slow) var(--ease-smooth-out),transform var(--duration-very-slow) var(--ease-smooth-out),filter var(--duration-very-slow) var(--ease-smooth-out)}
+
+/* ─────────── IL VOTO E QUANTI L'HANNO DATO ─────────── */
+.targa.voto small{margin-left:6px;font-size:10px;font-weight:500;color:var(--carta-3);letter-spacing:.02em}
+.cf-voti{display:block;font-size:10.5px;color:var(--carta-3);margin-top:2px}
