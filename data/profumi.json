@@ -48,11 +48,12 @@
   "casa": "si",
   "festivita": "si",
   "desc": "Vetiver soapy con rum caldo. Aromatico e avvolgente. Ottimo per tempo libero e festività.",
+  "accordi_forza": "100|96|86|82|82",
   "stagioni": {
-   "inverno": 20,
-   "primavera": 30,
-   "estate": 25,
-   "autunno": 25
+   "inverno": 22,
+   "primavera": 29,
+   "estate": 23,
+   "autunno": 26
   }
  },
  {
@@ -103,11 +104,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Fresco ed etereo, ispirato al ghiaccio. Versione estiva di Terre d'Hermès. Longevità bassa da solo — meglio in layering.",
+  "accordi_forza": "100|79|76|72|63",
   "stagioni": {
    "inverno": 10,
    "primavera": 35,
-   "estate": 45,
-   "autunno": 15
+   "estate": 43,
+   "autunno": 12
   }
  },
  {
@@ -134,7 +136,7 @@
   ],
   "longevita": 6,
   "sillage": "Forte",
-  "giornoPct": 72,
+  "giornoPct": 69,
   "rating": 4.1,
   "voti": 3680,
   "ufficio": "si",
@@ -159,11 +161,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Il classico marino per eccellenza. Versatilissimo — ufficio, formale, quotidiano. Rating 4.1 su 3.680 recensioni.",
+  "accordi_forza": "100|74|67|65|57",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
-   "estate": 45,
-   "autunno": 15
+   "primavera": 37,
+   "estate": 39,
+   "autunno": 14
   }
  },
  {
@@ -206,7 +209,7 @@
   "notePersonali": "Resa reale sotto le 4h: non adatto a giornate lunghe.",
   "note": "Testa: bacche di ginepro, rosmarino, bergamotto di calabria · Cuore: cipresso, violetta, eliotropio · Fondo: muschio bianco, legno di cedro, foglia di patchouli",
   "stagione": "pe",
-  "momento": "entrambi",
+  "momento": "giorno",
   "colore": "verde",
   "quotidiano": "si",
   "formale": "si",
@@ -215,11 +218,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Aromatico floreale insolito — non citrico come si pensa. Ginepro, cipresso e rosmarino lo rendono botanico-fresco. Rating 3.7 su 918 voti.",
+  "accordi_forza": "100|99|85|75|58",
   "stagioni": {
-   "inverno": 10,
-   "primavera": 50,
-   "estate": 35,
-   "autunno": 15
+   "inverno": 9,
+   "primavera": 38,
+   "estate": 37,
+   "autunno": 16
   }
  },
  {
@@ -263,7 +267,7 @@
   "notePersonali": "Pulito e persistente.",
   "note": "Testa: bergamotto, limone, lime, ribes nero, foglia di violetta, zenzero · Cuore: rosa, iris, gelsomino · Fondo: ambroxan, muschio, sandalo, legno di cedro",
   "stagione": "pe",
-  "momento": "entrambi",
+  "momento": "giorno",
   "colore": "blu",
   "quotidiano": "si",
   "formale": "si",
@@ -272,10 +276,11 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Clone di Creed Silver Mountain Water. Citrico-muschiato pulito con ambroxan potente. Proiezione eccellente. Unisex.",
+  "accordi_forza": "100|66|66|62|61",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
-   "estate": 35,
+   "primavera": 34,
+   "estate": 36,
    "autunno": 20
   }
  },
@@ -328,11 +333,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Fruttato-acquatico con prugna e mela dominanti. Ottimo per appuntamenti estivi. Nessuna menta — più dolce e fruttato di quanto si pensi.",
+  "accordi_forza": "100|98|88|82|70",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
+   "primavera": 34,
    "estate": 40,
-   "autunno": 18
+   "autunno": 16
   }
  },
  {
@@ -385,10 +391,11 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Rating 4.5 su 1.196 voti. Clone di Bvlgari Tygar. Agrumato brillante su base legnoso-muschiata con un tocco d'ambra. Da giorno, primavera-estate e mezza stagione.",
+  "accordi_forza": "100|78|75|70|68",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
-   "estate": 40,
+   "primavera": 33,
+   "estate": 37,
    "autunno": 20
   }
  },
@@ -441,11 +448,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Speziato verde con maté e sesamo, note insolite per un fresco speziato. Perfetto per outdoor e tempo libero.",
+  "accordi_forza": "100|78|74|73|66",
   "stagioni": {
-   "inverno": 10,
-   "primavera": 30,
-   "estate": 25,
-   "autunno": 30
+   "inverno": 13,
+   "primavera": 32,
+   "estate": 23,
+   "autunno": 32
   }
  },
  {
@@ -497,11 +505,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Marino cremoso ispirato al Mediterraneo. Orchidea vanigliata in base — insolita per un marino.",
+  "accordi_forza": "100|93|72|62|57",
   "stagioni": {
-   "inverno": 12,
-   "primavera": 40,
-   "estate": 45,
-   "autunno": 15
+   "inverno": 10,
+   "primavera": 36,
+   "estate": 43,
+   "autunno": 11
   }
  },
  {
@@ -553,11 +562,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Con moderazione in ufficio. Rum e castagna avvolgenti su vaniglia. Rating 4.5, 8h di longevità. Gourmand ambrato invernale: non proporlo in primavera-estate.",
+  "accordi_forza": "100|94|86|82|79",
   "stagioni": {
-   "inverno": 45,
-   "primavera": 12,
+   "inverno": 44,
+   "primavera": 10,
    "estate": 8,
-   "autunno": 35
+   "autunno": 38
   }
  },
  {
@@ -609,6 +619,7 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Marino-aromatico moderno: aquozone, cipresso e rosmarino su fondo minerale-ambrato. Da giorno in primavera-estate; regge anche una serata estiva. Rating 4.3 su 11.482 voti.",
+  "accordi_forza": "100|98|83|71|70",
   "stagioni": {
    "inverno": 10,
    "primavera": 35,
@@ -665,9 +676,10 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Rating 4.5. Tabaccoso elegante con apertura di pompelmo e cardamomo. Perfetto per cene romantiche invernali.",
+  "accordi_forza": "100|94|87|87|86",
   "stagioni": {
-   "inverno": 35,
-   "primavera": 20,
+   "inverno": 36,
+   "primavera": 19,
    "estate": 10,
    "autunno": 35
   }
@@ -696,7 +708,7 @@
   ],
   "longevita": 6,
   "sillage": "Forte",
-  "giornoPct": 60,
+  "giornoPct": 57,
   "rating": 4.2,
   "voti": 661,
   "ufficio": "si",
@@ -711,8 +723,8 @@
   "attivo": "si",
   "notePersonali": "Naturale e aromatico.",
   "note": "Testa: arancia amara, elemi, bergamotto, pompelmo · Cuore: bacche di ginepro, pepe rosa, legno di cedro · Fondo: vetiver, muschio di quercia, benzoino, patchouli",
-  "stagione": "ai",
-  "momento": "giorno",
+  "stagione": "tutto",
+  "momento": "entrambi",
   "colore": "verde",
   "quotidiano": "si",
   "formale": "no",
@@ -721,10 +733,11 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Botanico e naturale. Ginepro protagonista assoluto con resine. Ottimo anche in casa.",
+  "accordi_forza": "100|94|80|72|64",
   "stagioni": {
-   "inverno": 25,
+   "inverno": 28,
    "primavera": 25,
-   "estate": 20,
+   "estate": 17,
    "autunno": 30
   }
  },
@@ -768,7 +781,7 @@
   "notePersonali": "Flacone turchese. Serate vivaci.",
   "note": "Testa: menta, mela verde, limone · Cuore: fava tonka, ambroxan, geranio · Fondo: vaniglia del madagascar, cedro della virginia, cedro dell'atlante, vetiver, muschio di quercia",
   "stagione": "tutto",
-  "momento": "sera",
+  "momento": "entrambi",
   "colore": "rosso",
   "quotidiano": "no",
   "formale": "no",
@@ -777,11 +790,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Dolce e mentolato. L'Eros originale — vivace e seducente. Ideale per serate vivaci e club.",
+  "accordi_forza": "100|94|91|71|68",
   "stagioni": {
-   "inverno": 30,
-   "primavera": 30,
-   "estate": 25,
-   "autunno": 28
+   "inverno": 25,
+   "primavera": 27,
+   "estate": 22,
+   "autunno": 26
   }
  },
  {
@@ -824,7 +838,7 @@
   "notePersonali": "Menta e mela caramellata, fondo ambroxan-vanigliato.",
   "note": "Testa: menta, mela caramellata, limone, mandarino · Cuore: ambroxan, geranio, salvia sclarea · Fondo: vaniglia, legno di cedro, sandalo, arancia amara, patchouli, cuoio",
   "stagione": "tutto",
-  "momento": "sera",
+  "momento": "entrambi",
   "colore": "rosso",
   "quotidiano": "no",
   "formale": "si",
@@ -833,11 +847,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Menta, mela caramellata e agrumi su ambroxan, vaniglia e legni, con un filo di cuoio. Dolce ma controllato — perfetto per serate eleganti. Rating 4.3 su 8.175 voti.",
+  "accordi_forza": "100|96|83|78|77",
   "stagioni": {
-   "inverno": 30,
-   "primavera": 30,
+   "inverno": 24,
+   "primavera": 27,
    "estate": 22,
-   "autunno": 28
+   "autunno": 27
   }
  },
  {
@@ -879,8 +894,8 @@
   "attivo": "si",
   "notePersonali": "Speziato agrumato. Clima freddo.",
   "note": "Testa: mandarino, pepe del madagascar, limone, chinotto, rosmarino · Cuore: geranio, rosa, pepperwood · Fondo: vaniglia, fava tonka, sandalo, cedro del texas, patchouli, muschio di quercia",
-  "stagione": "ai",
-  "momento": "sera",
+  "stagione": "tutto",
+  "momento": "entrambi",
   "colore": "rosso",
   "quotidiano": "no",
   "formale": "si",
@@ -889,11 +904,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Speziato e passionale con cuore di rosa. Mandarino e pepe aprono, sandalo e vaniglia chiudono. Ottimo in clima freddo.",
+  "accordi_forza": "100|75|75|74|68",
   "stagioni": {
-   "inverno": 35,
+   "inverno": 29,
    "primavera": 25,
-   "estate": 15,
-   "autunno": 32
+   "estate": 16,
+   "autunno": 30
   }
  },
  {
@@ -937,7 +953,7 @@
   "notePersonali": "Ananas + betulla fumosa.",
   "note": "Testa: limone, ananas, bergamotto, ribes nero, mela · Cuore: betulla, gelsomino, rosa · Fondo: muschio, ambra grigia, patchouli, vaniglia",
   "stagione": "tutto",
-  "momento": "sera",
+  "momento": "entrambi",
   "colore": "rosso",
   "quotidiano": "no",
   "formale": "si",
@@ -946,10 +962,11 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Clone di Creed Aventus. Ananas fumé con betulla e ribes nero. 8h di longevità, sillage potente. Rating 4.1 su 26.520 recensioni.",
+  "accordi_forza": "100|76|67|62|62",
   "stagioni": {
-   "inverno": 15,
-   "primavera": 28,
-   "estate": 25,
+   "inverno": 17,
+   "primavera": 29,
+   "estate": 29,
    "autunno": 25
   }
  },
@@ -1002,11 +1019,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Il pioniere degli acquatici moderni. Lavanda, menta e rosmarino — classico senza tempo. Ottimo da palestra e casa.",
+  "accordi_forza": "100|76|73|69|61",
   "stagioni": {
-   "inverno": 15,
-   "primavera": 45,
-   "estate": 55,
-   "autunno": 18
+   "inverno": 10,
+   "primavera": 32,
+   "estate": 47,
+   "autunno": 11
   }
  },
  {
@@ -1058,10 +1076,11 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Rosa, pimento e aceto balsamico su lavanda e fiore d'arancio: speziato-floreale. Versatile giorno e sera.",
+  "accordi_forza": "100|90|81|80|77",
   "stagioni": {
-   "inverno": 25,
-   "primavera": 35,
-   "estate": 15,
+   "inverno": 22,
+   "primavera": 30,
+   "estate": 18,
    "autunno": 30
   }
  },
@@ -1114,11 +1133,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Rating 4.4. Iris-whisky sofisticato e boozy. Perfetto per cene e occasioni importanti. Prevalentemente da sera.",
+  "accordi_forza": "100|83|75|70|70",
   "stagioni": {
-   "inverno": 45,
+   "inverno": 41,
    "primavera": 12,
    "estate": 8,
-   "autunno": 40
+   "autunno": 39
   }
  },
  {
@@ -1170,11 +1190,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Con moderazione in ufficio. Caffè tostato e cuoio dominanti con cardamomo. Gourmand speziato raffinato, eccellente per serate e festività.",
+  "accordi_forza": "100|68|67|65|62",
   "stagioni": {
    "inverno": 40,
    "primavera": 15,
    "estate": 8,
-   "autunno": 38
+   "autunno": 37
   }
  },
  {
@@ -1226,11 +1247,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Con moderazione in ufficio. Rating 4.5. Iris e ambra vellutata — elegante in ogni occasione fredda. 8h di longevità.",
+  "accordi_forza": "100|89|87|84|73",
   "stagioni": {
-   "inverno": 35,
-   "primavera": 25,
-   "estate": 10,
-   "autunno": 38
+   "inverno": 33,
+   "primavera": 23,
+   "estate": 9,
+   "autunno": 35
   }
  },
  {
@@ -1283,11 +1305,12 @@
   "casa": "no",
   "festivita": "si",
   "desc": "Rating 4.4. Simile a Tuscan Leather di Tom Ford — cuoio, zafferano, lampone. 8h potenti: 1-2 spray bastano.",
+  "accordi_forza": "100|73|64|62|58",
   "stagioni": {
-   "inverno": 40,
+   "inverno": 50,
    "primavera": 12,
    "estate": 8,
-   "autunno": 38
+   "autunno": 30
   }
  },
  {
@@ -1337,11 +1360,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Vetiver oscuro e terroso con cipresso. Classico moderno polarizzante — amato o odiato. Ottimo rapporto qualità-prezzo. Rating 4.1 su 24.246 recensioni.",
+  "accordi_forza": "100|82|60|58|51",
   "stagioni": {
-   "inverno": 35,
-   "primavera": 22,
-   "estate": 12,
-   "autunno": 40
+   "inverno": 33,
+   "primavera": 18,
+   "estate": 11,
+   "autunno": 38
   }
  },
  {
@@ -1383,7 +1407,7 @@
   "attivo": "si",
   "notePersonali": "Il pompelmo addolcisce il vetiver.",
   "note": "Testa: pompelmo, bergamotto, noce moscata · Cuore: cipresso, note acquatiche, lavanda · Fondo: vetiver bourbon, vetiver di haiti, legno di cashmere, muschio",
-  "stagione": "tutto",
+  "stagione": "pe",
   "momento": "giorno",
   "colore": "verde",
   "quotidiano": "si",
@@ -1393,11 +1417,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Vetiver schiarito da pompelmo e bergamotto, con cipresso e note acquatiche: fresco e accessibile. Adatto anche alla palestra.",
+  "accordi_forza": "100|97|78|76|61",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
-   "estate": 30,
-   "autunno": 30
+   "primavera": 33,
+   "estate": 29,
+   "autunno": 28
   }
  },
  {
@@ -1441,7 +1466,7 @@
   "notePersonali": "Sillage ENORME: 1 spruzzo basta. In ufficio attenzione.",
   "note": "Testa: note marine, sale, limone · Cuore: davana, iris · Fondo: ambra grigia, muschio di quercia, sandalo",
   "stagione": "pe",
-  "momento": "entrambi",
+  "momento": "giorno",
   "colore": "blu",
   "quotidiano": "si",
   "formale": "no",
@@ -1450,11 +1475,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Marino salato con ambra grigia e sandalo. Scia enorme, 9h. Ispirato a Orto Parisi Megamare. Unisex. Proiezione eccessiva per spazi chiusi condivisi: massimo 2 spray in contesti sociali ravvicinati.",
+  "accordi_forza": "100|92|77|70|59",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
-   "estate": 40,
-   "autunno": 18
+   "primavera": 32,
+   "estate": 41,
+   "autunno": 17
   }
  },
  {
@@ -1507,11 +1533,12 @@
   "casa": "si",
   "festivita": "si",
   "desc": "Clone di Xerjoff Erba Pura. Melone e ananas su ambra e vaniglia cremosa, apertura verde-ozonica. Unisex, scia forte, 8h. Da evitare in caldo estremo e in ufficio chiuso: è ambrato-caldo. Rating 4.3 su 5.415 recensioni.",
+  "accordi_forza": "100|94|78|76|76",
   "stagioni": {
-   "inverno": 25,
-   "primavera": 30,
+   "inverno": 22,
+   "primavera": 28,
    "estate": 25,
-   "autunno": 28
+   "autunno": 25
   }
  },
  {
@@ -1564,11 +1591,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Agrumato-fresco estivo: mandarino, zenzero e bergamotto brillanti su fondo ambrato morbido, con fiore d'arancio e ribes nero nel cuore. Da giorno ma indossabile la sera. Versione Intense più calda dell'originale ariosa, ma resta un fresco. Cloni più fedeli di LV Imagination: Aqua Dubai e Marwa. Rating 4.4 su 1.573 recensioni.",
+  "accordi_forza": "100|69|59|56|52",
   "stagioni": {
    "inverno": 10,
-   "primavera": 35,
-   "estate": 40,
-   "autunno": 20
+   "primavera": 34,
+   "estate": 38,
+   "autunno": 18
   }
  },
  {
@@ -1621,11 +1649,12 @@
   "casa": "si",
   "festivita": "no",
   "desc": "Con moderazione in ufficio. Piña colada elegante: cocco cremoso e ananas su tonka e sandalo, con un iris polveroso che lo tiene lontano dal dolciastro. Considerato uno dei cloni più vicini a Le Beau Le Parfum di Jean Paul Gaultier, ma più polveroso e meno cocco dell'originale, che resta più brillante in apertura. Attenzione alla longevità: la media Fragrantica è 7h, molte recensioni parlano di 4-5h sulla pelle. Unisex, uscito nel 2024. Rating 4.3 su 2.953 recensioni.",
+  "accordi_forza": "100|93|89|77|75",
   "stagioni": {
-   "inverno": 15,
-   "primavera": 35,
-   "estate": 45,
-   "autunno": 18
+   "inverno": 10,
+   "primavera": 34,
+   "estate": 43,
+   "autunno": 13
   }
  },
  {
@@ -1679,11 +1708,12 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Pepe nero e tabacco su ambra, vaniglia e legni secchi. Speziato-ambrato da sera fredda, ispirato a Dior Sauvage Elixir.",
+  "accordi_forza": "100|92|88|86|84",
   "stagioni": {
-   "inverno": 35,
-   "primavera": 22,
-   "estate": 12,
-   "autunno": 38
+   "inverno": 39,
+   "primavera": 17,
+   "estate": 11,
+   "autunno": 33
   }
  },
  {
@@ -1710,7 +1740,7 @@
   ],
   "longevita": 6,
   "sillage": "Forte",
-  "giornoPct": 35,
+  "giornoPct": 38,
   "rating": null,
   "voti": null,
   "ufficio": "no",
@@ -1737,6 +1767,7 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Acquistato a Chania (Creta), formato 50ml, codice di catalogo U109. Dupe dichiarato di Angels' Share di By Kilian: cognac in apertura, quercia, cannella e tonka nel cuore, sandalo, pralina e vaniglia in chiusura. L'originale segna 8h e scia forte su Fragrantica (4.4 su 23.376 voti); per questa versione la resa reale è da verificare sulla pelle — stima prudente 6h. Boozy gourmand invernale da sera: 2-3 spray, mai in ufficio né col caldo.",
+  "accordi_forza": "100|100|92|84|82",
   "stagioni": {
    "inverno": 45,
    "primavera": 10,
@@ -1784,7 +1815,7 @@
   "notePersonali": "100 ml. Incenso e resine. La scia dichiarata forte convive con 6h soltanto: resa reale da verificare sulla pelle.",
   "note": "Testa: foglia di fico, menta, bergamotto · Cuore: foglia di tabacco, cannella, papiro · Fondo: cognac, mirra, olibano, legno di cedro, fava tonka",
   "stagione": "ai",
-  "momento": "entrambi",
+  "momento": "sera",
   "colore": "rosso",
   "quotidiano": "si",
   "formale": "si",
@@ -1794,11 +1825,12 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Legnoso speziato resinoso: apre verde e amaro — foglia di fico, menta, bergamotto — passa per tabacco e cannella e chiude su cognac, mirra, olibano, cedro e fava tonka. Il tabacco è foglia fresca, non fumo: resta più secco e meno dolce di quanto la lista note faccia pensare, e il cognac resta in sottofondo. Autunno-inverno, ma l'apertura verde lo tiene portabile anche di giorno. 2-3 spray; in ufficio dosare, la scia è forte a fronte di 6h dichiarate. Rating 4.3 su 1.528 voti.",
+  "accordi_forza": "100|87|87|77|75",
   "stagioni": {
-   "inverno": 41,
-   "primavera": 17,
-   "estate": 11,
-   "autunno": 41
+   "inverno": 38,
+   "primavera": 15,
+   "estate": 10,
+   "autunno": 37
   }
  },
  {
@@ -1841,7 +1873,7 @@
   "notePersonali": "Campioncino spray 2 ml. Originale di cui Amber Oud Gold Edition è il dupe più citato.",
   "note": "Testa: arancia di sicilia, bergamotto di calabria, limone di sicilia · Cuore: frutti · Fondo: muschio bianco, vaniglia del madagascar, ambra",
   "stagione": "pe",
-  "momento": "giorno",
+  "momento": "entrambi",
   "colore": "rosso",
   "quotidiano": "si",
   "formale": "si",
@@ -1851,9 +1883,10 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Agrumi siciliani — arancia, bergamotto, limone — su un cuore fruttato e un fondo di muschio bianco, vaniglia e ambra. Scia enorme e 9h su Fragrantica. Molto imitato: Amber Oud Gold Edition di Al Haramain è il dupe più citato. Rating 4.18 su 13.039 voti.",
+  "accordi_forza": "100|100|86|78|72",
   "stagioni": {
    "inverno": 12,
-   "primavera": 33,
+   "primavera": 32,
    "estate": 36,
    "autunno": 20
   }
@@ -1882,7 +1915,7 @@
   ],
   "longevita": 8,
   "sillage": "Forte",
-  "giornoPct": 46,
+  "giornoPct": 49,
   "rating": 4.49,
   "voti": 21028,
   "ufficio": "no",
@@ -1908,11 +1941,12 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Miele e tabacco su una base di vaniglia e fava tonka, con la lavanda in apertura a tenere il dolce lontano dallo sciroppo. Rating 4.49 su 21.028 voti.",
+  "accordi_forza": "100|90|88|76|75",
   "stagioni": {
    "inverno": 33,
    "primavera": 24,
    "estate": 12,
-   "autunno": 32
+   "autunno": 31
   }
  },
  {
@@ -1939,7 +1973,7 @@
   ],
   "longevita": 7,
   "sillage": "Forte",
-  "giornoPct": 37,
+  "giornoPct": 42,
   "rating": 4.45,
   "voti": 388,
   "ufficio": "no",
@@ -1965,6 +1999,7 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Oud e pelle scamosciata su un cuore di iris nero e violetta, aperti da zafferano e pepe rosa. Oud cuoiato e polveroso, da sera fredda.",
+  "accordi_forza": "100|97|90|84|80",
   "stagioni": {
    "inverno": 42,
    "primavera": 14,
@@ -1996,7 +2031,7 @@
   ],
   "longevita": 6,
   "sillage": "Forte",
-  "giornoPct": 40,
+  "giornoPct": 45,
   "rating": 4.22,
   "voti": 411,
   "ufficio": "no",
@@ -2012,7 +2047,7 @@
   "notePersonali": "Campioncino 1 ml, non spray.",
   "note": "Testa: cannella, pepe, limone · Cuore: tabacco, incenso, lavanda, geranio · Fondo: ambra, labdano, vetiver, legno di cedro",
   "stagione": "ai",
-  "momento": "sera",
+  "momento": "entrambi",
   "colore": "rosso",
   "quotidiano": "no",
   "formale": "si",
@@ -2022,11 +2057,12 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Tabacco e incenso su ambra e labdano, con la cannella in apertura. Incenso secco e tabaccoso più che resinoso.",
+  "accordi_forza": "100|84|82|75|65",
   "stagioni": {
    "inverno": 39,
    "primavera": 19,
    "estate": 5,
-   "autunno": 38
+   "autunno": 37
   }
  },
  {
@@ -2053,7 +2089,7 @@
   ],
   "longevita": 9,
   "sillage": "Enorme",
-  "giornoPct": 27,
+  "giornoPct": 36,
   "rating": 4.05,
   "voti": 12966,
   "ufficio": "no",
@@ -2079,6 +2115,7 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Resine, oud, note animali e cannabis in un extrait quasi solido. Non è un profumo da indossare distrattamente: Fragrantica lo dà a 27 su 100 per il giorno, nettamente serale.",
+  "accordi_forza": "100|81|80|75|70",
   "stagioni": {
    "inverno": 43,
    "primavera": 12,
@@ -2110,7 +2147,7 @@
   ],
   "longevita": 9,
   "sillage": "Enorme",
-  "giornoPct": 33,
+  "giornoPct": 41,
   "rating": 4.15,
   "voti": 1796,
   "ufficio": "no",
@@ -2136,11 +2173,12 @@
   "festivita": "si",
   "nuovo": true,
   "desc": "Frutto della passione e zafferano sopra oud e cuoio: fruttato-cuoiato con l'oud in primo piano.",
+  "accordi_forza": "100|89|84|83|80",
   "stagioni": {
    "inverno": 41,
    "primavera": 18,
    "estate": 7,
-   "autunno": 33
+   "autunno": 34
   }
  }
 ]

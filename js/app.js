@@ -546,7 +546,7 @@ const famigliaDi=(()=>{const m={};for(const f in famigliaAccordo)famigliaAccordo
 function profiloAccordi(p){
   const q={};raggiRuota.forEach(([k])=>q[k]=0);
   let tot=0;
-  (p.accordi||[]).forEach((a,i)=>{const f=famigliaDi(a);if(!f)return;const w=1/(1+i*.35);q[f]+=w;tot+=w});
+  (p.accordi||[]).forEach((a,i)=>{const f=famigliaDi(a);if(!f)return;const w=pesoAccordo(p,i);q[f]+=w;tot+=w});
   if(tot)for(const k in q)q[k]/=tot;
   return q;
 }
@@ -805,7 +805,8 @@ function costruisciTeca(p,i){
     const v=p[k],c=v==="si"?"si":v==="si-mod"?"forse":"no";
     return `<div class="uso ${c}"><span class="punto ${c}"></span>${usoLabels[k]}</div>`;
   }).join("");
-  const accordi=p.accordi.slice(0,3).map(a=>`<span class="accordo" style="color:${coloreAccordo(a)}">${a}</span>`).join("");
+  const forze=forzeAccordi(p);
+  const accordi=p.accordi.slice(0,3).map((a,i)=>`<span class="accordo" style="color:${coloreAccordo(a)}${forze&&forze[i]?`;--forza:${forze[i]}%`:""}"${forze&&forze[i]?` title="${a}: ${forze[i]}% della forza del primo accordo"`:""}>${a}</span>`).join("");
   const presa=insiemeConfronto.has(p.id);
   const ric=strati.get(p.id)||[];
   const orig=originaleDi(p),copie=copieDi(p);
@@ -889,9 +890,15 @@ function costruisciTeca(p,i){
    posizione (il primo conta piu' del quinto), poi le note in comune, e un
    piccolo bonus se la famiglia e' la stessa. Da 0 a 1. Sotto 0,3 non si
    mostra: due profumi qualsiasi hanno sempre un "legnoso" in comune. */
+/* La forza di ogni accordo, misurata sulle barre di Fragrantica (100 il
+   primo). Senza misura si stima dalla posizione, come prima. */
+const forzeAccordi=p=>{const f=String(p.accordi_forza||"").split("|").map(Number).filter(n=>n>0);return f.length?f:null};
+const pesoAccordo=(p,i)=>{const f=forzeAccordi(p);return f&&f[i]?f[i]/100:1/(1+i*.35)};
+// quanto pesa la parte calda: dolce, cuoio-tabacco, spezie e ambra
+const densita=p=>{const q=profiloAccordi(p);return q.dolce+q.fumo+q.spezia};
 function somiglianza(a,b){
-  const pesi=l=>{const m=new Map();(l||[]).forEach((x,i)=>m.set(x.toLowerCase(),1/(1+i*.35)));return m};
-  const A=pesi(a.accordi),B=pesi(b.accordi);
+  const pesi=p=>{const m=new Map();(p.accordi||[]).forEach((x,i)=>m.set(x.toLowerCase(),pesoAccordo(p,i)));return m};
+  const A=pesi(a),B=pesi(b);
   let dentro=0,tutto=0;
   new Set([...A.keys(),...B.keys()]).forEach(k=>{const x=A.get(k)||0,y=B.get(k)||0;dentro+=Math.min(x,y);tutto+=Math.max(x,y)});
   const na=new Set((a.noteElenco||[]).map(n=>n.toLowerCase())),nb=new Set((b.noteElenco||[]).map(n=>n.toLowerCase()));
@@ -1200,7 +1207,7 @@ const durataSullaPelle=p=>Math.min(p.longevita||6,12);
    meglio. */
 function effettoMeteo(p,f){
   if(!f)return {s:0,perche:"",contro:""};
-  const densi=p.colore==="rosso";
+  const densi=densita(p)>=.45;
   let s=0,perche="",contro="";
   if(f.max>=24&&f.umid>=70&&densi){s-=1.5;contro=`con ${f.max}° e aria umida un denso pesa`}
   if(f.pioggia!==null&&p.accordi.some(a=>/Legnoso|Terroso|Fumoso|Ambra|Balsamico/.test(a))){s+=1;
