@@ -1188,25 +1188,51 @@ const durataSullaPelle=p=>Math.min(p.longevita||6,12);
    ancora di piu'; con la pioggia legni, resine e terra rendono meglio.
    Si guarda la finestra oraria: il caldo si misura sul picco, il freddo
    sulla minima, la mezza stagione sulla media. */
+/* La temperatura entra nella stagione (sotto, stagioneDelMomento). Qui
+   restano le due cose che la stagione non dice: il caldo umido, che rende
+   pesante un orientale denso, e la pioggia, con cui legni e resine rendono
+   meglio. */
 function effettoMeteo(p,f){
   if(!f)return {s:0,perche:"",contro:""};
-  const densi=p.colore==="rosso",freschi=p.colore==="blu";
+  const densi=p.colore==="rosso";
   let s=0,perche="",contro="";
-  if(f.max>=26){s+=freschi?2.5:densi?-3:0;if(f.umid>=70&&densi)s-=1.5;
-    if(freschi)perche=`con un picco di ${f.max}° alle ${f.oraMax} serve un fresco`;
-    if(densi)contro=`con ${f.max}° rischia di pesare${f.umid>=70?", e l'aria è umida":""}`;}
-  else if(f.min<=10){s+=densi?2.5:freschi?-2:0;if(p.stagione==="ai")s+=1;
-    if(densi)perche=`con ${f.min}° alle ${f.oraMin} un intenso si sente e dura`;
-    if(freschi)contro=`a ${f.min}° un fresco svanisce in fretta`;}
-  else if(f.media>=21){s+=freschi?1:densi?-1:0;if(p.stagione==="pe")s+=1;
-    if(freschi)perche=`${f.min}–${f.max}°, clima mite: un fresco sta bene`;
-    if(densi)contro=`a ${f.min}–${f.max}° è un po' denso`;}
-  else if(f.media<=15){s+=densi?1.2:freschi?-1:0;if(p.stagione==="ai")s+=.8;
-    if(densi)perche=`${f.min}–${f.max}°, aria fresca: un caldo avvolge bene`;
-    if(freschi)contro=`a ${f.min}–${f.max}° un fresco dura poco`;}
+  if(f.max>=24&&f.umid>=70&&densi){s-=1.5;contro=`con ${f.max}° e aria umida un denso pesa`}
   if(f.pioggia!==null&&p.accordi.some(a=>/Legnoso|Terroso|Fumoso|Ambra|Balsamico/.test(a))){s+=1;
-    perche=perche||`pioggia dalle ${f.pioggia}: legni e resine rendono bene`}
+    perche=`pioggia dalle ${f.pioggia}: legni e resine rendono bene`}
   return {s,perche,contro};
+}
+
+// ── LA STAGIONE, CRITERIO PRINCIPALE ──────────────────────────────────────
+/* Quanto un profumo e' "di stagione" non e' piu' un si/no: si confrontano i
+   voti per stagione di Fragrantica (quanta gente lo porta d'inverno, in
+   primavera, d'estate, d'autunno) con la stagione del momento, che a sua
+   volta nasce da due cose:
+   - il calendario, sfumato: a meta' ottobre e' quasi tutto autunno, a fine
+     novembre gia' un po' inverno;
+   - la temperatura percepita nelle ore in cui il profumo sara' addosso:
+     un ottobre a 24 gradi chiede profumi da tarda estate.
+   Primavera e autunno hanno le stesse temperature: li distingue il
+   calendario. Senza meteo vale solo il calendario. */
+const STAGIONI=["inverno","primavera","estate","autunno"];
+function quoteStagioni(p){
+  const v=STAGIONI.map(k=>Math.max(0,+(p.stagioni&&p.stagioni[k])||0)),t=v.reduce((a,b)=>a+b,0);
+  return Object.fromEntries(STAGIONI.map((k,i)=>[k,t?v[i]/t:.25]));
+}
+function stagioneDelMomento(da,f){
+  const g=Math.floor((da-new Date(da.getFullYear(),0,0))/864e5),centri={inverno:20,primavera:110,estate:201,autunno:293};
+  const cal={};STAGIONI.forEach(k=>{let d=Math.abs(g-centri[k]);d=Math.min(d,365-d);cal[k]=Math.max(0,1-d/91)});
+  const norm=o=>{const t=STAGIONI.reduce((a,k)=>a+o[k],0)||1;STAGIONI.forEach(k=>o[k]/=t);return o};
+  norm(cal);
+  if(!f)return {w:cal,T:null};
+  const T=f.media,temp={inverno:Math.max(0,1-Math.abs(T-4)/7),estate:Math.max(0,1-Math.abs(T-26)/7)};
+  const mite=Math.max(0,1-Math.abs(T-15)/7);
+  // la mezza stagione la decide il calendario: primavera o autunno
+  const verso=cal.primavera+cal.estate>=cal.autunno+cal.inverno?"primavera":"autunno";
+  temp.primavera=verso==="primavera"?mite:0;temp.autunno=verso==="autunno"?mite:0;
+  if(T<=-3)temp.inverno=1;if(T>=33)temp.estate=1;
+  norm(temp);
+  const w={};STAGIONI.forEach(k=>w[k]=.4*cal[k]+.6*temp[k]);
+  return {w:norm(w),T};
 }
 // senza previsione oraria (posizione mai data, o rete assente) vale il meteo di adesso, solo per oggi
 function finestraPer(p,da,quando){
@@ -1217,12 +1243,12 @@ function finestraPer(p,da,quando){
     pioggia:piove(m)?da.getHours():null,dalle:da.getHours(),alle:da.getHours()};
 }
 function candidatiOggi(occ,quando=quandoOggi){
-  const da=inizioPer(quando,occ),a=adesso(da),st=a.stagione,mo=a.momento;
+  const da=inizioPer(quando,occ),a=adesso(da),mo=a.momento;
   return profumi.filter(p=>occ==="ufficio"||p[occ]==="si"||p[occ]==="si-mod").map(p=>{
     const g0=giorniDa(p.id),f=finestraPer(p,da,quando),mt=effettoMeteo(p,f);
     /* Il punteggio e i motivi nascono insieme: ogni voce che sposta la
        classifica lascia una frase, a favore o contro. */
-    const pro=[],contro=[],nomeSt=st==="pe"?"primavera ed estate":"autunno e inverno";
+    const pro=[],contro=[];
     let s=mt.s;
     if(occ==="ufficio"){
       if(p.ufficio==="si"){s+=2;pro.push("va bene in ufficio: 2–3 spray")}
@@ -1232,12 +1258,20 @@ function candidatiOggi(occ,quando=quandoOggi){
     }
     else if(p[occ]==="si"){s+=2;pro.push(fraseOccasione[occ])}
     else{s+=.5;contro.push(`${dosatoPer[occ]} va dosato: uno spray`)}
-    if(p.stagione===st){s+=3;pro.push(`è di stagione, nato per ${nomeSt}`)}
-    else if(p.stagione==="tutto"){s+=2;pro.push("va bene tutto l'anno")}
-    else{s-=3;contro.push(`è più da ${p.stagione==="pe"?"primavera ed estate":"autunno e inverno"}`)}
-    if(p.momento===mo){s+=2;pro.push(mo==="sera"?"è pensato per la sera":"è pensato per il giorno")}
-    else if(p.momento==="entrambi"){s+=2;pro.push("regge giorno e sera")}
-    else{s-=2;contro.push(p.momento==="sera"?"darebbe il meglio di sera":"è più da giorno")}
+    // la stagione: il peso piu' grande della classifica (da circa -4 a +5)
+    const q=quoteStagioni(p),sm=stagioneDelMomento(da,f);
+    const S=STAGIONI.reduce((a,k)=>a+sm.w[k]*q[k],0);
+    s+=24*(S-.25);
+    const suaTop=STAGIONI.reduce((a,k)=>q[k]>q[a]?k:a),oraTop=STAGIONI.reduce((a,k)=>sm.w[k]>sm.w[a]?k:a);
+    const clima=sm.T!==null?`con ${f.min===f.max?f.media:f.min+"–"+f.max}° percepiti`:`in ${oraTop}`;
+    const quandoSi=k=>(k==="estate"||k==="inverno"?"d'":"in ")+k;
+    if(S>=.3)pro.push(`${clima} è di stagione: su Fragrantica lo portano soprattutto ${quandoSi(suaTop)} (${Math.round(q[suaTop]*100)}%)`);
+    else if(S<.2)contro.push(`${clima} è fuori stagione: su Fragrantica lo portano soprattutto ${quandoSi(suaTop)} (${Math.round(q[suaTop]*100)}%)`);
+    // giorno o sera: conta, ma meno (da -1,5 a +1,5)
+    const gp=(p.giornoPct??50)/100,dn=mo==="giorno"?gp-.5:.5-gp;
+    s+=3*dn;
+    if(dn>=.15)pro.push(mo==="giorno"?`è da giorno (${Math.round(gp*100)}% dei voti)`:`è da sera (${Math.round((1-gp)*100)}% dei voti)`);
+    else if(dn<=-.15)contro.push(mo==="giorno"?`è più da sera (${Math.round((1-gp)*100)}% dei voti)`:`è più da giorno (${Math.round(gp*100)}% dei voti)`);
     if(mt.perche)pro.push(mt.perche);
     if(mt.contro)contro.push(mt.contro);
     // un campione mai indossato e' un'occasione per provarlo: lo si dice, ma la classifica non cambia
