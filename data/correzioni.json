@@ -1,1 +1,8 @@
-[]
+[
+ {"id": 33, "colonna": "rating", "da": "4.18", "a": "'3.78", "perche": "la cella era un orario (3.78 letto come 3h78 = 4:18): ora testo"},
+ {"id": 34, "colonna": "rating", "da": "4.49", "a": "'4.49", "perche": "la cella era un orario: ora testo"},
+ {"id": 35, "colonna": "rating", "da": "4.45", "a": "'4.45", "perche": "la cella era un orario: ora testo"},
+ {"id": 36, "colonna": "rating", "da": "4.22", "a": "'4.22", "perche": "la cella era un orario: ora testo"},
+ {"id": 37, "colonna": "rating", "da": "4.05", "a": "'4.05", "perche": "la cella era un orario: ora testo"},
+ {"id": 38, "colonna": "rating", "da": "4.15", "a": "'3.75", "perche": "la cella era un orario (3.75 letto come 3h75 = 4:15): ora testo"}
+]
