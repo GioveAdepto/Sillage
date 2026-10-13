@@ -1159,10 +1159,13 @@ function chiudiFiltri(){
 function chiudiFondale(e){if(e.target===document.getElementById("fondale-filtri"))chiudiFiltri()}
 
 // ── CONSIGLIAMI ───────────────────────────────────────────────────────────
-/* I cinque profumi migliori (boccette e campioni insieme) per l'occasione, la stagione, l'ora e il
-   meteo, ognuna con il suo perche'. A parita', vince quella che non metti da piu' tempo:
-   il diario serve anche a questo. Per domani vale lo stesso ragionamento,
-   spostato all'ora in cui lo metterai. */
+/* I cinque profumi migliori (boccette e campioni insieme) per l'occasione, la
+   stagione, l'ora e il meteo, ognuno con il suo perche'. Il diario registra e
+   basta: non sposta la classifica, e a parita' decide il rating. I profumi
+   mai indossati compaiono a parte, in piccolo, sotto le alternative. Per
+   domani vale lo stesso ragionamento, spostato all'ora in cui lo metterai.
+   L'ufficio non esclude: dosa. Tutti i profumi entrano, e chi non e' da
+   ufficio scende in classifica con il consiglio di quanto metterne. */
 const occasioniOggi=[["ufficio","Ufficio"],["quotidiano","Quotidiano"],["appuntamento","Appuntamento"],["formale","Formale"],["casa","In casa"],["festivita","Festività"],["palestra","Palestra"]];
 // a che ora, domani, si mette il profumo per quell'occasione
 const oraPerOccasione={ufficio:8,quotidiano:9,casa:10,palestra:18,appuntamento:19,formale:19,festivita:19};
@@ -1214,14 +1217,20 @@ function finestraPer(p,da,quando){
     pioggia:piove(m)?da.getHours():null,dalle:da.getHours(),alle:da.getHours()};
 }
 function candidatiOggi(occ,quando=quandoOggi){
-  const da=inizioPer(quando,occ),a=adesso(da),st=a.stagione,mo=a.momento,spost=quando==="domani"?1:0;
-  return profumi.filter(p=>p[occ]==="si"||p[occ]==="si-mod").map(p=>{
-    const g0=giorniDa(p.id),g=g0===null?null:g0+spost,f=finestraPer(p,da,quando),mt=effettoMeteo(p,f);
+  const da=inizioPer(quando,occ),a=adesso(da),st=a.stagione,mo=a.momento;
+  return profumi.filter(p=>occ==="ufficio"||p[occ]==="si"||p[occ]==="si-mod").map(p=>{
+    const g0=giorniDa(p.id),f=finestraPer(p,da,quando),mt=effettoMeteo(p,f);
     /* Il punteggio e i motivi nascono insieme: ogni voce che sposta la
        classifica lascia una frase, a favore o contro. */
     const pro=[],contro=[],nomeSt=st==="pe"?"primavera ed estate":"autunno e inverno";
     let s=mt.s;
-    if(p[occ]==="si"){s+=2;pro.push(fraseOccasione[occ])}
+    if(occ==="ufficio"){
+      if(p.ufficio==="si"){s+=2;pro.push("va bene in ufficio: 2–3 spray")}
+      else if(p.ufficio==="si-mod"){s+=.5;contro.push("in ufficio va dosato: 2 spray sul petto")}
+      // -3, quanto "fuori stagione": con -1,5 a 8 gradi un gourmand entrava tra i primi cinque
+      else{s-=3;contro.push("in ufficio solo 1 spray, sotto i vestiti")}
+    }
+    else if(p[occ]==="si"){s+=2;pro.push(fraseOccasione[occ])}
     else{s+=.5;contro.push(`${dosatoPer[occ]} va dosato: uno spray`)}
     if(p.stagione===st){s+=3;pro.push(`è di stagione, nato per ${nomeSt}`)}
     else if(p.stagione==="tutto"){s+=2;pro.push("va bene tutto l'anno")}
@@ -1231,12 +1240,8 @@ function candidatiOggi(occ,quando=quandoOggi){
     else{s-=2;contro.push(p.momento==="sera"?"darebbe il meglio di sera":"è più da giorno")}
     if(mt.perche)pro.push(mt.perche);
     if(mt.contro)contro.push(mt.contro);
-    // un campione mai indossato e' un'occasione per provarlo; uno gia' provato conta come gli altri
-    if(eCampione(p)&&g===null)pro.push(`è un campione${p.formatoMl?` da ${p.formatoMl} ml`:""}: buona occasione per provarlo`);
-    if(g===null){s+=2.5;if(!eCampione(p))pro.push("non l'hai ancora segnato nel diario")}
-    else if(g===0){s-=8;contro.push(spost?"lo metti oggi":"l'hai già messo oggi")}
-    else if(g===1){s-=2;contro.push(spost?"l'hai messo ieri":"l'hai messo ieri")}
-    else{s+=Math.min(g,30)/10;if(g0>=7)pro.push(`non lo metti da ${quandoFu(g0).replace(" fa","")}`)}
+    // un campione mai indossato e' un'occasione per provarlo: lo si dice, ma la classifica non cambia
+    if(eCampione(p)&&g0===null)pro.push(`è un campione${p.formatoMl?` da ${p.formatoMl} ml`:""}: buona occasione per provarlo`);
     s+=((p.rating||3.9)-3.9)*1.5;
     if(p.rating>=4.3)pro.push(`è tra i più amati su Fragrantica (★ ${voto(p.rating)})`);
     if(p.longevita>=9&&(occ==="appuntamento"||occ==="festivita"||occ==="formale"))pro.push(`dura ${p.longevita}h: arriva a fine serata`);
@@ -1305,7 +1310,6 @@ function disegnaOggi(){
   }else{
     /* Tutto in vista: la prima in rilievo, seconda e terza affiancate, le altre
        in elenco sotto, sempre nell'ordine del punteggio. */
-    const diarioTesto=g=>g===null?"mai segnato nel diario":g===0?(domani?"messo oggi":"l'hai già messo oggi"):`l'ultima volta ${quandoFu(g)}`;
     const lometto=(p,cls)=>domani?"":`<button class="${cls}${indossatoOggi(p.id)?" fatto":""}" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>`;
     /* Cinque, non tutte: la prima con tutti i suoi perche', le altre quattro
        con i tre motivi piu' forti e il contro principale. */
@@ -1315,7 +1319,7 @@ function disegnaOggi(){
     h+=`<div class="oggi-scelta ${cl}">
       <div class="oggi-nicchia"><div class="faretto acceso">${p.img?`<img src="${p.img}" alt="">`:vetroLettera[p.colore]}</div><div class="ripiano"></div></div>
       <div class="oggi-testo">
-        <div class="oggi-conto">Il primo consiglio · su ${c.length} adatte</div>
+        <div class="oggi-conto">Il primo consiglio · su ${c.length} ${occOggi==="ufficio"?"valutati":"adatti"}</div>
         <div class="marca">${esc(p.brand)}</div>
         <div class="oggi-nome">${esc(p.name)}</div>
         <div class="oggi-sotto2">${eCampione(p)?`<span class="oggi-campione">Campione</span>`:""}${p.conc} · ${esc(p.famiglia)}${domani?` · domani dalle ${da.getHours()}`:""}</div>
@@ -1342,6 +1346,12 @@ function disegnaOggi(){
           </span>
         </button>${lometto(x.p,"oggi-alt-metto")}
       </div>`).join("");
+    /* Fuori classifica, in piccolo: tra quelli adatti, i mai indossati. Un
+       promemoria, non un consiglio. */
+    const cinque=new Set(c.slice(0,5).map(x=>x.p.id));
+    const mai=c.filter(x=>!cinque.has(x.p.id)&&x.g===null&&x.s>0).slice(0,4);
+    if(mai.length)h+=`<div class="oggi-mai"><span class="incisa">Mai indossati, se vuoi riscoprirli</span>${mai.map(x=>
+      `<button onclick="chiudiOggi();vaiAlProfumo(${x.p.id})">${esc(x.p.name)}</button>`).join('<span class="sep">·</span>')}</div>`;
   }
   h+=meteo
     ?`<div class="oggi-meteo">Meteo di dove sei, ora per ora, da Open-Meteo · <button class="collegamento" onclick="scordaPosto()">non usarlo più</button></div>`
@@ -1457,7 +1467,7 @@ const ic={
 };
 const tinta={acqua:"#7fa8cf",bosco:"#93b98a",ambra:"#d9906f",oro:"#c8a35e"};
 const sezioniGuida=[
-  {k:"ufficio",breve:"Ufficio",t:"Ufficio e lavoro",sub:"Spazi chiusi condivisi: due spray, sul petto e non sul collo",i:ic.ufficio,c:"acqua",nota:"Gli orientali e i gourmand restano fuori: in una stanza chiusa la scia diventa invadente entro un'ora."},
+  {k:"ufficio",breve:"Ufficio",t:"Ufficio e lavoro",sub:"Spazi chiusi condivisi: due spray, sul petto e non sul collo",i:ic.ufficio,c:"acqua",nota:"In ufficio non si esclude: si dosa. Orientali e gourmand con 1 spray sotto i vestiti, mai sul collo."},
   {k:"appuntamento",breve:"Appuntamento",t:"Appuntamento e serata",sub:"Dove la scia è un vantaggio",i:ic.cuore,c:"ambra"},
   {k:"quotidiano",breve:"Quotidiano",t:"Quotidiano e casual",sub:"Il guardaroba di tutti i giorni",i:ic.sole,c:"bosco"},
   {k:"formale",breve:"Formale",t:"Formale e cerimonia",sub:"Eleganza misurata, mai dolciastra",i:ic.calice,c:"oro"},
@@ -1540,6 +1550,10 @@ function disegnaGuida(){
   });
   if(mod.length)gruppi+=`<div class="os-gruppo"><div class="os-gruppo-eti"><span class="incisa">Con moderazione</span><span class="os-q">${mod.length}</span></div>
       <div class="tessere">${mod.map(p=>tessera(p,"moderato",`${p.conc} · ${stagBreve(p.stagione)}`)).join("")}</div></div>`;
+  // ufficio: anche chi non e' da ufficio, a parte e chiuso, con il suo dosaggio
+  if(s.k==="ufficio"){const no=B.filter(p=>p.ufficio==="no");
+    if(no.length)gruppi+=`<details class="os-gruppo os-altri"><summary class="os-gruppo-eti"><span class="incisa">Con 1 spray, sotto i vestiti</span><span class="os-q">${no.length}</span></summary>
+      <div class="tessere">${no.map(p=>tessera(p,"moderato",`${p.conc} · 1 spray`)).join("")}</div></details>`}
   const prova=campioni().filter(p=>p[s.k]==="si"||p[s.k]==="si-mod");
   if(!si.length&&!mod.length)gruppi=`<div class="os-vuoto">Nessuna boccetta in collezione per questa occasione.</div>`;
   if(prova.length)gruppi+=`<div class="os-gruppo"><div class="os-gruppo-eti"><span class="incisa">Tra i campioni</span><span class="os-q">${prova.length}</span></div>

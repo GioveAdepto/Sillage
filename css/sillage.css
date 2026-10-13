@@ -1049,3 +1049,15 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:var(--sicuro-
 .aggiornamento-testo b{font-size:13.5px;font-weight:600;color:var(--carta)}
 .aggiornamento .btn-oro{padding:9px 14px}
 @media(prefers-reduced-motion:reduce){.aggiornamento{transition:none}}
+
+/* Consigliami: i mai indossati, fuori classifica e in piccolo */
+.oggi-mai{margin:14px 2px 2px;font-size:12.5px;line-height:1.7;color:var(--carta-3)}
+.oggi-mai .incisa{display:block;margin-bottom:3px}
+.oggi-mai button{background:none;border:0;padding:0;cursor:pointer;font:inherit;color:var(--carta-2);text-decoration:underline;text-decoration-color:var(--filo-2);text-underline-offset:3px}
+.oggi-mai .sep{margin:0 6px}
+/* Guida, ufficio: il gruppo dei "solo 1 spray" si apre a richiesta */
+.os-altri summary{list-style:none;cursor:pointer;margin-bottom:0}
+.os-altri summary::-webkit-details-marker{display:none}
+.os-altri summary::after{content:'+';margin-left:8px;color:var(--carta-3)}
+.os-altri[open] summary{margin-bottom:11px}
+.os-altri[open] summary::after{content:'−'}

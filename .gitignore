@@ -12,3 +12,6 @@ sillage-placeholder.svg
 
 # screenshot di prova nella radice
 /*.png
+
+# report generati in locale, non fanno parte del sito
+report/
