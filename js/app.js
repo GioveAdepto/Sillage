@@ -462,10 +462,45 @@ function rigaDiario(p){
    colonne formato_ml e residuo_pct c'erano gia' nel foglio: l'app non le
    mostrava. */
 function formato(p){
-  if(!p.formatoMl)return "";
-  let t=` · ${p.formatoMl} ml`;
-  if(p.residuoPct!=null&&p.residuoPct!==""&&+p.residuoPct<100)t+=` · ${p.residuoPct}%`;
+  const r=livelloResiduo(p);
+  let t=p.formatoMl?` · ${p.formatoMl} ml`:"";
+  if(r&&r.v<100)t+=` · ${r.l.toLowerCase()}`;
   return t;
+}
+/* Quanto ne resta, scelto a mano a occhio: niente percentuali finte. Nel
+   foglio finisce come numero (residuo_pct), cosi' resta ordinabile. */
+const LIVELLI=[[100,"Piena"],[90,"Usata poco"],[75,"Tre quarti"],[50,"Mezza"],[25,"Un quarto"],[10,"In fine"],[0,"Finita"]];
+function livelloResiduo(p){
+  if(p.residuoPct==null||p.residuoPct==="")return null;
+  const x=+p.residuoPct;
+  const [v,l]=LIVELLI.reduce((a,b)=>Math.abs(b[0]-x)<Math.abs(a[0]-x)?b:a);
+  return {v,l};
+}
+function bloccoResiduo(p){
+  const r=livelloResiduo(p);
+  return `<div class="residuo t-stagger-line t-stagger-line--2" id="residuo-${p.id}">
+    <span class="incisa">Quanto ne resta</span>
+    <div class="residuo-scelte">${LIVELLI.map(([v,l])=>`<button class="residuo-tacca${r&&r.v===v?" on":""}" onclick="event.stopPropagation();segnaResiduo(${p.id},${v})" aria-pressed="${r&&r.v===v}">
+      <span class="residuo-vetro"><i style="height:${v}%"></i></span>${l}</button>`).join("")}</div></div>`;
+}
+async function segnaResiduo(id,v){
+  const p=profumi.find(x=>x.id===id);if(!p)return;
+  const prima=p.residuoPct;
+  p.residuoPct=v;aggiornaResiduo(p);
+  try{
+    const q=new URLSearchParams({azione:"residuo",id,valore:v});
+    const e=await (await fetch(ORIGINE_DATI.appsScript+"?"+q,{method:"POST",redirect:"follow"})).json();
+    if(!e||!e.ok)throw new Error(e&&e.errore||"rifiutato");
+    const c=leggiCache();if(c){const x=c.profumi.find(y=>y.id===id);if(x){x.residuoPct=v;scriviCache(c)}}
+  }catch(err){
+    p.residuoPct=prima;aggiornaResiduo(p);
+    avvisa(/sconosciuta/.test(err.message)?"Per salvarlo va aggiornato lo script del foglio":"Non salvato: riprova con la rete");
+  }
+}
+function aggiornaResiduo(p){
+  document.querySelectorAll(`#residuo-${p.id}`).forEach(el=>el.outerHTML=bloccoResiduo(p));
+  const t=document.querySelector(`#teca-${p.id} .targa.grado`);if(t)t.textContent=p.conc+formato(p);
+  disegnaAcquisti();
 }
 
 /* Originale e clone si riconoscono dal nome: clone_di contiene "Marchio
@@ -877,7 +912,12 @@ function costruisciTeca(p,i){
           <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>
           ${p.accordi&&p.accordi.length?`<div class="incisa t-stagger-line t-stagger-line--3">Ruota degli accordi</div>
           <div class="t-stagger-line t-stagger-line--3">${ruotaAccordi([p])}</div>`:""}
-          <p class="racconto t-stagger-line t-stagger-line--3">${rinumera(esc(p.desc))}</p>${bloccoLegami}${bloccoSimili}${bloccoStrati}
+          ${bloccoResiduo(p)}
+          <p class="racconto t-stagger-line t-stagger-line--3">${rinumera(esc(p.desc))}</p>
+          <div class="scheda-azioni t-stagger-line t-stagger-line--3">
+            ${p.fragrantica?`<a class="collegamento-esterno" href="${esc(p.fragrantica)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apri su Fragrantica ↗</a>`:""}
+            <button class="collegamento-esterno" onclick="event.stopPropagation();condividiScheda(${p.id})">Condividi la scheda</button>
+          </div>${bloccoLegami}${bloccoSimili}${bloccoStrati}
         </div>
       </div>
     </div>
@@ -1705,6 +1745,9 @@ function disegnaAcquisti(){
   const idee=aperte.reduce((a,c)=>a+c.voci.filter(v=>!giaInCasa(v.t)).length,0);
   const nChiusi=chiuse.reduce((a,c)=>a+c.voci.length,0);
   let h=intesta("Acquisti",`Dove la collezione è scoperta e con cosa riempirla, letta sulle ${boccette().length} boccette di oggi.`);
+  const finendo=boccette().filter(p=>{const r=livelloResiduo(p);return r&&r.v<=25});
+  if(finendo.length)h+=`<div class="tavola finendo"><div class="tavola-t incisa">Stanno finendo</div>
+    <div class="tessere">${finendo.map(p=>tessera(p,"",livelloResiduo(p).l.toLowerCase())).join("")}</div></div>`;
   h+=`<div class="riepilogo">
     <div><b>${lacune}</b><span>${lacune===1?"lacuna aperta":"lacune aperte"}</span></div>
     <div><b>${idee}</b><span>idee d'acquisto</span></div>
@@ -1817,10 +1860,76 @@ function disegnaNumeri(){
       <div class="incisa diario-sotto">Le più indossate</div>
       ${classifica(usate,p=>n(p.id),p=>n(p.id)+"×",n(usate[0].id),5)}
       <div class="incisa diario-sotto">Da riprendere</div>
-      <div class="tessere">${dimenticate.map(({p,g})=>tessera(p,"",g===null?"mai":quandoFu(g))).join("")}</div>`;
+      <div class="tessere">${dimenticate.map(({p,g})=>tessera(p,"",g===null?"mai":quandoFu(g))).join("")}</div>
+      ${statisticheStagioni(D,B)}`;
   }
   h+=`</div></div>`+collegamentoProfilo;
   document.getElementById("vista-numeri").innerHTML=h;
+}
+
+/* Il diario per stagione (della data, non del profumo): cosa porti di piu'
+   d'inverno, in primavera, d'estate, d'autunno. E la rotazione del mese:
+   quante boccette diverse hai messo sul totale. */
+function statisticheStagioni(D,B){
+  const stagioneDi=iso=>{const [,m,g]=iso.split("-").map(Number),k=m*100+g;
+    return k>=321&&k<621?"primavera":k>=621&&k<923?"estate":k>=923&&k<1221?"autunno":"inverno"};
+  const per={};D.forEach(v=>{const s=stagioneDi(v.data);(per[s]=per[s]||new Map()).set(+v.id,((per[s].get(+v.id))||0)+1)});
+  const mese=oggiISO().slice(0,7),diverse=new Set(D.filter(v=>v.data.startsWith(mese)).map(v=>+v.id).filter(id=>B.some(p=>p.id===id))).size;
+  const righe=["inverno","primavera","estate","autunno"].filter(s=>per[s]).map(s=>{
+    const top=[...per[s].entries()].sort((a,b)=>b[1]-a[1]).slice(0,3),tot=[...per[s].values()].reduce((a,b)=>a+b,0);
+    return `<div class="stag-riga"><span class="stag-nome">${maiuscola(s)}<small>${tot} ${tot===1?"voce":"voci"}</small></span>
+      <span class="stag-top">${top.map(([id,n])=>{const p=profumi.find(x=>x.id===id);return p?`<button class="stag-p" onclick="vaiAlProfumo(${id})">${miniatura(p)}<small>${n}×</small></button>`:""}).join("")}</span></div>`}).join("");
+  return `<div class="incisa diario-sotto">Per stagione</div>${righe||`<p class="diario-invito">Ancora poche voci.</p>`}
+    <div class="incisa diario-sotto">Rotazione del mese</div>
+    <div class="rotazione"><div class="binario"><div class="riempio" style="width:${Math.round(diverse/B.length*100)}%"></div></div>
+      <span>${diverse} boccette diverse su ${B.length}</span></div>`;
+}
+
+// ── CONDIVIDI LA SCHEDA ───────────────────────────────────────────────────
+/* Un'immagine verticale della scheda (1080×1350, il formato dei post):
+   boccetta nella sua nicchia, nome, accordi con la loro forza, stagioni,
+   voto. Dove il telefono lo permette si apre il foglio di condivisione,
+   altrimenti si scarica. */
+async function condividiScheda(id){
+  const p=profumi.find(x=>x.id===id);if(!p)return;
+  try{await document.fonts.load("40px Marcellus");await document.fonts.load("600 20px Manrope")}catch(e){}
+  const W=1080,H=1350,cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");
+  const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#221d16");bg.addColorStop(1,"#12100d");g.fillStyle=bg;g.fillRect(0,0,W,H);
+  const luce=g.createRadialGradient(W/2,-80,40,W/2,-80,900);luce.addColorStop(0,"rgba(255,238,205,.22)");luce.addColorStop(1,"rgba(255,238,205,0)");g.fillStyle=luce;g.fillRect(0,0,W,H);
+  g.strokeStyle="rgba(200,163,94,.55)";g.lineWidth=2;g.strokeRect(36,36,W-72,H-72);
+  // la boccetta, nella nicchia
+  const nx=W/2-190,ny=110,nw=380,nh=450;
+  g.save();g.beginPath();g.roundRect(nx,ny,nw,nh,26);g.clip();g.fillStyle="#0c0a08";g.fillRect(nx,ny,nw,nh);
+  if(p.img){const im=new Image();im.src=p.img;try{await im.decode();g.drawImage(im,nx,ny,nw,nh)}catch(e){}}
+  // i bordi sfumano nel buio della nicchia, come nella vetrina
+  const sf=g.createRadialGradient(nx+nw/2,ny+nh*.48,nh*.28,nx+nw/2,ny+nh*.48,nh*.62);
+  sf.addColorStop(0,"rgba(12,10,8,0)");sf.addColorStop(1,"rgba(12,10,8,.92)");g.fillStyle=sf;g.fillRect(nx,ny,nw,nh);
+  const v=g.createLinearGradient(0,ny,0,ny+nh);v.addColorStop(0,"rgba(255,243,216,.18)");v.addColorStop(.5,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(12,10,8,.35)");g.fillStyle=v;g.fillRect(nx,ny,nw,nh);
+  g.restore();g.strokeStyle="rgba(243,223,175,.7)";g.lineWidth=2;g.beginPath();g.roundRect(nx,ny,nw,nh,26);g.stroke();
+  g.fillStyle="#f0d9a4";g.fillRect(nx+30,ny+nh+14,nw-60,2);
+  // nome
+  g.textAlign="center";g.fillStyle="#8d8474";g.font="600 26px Manrope";g.fillText(p.brand.toUpperCase().split("").join(" "),W/2,650);
+  g.fillStyle="#f3ede1";let fs=74;g.font=`${fs}px Marcellus`;while(g.measureText(p.name).width>W-160&&fs>40){fs-=4;g.font=`${fs}px Marcellus`}
+  g.fillText(p.name,W/2,735);
+  g.fillStyle="#c8a35e";g.font="500 28px Manrope";
+  g.fillText([p.conc,p.rating?`★ ${voto(p.rating)}`:"",p.longevita?p.longevita+"h":"",p.sillage||""].filter(Boolean).join("   ·   "),W/2,790);
+  // accordi con la loro forza
+  const f=forzeAccordi(p)||p.accordi.map((_,i)=>Math.round(100/(1+i*.35)));
+  p.accordi.slice(0,5).forEach((a,i)=>{const y=860+i*58,x=150,w=(W-300)*(f[i]||50)/100;
+    g.fillStyle="rgba(255,255,255,.06)";g.beginPath();g.roundRect(x,y,W-300,40,8);g.fill();
+    g.fillStyle=coloreAccordo(a);g.globalAlpha=.85;g.beginPath();g.roundRect(x,y,w,40,8);g.fill();g.globalAlpha=1;
+    g.fillStyle="#12100d";g.textAlign="left";g.font="600 22px Manrope";g.fillText(a,x+16,y+28)});
+  // stagioni
+  const q=quoteStagioni(p),nomi=[["inverno","Inverno"],["primavera","Primavera"],["estate","Estate"],["autunno","Autunno"]];
+  nomi.forEach(([k,l],i)=>{const x=150+i*((W-300)/4),y=1175;g.textAlign="center";
+    g.fillStyle="#b9b0a0";g.font="500 22px Manrope";g.fillText(l,x+(W-300)/8,y);
+    g.fillStyle="#c8a35e";g.font="32px Marcellus";g.fillText(Math.round(q[k]*100)+"%",x+(W-300)/8,y+44)});
+  g.textAlign="center";g.fillStyle="#f0d9a4";g.font="30px Marcellus";g.fillText("S I L L A G E",W/2,H-70);
+  const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
+  const nome=`sillage-${piega(p.brand+"-"+p.name).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}.png`;
+  const file=new File([blob],nome,{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:p.name});return}catch(e){if(e.name==="AbortError")return}}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 }
 
 // ── DIARIO ────────────────────────────────────────────────────────────────

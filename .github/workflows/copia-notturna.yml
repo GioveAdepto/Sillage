@@ -1,0 +1,40 @@
+# Ogni notte rilegge il foglio Google (attraverso il Web App, in sola lettura)
+# e aggiorna la copia in data/*.json: e' il ripiego del sito quando il foglio
+# non risponde, e la cronologia di git diventa uno storico giornaliero dei dati.
+# Si fa un commit solo se qualcosa e' cambiato.
+name: Copia notturna del foglio
+
+on:
+  schedule:
+    - cron: "15 2 * * *"      # 02:15 UTC, le 4 circa in Italia
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  copia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Legge il foglio e riscrive data/*.json
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          U = "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec?fresco=1"
+          d = json.load(urllib.request.urlopen(U, timeout=60))
+          assert isinstance(d.get("profumi"), list) and len(d["profumi"]) > 0, "risposta senza profumi"
+          for k in ("profumi", "note", "layering", "consigli"):
+              if k in d:
+                  with open(f"data/{k}.json", "w", encoding="utf-8", newline="\n") as f:
+                      f.write(json.dumps(d[k], ensure_ascii=False, indent=1) + "\n")
+          print(len(d["profumi"]), "profumi")
+          PY
+      - name: Commit se ci sono differenze
+        run: |
+          if git diff --quiet -- data/; then echo "niente di nuovo"; exit 0; fi
+          git config user.name "sillage-bot"
+          git config user.email "sillage-bot@users.noreply.github.com"
+          git add data/
+          git commit -m "Copia notturna del foglio"
+          git push

@@ -1141,3 +1141,32 @@ img.sfuma.su{opacity:1}
 .sett-proposta-testa small{font-size:11.5px;color:var(--carta-3)}
 .sett-proposta .motivi{margin-bottom:10px}
 .sett-passato{font-size:13.5px;color:var(--carta-2)}
+
+/* ─────────── QUANTO NE RESTA ─────────── */
+.residuo{margin:2px 0 14px}
+.residuo .incisa{display:block;margin-bottom:8px}
+.residuo-scelte{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.residuo-scelte::-webkit-scrollbar{display:none}
+.residuo-tacca{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 9px 7px;cursor:pointer;
+  background:var(--vetro);border:1px solid var(--filo);border-radius:var(--r-s);color:var(--carta-3);font:500 11px 'Manrope',sans-serif;white-space:nowrap;
+  transition:border-color var(--duration-quick) var(--ease-smooth-out),color var(--duration-quick) var(--ease-smooth-out),background var(--duration-quick) var(--ease-smooth-out)}
+.residuo-tacca:hover{border-color:var(--filo-2);color:var(--carta-2)}
+.residuo-tacca.on{border-color:rgba(200,163,94,.6);background:var(--ottone-velo);color:var(--ottone-chiaro)}
+.residuo-vetro{position:relative;width:14px;height:22px;border:1.5px solid currentColor;border-radius:3px 3px 4px 4px;overflow:hidden;opacity:.85}
+.residuo-vetro i{position:absolute;left:0;right:0;bottom:0;background:currentColor;opacity:.55}
+.scheda-azioni{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0 4px}
+.collegamento-esterno{background:none;border:0;padding:0;cursor:pointer;font:500 13px 'Manrope',sans-serif;color:var(--ottone);text-decoration:none;
+  border-bottom:1px solid rgba(200,163,94,.35);padding-bottom:1px}
+.collegamento-esterno:hover{color:var(--ottone-chiaro);border-bottom-color:var(--ottone)}
+.tavola.finendo{border-color:rgba(217,144,111,.35)}
+.tavola.finendo .tavola-t{color:var(--ambra)}
+
+/* ─────────── IL DIARIO PER STAGIONE ─────────── */
+.stag-riga{display:flex;align-items:center;gap:12px;padding:8px 2px;border-bottom:1px solid var(--filo)}
+.stag-riga:last-of-type{border-bottom:0}
+.stag-nome{width:96px;flex-shrink:0;font-family:'Marcellus',serif;font-size:15px;color:var(--carta);display:flex;flex-direction:column}
+.stag-nome small{font-family:'Manrope',sans-serif;font-size:11px;color:var(--carta-3)}
+.stag-top{display:flex;gap:10px}
+.stag-p{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:0;cursor:pointer;color:var(--carta-3);font:500 11px 'Manrope',sans-serif}
+.stag-p .mini{width:34px;height:40px}
+.rotazione{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--carta-2)}
