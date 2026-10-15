@@ -21,7 +21,8 @@ jobs:
           npm install --no-save --no-package-lock playwright@1
           npx playwright install --with-deps chromium
       - name: Controllo della sintassi
-        run: node -e "new Function(require('fs').readFileSync('js/app.js','utf8'))"
+        # i file di js/ nell'ordine in cui index.html li carica, letti come uno solo
+        run: node -e "const fs=require('fs');const f=[...fs.readFileSync('index.html','utf8').matchAll(/<script src=\"(js\/[^?\"]+)/g)].map(m=>m[1]);console.log(f.join(' '));new Function(f.map(x=>fs.readFileSync(x,'utf8')).join('\n'))"
       - name: Apre il sito e lo percorre
         run: |
           python3 -m http.server 8800 --bind 127.0.0.1 &
