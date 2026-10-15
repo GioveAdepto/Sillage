@@ -47,7 +47,11 @@ function diario_() {
 function scriviNota_(f, testa, riga, p) {
   testa = testa.map(function (c) { return String(c).trim(); });
   ['nota', 'voto'].forEach(function (k) {
-    if (testa.indexOf(k) < 0) { testa.push(k); f.getRange(1, testa.length).setValue(k).setFontWeight('bold'); }
+    if (testa.indexOf(k) >= 0) return;
+    testa.push(k);
+    f.getRange(1, testa.length).setValue(k).setFontWeight('bold');
+    // l'appunto resta testo: in italiano "3.5" diventerebbe un orario
+    if (k === 'nota') f.getRange(1, testa.length, f.getMaxRows(), 1).setNumberFormat('@');
   });
   var nota = String(p.nota || '').replace(/\s+/g, ' ').trim().slice(0, 200);
   if (/^[=+\-@]/.test(nota)) nota = "'" + nota;
