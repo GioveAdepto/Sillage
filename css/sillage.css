@@ -1143,17 +1143,18 @@ img.sfuma.su{opacity:1}
 .sett-passato{font-size:13.5px;color:var(--carta-2)}
 
 /* ─────────── QUANTO NE RESTA ─────────── */
-.residuo{margin:2px 0 14px}
-.residuo .incisa{display:block;margin-bottom:8px}
-.residuo-scelte{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.residuo-scelte::-webkit-scrollbar{display:none}
-.residuo-tacca{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 9px 7px;cursor:pointer;
-  background:var(--vetro);border:1px solid var(--filo);border-radius:var(--r-s);color:var(--carta-3);font:500 11px 'Manrope',sans-serif;white-space:nowrap;
-  transition:border-color var(--duration-quick) var(--ease-smooth-out),color var(--duration-quick) var(--ease-smooth-out),background var(--duration-quick) var(--ease-smooth-out)}
-.residuo-tacca:hover{border-color:var(--filo-2);color:var(--carta-2)}
-.residuo-tacca.on{border-color:rgba(200,163,94,.6);background:var(--ottone-velo);color:var(--ottone-chiaro)}
-.residuo-vetro{position:relative;width:14px;height:22px;border:1.5px solid currentColor;border-radius:3px 3px 4px 4px;overflow:hidden;opacity:.85}
-.residuo-vetro i{position:absolute;left:0;right:0;bottom:0;background:currentColor;opacity:.55}
+.residuo{margin:2px 0 16px}
+.residuo-testa{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.residuo-testa b{font-family:'Marcellus',serif;font-weight:400;font-size:15px;color:var(--ottone-chiaro)}
+.livello{display:flex;gap:3px;padding:3px;border-radius:10px;background:var(--vetro);border:1px solid var(--filo)}
+.livello-tacca{flex:1;height:26px;border:0;padding:0;cursor:pointer;border-radius:4px;background:rgba(255,255,255,.05);
+  transition:background var(--duration-quick) var(--ease-smooth-out),box-shadow var(--duration-quick) var(--ease-smooth-out)}
+.livello-tacca:first-child{border-radius:7px 4px 4px 7px}
+.livello-tacca:last-child{border-radius:4px 7px 7px 4px}
+.livello-tacca:hover{background:rgba(255,255,255,.1)}
+.livello-tacca.pieno{background:linear-gradient(180deg,rgba(240,217,164,.85),rgba(200,163,94,.75))}
+.livello-tacca.on{box-shadow:0 0 0 1.5px var(--ottone-chiaro) inset,0 0 14px -2px rgba(255,214,146,.55)}
+.livello-eti{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--carta-3)}
 .scheda-azioni{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0 4px}
 .collegamento-esterno{background:none;border:0;padding:0;cursor:pointer;font:500 13px 'Manrope',sans-serif;color:var(--ottone);text-decoration:none;
   border-bottom:1px solid rgba(200,163,94,.35);padding-bottom:1px}
