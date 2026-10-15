@@ -9,9 +9,10 @@
  * Un layering sono due righe con lo stesso t a 13 cifre più una cifra di
  * ruolo (1 sotto, 2 sopra): l'app le riconosce da sola e le mostra come coppia.
  *
- * Ogni voce puo' avere un appunto (nota, fino a 200 caratteri) e un voto da 1
- * a 5 su com'e' andata: op=nota li scrive sulla riga con quel t. Le colonne
- * nota e voto nascono da sole la prima volta.
+ * Ogni voce puo' avere un appunto (nota, fino a 200 caratteri), un voto da 1
+ * a 5 su com'e' andata, l'occasione (ufficio, quotidiano, ...) e il momento
+ * (giorno o sera): op=nota li scrive sulla riga con quel t, e op=metti puo'
+ * gia' portare occasione e momento. Le colonne nascono da sole la prima volta.
  *
  * Il link del Web App è pubblico, quindi ogni voce viene controllata: il
  * profumo deve esistere, la data dev'essere una data, e in un giorno non
@@ -38,15 +39,18 @@ function diario_() {
   if (!SpreadsheetApp.getActive().getSheetByName(TAB_DIARIO)) return [];
   return righe_(TAB_DIARIO)
     .map(function (r) { return { data: r.data, id: numero_(r.id), t: String(r.t),
-                                 nota: r.nota || '', voto: numero_(r.voto) }; })
+                                 nota: r.nota || '', voto: numero_(r.voto),
+                                 occasione: r.occasione || '', momento: r.momento || '' }; })
     .filter(function (v) { return v.id && /^\d{4}-\d{2}-\d{2}$/.test(v.data); });
 }
 
-/** L'appunto e il voto di una voce. Testo semplice: un appunto che comincia
-    con = + - @ non deve diventare una formula. */
+var OCCASIONI_DIARIO = ['ufficio', 'quotidiano', 'appuntamento', 'formale', 'casa', 'festivita', 'palestra'];
+
+/** Appunto, voto, occasione e momento di una voce. Testo semplice: un appunto
+    che comincia con = + - @ non deve diventare una formula. */
 function scriviNota_(f, testa, riga, p) {
   testa = testa.map(function (c) { return String(c).trim(); });
-  ['nota', 'voto'].forEach(function (k) {
+  ['nota', 'voto', 'occasione', 'momento'].forEach(function (k) {
     if (testa.indexOf(k) >= 0) return;
     testa.push(k);
     f.getRange(1, testa.length).setValue(k).setFontWeight('bold');
@@ -59,7 +63,11 @@ function scriviNota_(f, testa, riga, p) {
   voto = voto >= 1 && voto <= 5 ? Math.round(voto) : '';
   f.getRange(riga, testa.indexOf('nota') + 1).setValue(nota);
   f.getRange(riga, testa.indexOf('voto') + 1).setValue(voto);
-  return { ok: true, nota: true };
+  var occ = OCCASIONI_DIARIO.indexOf(p.occasione) >= 0 ? p.occasione : '';
+  var mom = p.momento === 'giorno' || p.momento === 'sera' ? p.momento : '';
+  f.getRange(riga, testa.indexOf('occasione') + 1).setValue(occ);
+  f.getRange(riga, testa.indexOf('momento') + 1).setValue(mom);
+  return { ok: true, nota: true, uso: true };
 }
 
 /** op=metti aggiunge una voce, op=togli la toglie. Rilanciare non duplica:
@@ -90,5 +98,6 @@ function scriviDiario_(p) {
   // un t di 14 cifre e' meta' di un layering: l'ultima cifra dice il ruolo
   var ruolo = t.length === 14 ? (t.slice(-1) === '1' ? ' (layering, sotto)' : ' (layering, sopra)') : '';
   f.appendRow([data, String(id), profumo.marchio + ' ' + profumo.profumo + ruolo, t]);
-  return { ok: true };
+  if (p.occasione || p.momento) scriviNota_(f, g[0], f.getLastRow(), { occasione: p.occasione, momento: p.momento });
+  return { ok: true, uso: true };
 }
