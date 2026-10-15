@@ -477,11 +477,16 @@ function livelloResiduo(p){
   return {v,l};
 }
 function bloccoResiduo(p){
-  const r=livelloResiduo(p);
+  /* Un indicatore di livello, come quello della benzina: sette tacche in una
+     barra sola, dalla boccetta finita (sinistra) a quella piena (destra).
+     Si vede tutto senza scorrere; il nome del livello sta sopra. */
+  const r=livelloResiduo(p),tacche=[...LIVELLI].reverse();
   return `<div class="residuo t-stagger-line t-stagger-line--2" id="residuo-${p.id}">
-    <span class="incisa">Quanto ne resta</span>
-    <div class="residuo-scelte">${LIVELLI.map(([v,l])=>`<button class="residuo-tacca${r&&r.v===v?" on":""}" onclick="event.stopPropagation();segnaResiduo(${p.id},${v})" aria-pressed="${r&&r.v===v}">
-      <span class="residuo-vetro"><i style="height:${v}%"></i></span>${l}</button>`).join("")}</div></div>`;
+    <div class="residuo-testa"><span class="incisa">Quanto ne resta</span><b>${r?r.l:"Non indicato"}</b></div>
+    <div class="livello" role="radiogroup" aria-label="Quanto ne resta">${tacche.map(([v,l])=>
+      `<button class="livello-tacca${r&&v<=r.v&&r.v>0?" pieno":""}${r&&r.v===v?" on":""}" role="radio" aria-checked="${!!(r&&r.v===v)}" aria-label="${l}" title="${l}"
+        onclick="event.stopPropagation();segnaResiduo(${p.id},${v})"></button>`).join("")}</div>
+    <div class="livello-eti"><span>Finita</span><span>Mezza</span><span>Piena</span></div></div>`;
 }
 async function segnaResiduo(id,v){
   const p=profumi.find(x=>x.id===id);if(!p)return;

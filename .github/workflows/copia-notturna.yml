@@ -1,13 +1,17 @@
 # Ogni notte rilegge il foglio Google (attraverso il Web App, in sola lettura)
 # e aggiorna la copia in data/*.json: e' il ripiego del sito quando il foglio
 # non risponde, e la cronologia di git diventa uno storico giornaliero dei dati.
-# Si fa un commit solo se qualcosa e' cambiato.
+# Si fa un commit solo se qualcosa e' cambiato. Parte anche quando cambia
+# questo file, per provarlo subito.
 name: Copia notturna del foglio
 
 on:
   schedule:
     - cron: "15 2 * * *"      # 02:15 UTC, le 4 circa in Italia
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/copia-notturna.yml"]
 
 permissions:
   contents: write
@@ -16,14 +20,31 @@ jobs:
   copia:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Legge il foglio e riscrive data/*.json
         run: |
           python3 - <<'PY'
-          import json, urllib.request
+          import json, time, urllib.request, urllib.error
           U = "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec?fresco=1"
-          d = json.load(urllib.request.urlopen(U, timeout=60))
-          assert isinstance(d.get("profumi"), list) and len(d["profumi"]) > 0, "risposta senza profumi"
+          # Google tratta male i client senza nome: ci si presenta come un browser
+          testa = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36",
+                   "Accept": "application/json,text/plain,*/*"}
+          d, ultimo = None, ""
+          for tentativo in range(1, 4):
+              try:
+                  r = urllib.request.urlopen(urllib.request.Request(U, headers=testa), timeout=90)
+                  corpo = r.read().decode("utf-8", "replace")
+                  d = json.loads(corpo)
+                  break
+              except urllib.error.HTTPError as e:
+                  ultimo = f"HTTP {e.code}: {e.read()[:400]!r}"
+              except Exception as e:
+                  ultimo = f"{type(e).__name__}: {e} — ricevuto: {locals().get('corpo', '')[:400]!r}"
+              print(f"tentativo {tentativo} non riuscito: {ultimo}")
+              time.sleep(20 * tentativo)
+          if d is None:
+              raise SystemExit("il foglio non ha risposto: " + ultimo)
+          assert isinstance(d.get("profumi"), list) and d["profumi"], "risposta senza profumi"
           for k in ("profumi", "note", "layering", "consigli"):
               if k in d:
                   with open(f"data/{k}.json", "w", encoding="utf-8", newline="\n") as f:
