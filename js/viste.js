@@ -518,20 +518,59 @@ function apriAppuntoDiOggi(id){
 }
 function salvaAppunto(t,id,data){
   const nota=(document.getElementById("appunto-testo")?.value||"").trim().slice(0,200);
-  const coda=leggiCoda().filter(o=>!(o.op==="nota"&&String(o.t)===String(t)));
-  coda.push({op:"nota",id,data,t:String(t),nota,voto:votoBozza||""});
-  scriviCoda(coda);appuntoAperto=null;
+  aggiornaVoce(t,{nota,voto:votoBozza||""});appuntoAperto=null;
   disegnaDiario();dopoDiario(id);sincronizzaDiario();
 }
-// nella scheda: com'e' andato su di te, dagli appunti
+/* ── Occasione e momento ──
+   Per ogni voce del diario: dove l'hai portato (ufficio, appuntamento...) e
+   se di giorno o di sera. Un layering ne ha uno solo per la coppia. */
+const momenti=[["giorno","Di giorno",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>'],
+  ["sera","Di sera",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>']];
+// le voci da cambiare insieme: il profumo di quel giorno, o tutta la coppia se e' un layering
+function vociUso(id,data){
+  const v=vociDelGiorno(data),x=v.find(y=>+y.id===id);
+  if(!x)return [];
+  return ruoloStrato(x)?v.filter(y=>ruoloStrato(y)&&coppiaDi(y)===coppiaDi(x)):[x];
+}
+const testoUso=v=>v?[nomeOcc[v.occasione],v.momento==="sera"?"sera":v.momento==="giorno"?"giorno":""].filter(Boolean).join(", ").toLowerCase().replace(/^./,c=>c.toUpperCase()):"";
+function sceltaUso(voci,cls=""){
+  if(!voci.length)return "";
+  const v=voci[0],ts=voci.map(x=>String(x.t)).join(",");
+  return `<div class="uso ${cls}" onclick="event.stopPropagation()">
+    <label class="uso-occ"><span class="uso-occ-testo">${v.occasione?nomeOcc[v.occasione]:"Occasione"}</span>
+      <select onchange="cambiaUso('${ts}','occasione',this.value)" aria-label="Occasione">
+        <option value=""${v.occasione?"":" selected"}>Nessuna</option>
+        ${ciclo.map(k=>`<option value="${k}"${v.occasione===k?" selected":""}>${nomeOcc[k]}</option>`).join("")}</select>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></label>
+    <span class="uso-mom">${momenti.map(([k,n,ic])=>`<button class="${v.momento===k?"on":""}" onclick="cambiaUso('${ts}','momento','${v.momento===k?"":k}')" aria-label="${n}" aria-pressed="${v.momento===k}" title="${n}">${ic}</button>`).join("")}</span>
+  </div>`;
+}
+function cambiaUso(ts,campo,valore){
+  const ids=new Set();
+  String(ts).split(",").forEach(t=>{aggiornaVoce(t,{[campo]:valore});const v=diario().find(x=>String(x.t)===t);if(v)ids.add(+v.id)});
+  ids.forEach(id=>dopoDiario(id));
+  sincronizzaDiario();
+}
+// nella scheda: com'e' andato su di te, dagli appunti, e dove lo porti di solito
+function usoAbituale(p){
+  const v=diario().filter(x=>+x.id===p.id&&x.occasione);
+  if(v.length<2)return "";
+  const conta={};v.forEach(x=>conta[x.occasione]=(conta[x.occasione]||0)+1);
+  const [occ,n]=Object.entries(conta).sort((a,b)=>b[1]-a[1])[0];
+  const sere=v.filter(x=>x.momento==="sera").length,giorni=v.filter(x=>x.momento==="giorno").length;
+  const mom=sere>giorni?", di sera":giorni>sere?", di giorno":"";
+  return `<span class="su-di-te-uso">Di solito: <b>${nomeOcc[occ].toLowerCase()}${mom}</b> <small>${n} su ${v.length}</small></span>`;
+}
 function suDiTe(p){
   const v=diario().filter(x=>+x.id===p.id&&(x.voto||x.nota)).sort((a,b)=>a.data<b.data?1:-1);
-  if(!v.length)return "";
+  const abituale=usoAbituale(p);
+  if(!v.length&&!abituale)return "";
   const voti=v.filter(x=>x.voto).map(x=>+x.voto),media=voti.length?voti.reduce((a,b)=>a+b,0)/voti.length:0;
   const ultima=v.find(x=>x.nota);
   return `<div class="su-di-te t-stagger-line t-stagger-line--2"><span class="incisa">Su di te</span>
     ${media?`<span class="su-di-te-voto">${stelle(Math.round(media))}<b>${media.toLocaleString("it-IT",{maximumFractionDigits:1})}</b><small>${voti.length} ${voti.length===1?"volta":"volte"}</small></span>`:""}
-    ${ultima?`<span class="su-di-te-nota">«${esc(ultima.nota)}» <small>${dataLunga(ultima.data)}</small></span>`:""}</div>`;
+    ${ultima?`<span class="su-di-te-nota">«${esc(ultima.nota)}» <small>${dataLunga(ultima.data)}</small></span>`:""}
+    ${abituale}</div>`;
 }
 
 // ── LA MAPPA OLFATTIVA ────────────────────────────────────────────────────

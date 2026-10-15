@@ -309,7 +309,7 @@ function disegnaOggi(){
   }else{
     /* Tutto in vista: la prima in rilievo, seconda e terza affiancate, le altre
        in elenco sotto, sempre nell'ordine del punteggio. */
-    const lometto=(p,cls)=>domani?"":`<button class="${cls}${indossatoOggi(p.id)?" fatto":""}" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id});`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>`;
+    const lometto=(p,cls)=>domani?"":`<button class="${cls}${indossatoOggi(p.id)?" fatto":""}" onclick="${indossatoOggi(p.id)?"":`indossa(${p.id},'${occOggi}','${(oraPerOccasione[occOggi]||9)>=17?"sera":a.momento}');`}chiudiOggi()">${indossatoOggi(p.id)?"Già segnato":"Lo metto"}</button>`;
     /* Cinque, non tutte: la prima con tutti i suoi perche', le altre quattro
        con i tre motivi piu' forti e il contro principale. */
     const [primo,...resto]=c.slice(0,5);
@@ -330,7 +330,7 @@ function disegnaOggi(){
     ${r&&altro?(()=>{const pr=partiRicetta(r.l),fatto=pr.sotto&&pr.sopra&&layeringFatto(pr.sotto.id,pr.sopra.id);
       return `<div class="oggi-strato-riga"><button class="oggi-strato" onclick="chiudiOggi();vaiAllaRicetta(${r.i})">${miniatura(altro)}
       <span><span class="incisa">Se vuoi osare, con</span><b>${esc(altro.name)}</b><small>${esc(r.nome)}</small></span></button>
-      ${!domani&&pr.sotto&&pr.sopra?`<button class="oggi-strato-metto${fatto?" fatto":""}" onclick="faiLayering(${pr.sotto.id},${pr.sopra.id})">${fatto?"Segnato":"Lo faccio"}</button>`:""}</div>`})():""}
+      ${!domani&&pr.sotto&&pr.sopra?`<button class="oggi-strato-metto${fatto?" fatto":""}" onclick="faiLayering(${pr.sotto.id},${pr.sopra.id},'${occOggi}','${(oraPerOccasione[occOggi]||9)>=17?"sera":a.momento}')">${fatto?"Segnato":"Lo faccio"}</button>`:""}</div>`})():""}
     <div class="oggi-azioni">
       <button class="${domani?"btn-oro":"btn-ombra"}" onclick="chiudiOggi();vaiAlProfumo(${p.id})">Scheda</button>
       ${lometto(p,"btn-oro")}

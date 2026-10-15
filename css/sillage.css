@@ -1208,3 +1208,20 @@ img.sfuma.su{opacity:1}
 .mappa-punto.campione .mappa-anello{stroke:#a9c6e2;stroke-dasharray:3 2}
 .mappa-punto:hover .mappa-anello{stroke:var(--ottone-chiaro);stroke-width:2.5}
 .mappa-nota{margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--carta-2)}
+
+/* ─────────── OCCASIONE E MOMENTO NEL DIARIO ─────────── */
+.uso{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-basis:100%}
+.uso.nel-giorno{margin:2px 0 6px 58px}
+.uso-occ{position:relative;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 30px 0 13px;border-radius:99px;
+  border:1px solid var(--filo-2);background:var(--vetro);color:var(--carta);font-size:13px;cursor:pointer}
+.uso-occ select{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;font-size:16px}
+.uso-occ svg{position:absolute;right:10px;width:14px;height:14px;color:var(--carta-3);pointer-events:none}
+.uso-occ:focus-within{border-color:var(--ottone)}
+.uso-mom{display:inline-flex;padding:2px;border-radius:99px;border:1px solid var(--filo-2);background:var(--vetro)}
+.uso-mom button{display:grid;place-items:center;width:34px;height:26px;padding:0;border:0;border-radius:99px;background:none;color:var(--carta-3);cursor:pointer}
+.uso-mom svg{width:16px;height:16px}
+.uso-mom button.on{background:var(--ottone-velo);color:var(--ottone-chiaro);box-shadow:inset 0 0 0 1px rgba(200,163,94,.4)}
+.su-di-te-uso{font-size:13px;color:var(--carta-2)}
+.su-di-te-uso b{font-weight:600;color:var(--carta)}
+.su-di-te-uso small{font-size:11px;color:var(--carta-3)}
+.diario-riga .collegamento{font-size:13px}

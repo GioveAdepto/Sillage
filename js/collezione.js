@@ -74,7 +74,7 @@ function diario(){
   diarioFoglio.forEach(v=>m.set(String(v.t),v));
   coda.filter(o=>o.op==="metti").forEach(o=>m.set(String(o.t),o));
   // un appunto in attesa si vede subito, sopra quello che dice il foglio
-  coda.filter(o=>o.op==="nota").forEach(o=>{const v=m.get(String(o.t));if(v)m.set(String(o.t),{...v,nota:o.nota,voto:o.voto})});
+  coda.filter(o=>o.op==="nota").forEach(o=>{const v=m.get(String(o.t));if(v)m.set(String(o.t),{...v,nota:o.nota,voto:o.voto,occasione:o.occasione,momento:o.momento})});
   return [...m.values()].filter(v=>!tolte.has(String(v.t)));
 }
 const vociDi=id=>diario().filter(v=>+v.id===id&&v.data<=oggiISO()).map(v=>v.data).sort();
@@ -86,7 +86,27 @@ function giorniDa(id){
 const indossatoOggi=id=>diario().some(v=>+v.id===id&&v.data===oggiISO());
 const quandoFu=g=>g===0?"oggi":g===1?"ieri":g<45?`${g} giorni fa`:g<365?`${Math.round(g/30)} mesi fa`:"più di un anno fa";
 
-function indossa(id){segna(id,oggiISO())}
+/* Segnato oggi, il profumo porta con se' l'occasione e il momento: quelli
+   scelti in Consigliami o nel piano della settimana, se arriva da li';
+   altrimenti quelli piu' probabili adesso. Si cambiano con un tocco. */
+const usoProbabile=()=>({occasione:occasioneProbabile(),momento:adesso().momento});
+function indossa(id,occasione,momento){
+  segna(id,oggiISO(),occasione?{occasione,momento:momento||adesso().momento}:usoProbabile());
+}
+/* Cambia appunto, voto, occasione o momento di una voce. Se la voce aspetta
+   ancora in coda si corregge li'; se il foglio l'ha gia', parte un op=nota
+   con tutti i campi. */
+function aggiornaVoce(t,cambi){
+  t=String(t);
+  const coda=leggiCoda(),m=coda.find(o=>o.op==="metti"&&String(o.t)===t);
+  if(m)Object.assign(m,cambi);
+  else{
+    const v=diario().find(x=>String(x.t)===t);if(!v)return;
+    const i=coda.findIndex(o=>o.op==="nota"&&String(o.t)===t);if(i>=0)coda.splice(i,1);
+    coda.push({op:"nota",id:+v.id,data:v.data,t,nota:v.nota||"",voto:v.voto||"",occasione:v.occasione||"",momento:v.momento||"",...cambi});
+  }
+  scriviCoda(coda);
+}
 /* Al massimo due profumi al giorno: o due singoli, o un layering (sotto e
    sopra). Il layering si riconosce dal t, senza toccare il foglio: un t di 14
    cifre e' la coppia (le prime 13, uguali per i due) piu' il ruolo, 1 sotto e
@@ -102,7 +122,7 @@ function togliDallaCoda(coda,v){
 }
 /* Mette o toglie un profumo in un giorno: oggi dal pulsante della scheda,
    un giorno passato dal Diario. Togliere meta' di un layering lo toglie tutto. */
-function segna(id,data){
+function segna(id,data,uso){
   const coda=leggiCoda(),giorno=vociDelGiorno(data),gia=giorno.find(v=>+v.id===id);
   if(gia){
     const insieme=ruoloStrato(gia)?giorno.filter(v=>ruoloStrato(v)&&coppiaDi(v)===coppiaDi(gia)):[gia];
@@ -110,7 +130,7 @@ function segna(id,data){
     scriviCoda(coda);insieme.forEach(v=>dopoDiario(+v.id));
   }else{
     if(giorno.length>=MAX_GIORNO){avvisa(`${data===oggiISO()?"Oggi":"Quel giorno"} hai già segnato due profumi: togline uno prima.`);return false}
-    coda.push({op:"metti",id,data,t:String(Date.now())});
+    coda.push({op:"metti",id,data,t:String(Date.now()),...(uso||{})});
     scriviCoda(coda);dopoDiario(id);
   }
   sincronizzaDiario();
@@ -118,14 +138,14 @@ function segna(id,data){
 }
 /* Il layering occupa il giorno intero. Se quel giorno c'era gia' uno dei due
    come singolo, diventa parte della coppia; un terzo profumo invece va tolto prima. */
-function segnaLayering(sotto,sopra,data){
+function segnaLayering(sotto,sopra,data,uso){
   if(!sotto||!sopra||sotto===sopra)return false;
   const coda=leggiCoda(),giorno=vociDelGiorno(data);
   const altro=giorno.find(v=>+v.id!==sotto&&+v.id!==sopra);
   if(altro){avvisa(`Quel giorno c'è già ${profumi.find(p=>p.id===+altro.id)?.name||"un altro profumo"}: toglilo prima di segnare un layering.`);return false}
   giorno.forEach(v=>togliDallaCoda(coda,v));
   const base=String(Date.now());
-  coda.push({op:"metti",id:sotto,data,t:base+"1"},{op:"metti",id:sopra,data,t:base+"2"});
+  coda.push({op:"metti",id:sotto,data,t:base+"1",...(uso||{})},{op:"metti",id:sopra,data,t:base+"2",...(uso||{})});
   scriviCoda(coda);dopoDiario(sotto);dopoDiario(sopra);
   sincronizzaDiario();
   return true;
@@ -137,9 +157,9 @@ function layeringDel(data){
   return sotto&&sopra?{sotto:profumi.find(p=>p.id===+sotto.id),sopra:profumi.find(p=>p.id===+sopra.id)}:null;
 }
 const layeringFatto=(sotto,sopra,data=oggiISO())=>{const l=layeringDel(data);return !!l&&l.sotto?.id===sotto&&l.sopra?.id===sopra};
-function faiLayering(sotto,sopra){
+function faiLayering(sotto,sopra,occasione,momento){
   if(layeringFatto(sotto,sopra)){segna(sotto,oggiISO());return}   // di nuovo: lo toglie
-  if(segnaLayering(sotto,sopra,oggiISO()))avvisa("Layering segnato nel diario di oggi.");
+  if(segnaLayering(sotto,sopra,oggiISO(),occasione?{occasione,momento:momento||adesso().momento}:usoProbabile()))avvisa("Layering segnato nel diario di oggi.");
 }
 // un avviso breve in basso, sopra la barra
 let timerAvviso=null;
@@ -163,20 +183,27 @@ async function sincronizzaDiario(){
   sincronizzando=true;
   try{
     for(const o of leggiCoda()){
-      const q=new URLSearchParams({azione:"diario",op:o.op,id:o.id,data:o.data,t:o.t,...(o.op==="nota"?{nota:o.nota||"",voto:o.voto||""}:{})});
+      const uso={occasione:o.occasione||"",momento:o.momento||""};
+      const q=new URLSearchParams({azione:"diario",op:o.op,id:o.id,data:o.data,t:o.t,
+        ...(o.op==="nota"?{nota:o.nota||"",voto:o.voto||"",...uso}:o.op==="metti"&&(uso.occasione||uso.momento)?uso:{})});
       const r=await fetch(ORIGINE_DATI.appsScript+"?"+q,{method:"POST",redirect:"follow"});
       const e=await r.json();
       // un rifiuto del foglio (voce non valida) toglie la voce dalla coda;
       // un errore di rete o un Web App vecchio la lasciano li' per la prossima
       if(!e||(!e.ok&&(!e.errore||/sconosciuta:/.test(e.errore))))break;
-      // uno script del foglio senza appunti risponde "ok" ma non scrive: si aspetta
-      if(o.op==="nota"&&e.ok&&!e.nota)break;
-      if(e.ok&&o.op==="nota"){const v=diarioFoglio.find(x=>String(x.t)===String(o.t));if(v){v.nota=o.nota;v.voto=o.voto}}
-      else if(e.ok){
-        if(o.op==="metti")diarioFoglio.push({data:o.data,id:+o.id,t:String(o.t)});
-        else diarioFoglio=diarioFoglio.filter(v=>String(v.t)!==String(o.t));
+      // uno script del foglio senza occasione e momento risponde "ok" ma non li scrive: si aspetta
+      if(o.op==="nota"&&e.ok&&!e.uso)break;
+      let resta=null;   // quello che il foglio deve ancora sapere di questa voce
+      if(e.ok&&o.op==="nota"){const v=diarioFoglio.find(x=>String(x.t)===String(o.t));if(v)Object.assign(v,{nota:o.nota,voto:o.voto,...uso})}
+      else if(e.ok&&o.op==="metti"){
+        diarioFoglio.push({data:o.data,id:+o.id,t:String(o.t),...(e.uso?uso:{})});
+        // cambiata mentre viaggiava, o arrivata a uno script vecchio: si manda il resto dopo
+        const ora=leggiCoda().find(x=>x.op==="metti"&&String(x.t)===String(o.t))||o;
+        if((!e.uso&&(ora.occasione||ora.momento))||ora.occasione!==o.occasione||ora.momento!==o.momento)
+          resta={op:"nota",id:+o.id,data:o.data,t:String(o.t),nota:ora.nota||"",voto:ora.voto||"",occasione:ora.occasione||"",momento:ora.momento||""};
       }
-      scriviCoda(leggiCoda().filter(x=>!(x.op===o.op&&String(x.t)===String(o.t))));
+      else if(e.ok)diarioFoglio=diarioFoglio.filter(v=>String(v.t)!==String(o.t));
+      scriviCoda(leggiCoda().filter(x=>!(x.op===o.op&&String(x.t)===String(o.t))).concat(resta?[resta]:[]));
       const c=leggiCache();if(c){c.diario=diarioFoglio;scriviCache(c)}
     }
   }catch(e){/* rete assente: si riprova al prossimo avvio o al prossimo tocco */}
@@ -189,7 +216,8 @@ function rigaDiario(p){
   const lay=oggi&&layeringDel(oggiISO()),inLay=lay&&(lay.sotto?.id===p.id||lay.sopra?.id===p.id);
   return `<button class="btn-indossa${oggi?" fatto":""}" onclick="event.stopPropagation();indossa(${p.id})">${oggi?spunta+(inLay?"In layering oggi":"Indossato oggi"):goccia+"Lo metto oggi"}</button>
     <span class="diario-nota">${n?`${n} ${n===1?"volta":"volte"} · l'ultima ${quandoFu(g)}`:"Mai segnato nel diario"}</span>
-    ${oggi&&!inLay?`<button class="collegamento" onclick="event.stopPropagation();apriAppuntoDiOggi(${p.id})">${diario().find(v=>+v.id===p.id&&v.data===oggiISO()&&(v.nota||v.voto))?"Modifica l'appunto":"Aggiungi un appunto"}</button>`:""}`;
+    ${oggi&&!inLay?`<button class="collegamento" onclick="event.stopPropagation();apriAppuntoDiOggi(${p.id})">${diario().find(v=>+v.id===p.id&&v.data===oggiISO()&&(v.nota||v.voto))?"Modifica l'appunto":"Aggiungi un appunto"}</button>`:""}
+    ${oggi?sceltaUso(vociUso(p.id,oggiISO())):""}`;
 }
 
 /* "EDP · 100 ml", e il residuo quando la boccetta non e' piu' piena. Le
