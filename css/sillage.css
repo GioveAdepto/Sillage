@@ -12,13 +12,13 @@
   --filo-3:rgba(232,214,176,.34);
   --ottone:#c8a35e;
   --ottone-chiaro:#f0d9a4;
-  --ottone-scuro:#8a6f3c;
+  --ottone-scuro:#a8884f;
   --ottone-velo:rgba(200,163,94,.12);
   --luce:#fff3d8;
   /* testi: carta d'etichetta */
   --carta:#f3ede1;
   --carta-2:#b9b0a0;
-  --carta-3:#8d8474;
+  --carta-3:#9a9081;
   /* vetri colorati delle tre famiglie */
   --acqua:#7fa8cf;
   --bosco:#93b98a;
@@ -1171,3 +1171,40 @@ img.sfuma.su{opacity:1}
 .stag-p{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:0;cursor:pointer;color:var(--carta-3);font:500 11px 'Manrope',sans-serif}
 .stag-p .mini{width:34px;height:40px}
 .rotazione{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--carta-2)}
+
+/* ─────────── GLI APPUNTI DEL DIARIO ─────────── */
+.stelle{display:inline-flex;gap:1px;color:var(--filo-3);font-size:12px;letter-spacing:0}
+.stelle i{font-style:normal}.stelle i.on{color:var(--ottone-chiaro)}
+.appunto{display:flex;align-items:baseline;gap:8px;width:100%;margin:-4px 0 8px;padding:4px 10px 6px 58px;background:none;border:0;cursor:pointer;
+  text-align:left;color:var(--carta-2);font:400 13px/1.45 'Manrope',sans-serif}
+.appunto span{font-style:italic}
+.appunto.vuoto{color:var(--carta-3);font-size:12px}
+.appunto.vuoto:hover,.appunto:hover{color:var(--ottone-chiaro)}
+.appunto-editor{margin:2px 0 12px;padding:10px 12px;border:1px solid var(--filo-2);border-radius:var(--r-s);background:var(--vetro)}
+.appunto-stelle{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+.appunto-stelle button{background:none;border:0;padding:2px;cursor:pointer;font-size:24px;line-height:1;color:var(--filo-3)}
+.appunto-stelle button.on{color:var(--ottone-chiaro)}
+.appunto-stelle span{margin-left:8px;font-size:12.5px;color:var(--carta-3)}
+.appunto-azioni{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.appunto-azioni .btn-oro,.appunto-azioni .btn-ombra{padding:8px 14px}
+.su-di-te{display:flex;flex-direction:column;gap:5px;margin:-4px 0 14px;padding:10px 12px;border-radius:var(--r-s);background:var(--ottone-velo);border:1px solid rgba(200,163,94,.25)}
+.su-di-te-voto{display:flex;align-items:center;gap:8px}
+.su-di-te-voto .stelle{font-size:14px}
+.su-di-te-voto b{font-family:'Marcellus',serif;font-weight:400;font-size:17px;color:var(--carta)}
+.su-di-te-voto small,.su-di-te-nota small{font-size:11px;color:var(--carta-3);font-style:normal}
+.su-di-te-nota{font-size:13px;color:var(--carta-2);font-style:italic;line-height:1.5}
+
+/* ─────────── LA MAPPA OLFATTIVA ─────────── */
+.mappa-tavola{margin-bottom:10px}
+.mappa-tavola .tavola-t{display:flex;justify-content:space-between;align-items:baseline}
+.mappa-campioni{font-size:12px;letter-spacing:0;text-transform:none}
+.mappa{display:block;width:100%;max-width:480px;height:auto;margin:0 auto}
+.mappa-zona{fill:rgba(255,255,255,.025);stroke:var(--filo);stroke-width:1}
+.mappa-zona.vuota{fill:rgba(217,144,111,.05);stroke:rgba(217,144,111,.3);stroke-dasharray:4 4}
+.mappa-vuota{font:500 10px 'Manrope',sans-serif;fill:rgba(217,144,111,.7);text-anchor:middle;letter-spacing:.08em;text-transform:uppercase}
+.mappa-asse{font:500 10px 'Manrope',sans-serif;fill:var(--carta-3);letter-spacing:.12em;text-transform:uppercase}
+.mappa-punto{cursor:pointer}
+.mappa-anello{fill:#0c0a08;stroke:rgba(200,163,94,.75);stroke-width:1.5}
+.mappa-punto.campione .mappa-anello{stroke:#a9c6e2;stroke-dasharray:3 2}
+.mappa-punto:hover .mappa-anello{stroke:var(--ottone-chiaro);stroke-width:2.5}
+.mappa-nota{margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--carta-2)}

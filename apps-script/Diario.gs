@@ -9,6 +9,10 @@
  * Un layering sono due righe con lo stesso t a 13 cifre più una cifra di
  * ruolo (1 sotto, 2 sopra): l'app le riconosce da sola e le mostra come coppia.
  *
+ * Ogni voce puo' avere un appunto (nota, fino a 200 caratteri) e un voto da 1
+ * a 5 su com'e' andata: op=nota li scrive sulla riga con quel t. Le colonne
+ * nota e voto nascono da sole la prima volta.
+ *
  * Il link del Web App è pubblico, quindi ogni voce viene controllata: il
  * profumo deve esistere, la data dev'essere una data, e in un giorno non
  * entrano più di dieci voci.
@@ -33,8 +37,25 @@ function foglioDiario_() {
 function diario_() {
   if (!SpreadsheetApp.getActive().getSheetByName(TAB_DIARIO)) return [];
   return righe_(TAB_DIARIO)
-    .map(function (r) { return { data: r.data, id: numero_(r.id), t: String(r.t) }; })
+    .map(function (r) { return { data: r.data, id: numero_(r.id), t: String(r.t),
+                                 nota: r.nota || '', voto: numero_(r.voto) }; })
     .filter(function (v) { return v.id && /^\d{4}-\d{2}-\d{2}$/.test(v.data); });
+}
+
+/** L'appunto e il voto di una voce. Testo semplice: un appunto che comincia
+    con = + - @ non deve diventare una formula. */
+function scriviNota_(f, testa, riga, p) {
+  testa = testa.map(function (c) { return String(c).trim(); });
+  ['nota', 'voto'].forEach(function (k) {
+    if (testa.indexOf(k) < 0) { testa.push(k); f.getRange(1, testa.length).setValue(k).setFontWeight('bold'); }
+  });
+  var nota = String(p.nota || '').replace(/\s+/g, ' ').trim().slice(0, 200);
+  if (/^[=+\-@]/.test(nota)) nota = "'" + nota;
+  var voto = Number(p.voto);
+  voto = voto >= 1 && voto <= 5 ? Math.round(voto) : '';
+  f.getRange(riga, testa.indexOf('nota') + 1).setValue(nota);
+  f.getRange(riga, testa.indexOf('voto') + 1).setValue(voto);
+  return { ok: true, nota: true };
 }
 
 /** op=metti aggiunge una voce, op=togli la toglie. Rilanciare non duplica:
@@ -53,10 +74,12 @@ function scriviDiario_(p) {
   for (var i = g.length - 1; i >= 1; i--) {
     if (String(g[i][cT]) === t) {
       if (p.op === 'togli') { f.deleteRow(i + 1); return { ok: true, tolta: true }; }
+      if (p.op === 'nota') return scriviNota_(f, g[0], i + 1, p);
       return { ok: true, gia: true };
     }
   }
   if (p.op === 'togli') return { ok: true, assente: true };
+  if (p.op === 'nota') return { errore: 'voce non trovata' };
 
   var nelGiorno = g.filter(function (r) { return r[cData] === data; }).length;
   if (nelGiorno >= 10) return { errore: 'troppe voci per il ' + data };

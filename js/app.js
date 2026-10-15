@@ -345,6 +345,8 @@ function diario(){
   const coda=leggiCoda(),tolte=new Set(coda.filter(o=>o.op==="togli").map(o=>String(o.t))),m=new Map();
   diarioFoglio.forEach(v=>m.set(String(v.t),v));
   coda.filter(o=>o.op==="metti").forEach(o=>m.set(String(o.t),o));
+  // un appunto in attesa si vede subito, sopra quello che dice il foglio
+  coda.filter(o=>o.op==="nota").forEach(o=>{const v=m.get(String(o.t));if(v)m.set(String(o.t),{...v,nota:o.nota,voto:o.voto})});
   return [...m.values()].filter(v=>!tolte.has(String(v.t)));
 }
 const vociDi=id=>diario().filter(v=>+v.id===id&&v.data<=oggiISO()).map(v=>v.data).sort();
@@ -433,13 +435,16 @@ async function sincronizzaDiario(){
   sincronizzando=true;
   try{
     for(const o of leggiCoda()){
-      const q=new URLSearchParams({azione:"diario",op:o.op,id:o.id,data:o.data,t:o.t});
+      const q=new URLSearchParams({azione:"diario",op:o.op,id:o.id,data:o.data,t:o.t,...(o.op==="nota"?{nota:o.nota||"",voto:o.voto||""}:{})});
       const r=await fetch(ORIGINE_DATI.appsScript+"?"+q,{method:"POST",redirect:"follow"});
       const e=await r.json();
       // un rifiuto del foglio (voce non valida) toglie la voce dalla coda;
       // un errore di rete o un Web App vecchio la lasciano li' per la prossima
       if(!e||(!e.ok&&(!e.errore||/sconosciuta:/.test(e.errore))))break;
-      if(e.ok){
+      // uno script del foglio senza appunti risponde "ok" ma non scrive: si aspetta
+      if(o.op==="nota"&&e.ok&&!e.nota)break;
+      if(e.ok&&o.op==="nota"){const v=diarioFoglio.find(x=>String(x.t)===String(o.t));if(v){v.nota=o.nota;v.voto=o.voto}}
+      else if(e.ok){
         if(o.op==="metti")diarioFoglio.push({data:o.data,id:+o.id,t:String(o.t)});
         else diarioFoglio=diarioFoglio.filter(v=>String(v.t)!==String(o.t));
       }
@@ -455,7 +460,8 @@ function rigaDiario(p){
   const oggi=indossatoOggi(p.id),n=vociDi(p.id).length,g=giorniDa(p.id);
   const lay=oggi&&layeringDel(oggiISO()),inLay=lay&&(lay.sotto?.id===p.id||lay.sopra?.id===p.id);
   return `<button class="btn-indossa${oggi?" fatto":""}" onclick="event.stopPropagation();indossa(${p.id})">${oggi?spunta+(inLay?"In layering oggi":"Indossato oggi"):goccia+"Lo metto oggi"}</button>
-    <span class="diario-nota">${n?`${n} ${n===1?"volta":"volte"} · l'ultima ${quandoFu(g)}`:"Mai segnato nel diario"}</span>`;
+    <span class="diario-nota">${n?`${n} ${n===1?"volta":"volte"} · l'ultima ${quandoFu(g)}`:"Mai segnato nel diario"}</span>
+    ${oggi&&!inLay?`<button class="collegamento" onclick="event.stopPropagation();apriAppuntoDiOggi(${p.id})">${diario().find(v=>+v.id===p.id&&v.data===oggiISO()&&(v.nota||v.voto))?"Modifica l'appunto":"Aggiungi un appunto"}</button>`:""}`;
 }
 
 /* "EDP · 100 ml", e il residuo quando la boccetta non e' piu' piena. Le
@@ -915,6 +921,7 @@ function costruisciTeca(p,i){
           <div class="incisa t-stagger-line t-stagger-line--1">Quando indossarlo</div>
           <div class="usi t-stagger-line t-stagger-line--2">${usi}</div>
           <div class="diario-riga t-stagger-line t-stagger-line--2" id="diario-${p.id}">${rigaDiario(p)}</div>
+          ${suDiTe(p)}
           ${p.accordi&&p.accordi.length?`<div class="incisa t-stagger-line t-stagger-line--3">Ruota degli accordi</div>
           <div class="t-stagger-line t-stagger-line--3">${ruotaAccordi([p])}</div>`:""}
           ${bloccoResiduo(p)}
@@ -1828,7 +1835,7 @@ function disegnaNumeri(){
     <div class="numero"><div class="numero-n">${mediaR.replace(".",",")}</div><div class="numero-l">Rating medio</div></div>
     <div class="numero"><div class="numero-n">${mediaL.replace(".",",")}<small>h</small></div><div class="numero-l">Durata media</div></div>
     <div class="numero"><div class="numero-n">${B.filter(p=>p.momento==="entrambi").length}</div><div class="numero-l">Giorno e sera</div></div>
-  </div><div class="tavole">`;
+  </div>${mappaOlfattiva()}<div class="tavole">`;
   h+=`<div class="tavola"><div class="tavola-t incisa">Stagione</div>${segmenti(
     ["pe","tutto","ai"].map(k=>({n:B.filter(p=>p.stagione===k).length,c:tintaStagione[k],l:stagLbl(k)})),tot)}
     <div class="tavola-t incisa" style="margin-top:22px">Famiglia olfattiva</div>${segmenti(
@@ -1935,6 +1942,108 @@ async function condividiScheda(id){
   const file=new File([blob],nome,{type:"image/png"});
   if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:p.name});return}catch(e){if(e.name==="AbortError")return}}
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+// ── GLI APPUNTI DEL DIARIO ────────────────────────────────────────────────
+/* A ogni voce del diario si puo' aggiungere una riga e un voto da 1 a 5 su
+   com'e' andata quel giorno: quanto e' durato, se ha funzionato, chi l'ha
+   notato. Col tempo dice come rende un profumo su di te, non in media su
+   Fragrantica. Il voto non entra nella classifica di Consigliami: resta un
+   ricordo tuo, mostrato nella scheda. */
+let appuntoAperto=null,votoBozza=0;
+const stelle=(n,cls="")=>`<span class="stelle ${cls}">${[1,2,3,4,5].map(i=>`<i class="${i<=n?"on":""}">★</i>`).join("")}</span>`;
+function bloccoAppunto(v,p){
+  if(!v||ruoloStrato(v))return "";
+  const t=String(v.t);
+  if(appuntoAperto===t)return `<div class="appunto-editor" onclick="event.stopPropagation()">
+    <div class="appunto-stelle">${[1,2,3,4,5].map(i=>`<button class="${i<=votoBozza?"on":""}" onclick="votaBozza(${i})" aria-label="${i} su 5">★</button>`).join("")}<span>${GIUDIZI[votoBozza]}</span></div>
+    <input id="appunto-testo" class="diario-cerca" maxlength="200" placeholder="Una riga: quanto è durato, se ha funzionato…" value="${esc(v.nota||"")}">
+    <div class="appunto-azioni"><button class="btn-ombra" onclick="appuntoAperto=null;disegnaDiario()">Annulla</button>
+      <button class="btn-oro" onclick="salvaAppunto('${t}',${p.id},'${v.data}')">Salva</button></div></div>`;
+  return (v.nota||v.voto)
+    ?`<button class="appunto" onclick="apriAppunto('${t}',${+v.voto||0})">${v.voto?stelle(+v.voto):""}${v.nota?`<span>${esc(v.nota)}</span>`:""}</button>`
+    :`<button class="appunto vuoto" onclick="apriAppunto('${t}',0)">+ Aggiungi un appunto</button>`;
+}
+const GIUDIZI=["Com'è andata?","Male","Così così","Bene","Molto bene","Perfetto"];
+// le stelle si aggiornano sul posto: ridisegnare il diario perderebbe quello che stai scrivendo
+function votaBozza(i){
+  votoBozza=i===votoBozza?0:i;
+  const b=document.querySelector(".appunto-stelle");if(!b)return;
+  b.querySelectorAll("button").forEach((x,k)=>x.classList.toggle("on",k<votoBozza));
+  b.querySelector("span").textContent=GIUDIZI[votoBozza];
+}
+function apriAppunto(t,voto){appuntoAperto=String(t);votoBozza=voto;disegnaDiario();setTimeout(()=>document.getElementById("appunto-testo")?.focus(),50)}
+function apriAppuntoDiOggi(id){
+  const v=diario().find(x=>+x.id===id&&x.data===oggiISO()&&!ruoloStrato(x));if(!v)return;
+  giornoDiario=oggiISO();meseDiario=giornoDiario.slice(0,7);
+  cambiaVista("diario");apriAppunto(v.t,+v.voto||0);
+  document.getElementById("diario-giorno")?.scrollIntoView({block:"start"});
+}
+function salvaAppunto(t,id,data){
+  const nota=(document.getElementById("appunto-testo")?.value||"").trim().slice(0,200);
+  const coda=leggiCoda().filter(o=>!(o.op==="nota"&&String(o.t)===String(t)));
+  coda.push({op:"nota",id,data,t:String(t),nota,voto:votoBozza||""});
+  scriviCoda(coda);appuntoAperto=null;
+  disegnaDiario();dopoDiario(id);sincronizzaDiario();
+}
+// nella scheda: com'e' andato su di te, dagli appunti
+function suDiTe(p){
+  const v=diario().filter(x=>+x.id===p.id&&(x.voto||x.nota)).sort((a,b)=>a.data<b.data?1:-1);
+  if(!v.length)return "";
+  const voti=v.filter(x=>x.voto).map(x=>+x.voto),media=voti.length?voti.reduce((a,b)=>a+b,0)/voti.length:0;
+  const ultima=v.find(x=>x.nota);
+  return `<div class="su-di-te t-stagger-line t-stagger-line--2"><span class="incisa">Su di te</span>
+    ${media?`<span class="su-di-te-voto">${stelle(Math.round(media))}<b>${media.toLocaleString("it-IT",{maximumFractionDigits:1})}</b><small>${voti.length} ${voti.length===1?"volta":"volte"}</small></span>`:""}
+    ${ultima?`<span class="su-di-te-nota">«${esc(ultima.nota)}» <small>${dataLunga(ultima.data)}</small></span>`:""}</div>`;
+}
+
+// ── LA MAPPA OLFATTIVA ────────────────────────────────────────────────────
+/* Tutte le boccette su due assi. In orizzontale da fresco a caldo, dalla
+   forza degli accordi: marino e agrumato da una parte, dolce, cuoio, spezie
+   e ambra dall'altra. In verticale da discreto a potente: la scia
+   (moderata, forte, enorme), la durata e la concentrazione. Le zone vuote sono quelle dove
+   un acquisto aggiungerebbe qualcosa che non hai. */
+let mappaCampioni=false;
+function posizioneOlfattiva(p){
+  const q=profiloAccordi(p);
+  const caldo=q.dolce+q.fumo+q.spezia+q.cipria*.4-(q.acqua+q.agrume+q.bosco*.3);
+  const sil={moderato:.15,forte:.55,enorme:.95}[String(p.sillage||"").toLowerCase()]??.5;
+  const conc={cologne:.1,edc:.1,edt:.4,edp:.65,parfum:.9,extrait:1,elixir:.9}[String(p.conc||"").toLowerCase()]??.5;
+  const forza=.4*sil+.38*Math.max(0,Math.min(1,((p.longevita||6)-4)/7))+.22*conc;
+  return {x:Math.max(0,Math.min(1,(caldo+1)/2)),y:Math.max(0,Math.min(1,forza))};
+}
+function mappaOlfattiva(){
+  const lista=(mappaCampioni?profumi:boccette()).filter(p=>p.accordi&&p.accordi.length);
+  const W=360,H=420,m=34,R=12,X=x=>m+x*(W-2*m),Y=y=>H-m-y*(H-2*m);
+  // ognuno al suo posto, poi un po' di spinta finche' non si coprono piu'
+  const pt=lista.map(p=>{const o=posizioneOlfattiva(p);return {p,x:X(o.x),y:Y(o.y),tx:X(o.x),ty:Y(o.y),o}});
+  for(let k=0;k<160;k++){
+    for(let i=0;i<pt.length;i++)for(let j=i+1;j<pt.length;j++){
+      const a=pt[i],b=pt[j];let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||.01;
+      if(d<2*R+2){const s=(2*R+2-d)/2;dx/=d;dy/=d;a.x-=dx*s;a.y-=dy*s;b.x+=dx*s;b.y+=dy*s}
+    }
+    pt.forEach(a=>{a.x+=(a.tx-a.x)*.04;a.y+=(a.ty-a.y)*.04;a.x=Math.max(m-6,Math.min(W-m+6,a.x));a.y=Math.max(m-6,Math.min(H-m+6,a.y))});
+  }
+  // le nove zone e quante boccette ci cadono
+  const zona=o=>Math.min(2,Math.floor(o.x*3))+3*Math.min(2,Math.floor(o.y*3));
+  const conta=Array(9).fill(0);pt.filter(a=>!eCampione(a.p)).forEach(a=>conta[zona(a.o)]++);
+  const nomiX=["fresche","di mezzo","calde"],nomiY=["discrete","medie","potenti"];
+  let s=`<svg class="mappa" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mappa olfattiva della collezione">`;
+  for(let i=0;i<9;i++){const cx=i%3,cy=Math.floor(i/3),x0=m+cx*(W-2*m)/3,y0=H-m-(cy+1)*(H-2*m)/3;
+    s+=`<rect class="mappa-zona${conta[i]?"":" vuota"}" x="${x0+1}" y="${y0+1}" width="${(W-2*m)/3-2}" height="${(H-2*m)/3-2}" rx="6"/>`;
+    if(!conta[i])s+=`<text class="mappa-vuota" x="${x0+(W-2*m)/6}" y="${y0+(H-2*m)/6+3}">vuota</text>`}
+  s+=`<text class="mappa-asse" x="${m}" y="${H-10}">fresco</text><text class="mappa-asse" x="${W-m}" y="${H-10}" text-anchor="end">caldo</text>
+    <text class="mappa-asse" x="16" y="${H-m}" transform="rotate(-90 16 ${H-m})">discreto</text><text class="mappa-asse" x="16" y="${m}" text-anchor="end" transform="rotate(-90 16 ${m})">potente</text>`;
+  s+=`<defs>${pt.map((a,i)=>`<clipPath id="mp${i}"><circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="${R}"/></clipPath>`).join("")}</defs>`;
+  pt.forEach((a,i)=>{const c=eCampione(a.p);
+    s+=`<g class="mappa-punto${c?" campione":""}" onclick="vaiAlProfumo(${a.p.id})"><title>${esc(a.p.name)}</title>
+      <circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="${R+1.5}" class="mappa-anello"/>
+      ${a.p.img?`<image href="${a.p.img}" x="${(a.x-R*1.25).toFixed(1)}" y="${(a.y-R*1.5).toFixed(1)}" width="${R*2.5}" height="${R*3}" preserveAspectRatio="xMidYMid slice" clip-path="url(#mp${i})"/>`:""}</g>`});
+  s+=`</svg>`;
+  const vuote=[];for(let i=0;i<9;i++)if(!conta[i])vuote.push(`${nomiX[i%3]} e ${nomiY[Math.floor(i/3)]}`);
+  return `<div class="tavola mappa-tavola"><div class="tavola-t incisa">Mappa olfattiva
+      <button class="collegamento mappa-campioni" onclick="mappaCampioni=!mappaCampioni;disegnaNumeri()">${mappaCampioni?"Solo boccette":"Anche i campioni"}</button></div>
+    ${s}<p class="mappa-nota">${vuote.length?`Nessuna boccetta tra le ${vuote.join(", tra le ")}.`:"Ogni zona ha almeno una boccetta."} Tocca un profumo per aprirlo.</p></div>`;
 }
 
 // ── DIARIO ────────────────────────────────────────────────────────────────
@@ -2122,9 +2231,9 @@ function disegnaDiario(){
           <span class="riga-strato"><small>sopra</small><button onclick="vaiAlProfumo(${layG.sopra.id})">${esc(layG.sopra.name)}</button></span>
           <span class="riga-strato"><small>sotto</small><button onclick="vaiAlProfumo(${layG.sotto.id})">${esc(layG.sotto.name)}</button></span></span>
         ${xTogli(layG.sotto,"Togli il layering da questo giorno")}</div>`:""}
-    ${singoli.map(({p})=>`<div class="diario-voce">
+    ${singoli.map(({x,p})=>`<div class="diario-voce">
         <button class="diario-voce-apri" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}<span class="diario-voce-testo"><b>${esc(p.name)}</b><small>${esc(p.brand)}</small></span></button>
-        ${xTogli(p,"Togli "+esc(p.name)+" da questo giorno")}</div>`).join("")}
+        ${xTogli(p,"Togli "+esc(p.name)+" da questo giorno")}</div>${bloccoAppunto(x,p)}`).join("")}
     ${!v.length?`<div class="diario-vuoto">${giornoDiario===oggi?"Oggi non hai ancora segnato niente.":"Niente segnato in questo giorno."}</div>`:""}
     ${pieno&&!sceltaDiario?`<div class="diario-limite">Due profumi al giorno al massimo: per cambiarli, togline uno.</div>`:`<div class="diario-pulsanti">
       <button class="diario-aggiungi${sceltaDiario==="uno"?" aperto":""}" onclick="apriSceltaDiario('uno')"${pieno&&sceltaDiario!=="uno"?" disabled":""}>${sceltaDiario==="uno"?"Chiudi":`${piu}Un profumo`}</button>
