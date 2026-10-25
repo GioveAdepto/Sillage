@@ -555,7 +555,7 @@
   "formatoMl": null,
   "tipoPossesso": "full",
   "numFlaconi": 1,
-  "residuoPct": null,
+  "residuoPct": 50,
   "cloneStato": "",
   "img": "img/armani-swy-absolutely.webp",
   "attivo": "si",
