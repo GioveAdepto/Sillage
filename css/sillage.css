@@ -30,7 +30,9 @@
   --lastra:linear-gradient(168deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.012) 42%,rgba(255,255,255,.035) 100%);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:var(--lacca)}
+/* è un'app installata, non una pagina: niente zoom col doppio tocco (lo scroll resta),
+   e il testo non si ingrandisce da solo quando il telefono si gira */
+html{background:var(--lacca);-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
 body{
   font-family:'Manrope',system-ui,sans-serif;font-weight:400;font-size:16px;
   color:var(--carta);background:var(--lacca);min-height:100dvh;overflow-x:hidden;
@@ -1234,3 +1236,9 @@ img.sfuma.su{opacity:1}
 .storico-mese span{color:var(--carta-3)}
 .storico-dett{font-size:12.5px;color:var(--carta-3);line-height:1.4}
 .storico .tavola-t{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* iOS ingrandisce la pagina quando si tocca un campo con testo sotto i 16px:
+   sui touch i campi di testo vanno a 16, il resto del layout non cambia */
+@media (pointer:coarse){
+  input[type=search],input.diario-cerca{font-size:16px}
+}
