@@ -146,7 +146,7 @@ const usoLabels={ufficio:"Ufficio",quotidiano:"Quotidiano",informale:"Informale"
 const vetroClasse={blu:"acqua",verde:"bosco",rosso:"ambra"};
 const vetroLettera={blu:"A",verde:"V",rosso:"O"};
 const vetroNome={blu:"Acquatici e freschi",verde:"Aromatici e legnosi",rosso:"Orientali e intensi"};
-const etichetteFiltro={pe:"Primavera / Estate",ai:"Autunno / Inverno",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Acquatici",verde:"Legnosi",rosso:"Orientali",sera:"Solo sera",giorno:"Solo giorno",dupe:"Cloni e dupe",adesso:"Adatti adesso"};
+const etichetteFiltro={pe:"Primavera / Estate",ai:"Autunno / Inverno",tutto:"Tutto l'anno",ufficio:"Ufficio",appuntamento:"Appuntamento",quotidiano:"Quotidiano",informale:"Informale",formale:"Formale",palestra:"Palestra",casa:"In casa",festivita:"Festività",blu:"Acquatici",verde:"Legnosi",rosso:"Orientali",sera:"Solo sera",giorno:"Solo giorno",dupe:"Cloni e dupe",adesso:"Adatti adesso",recenti:"Aggiunti di recente"};
 const stagLbl=s=>s==="pe"?"Primavera / Estate":s==="ai"?"Autunno / Inverno":"Tutto l'anno";
 const stagBreve=s=>s==="pe"?"P/E":s==="ai"?"A/I":"tutto l'anno";
 const momLbl=m=>m==="entrambi"?"Giorno e sera":m==="sera"?"Sera":"Giorno";
@@ -179,8 +179,23 @@ const ordinamenti={
   famiglia:{lbl:"Famiglia olfattiva",fn:p=>p.famiglia.toLowerCase()},
   stagione:{lbl:"Stagione",fn:p=>({pe:0,tutto:1,ai:2}[p.stagione]??3)},
   longevita:{lbl:"Longevità più lunga",fn:p=>-(p.longevita||0)},
-  id:{lbl:"Numero di catalogo",fn:p=>p.id}
+  id:{lbl:"Numero di catalogo",fn:p=>p.id},
+  recenti:{lbl:"Aggiunti di recente",fn:p=>-(aggiuntoIl(p)?.getTime()||0)}
 };
+/* Quando un profumo e' entrato in Sillage: la colonna «aggiunto» del foglio.
+   Se la cella e' diventata una data, il foglio la restituisce come la
+   mostra (05/11/2026): si accettano tutte e due le forme. Vuota vuol dire
+   collezione di partenza, quella che c'era prima che Sillage tenesse le date.
+   «Nuovo» dura un mese. */
+const GIORNI_NOVITA=30;
+function aggiuntoIl(p){
+  const t=String(p.aggiunto||"").trim();let m;
+  if((m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)))return new Date(+m[1],m[2]-1,+m[3]);
+  if((m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)))return new Date(+m[3],m[2]-1,+m[1]);
+  return null;
+}
+const eNovita=p=>{const d=aggiuntoIl(p);return !!d&&(Date.now()-d)/864e5<=GIORNI_NOVITA};
+const dataAggiunta=p=>aggiuntoIl(p).toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"});
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
 let filtriAttivi=new Set(), noteAttive=new Set(), testoCerca="", ordine="alpha", noteEspanse=false;

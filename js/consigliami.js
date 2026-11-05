@@ -18,7 +18,8 @@ function disegnaRapidi(){
     scelta("ufficio","","Ufficio")+
     scelta("appuntamento","","Appuntamento")+
     scelta("sera","","Sera")+
-    scelta("dupe","","Cloni");
+    scelta("dupe","","Cloni")+
+    (profumi.some(eNovita)?scelta("recenti","","Novità"):"");
 }
 function disegnaAttivi(){
   const el=document.getElementById("attivi");
@@ -44,7 +45,7 @@ const gruppiFiltro=[
   {t:"Occasione",v:[["ufficio","Ufficio"],["appuntamento","Appuntamento"],["quotidiano","Quotidiano"],["informale","Informale"],["formale","Formale"],["palestra","Palestra"],["casa","In casa"],["festivita","Festività"]]},
   {t:"Famiglia",v:[["blu","Acquatici e freschi"],["verde","Aromatici e legnosi"],["rosso","Orientali e intensi"]]},
   {t:"Momento",v:[["giorno","Solo giorno"],["sera","Solo sera"],["adesso","Adatti adesso"]]},
-  {t:"Provenienza",v:[["dupe","Cloni e dupe"]]}
+  {t:"Provenienza",v:[["dupe","Cloni e dupe"],["recenti","Aggiunti di recente"]]}
 ];
 function costruisciFoglio(){
   let h="";

@@ -1225,3 +1225,12 @@ img.sfuma.su{opacity:1}
 .su-di-te-uso b{font-weight:600;color:var(--carta)}
 .su-di-te-uso small{font-size:11px;color:var(--carta-3)}
 .diario-riga .collegamento{font-size:13px}
+
+/* novita': targhetta «Nuovo» e storico delle aggiunte */
+.targa.novita{color:var(--lacca);background:var(--ottone);border:1px solid var(--ottone);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:10px}
+.clone-nome .targa.novita{vertical-align:2px;margin-left:6px;padding:1px 6px}
+.storico-mese{display:flex;justify-content:space-between;margin:18px 0 4px}
+.tavola-t + .storico-mese{margin-top:0}
+.storico-mese span{color:var(--carta-3)}
+.storico-dett{font-size:12.5px;color:var(--carta-3);line-height:1.4}
+.storico .tavola-t{display:flex;align-items:center;justify-content:space-between;gap:12px}
