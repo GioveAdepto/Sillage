@@ -208,3 +208,8 @@ async function avvia() {
   }
 }
 avvia();
+
+// iOS ignora user-scalable=no: il pinch si ferma qui. Solo gesture* (eventi
+// di Safari per due dita), così scroll e tocchi normali non sono toccati.
+["gesturestart","gesturechange"].forEach(t =>
+  document.addEventListener(t, e => e.preventDefault(), { passive: false }));
