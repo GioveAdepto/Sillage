@@ -1,6 +1,11 @@
 [
  {
   "tab": "Profumi",
+  "colonna": "aggiunto",
+  "perche": "data in cui il profumo è entrato in Sillage (AAAA-MM-GG); vuota = collezione di partenza"
+ },
+ {
+  "tab": "Profumi",
   "chiave": "id",
   "valore": "39",
   "perche": "acquisto novembre 2026: Yves Saint Laurent Muse 35 ml",

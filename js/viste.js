@@ -394,6 +394,7 @@ function disegnaNumeri(){
     return `<button class="clone" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}
       <span class="clone-testo"><span class="clone-nome">${esc(p.name)}</span>
       <span class="clone-orig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>${esc(p.dupe.split(" (")[0])}${o?` <em>${eCampione(o)?"campione in casa":"in casa"}</em>`:""}</span></span></button>`}).join("")}</div>`;
+  h+=storicoAggiunte();
   // il diario conta tutto quello che indossi, campioni compresi; "da
   // riprendere" invece guarda solo le boccette: un 2 ml non si riprende
   const D=diario().filter(v=>profumi.some(p=>p.id===+v.id));
@@ -415,6 +416,27 @@ function disegnaNumeri(){
   h+=`</div></div>`+collegamentoProfilo;
   document.getElementById("vista-numeri").innerHTML=h;
 }
+
+/* Lo storico delle aggiunte: boccette e campioni, dal piu' recente, a
+   gruppi di mese. Chi non ha la data sta in fondo come collezione di
+   partenza. Un tocco apre la scheda. */
+function storicoAggiunte(){
+  const datati=profumi.filter(aggiuntoIl).sort((a,b)=>aggiuntoIl(b)-aggiuntoIl(a)||a.id-b.id);
+  if(!datati.length)return "";
+  const partenza=profumi.filter(p=>!aggiuntoIl(p)).length,mesi=new Map();
+  datati.forEach(p=>{const k=maiuscola(aggiuntoIl(p).toLocaleDateString("it-IT",{month:"long",year:"numeric"}));
+    if(!mesi.has(k))mesi.set(k,[]);mesi.get(k).push(p)});
+  const n=profumi.filter(eNovita).length;
+  let h=`<div class="tavola storico" id="storico"><div class="tavola-t incisa">Storico aggiunte${n?`<button class="collegamento diario-apri" onclick="vediNovita()">Le ${n} novità →</button>`:""}</div>`;
+  mesi.forEach((lista,mese)=>{
+    h+=`<div class="incisa storico-mese">${mese}<span>${lista.length}</span></div>`+lista.map(p=>`<button class="clone" onclick="vaiAlProfumo(${p.id})">${miniatura(p)}
+      <span class="clone-testo"><span class="clone-nome">${esc(p.name)}${eNovita(p)?` <span class="targa novita">Nuovo</span>`:""}</span>
+      <span class="storico-dett">${esc(p.brand)} · ${eCampione(p)?`campione${p.formatoMl?` ${p.formatoMl} ml`:""}`:`${p.conc}${p.formatoMl?` · ${p.formatoMl} ml`:""}`} · ${aggiuntoIl(p).getDate()} ${aggiuntoIl(p).toLocaleDateString("it-IT",{month:"short"})}</span></span></button>`).join("");
+  });
+  if(partenza)h+=`<div class="tavola-nota">Più ${partenza} dalla collezione di partenza, senza data.</div>`;
+  return h+`</div>`;
+}
+function vediNovita(){filtriAttivi.clear();noteAttive.clear();filtriAttivi.add("recenti");cambiaVista("collezione");disegna()}
 
 /* Il diario per stagione (della data, non del profumo): cosa porti di piu'
    d'inverno, in primavera, d'estate, d'autunno. E la rotazione del mese:

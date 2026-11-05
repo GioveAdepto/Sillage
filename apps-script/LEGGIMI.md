@@ -152,6 +152,14 @@ Attenzione a `serata`: **non** è `appuntamento`. Sono due colonne distinte e su
 4 profumi danno risposte diverse (Helan, Terre d'Hermès, Acqua di Giò, CdN
 Sillage); l'app legge `appuntamento`.
 
+## La colonna `aggiunto`
+
+Data in cui un profumo è entrato in Sillage, `AAAA-MM-GG`. Se il foglio la
+trasforma in una data e la mostra come `05/11/2026` va bene lo stesso: l'app
+legge tutte e due le forme. Vuota vuol dire collezione di partenza. Per un
+mese dalla data il profumo porta la targhetta «Nuovo», risponde al filtro
+«Aggiunti di recente» e compare in cima allo storico, in Numeri.
+
 ## Il diario d'uso
 
 `Diario.gs` tiene la tab **Diario**: una riga per ogni volta che indossi un

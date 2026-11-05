@@ -30,6 +30,7 @@ function passa(p,filtri,note){
     if(f==="sera"&&p.momento!=="sera")return false;
     if(f==="giorno"&&p.momento!=="giorno")return false;
     if(f==="dupe"&&!p.dupe)return false;
+    if(f==="recenti"&&!eNovita(p))return false;
   }
   if(note.size){
     let trovata=false;
@@ -650,6 +651,7 @@ function costruisciTeca(p,i){
           <div class="riga-marca"><span class="marca">${esc(p.brand)}</span><span class="catalogo">№ ${numeroDi(p.id)}</span></div>
           <h2 class="nome">${esc(p.name)}</h2>
           <div class="targhette">
+            ${eNovita(p)?`<span class="targa novita" title="In collezione dal ${dataAggiunta(p)}">Nuovo</span>`:""}
             <span class="targa grado">${p.conc}${formato(p)}</span>
             <span class="targa voto"${p.voti?` title="${Number(p.voti).toLocaleString("it-IT")} voti su Fragrantica"`:""}>${p.rating?`★ ${voto(p.rating)}${p.voti?`<small>${recensioni(p.voti)}</small>`:""}`:"★ n.d."}</span>
             ${p.dupe?`<span class="targa copia">Copia di ${esc(p.dupe.split(" (")[0])}</span>`:""}
