@@ -6,9 +6,9 @@
      scarica la nuova (i link a CSS e JS portano ?v=, quindi una versione
      nuova è un indirizzo nuovo e non resta mai indietro);
    - i font di Google: dalla copia, cambiano di rado;
-   - il foglio Google e il meteo passano dritti: sono dati vivi, e l'app ha
+   - il ponte verso il database, il foglio Google e il meteo passano dritti: sono dati vivi, e l'app ha
      già la sua cache per quando mancano. */
-const CASSA = "sillage-v2";
+const CASSA = "sillage-v3";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CASSA).then(c => c.addAll(["./", "manifest.webmanifest", "img/icona-192.png"])));
@@ -41,7 +41,9 @@ self.addEventListener("fetch", e => {
   }
   // il controllo della versione nuova deve vedere la pagina pubblicata, non la copia
   if (u.searchParams.has("controllo")) return;
+  // il ponte verso il database (anche quando il sito è servito da Cloudflare) è un dato vivo
+  if (u.pathname === "/api" || u.pathname.startsWith("/api/")) return;
   if (u.origin === location.origin) { e.respondWith(dallaCopia(req, true)); return; }
   if (/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)) { e.respondWith(dallaCopia(req, false)); return; }
-  // tutto il resto (foglio Google, meteo) non si tocca
+  // tutto il resto (il ponte, il foglio Google, il meteo) non si tocca
 });

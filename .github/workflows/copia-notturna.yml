@@ -1,4 +1,5 @@
-# Ogni notte rilegge il foglio Google (attraverso il Web App, in sola lettura)
+# Ogni notte rilegge i dati dal ponte verso il database (ponte/LEGGIMI.md: il
+# catalogo arriva dal foglio Google, diario e residuo li comanda il database)
 # e aggiorna la copia in data/*.json: e' il ripiego del sito quando il foglio
 # non risponde, e la cronologia di git diventa uno storico giornaliero dei dati.
 # Si fa un commit solo se qualcosa e' cambiato. Parte anche quando cambia
@@ -33,7 +34,8 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, time, urllib.parse, urllib.request, urllib.error
-          U = "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec?fresco=1"
+          # il ponte verso il database: da quando comanda il database, l'originale del diario e' li'
+          U = "https://sillage.danilo-moro96.workers.dev/api"
           CHIAVE = os.environ.get("SILLAGE_CHIAVE", "").strip()
           # Google tratta male i client senza nome: ci si presenta come un browser
           testa = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36",
@@ -41,7 +43,7 @@ jobs:
 
           def chiedi(corpo=None):
               """GET, o POST con i campi in `corpo`. Tre tentativi; None se il foglio non risponde.
-              Il POST del Web App risponde con un rinvio, che urllib segue come GET: e' quello giusto."""
+              Il ponte risponde direttamente; il Web App del foglio rispondeva con un rinvio, che urllib segue."""
               ultimo = ""
               dati = urllib.parse.urlencode(corpo).encode() if corpo else None
               for tentativo in range(1, 4):
@@ -70,7 +72,7 @@ jobs:
                       f.write(json.dumps(d[k], ensure_ascii=False, indent=1) + "\n")
           print(len(d["profumi"]), "profumi")
 
-          # il diario: lo script vecchio lo dava a tutti, quello nuovo solo con la chiave
+          # il diario: si legge solo con la chiave
           if not CHIAVE:
               print("diario saltato: manca il segreto SILLAGE_CHIAVE")
           else:
