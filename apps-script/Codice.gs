@@ -13,6 +13,12 @@
  *           dall'editor. Scrive solo quello che sta in data/aggiunte.json e
  *           data/correzioni.json su main, con le stesse guardie di sempre.
  *           Con azione=leggi e la chiave giusta restituisce tutto, diario compreso.
+ *           Con azione=grezzo e azione=specchio (con la chiave) il database
+ *           legge le tab cosi' come sono e le riscrive: vedi in fondo.
+ *
+ * DA NOVEMBRE 2026 L'ORIGINALE E' IL DATABASE (ponte/LEGGIMI.md): questo
+ * foglio ne e' una copia, riscritta dopo ogni modifica. Quello che cambi a
+ * mano qui viene sovrascritto alla copia successiva.
  *
  * LA CHIAVE. Il link del Web App e' scritto nel codice dell'app, e il repo e'
  * pubblico: chiunque puo' trovarlo. Per questo il diario si legge e si scrive,
@@ -211,6 +217,15 @@ function doPost(e) {
     var corpo = corpo_(e);
     return json_(chiaveGiusta_(e) ? corpo : senzaDiario_(corpo));
   }
+  if (azione === 'grezzo' || azione === 'specchio') {
+    if (!chiaveGiusta_(e)) return json_(JSON.stringify(SENZA_CHIAVE));
+    if (azione === 'grezzo') return json_(JSON.stringify(grezzo_()));
+    var l = LockService.getScriptLock();
+    l.waitLock(30000);
+    try { esito = specchio_(JSON.parse(e.parameter.dati || '{}')); }
+    finally { l.releaseLock(); }
+    return json_(JSON.stringify(esito));
+  }
   if (['applica', 'diario', 'residuo'].indexOf(azione) < 0) {
     esito = { errore: 'azione sconosciuta: ' + azione };
   } else if (azione !== 'applica' && !chiaveGiusta_(e)) {
@@ -261,6 +276,58 @@ function valoreFoglio_(v) {
     riga appena aggiunta. Poi via la cache, così l'app vede subito il foglio. */
 function applica() {
   var esito = { aggiunte: aggiungi(), correzioni: correggi() };
+  CacheService.getScriptCache().remove('dati');
+  return esito;
+}
+
+// ── IL FOGLIO COME COPIA DEL DATABASE ─────────────────────────────────────
+/* Da quando l'originale e' il database (ponte/LEGGIMI.md), il foglio ne e'
+   una copia da guardare. Due azioni, tutte e due con la chiave:
+   azione=grezzo    le tab di Sillage cosi' come sono, colonna per colonna:
+                    serve una volta, per portare il foglio nel database.
+   azione=specchio  riscrive le tab con quello che manda il database
+                    (dati = {tabs: {Nome: {colonne, righe}}}). Le colonne del
+                    foglio restano dove sono, quelle nuove vanno in fondo.
+                    Tutto viene scritto come testo semplice: niente decimali
+                    che diventano orari. */
+var TAB_SPECCHIO = ['Profumi', 'Layering', 'Consigli', 'ConsigliVoci', 'Note', 'Diario'];
+
+function grezzo_() {
+  var ss = SpreadsheetApp.getActive(), tabs = {};
+  TAB_SPECCHIO.forEach(function (nome) {
+    var f = ss.getSheetByName(nome);
+    if (!f || !f.getLastColumn()) return;
+    var testa = f.getRange(1, 1, 1, f.getLastColumn()).getDisplayValues()[0]
+      .map(function (c) { return String(c).trim(); });
+    tabs[nome] = { colonne: testa.filter(function (c) { return c; }), righe: righe_(nome) };
+  });
+  return { ok: true, tabs: tabs };
+}
+
+function specchio_(d) {
+  var ss = SpreadsheetApp.getActive(), esito = { ok: true, tab: {} };
+  Object.keys((d && d.tabs) || {}).forEach(function (nome) {
+    var t = d.tabs[nome];
+    if (TAB_SPECCHIO.indexOf(nome) < 0 || !t || !Array.isArray(t.righe)) return;
+    // un database vuoto per errore non deve svuotare il foglio
+    if (nome === TAB.profumi && !t.righe.length) { esito.tab[nome] = 'saltata: nessun profumo'; return; }
+    var f = ss.getSheetByName(nome) || ss.insertSheet(nome);
+    var larga = f.getLastColumn();
+    var testa = larga ? f.getRange(1, 1, 1, larga).getDisplayValues()[0]
+      .map(function (c) { return String(c).trim(); }) : [];
+    (t.colonne || []).forEach(function (c) { if (c && testa.indexOf(c) < 0) testa.push(c); });
+    var valori = t.righe.map(function (r) {
+      return testa.map(function (c) {
+        var v = c ? r[c] : '';
+        return v === undefined || v === null ? '' : String(v);
+      });
+    });
+    f.getRange(1, 1, 1, testa.length).setValues([testa]).setFontWeight('bold');
+    var ultima = f.getLastRow();
+    if (ultima > 1) f.getRange(2, 1, ultima - 1, Math.max(testa.length, larga)).clearContent();
+    if (valori.length) f.getRange(2, 1, valori.length, testa.length).setNumberFormat('@').setValues(valori);
+    esito.tab[nome] = valori.length;
+  });
   CacheService.getScriptCache().remove('dati');
   return esito;
 }

@@ -20,7 +20,8 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "sillage" }
   ],
-  // Ogni 5 minuti il ponte rilegge il foglio e manda al foglio quello che gli manca.
+  // Ogni 5 minuti il ponte riprova la copia nel foglio, se una non è andata;
+  // una volta al giorno la rifà comunque.
   "triggers": {
     "crons": ["*/5 * * * *"]
   },
@@ -28,11 +29,8 @@
   // anche dopo ogni pubblicazione: senza, Cloudflare cancellerebbe quelle di tipo Text.
   "keep_vars": true,
   "vars": {
-    // Il Web App del foglio: il ponte lo usa per leggere il foglio e per copiarci diario e residuo.
-    "FOGLIO_URL": "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
-    // "foglio": comanda il foglio, il database ne è una copia. "database": diario e
-    // residuo li comanda il database, il foglio ne riceve una copia. Vedi ponte/LEGGIMI.md.
-    "PADRONE": "database"
+    // Il Web App del foglio: il ponte ci riscrive la copia del catalogo e del diario.
+    "FOGLIO_URL": "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec"
   }
   // La chiave di Sillage è un segreto (SILLAGE_CHIAVE), impostato nel pannello di
   // Cloudflare: Workers ▸ sillage ▸ Settings ▸ Variables and Secrets.

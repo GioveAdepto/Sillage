@@ -19,11 +19,11 @@ di immagini in base64. Ora `index.html` pesa 5,6 KB.
 
 ## Da dove arrivano i dati
 
-Sorgente di verità è il foglio Google **sillage-profumi**, pubblicato in JSON da
-Apps Script — istruzioni in [`apps-script/LEGGIMI.md`](apps-script/LEGGIMI.md).
-`data/*.json` ne è una copia versionata: l'app la usa quando il backend non
-risponde, o finché `ORIGINE_DATI.appsScript` in [`js/app.js`](js/app.js) resta
-vuoto.
+L'originale è il **database** su Cloudflare, dietro il ponte
+[`ponte/ponte.js`](ponte/ponte.js) — istruzioni in [`ponte/LEGGIMI.md`](ponte/LEGGIMI.md).
+Il foglio Google **sillage-profumi** ne è una copia da guardare, riscritta
+dopo ogni modifica. `data/*.json` è la copia notturna versionata: l'app la usa
+quando il ponte non risponde.
 
 Le immagini restano file nel repo, non passano dal foglio: il foglio contiene
 solo il percorso, nella colonna `img`.
