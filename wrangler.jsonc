@@ -29,7 +29,7 @@
     "FOGLIO_URL": "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
     // "foglio": comanda il foglio, il database ne è una copia. "database": diario e
     // residuo li comanda il database, il foglio ne riceve una copia. Vedi ponte/LEGGIMI.md.
-    "PADRONE": "foglio"
+    "PADRONE": "database"
   }
   // La chiave di Sillage è un segreto (SILLAGE_CHIAVE), impostato nel pannello di
   // Cloudflare: Workers ▸ sillage ▸ Settings ▸ Variables and Secrets.

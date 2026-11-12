@@ -10,10 +10,13 @@
    fossero un file solo. */
 
 // ── ORIGINE DEI DATI ──────────────────────────────────────────────────────
-// appsScript: l'URL .../exec del Web App (istruzioni in apps-script/LEGGIMI.md).
-//             Se resta vuoto, l'app legge soltanto i JSON del repo.
+// appsScript: dove l'app legge e scrive. Oggi è il ponte verso il database
+//             (ponte/LEGGIMI.md), che parla come il Web App del foglio: per
+//             tornare al foglio basta rimettere qui l'URL .../exec del Web App
+//             (apps-script/LEGGIMI.md). Se resta vuoto, l'app legge soltanto i
+//             JSON del repo. Il nome resta quello di prima: lo usano tutti i file.
 const ORIGINE_DATI = {
-  appsScript: "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
+  appsScript: "https://sillage.danilo-moro96.workers.dev/api",
   locale: "data/",
   attesaMax: 8000            // ms oltre i quali si rinuncia al backend remoto
 };
