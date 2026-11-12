@@ -1,0 +1,76 @@
+/* ——— Altro (indice) e pagine in allestimento ——— */
+.indice,
+.segnaposto {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.indice-voci {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.indice-voci li {
+  border-bottom: 1px solid var(--filo);
+}
+.indice-voce {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 18px;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px 0;
+}
+.indice-testo {
+  display: grid;
+  gap: 4px;
+}
+.indice-testo b {
+  font: 500 24px/1 var(--f-maison);
+}
+.indice-testo span {
+  font: 400 13px/1.3 var(--f-dati);
+  color: var(--seppia);
+}
+.indice-tappa {
+  font: italic 500 14px/1 var(--f-maison);
+  color: var(--ottone-testo);
+  white-space: nowrap;
+}
+.indice-freccia {
+  width: 18px;
+  height: 18px;
+  color: var(--seppia);
+}
+@media (hover: hover) {
+  .indice-voce:hover b {
+    color: var(--ottone-testo);
+  }
+}
+
+.elenco-arrivo {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--filo);
+}
+.elenco-arrivo li {
+  position: relative;
+  padding: 11px 0 10px 22px;
+  border-bottom: 1px solid var(--filo-2);
+  font: italic 400 19px/1.3 var(--f-maison);
+}
+.elenco-arrivo li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 19px;
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  background: var(--ottone);
+}
+.origine {
+  margin: 22px 0 0;
+  font: 400 12px/1.45 var(--f-dati);
+  color: var(--cenere);
+}

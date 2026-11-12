@@ -1,0 +1,395 @@
+/* ——— Collezione: testata, vetrine, ricerca, filtri, mensole con i cartellini appesi ——— */
+.maison {
+  display: grid;
+  gap: 12px;
+}
+.maison .riga {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+}
+.marchio {
+  margin: 4px -0.26em 0 0;
+  font: 500 36px/0.9 var(--f-maison);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+.conta {
+  margin: 0;
+  font: 400 12.5px/1.2 var(--f-dati);
+  color: var(--seppia);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.conta b {
+  display: block;
+  font: 500 22px/1 var(--f-maison);
+  color: var(--inchiostro);
+}
+
+/* Boccette / Campioni: due vetrine, un filo d'ottone sotto quella aperta */
+.vetrine {
+  display: flex;
+  gap: 22px;
+  margin-top: 2px;
+}
+.vetrina-bottone {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 500 21px/1 var(--f-maison);
+  color: var(--cenere);
+  transition: color 250ms var(--curva);
+}
+.vetrina-bottone small {
+  font: 400 12px/1 var(--f-dati);
+  font-variant-numeric: tabular-nums;
+}
+.vetrina-bottone[aria-pressed="true"] {
+  color: var(--inchiostro);
+}
+.vetrina-bottone::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 1px;
+  background: var(--ottone);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 450ms var(--curva);
+}
+.vetrina-bottone[aria-pressed="true"]::after {
+  transform: none;
+}
+
+.cerca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  border-bottom: 1px solid var(--filo-3);
+}
+.cerca:focus-within {
+  border-bottom-color: var(--ottone-testo);
+}
+.cerca > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--seppia);
+}
+.cerca input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: 400 16px var(--f-dati);
+  color: var(--inchiostro);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cerca input::-webkit-search-cancel-button {
+  display: none;
+}
+.cerca input::placeholder {
+  color: var(--cenere);
+}
+.cerca-via {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-right: -8px;
+  border: 0;
+  background: none;
+  color: var(--seppia);
+  cursor: pointer;
+}
+.cerca-via svg {
+  width: 16px;
+  height: 16px;
+}
+
+.filtri {
+  min-width: 0;
+  margin: 2px calc(-1 * var(--margine)) 0;
+  padding: 0 var(--margine) 2px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filtri::-webkit-scrollbar {
+  display: none;
+}
+.chip .gemma {
+  display: block;
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  background: currentColor;
+}
+.chip-blu .gemma {
+  background: var(--acqua);
+}
+.chip-verde .gemma {
+  background: var(--bosco);
+}
+.chip-rosso .gemma {
+  background: var(--ambra);
+}
+.chip-adesso {
+  margin-left: 6px;
+}
+.chip-adesso::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--filo);
+}
+
+.registro {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 22px 0 0;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--filo);
+}
+.registro span {
+  font: 400 12px/1.2 var(--f-dati);
+  color: var(--seppia);
+  letter-spacing: 0.04em;
+}
+
+/* le mensole: ogni riga è un ripiano di pietra col filo d'ottone sul bordo */
+.scaffale {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: 30px;
+  margin: 6px calc(-1 * var(--margine)) 0;
+}
+@media (min-width: 600px) {
+  .scaffale {
+    grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
+    margin: 6px 0 0;
+  }
+}
+.voce {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  justify-items: center;
+  padding: 0 12px;
+  color: inherit;
+  scroll-margin: 80px 0 120px;
+}
+.voce .nicchia {
+  position: relative;
+  z-index: 1;
+  justify-self: stretch;
+  margin: 0 -12px;
+  height: 184px;
+  display: grid;
+  place-items: end center;
+  background: radial-gradient(52% 82% at 50% 0%, var(--faro) 0, var(--faro-mezzo) 45%, var(--faro-0) 78%);
+}
+.voce .nicchia::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: -6px;
+  width: 104px;
+  height: 12px;
+  margin-left: -52px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--ombra), transparent);
+}
+.scaffale.prima-volta .bottiglia {
+  animation: posa 900ms var(--curva) both;
+  animation-delay: calc(150ms + var(--i, 0) * 80ms);
+}
+.mensola {
+  position: relative;
+  z-index: 0;
+  justify-self: stretch;
+  margin: 0 -12px;
+  height: 15px;
+  background: linear-gradient(
+    180deg,
+    var(--mensola-sopra) 0 6px,
+    var(--ottone) 6px 7px,
+    var(--mensola-fronte) 7px 14px,
+    var(--mensola-sotto) 14px 15px
+  );
+  box-shadow: 0 14px 16px -14px var(--ombra-lunga);
+}
+.cartellino {
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 8px 11px;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  text-align: center;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+}
+/* il filo d'ottone a cui è appeso */
+.cartellino::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -15px;
+  width: 1px;
+  height: 14px;
+  background: var(--ottone);
+}
+.c-nr {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: italic 500 14px/1 var(--f-maison);
+  color: var(--ottone-testo);
+  letter-spacing: 0.05em;
+}
+.c-nr i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  background: currentColor;
+}
+.blu .c-nr i {
+  background: var(--acqua);
+}
+.verde .c-nr i {
+  background: var(--bosco);
+}
+.rosso .c-nr i {
+  background: var(--ambra);
+}
+.novita {
+  padding: 2px 5px 1px;
+  border: 1px solid var(--ottone);
+  font: 500 8.5px/1.1 var(--f-dati);
+  font-style: normal;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.marca {
+  margin: 5px 0 0;
+  font: 500 10px/1.3 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.nome {
+  margin: 0;
+  font: 500 20px/1.05 var(--f-maison);
+  color: var(--inchiostro);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.dati {
+  margin: 1px 0 0;
+  font: 400 12px/1.35 var(--f-dati);
+  color: var(--seppia);
+}
+.voto {
+  margin: 5px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--filo-2);
+  font: 400 11.5px/1 var(--f-dati);
+  color: var(--seppia);
+  font-variant-numeric: tabular-nums;
+}
+.voto b {
+  font: 600 16px/1 var(--f-maison);
+  color: var(--inchiostro);
+}
+@media (hover: hover) {
+  .voce:hover .bottiglia {
+    translate: 0 -4px;
+  }
+}
+.voce:focus-visible {
+  outline-offset: -2px;
+}
+
+/* arrivo da un'altra pagina: la teca resta chiusa e si illumina */
+.voce.ancorata .cartellino {
+  animation: bagliore 2600ms var(--curva) both;
+}
+.voce.ancorata .nicchia::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(40% 70% at 50% 10%, var(--faro), var(--faro-0) 80%);
+  animation: faro-acceso 2600ms var(--curva) both;
+}
+@keyframes bagliore {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  20%,
+  65% {
+    box-shadow:
+      0 0 0 1px var(--ottone),
+      0 0 22px 2px var(--bagliore);
+  }
+}
+@keyframes faro-acceso {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  65% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* senza animazioni il bagliore resta acceso finché dura */
+  .voce.ancorata .cartellino {
+    box-shadow:
+      0 0 0 1px var(--ottone),
+      0 0 22px 2px var(--bagliore);
+  }
+}
+
+/* in attesa dei dati, o vetrina vuota */
+.attesa {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+}
+.attesa .btn-filo {
+  justify-self: start;
+}
+.vuoto {
+  padding: 28px 0;
+}

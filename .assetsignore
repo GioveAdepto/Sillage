@@ -7,3 +7,5 @@ node_modules
 ponte
 prove
 *.md
+# la nuova app in React: non fa parte del sito di oggi
+app

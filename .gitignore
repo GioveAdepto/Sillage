@@ -15,3 +15,7 @@ sillage-placeholder.svg
 
 # report generati in locale, non fanno parte del sito
 report/
+
+# la nuova app (app/): pacchetti e build si rifanno con npm
+app/node_modules/
+app/dist/

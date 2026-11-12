@@ -22,6 +22,7 @@ img/*.webp            41 flaconi, 176×208, più il segnaposto; img/avvio le sch
 ponte/                il Worker con il database (ponte.js, applica.mjs)
 apps-script/          lo script del foglio Google, oggi una copia
 prove/prova.mjs       prove Playwright lanciate da .github/workflows/prova.yml
+app/                  la nuova app in React + TypeScript, non ancora pubblicata (app/LEGGIMI.md)
 ```
 
 I sei script sono classici (niente moduli): si caricano in quest'ordine e

@@ -14,6 +14,7 @@ Questo file si carica a ogni sessione: resta corto. I dettagli stanno qui, da ap
 | colori, componenti, animazioni: prima di disegnare o cambiare CSS | `DESIGN.md` |
 | database, ponte, indirizzi `/api`, come applicare modifiche, tornare indietro | `ponte/LEGGIMI.md` |
 | foglio Google, Apps Script, chiave, diario cifrato (storia e via di ritorno) | `apps-script/LEGGIMI.md` |
+| la nuova app in React + TypeScript (`app/`, non ancora pubblicata): avvio, pagine, tappe | `app/LEGGIMI.md` |
 
 A ogni modifica aggiorna, nello stesso commit, il `.md` che la descrive. Se un `.md` dice una cosa non
 più vera, correggila subito.

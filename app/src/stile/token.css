@@ -1,0 +1,111 @@
+/* Boutique di nicchia: una maison a Milano. Di giorno travertino e avorio, la sera la stessa pietra in penombra.
+   Fili d'ottone sottili; le boccette su mensole e piedistalli di pietra, sotto un faretto, con la loro ombra.
+   Tutti i colori sono variabili: il tema scuro cambia solo i valori, mai i componenti.
+   Il tema segue l'iPhone (prefers-color-scheme): nessun interruttore salvato.
+   Valori presi dall'anteprima D, prima versione (Main.dc.html della tela). */
+:root {
+  color-scheme: light;
+  --fondo-pagina: #e9e1d3;
+  --parete: #f1ebe0;
+  --avorio: #f9f6ef;
+  --bordo-carta: #ddd2c0;
+  --cornice: #d3c7b3;
+  --inchiostro: #2a241d;
+  --seppia: #55493b;
+  --cenere: #6e6151;
+  --su-inchiostro: #f9f6ef;
+  --su-inchiostro-2: #d9cbb0;
+  --ottone: #a88748;
+  --ottone-pieno: #8a6a31;
+  --ottone-testo: #6b5226;
+  --acqua: #3f5f78;
+  --bosco: #56663f;
+  --ambra: #8c4f2c;
+  --filo: rgba(42, 36, 29, 0.22);
+  --filo-2: rgba(42, 36, 29, 0.11);
+  --filo-3: rgba(42, 36, 29, 0.35);
+  --vena: rgba(140, 112, 72, 0.045);
+  --vena-2: rgba(140, 112, 72, 0.03);
+  --faro: rgba(255, 252, 245, 0.98);
+  --faro-mezzo: rgba(255, 252, 245, 0.5);
+  --faro-0: rgba(255, 252, 245, 0);
+  --fascio: rgba(255, 251, 240, 0.95);
+  --alone: rgba(255, 252, 246, 0.95);
+  --mensola-sopra: #faf6ee;
+  --mensola-fronte: #e4d9c6;
+  --mensola-sotto: #cbbda6;
+  --plinto-sopra: #faf6ee;
+  --plinto-a: #d8cbb4;
+  --plinto-b: #e6dccb;
+  --plinto-c: #eae1d1;
+  --plinto-d: #d3c5ad;
+  --plinto-vena: rgba(130, 104, 66, 0.07);
+  --pavimento: rgba(203, 189, 166, 0.35);
+  --ombra: rgba(52, 38, 20, 0.42);
+  --ombra-lunga: rgba(70, 52, 28, 0.45);
+  --ombra-tel: rgba(70, 52, 28, 0.5);
+  --bordo-luce: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
+  --faretto: #3a3129;
+  --giorno: #e5d6b4;
+  --timone: rgba(246, 241, 232, 0.95);
+  --chip: rgba(249, 246, 239, 0.7);
+  --bagliore: rgba(168, 135, 72, 0.55);
+
+  --f-maison: "Cormorant Garamond", "Cormorant", "Didot", "Bodoni 72", Georgia, serif;
+  --f-dati: "Jost", "Futura", "Avenir Next", "Century Gothic", sans-serif;
+  --curva: cubic-bezier(0.22, 1, 0.36, 1);
+  --margine: 20px;
+  --altezza-timone: 64px;
+}
+
+/* la sera: stessa pietra in penombra, ottone più chiaro, faretti caldi */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fondo-pagina: #110f0c;
+    --parete: #1a1714;
+    --avorio: #24201b;
+    --bordo-carta: #3a332b;
+    --cornice: #3a332b;
+    --inchiostro: #efe7d8;
+    --seppia: #c7bba8;
+    --cenere: #a3978a;
+    --su-inchiostro: #1a1714;
+    --su-inchiostro-2: #55493b;
+    --ottone: #b8975a;
+    --ottone-pieno: #c9a866;
+    --ottone-testo: #d9bc7e;
+    --acqua: #8fb2cf;
+    --bosco: #a3bc8e;
+    --ambra: #d9a07c;
+    --filo: rgba(239, 231, 216, 0.2);
+    --filo-2: rgba(239, 231, 216, 0.09);
+    --filo-3: rgba(239, 231, 216, 0.3);
+    --vena: rgba(255, 232, 190, 0.028);
+    --vena-2: rgba(255, 232, 190, 0.018);
+    --faro: rgba(255, 224, 168, 0.2);
+    --faro-mezzo: rgba(255, 224, 168, 0.08);
+    --faro-0: rgba(255, 224, 168, 0);
+    --fascio: rgba(255, 224, 168, 0.17);
+    --alone: rgba(255, 224, 168, 0.13);
+    --mensola-sopra: #433b32;
+    --mensola-fronte: #2c2620;
+    --mensola-sotto: #1c1814;
+    --plinto-sopra: #4a4137;
+    --plinto-a: #26201b;
+    --plinto-b: #342d26;
+    --plinto-c: #3a322a;
+    --plinto-d: #231e19;
+    --plinto-vena: rgba(255, 232, 190, 0.04);
+    --pavimento: rgba(0, 0, 0, 0.3);
+    --ombra: rgba(0, 0, 0, 0.75);
+    --ombra-lunga: rgba(0, 0, 0, 0.7);
+    --ombra-tel: rgba(0, 0, 0, 0.8);
+    --bordo-luce: drop-shadow(0 0 1px rgba(255, 236, 200, 0.4));
+    --faretto: #0d0b09;
+    --giorno: #8c7a57;
+    --timone: rgba(26, 23, 20, 0.95);
+    --chip: rgba(36, 32, 27, 0.8);
+    --bagliore: rgba(201, 168, 102, 0.5);
+  }
+}
