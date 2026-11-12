@@ -154,6 +154,8 @@ function disegnaDiario(){
   const conta=new Map();delMese.forEach(v=>conta.set(+v.id,(conta.get(+v.id)||0)+1));
   const top=[...conta.entries()].sort((a,b)=>b[1]-a[1])[0],pTop=top&&profumi.find(p=>p.id===top[0]);
   let h=intesta("Diario","Cosa hai indossato, giorno per giorno. Tocca un giorno per vederlo, o per segnare quello che avevi addosso.");
+  if(serveChiave)h+=`<div class="diario-chiave">Per salvare il diario nel foglio serve la chiave di Sillage. Finché manca, quello che segni resta sul telefono.
+    <button class="collegamento" onclick="inserisciChiave()">Inserisci la chiave</button></div>`;
   h+=settimanaHTML();
   h+=`<div class="diario-griglia"><div class="cal">
     <div class="cal-testa">
