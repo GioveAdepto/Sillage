@@ -6,16 +6,26 @@ compilazione: si apre servendo la cartella così com'è.
 ## Struttura
 
 ```
-index.html            solo markup (92 righe)
-css/sillage.css       lo stile, com'era nel <style> inline
-js/app.js             la logica + il caricamento dei dati
-data/*.json           copia dei dati nel repo (ripiego e avvio a freddo)
-img/*.webp            32 flaconi, 176×208, più il segnaposto
-apps-script/          backend di lettura sul foglio Google
+index.html            solo markup; carica CSS e JS con ?v= per svuotare le cache
+css/sillage.css       lo stile (vedi DESIGN.md)
+css/transitions.css   animazioni e View Transitions
+js/dati.js            da dove arrivano i dati, etichette, stagione, ora e meteo
+js/collezione.js      filtri, teca, boccetta presa in mano, dettaglio, coda del diario
+js/consigliami.js     scelte rapide, cassetto dei filtri, Consigliami
+js/viste.js           confronto, Guida, Layering, Acquisti, Numeri, condivisione
+js/diario.js          il diario e il piano della settimana
+js/app.js             navigazione, vetrina di apertura, app installabile, avvio
+sw.js                 service worker: l'app funziona anche senza rete
+data/*.json           copia notturna dei dati (ripiego e avvio a freddo)
+data/diario.enc       copia cifrata del diario
+img/*.webp            41 flaconi, 176×208, più il segnaposto; img/avvio le schermate d'avvio iPhone
+ponte/                il Worker con il database (ponte.js, applica.mjs)
+apps-script/          lo script del foglio Google, oggi una copia
+prove/prova.mjs       prove Playwright lanciate da .github/workflows/prova.yml
 ```
 
-Prima stava tutto dentro `index.html`: 242 KB, di cui 129 KB erano una sola riga
-di immagini in base64. Ora `index.html` pesa 5,6 KB.
+I sei script sono classici (niente moduli): si caricano in quest'ordine e
+condividono variabili globali.
 
 ## Da dove arrivano i dati
 
