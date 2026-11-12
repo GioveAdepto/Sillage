@@ -24,6 +24,9 @@
   "triggers": {
     "crons": ["*/5 * * * *"]
   },
+  // Le variabili messe a mano nel pannello di Cloudflare (come la chiave) restano
+  // anche dopo ogni pubblicazione: senza, Cloudflare cancellerebbe quelle di tipo Text.
+  "keep_vars": true,
   "vars": {
     // Il Web App del foglio: il ponte lo usa per leggere il foglio e per copiarci diario e residuo.
     "FOGLIO_URL": "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
