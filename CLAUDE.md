@@ -4,35 +4,40 @@ Vetrina personale di profumi di Danilo (41 profumi), usata soprattutto da iPhone
 anche senza rete. Repo pubblico GioveAdepto/Sillage. Rispondi in italiano semplice: l'utente non è un
 programmatore di mestiere e vuole risposte brevi con una raccomandazione chiara.
 
-## Tieni aggiornati i file .md
+## Quale .md aprire
 
-A ogni modifica aggiorna il `.md` che la descrive (questo file, `README.md`, `ponte/LEGGIMI.md`,
-`apps-script/LEGGIMI.md`). Servono alle sessioni future per capire il progetto leggendo poco,
-invece di riscoprirlo dal codice.
+Questo file si carica a ogni sessione: resta corto. I dettagli stanno qui, da aprire solo quando servono.
 
-## Com'è fatto
+| argomento | file |
+|---|---|
+| struttura dei file, provarla in locale, pubblicazione | `README.md` |
+| colori, componenti, animazioni: prima di disegnare o cambiare CSS | `DESIGN.md` |
+| database, ponte, indirizzi `/api`, come applicare modifiche, tornare indietro | `ponte/LEGGIMI.md` |
+| foglio Google, Apps Script, chiave, diario cifrato (storia e via di ritorno) | `apps-script/LEGGIMI.md` |
+
+A ogni modifica aggiorna, nello stesso commit, il `.md` che la descrive. Se un `.md` dice una cosa non
+più vera, correggila subito.
+
+## Com'è fatto, in breve
 
 - **Frontend statico, senza build**: `index.html`, sei script classici in `js/` caricati in ordine
   (dati, collezione, consigliami, viste, diario, app) con variabili globali condivise e `onclick` inline;
   `css/sillage.css`, `css/transitions.css`; service worker `sw.js`; immagini in `img/`.
   Se cambi un file JS o CSS, alza il `?v=` in `index.html`.
-- **Dati**: l'originale è il **database Cloudflare D1** dietro il ponte `ponte/ponte.js` (Worker su
-  `https://sillage.danilo-moro96.workers.dev/api`). Il foglio Google `sillage-profumi` ne è una copia
-  riscritta dal ponte (Apps Script, `azione=specchio`). `data/*.json` è la copia notturna
-  (`.github/workflows/copia-notturna.yml`); `data/diario.enc` è il diario cifrato. Dettagli in `ponte/LEGGIMI.md`.
-- **La chiave di Sillage** protegge diario, residuo e modifiche al catalogo. Sta in: proprietà script
-  `CHIAVE` (Apps Script), segreto `SILLAGE_CHIAVE` su GitHub e nel Worker (tipo **Secret**, riquadro
-  Variables and Secrets in cima a Settings, non in Builds), `localStorage` del telefono,
-  `C:\Projects\Sillage\.dev.vars` in locale (ignorato da git). Mai nel repo, mai negli indirizzi.
-- **Pubblicazione**: GitHub Pages da `main` (il sito) e Workers Builds da `main` (sito e ponte).
-  Controlli: `.github/workflows/prova.yml` (sintassi e Playwright con `prove/prova.mjs`).
+- **Dati**: l'originale è il **database Cloudflare D1** dietro il ponte `ponte/ponte.js`
+  (`https://sillage.danilo-moro96.workers.dev/api`). Il foglio Google `sillage-profumi` è una copia
+  riscritta dal ponte; `data/*.json` è la copia notturna; `data/diario.enc` il diario cifrato.
+- **La chiave di Sillage** protegge diario, residuo e modifiche al catalogo. In locale sta in
+  `C:\Projects\Sillage\.dev.vars` (ignorato da git). Mai nel repo, nelle risposte o negli indirizzi.
+- **Controlli**: `.github/workflows/prova.yml` (sintassi e Playwright con `prove/prova.mjs`).
 
 ## Cambiare i dati del catalogo
 
-Voci in `data/aggiunte.json` (righe e colonne nuove) e `data/correzioni.json` (celle, con il valore `da`
-atteso), con i nomi di colonna del foglio. Poi `node ponte/applica.mjs --prova` e `node ponte/applica.mjs`.
-I dati dei profumi vengono dalle schede Fragrantica e devono essere precisissimi. Diario e residuo li
-scrive solo l'app. Apps Script si aggiorna solo a mano dall'utente: evitalo se puoi.
+Voci in `data/aggiunte.json` e `data/correzioni.json` (nomi di colonna del foglio), poi
+`node ponte/applica.mjs --prova` e `node ponte/applica.mjs`: lo lancio io, non l'utente.
+I dati vengono dalle schede Fragrantica e devono essere precisissimi: l'utente salva le schermate in
+`C:\Projects\Sillage\SchedeProfumiFragrantica` (fuori da git) e le barre si misurano al pixel.
+Diario e residuo li scrive solo l'app. Il codice Apps Script lo aggiorna solo l'utente a mano: evitalo.
 
 ## Regole dell'app (scelte dell'utente)
 
@@ -40,14 +45,16 @@ scrive solo l'app. Apps Script si aggiorna solo a mano dall'utente: evitalo se p
   Open-Meteo), poi l'occasione, poi giorno/sera. Diario e voti personali non entrano nel punteggio.
   Ogni modifica al punteggio si verifica con un prima/dopo.
 - Saltando a un profumo da un'altra sezione, la scheda resta chiusa, ancorata e illuminata.
-- Nessuna memoria di stato tra un'apertura e l'altra; niente promemoria; il residuo si sceglie a mano.
+- Nessuna memoria di stato tra un'apertura e l'altra; niente promemoria; il residuo si sceglie a mano;
+  niente campo «stato» sui profumi (rifiutato).
 - Deve funzionare da iPhone come app installata, anche senza rete (cache, coda locale delle scritture).
 - Le rifiniture (boccetta presa in mano, vetrina di apertura, View Transitions, tilt) non si rompono.
 
 ## Git
 
-- Lavora su un branch con un nome italiano chiaro (`chiave-del-diario`, `database-d1`), mai il nome
-  automatico `claude/...`. Committa e pusha il branch senza chiedere.
-- Unisci su `main` solo con il via libera dell'utente in quella conversazione, con `--no-ff` e un
-  messaggio che dica cosa cambia per chi usa l'app. Dopo, verifica il sito pubblicato.
+- Branch con un nome italiano chiaro (`chiave-del-diario`, `database-d1`), mai `claude/...`: dal worktree
+  `git push origin HEAD:refs/heads/<nome>`. Committa e pusha il branch senza chiedere.
+- Unisci su `main` solo con il via libera dell'utente in quella conversazione (senza, il push su `main`
+  viene bloccato), con `--no-ff` e un messaggio da file (`git merge -F file`) che dica cosa cambia per chi
+  usa l'app. Dopo, verifica il sito pubblicato. `gh secret set` lo fa l'utente.
 - Dopo ogni pubblicazione che tocca il ponte: `azione=sincronizza` con la chiave deve rispondere `ok`.
