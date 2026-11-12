@@ -43,3 +43,5 @@ poi <http://127.0.0.1:8765>. Aprire `index.html` con doppio clic non funziona.
 GitHub Pages sul ramo `main`. `wrangler.jsonc` tiene in piedi in parallelo la
 distribuzione Cloudflare Workers, che serve la stessa cartella e, sotto `/api`,
 il ponte verso il database: vedi [`ponte/LEGGIMI.md`](ponte/LEGGIMI.md).
+
+Per disegnare una pagina nuova: colori, caratteri, componenti e movimento sono riassunti in [`DESIGN.md`](DESIGN.md).
