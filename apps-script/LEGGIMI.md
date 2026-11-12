@@ -1,7 +1,11 @@
 # Backend Apps Script
 
 Il foglio [`sillage-profumi`](https://docs.google.com/spreadsheets/d/12SyJ5v4ypSNTbP9zS3rY0zlaBebt216B2Lsvndhfmgo/edit)
-è la sorgente di verità. Questo script lo pubblica come JSON per `js/app.js`.
+**non è più l'originale**: da novembre 2026 lo è il database dietro il ponte
+([`ponte/LEGGIMI.md`](../ponte/LEGGIMI.md)), e il foglio ne è una copia riscritta
+dopo ogni modifica (`azione=specchio`). Quello che segue descrive lo script,
+che resta per la copia e come via di ritorno. Il resto di questo file racconta
+come funzionava quando il foglio era l'originale.
 
 ## Cosa fa
 

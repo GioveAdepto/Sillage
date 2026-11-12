@@ -1,29 +1,46 @@
-# Il ponte: l'app sul database
+# Il ponte: Sillage sul database
 
-`ponte.js` è un piccolo programma su Cloudflare (un Worker) che collega l'app a
-un database (Cloudflare D1). Il foglio Google resta il posto dove modifichi il
-catalogo dei profumi; l'app legge e scrive sul database, che è più veloce
-(circa 60 ms invece di un secondo) e non dipende dai tempi di Google.
+`ponte.js` è un piccolo programma su Cloudflare (un Worker) con dietro un
+database (Cloudflare D1). **Il database è l'originale di tutto**: catalogo dei
+profumi, layering, consigli, note, diario e residuo. Il foglio Google
+`sillage-profumi` ne è una **copia da guardare**, riscritta dal ponte dopo ogni
+modifica: quello che cambi a mano nel foglio viene sovrascritto.
 
-Il ponte parla esattamente come il Web App di Apps Script (stesse richieste,
-stesse risposte), quindi per far passare l'app dal foglio al database basta
-cambiare un indirizzo in `js/dati.js`. Per tornare indietro si rimette quello
-vecchio.
+L'app parla con il ponte come parlava con il Web App di Apps Script: stesse
+richieste, stesse risposte.
 
-## Chi comanda
+## Come si cambiano i dati
 
-`PADRONE` in `wrangler.jsonc`:
+- **Diario e residuo**: dall'app, come sempre.
+- **Catalogo** (profumi nuovi, correzioni, layering, consigli, note): li
+  prepara Claude nel repo, in `data/aggiunte.json` e `data/correzioni.json`,
+  nello stesso formato di sempre, e li applica al database con
 
-| valore | catalogo | diario e residuo | scritture dall'app |
-|---|---|---|---|
-| `foglio` | dal foglio | dal foglio: il database è una copia | rifiutate (si fanno sul foglio) |
-| `database` | dal foglio | li comanda il database, il foglio ne riceve una copia | accettate |
+  ```bash
+  node ponte/applica.mjs --prova
+  node ponte/applica.mjs
+  ```
 
-Ogni 5 minuti il ponte rilegge il foglio. Con il database al comando, dopo ogni
-scrittura il ponte manda subito una copia al foglio (attraverso il Web App,
-con la chiave); se il foglio non risponde, riprova al giro successivo e niente
-si perde. Le voci del diario aggiunte a mano nel foglio, con il database al
-comando, non entrano: il diario nel foglio è una copia da guardare.
+  Una riga che c'è già non viene duplicata; una correzione si applica solo se
+  la cella contiene ancora il valore `da`. Rilanciare non fa danni. La chiave
+  si prende da `SILLAGE_CHIAVE` o dal file `.dev.vars` nella cartella del repo
+  (riga `SILLAGE_CHIAVE=...`, ignorato da git).
+- I decimali si scrivono semplici (`"3.78"`); l'apostrofo che serviva nel
+  foglio (`"'3.78"`) viene tolto da solo.
+
+## Come è fatto
+
+Nel database il catalogo sta con **le stesse colonne del foglio** (tab
+Profumi, Layering, Consigli, ConsigliVoci, Note): una riga di database per
+tab, con dentro tutte le sue righe. Il piano gratuito concede 50 operazioni
+per richiesta, e così ne bastano poche. Da lì il ponte ricava il JSON per
+l'app con le stesse regole di `apps-script/Codice.gs` e lo tiene pronto.
+Il diario è una tabella a sé, una riga per voce.
+
+La copia nel foglio passa dal Web App (`azione=specchio`, con la chiave): il
+ponte manda tutte le tab, lo script le riscrive come testo semplice, con le
+colonne dove sono. Se il foglio non risponde, il ponte riprova ogni 5 minuti;
+una volta al giorno (verso le 3 UTC) la copia si rifà comunque.
 
 ## Indirizzi
 
@@ -33,45 +50,43 @@ comando, non entrano: il diario nel foglio è una copia da guardare.
 |---|---|
 | `GET /api` | tutto, senza il diario |
 | `POST /api?azione=leggi` | tutto, diario compreso, con la chiave |
-| `POST /api?azione=diario&op=metti\|togli\|nota&…` | come il Web App, con la chiave |
-| `POST /api?azione=residuo&id=…&valore=…` | come il Web App, con la chiave |
-| `POST /api?azione=sincronizza` | rilegge subito il foglio e manda quello che manca, con la chiave |
-| `GET /api?stato=1` | chi comanda, ultima sincronia, quante cose aspettano di andare al foglio |
+| `POST /api?azione=diario&op=metti\|togli\|nota&…` | il diario, con la chiave |
+| `POST /api?azione=residuo&id=…&valore=…` | il residuo, con la chiave |
+| `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
+| `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |
+| `POST /api?azione=importa&conferma=si` | ricopia il catalogo **dal** foglio: solo per rimediare, con la chiave |
+| `GET /api?stato=1` | quanti profumi, ultima copia nel foglio, se una copia è in attesa |
 
 La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 
 ## Messa in opera
 
-- Il database si chiama `sillage` e Cloudflare lo crea da solo alla prima
-  pubblicazione: in `wrangler.jsonc` non c'è il `database_id` apposta. Le
-  tabelle le crea il ponte alla prima richiesta.
-- La chiave di Sillage va messa anche qui, una volta: Cloudflare ▸ Workers ▸
-  **sillage** ▸ Settings ▸ **Variables and Secrets** ▸ Add ▸ tipo *Secret*,
-  nome `SILLAGE_CHIAVE`, valore la chiave ▸ Deploy.
-- Ogni unione su `main` ripubblica il ponte da sola (Workers Builds).
-- Controllo veloce: `GET /api?stato=1` deve dire una `ultimaSincronia` di pochi
-  minuti fa.
+- Il database `sillage` l'ha creato Cloudflare alla prima pubblicazione. Le
+  tabelle le crea il ponte; la prima volta che parte senza catalogo lo copia
+  dal foglio da solo (`azione=grezzo` del Web App).
+- La chiave di Sillage sta nel Worker come **Secret**: Cloudflare ▸ Workers ▸
+  sillage ▸ Settings ▸ **Variables and Secrets** (il riquadro in cima, *non*
+  quello dentro Builds) ▸ Add ▸ tipo *Secret*, nome `SILLAGE_CHIAVE`.
+- Ogni unione su `main` ripubblica il ponte da sola. Dopo, un controllo:
+  `azione=sincronizza` con la chiave deve rispondere `ok`.
 
-## Le tappe del passaggio
+## Per tornare indietro
 
-1. **Ponte pubblicato, comanda il foglio.** L'app usa ancora il Web App. Il
-   database si riempie e si aggiorna da solo; si confrontano le risposte del
-   ponte con quelle del foglio (devono essere uguali, a parte `aggiornato`).
-2. **Il database comanda.** In un solo commit: `PADRONE` diventa `database` e
-   in `js/dati.js` `ORIGINE_DATI.appsScript` punta al ponte (con `?v=` nuovo in
-   `index.html`). La coda del telefono passa da sola al nuovo indirizzo.
-   La copia notturna legge il diario dal ponte.
-3. **Per tornare indietro:** si annulla quel commit. Il foglio ha già tutto,
-   perché ogni scrittura gli è stata copiata; prima di annullare, controllare
-   che `daMandareAlFoglio` sia 0.
+Il foglio ha sempre tutto, perché ogni modifica gli viene copiata. Prima di
+tornare indietro: `GET /api?stato=1` deve dire `copiaInAttesa: false`.
+
+- **Al foglio come originale del catalogo** (diario e residuo restano al
+  database): annullare il commit che ha portato questa versione del ponte.
+- **Al foglio per tutto, senza ponte**: in più, in `js/dati.js`
+  `ORIGINE_DATI.appsScript` torna all'URL `.../exec` del Web App, e la copia
+  notturna torna a leggere da lì.
 
 ## Provarlo in locale
 
-Serve Node. Con un foglio finto (nessuna scrittura arriva al foglio vero):
-
 ```bash
-npx wrangler@4 dev --test-scheduled --var FOGLIO_URL:http://127.0.0.1:8899/exec --var SILLAGE_CHIAVE:prova --var PADRONE:database
+npx wrangler@4 dev --test-scheduled --var FOGLIO_URL:http://127.0.0.1:8899/exec --var SILLAGE_CHIAVE:prova
 ```
 
-poi `curl "http://127.0.0.1:8787/__scheduled?cron=*/5+*+*+*+*"` lancia un giro
-di sincronia. Il database locale sta in `.wrangler/` (fuori da git).
+con un Web App finto su 8899 che risponde a `grezzo` e `specchio` (nessuna
+scrittura arriva al foglio vero). `curl "http://127.0.0.1:8787/__scheduled?cron=*/5+*+*+*+*"`
+lancia un giro. Il database locale sta in `.wrangler/` (fuori da git).
