@@ -23,6 +23,9 @@ jobs:
       - name: Controllo della sintassi
         # i file di js/ nell'ordine in cui index.html li carica, letti come uno solo
         run: node -e "const fs=require('fs');const f=[...fs.readFileSync('index.html','utf8').matchAll(/<script src=\"(js\/[^?\"]+)/g)].map(m=>m[1]);console.log(f.join(' '));new Function(f.map(x=>fs.readFileSync(x,'utf8')).join('\n'))"
+      - name: Controllo della sintassi del ponte
+        # ponte/ponte.js è un modulo: per Node 20 serve l'estensione .mjs
+        run: cp ponte/ponte.js "$RUNNER_TEMP/ponte.mjs" && node --check "$RUNNER_TEMP/ponte.mjs"
       - name: Apre il sito e lo percorre
         run: |
           python3 -m http.server 8800 --bind 127.0.0.1 &

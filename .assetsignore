@@ -1,0 +1,9 @@
+# file che non fanno parte del sito pubblicato da Cloudflare
+.git
+.github
+.wrangler
+.dev.vars*
+node_modules
+ponte
+prove
+*.md
