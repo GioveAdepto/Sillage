@@ -12,6 +12,14 @@
  *           al repo applica le sue modifiche al foglio senza passare
  *           dall'editor. Scrive solo quello che sta in data/aggiunte.json e
  *           data/correzioni.json su main, con le stesse guardie di sempre.
+ *           Con azione=leggi e la chiave giusta restituisce tutto, diario compreso.
+ *
+ * LA CHIAVE. Il link del Web App e' scritto nel codice dell'app, e il repo e'
+ * pubblico: chiunque puo' trovarlo. Per questo il diario si legge e si scrive,
+ * e il residuo si cambia, solo con la chiave di Sillage. La chiave sta nelle
+ * proprieta' dello script (Impostazioni progetto ▸ Proprieta' script ▸ CHIAVE),
+ * mai nel repo. Senza la chiave doGet() risponde lo stesso, ma senza il
+ * diario. azione=applica resta libera: scrive solo quello che e' gia' nel repo.
  *
  * Il foglio resta la sorgente di verita'. I file data/*.json nel repo sono una
  * copia di sicurezza: l'app li usa se questo servizio non risponde.
@@ -149,7 +157,8 @@ function tutto_() {
 }
 
 // ── PUBBLICAZIONE ─────────────────────────────────────────────────────────
-function doGet(e) {
+/** Tutto il foglio in JSON, diario compreso: dalla cache se c'e'. */
+function corpo_(e) {
   var cache = CacheService.getScriptCache();
   var salta = e && e.parameter && e.parameter.fresco === '1';
   var corpo = salta ? null : cache.get('dati');
@@ -157,19 +166,55 @@ function doGet(e) {
     corpo = JSON.stringify(tutto_());
     try { cache.put('dati', corpo, CACHE_SEC); } catch (err) { /* oltre 100 KB: si serve senza cache */ }
   }
-  return ContentService.createTextOutput(corpo)
-    .setMimeType(ContentService.MimeType.JSON);
+  return corpo;
 }
+
+/** Lo stesso JSON senza il diario, per chi non ha la chiave. */
+function senzaDiario_(corpo) {
+  var d = JSON.parse(corpo);
+  delete d.diario;
+  d.diarioChiuso = true;
+  return JSON.stringify(d);
+}
+
+function json_(testo) {
+  return ContentService.createTextOutput(testo).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  return json_(senzaDiario_(corpo_(e)));
+}
+
+// ── LA CHIAVE ─────────────────────────────────────────────────────────────
+/* Arriva nel corpo della richiesta POST, non nell'indirizzo, cosi' non
+   finisce nei registri. Senza la proprieta' CHIAVE non passa niente: meglio
+   un diario fermo (l'app tiene le voci in coda) che un diario aperto. */
+function chiaveGiusta_(e) {
+  var vera = PropertiesService.getScriptProperties().getProperty('CHIAVE');
+  var data = e && e.parameter && e.parameter.chiave;
+  return !!vera && !!data && String(data).trim() === String(vera).trim();
+}
+
+/* "sconosciuta:" non e' un caso: le versioni vecchie dell'app tengono in coda
+   una voce rifiutata con questa parola, e la riprovano dopo. Senza, la
+   butterebbero via. */
+var SENZA_CHIAVE = { errore: 'chiave sconosciuta: manca o non e\' quella giusta' };
 
 // ── APPLICAZIONE DA FUORI ─────────────────────────────────────────────────
 /* POST e non GET: un link aperto per sbaglio, o un crawler, non scrive niente.
-   Non serve una password: chi lo chiama può solo applicare quello che è già
-   nel repo, e rilanciare non fa danni. */
+   applica non chiede la chiave: chi lo chiama può solo applicare quello che
+   è già nel repo, e rilanciare non fa danni. */
 function doPost(e) {
   var azione = e && e.parameter && e.parameter.azione;
   var esito;
+  if (azione === 'leggi') {
+    var corpo = corpo_(e);
+    return json_(chiaveGiusta_(e) ? corpo : senzaDiario_(corpo));
+  }
   if (['applica', 'diario', 'residuo'].indexOf(azione) < 0) {
     esito = { errore: 'azione sconosciuta: ' + azione };
+  } else if (azione !== 'applica' && !chiaveGiusta_(e)) {
+    esito = SENZA_CHIAVE;
   } else {
     var lucchetto = LockService.getScriptLock();
     lucchetto.waitLock(30000);            // due lanci insieme non si pestano

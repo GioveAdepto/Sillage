@@ -3,6 +3,12 @@
 # non risponde, e la cronologia di git diventa uno storico giornaliero dei dati.
 # Si fa un commit solo se qualcosa e' cambiato. Parte anche quando cambia
 # questo file, per provarlo subito.
+#
+# Il diario si legge solo con la chiave di Sillage (segreto SILLAGE_CHIAVE in
+# GitHub > Settings > Secrets and variables > Actions) e finisce nel repo
+# cifrato, in data/diario.enc: il repo e' pubblico. Per rileggerlo serve la
+# stessa chiave, istruzioni in apps-script/LEGGIMI.md ("La chiave di Sillage").
+# Senza il segreto la copia del diario si salta, il resto va avanti.
 name: Copia notturna del foglio
 
 on:
@@ -19,43 +25,84 @@ permissions:
 jobs:
   copia:
     runs-on: ubuntu-latest
+    env:
+      SILLAGE_CHIAVE: ${{ secrets.SILLAGE_CHIAVE }}
     steps:
       - uses: actions/checkout@v5
       - name: Legge il foglio e riscrive data/*.json
         run: |
           python3 - <<'PY'
-          import json, time, urllib.request, urllib.error
+          import json, os, time, urllib.parse, urllib.request, urllib.error
           U = "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec?fresco=1"
+          CHIAVE = os.environ.get("SILLAGE_CHIAVE", "").strip()
           # Google tratta male i client senza nome: ci si presenta come un browser
           testa = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36",
                    "Accept": "application/json,text/plain,*/*"}
-          d, ultimo = None, ""
-          for tentativo in range(1, 4):
-              try:
-                  r = urllib.request.urlopen(urllib.request.Request(U, headers=testa), timeout=90)
-                  corpo = r.read().decode("utf-8", "replace")
-                  d = json.loads(corpo)
-                  break
-              except urllib.error.HTTPError as e:
-                  ultimo = f"HTTP {e.code}: {e.read()[:400]!r}"
-              except Exception as e:
-                  ultimo = f"{type(e).__name__}: {e} — ricevuto: {locals().get('corpo', '')[:400]!r}"
-              print(f"tentativo {tentativo} non riuscito: {ultimo}")
-              time.sleep(20 * tentativo)
+
+          def chiedi(corpo=None):
+              """GET, o POST con i campi in `corpo`. Tre tentativi; None se il foglio non risponde.
+              Il POST del Web App risponde con un rinvio, che urllib segue come GET: e' quello giusto."""
+              ultimo = ""
+              dati = urllib.parse.urlencode(corpo).encode() if corpo else None
+              for tentativo in range(1, 4):
+                  testo = ""
+                  try:
+                      r = urllib.request.urlopen(urllib.request.Request(U, data=dati, headers=testa), timeout=90)
+                      testo = r.read().decode("utf-8", "replace")
+                      return json.loads(testo)
+                  except urllib.error.HTTPError as e:
+                      ultimo = f"HTTP {e.code}: {e.read()[:400]!r}"
+                  except Exception as e:
+                      # niente di quello che arriva dal diario finisce nel registro
+                      ultimo = f"{type(e).__name__}: {e}" + ("" if corpo else f" — ricevuto: {testo[:400]!r}")
+                  print(f"tentativo {tentativo} non riuscito: {ultimo}")
+                  time.sleep(20 * tentativo)
+              print("il foglio non ha risposto: " + ultimo)
+              return None
+
+          d = chiedi()
           if d is None:
-              raise SystemExit("il foglio non ha risposto: " + ultimo)
+              raise SystemExit("il foglio non ha risposto")
           assert isinstance(d.get("profumi"), list) and d["profumi"], "risposta senza profumi"
           for k in ("profumi", "note", "layering", "consigli"):
               if k in d:
                   with open(f"data/{k}.json", "w", encoding="utf-8", newline="\n") as f:
                       f.write(json.dumps(d[k], ensure_ascii=False, indent=1) + "\n")
           print(len(d["profumi"]), "profumi")
+
+          # il diario: lo script vecchio lo dava a tutti, quello nuovo solo con la chiave
+          if not CHIAVE:
+              print("diario saltato: manca il segreto SILLAGE_CHIAVE")
+          else:
+              diario = d.get("diario")
+              if not isinstance(diario, list):
+                  t = chiedi({"azione": "leggi", "chiave": CHIAVE})
+                  diario = t.get("diario") if isinstance(t, dict) else None
+              if not isinstance(diario, list):
+                  print("diario saltato: il foglio non l'ha dato (chiave diversa da quella dello script?)")
+              else:
+                  with open(os.path.join(os.environ["RUNNER_TEMP"], "diario.json"), "w", encoding="utf-8", newline="\n") as f:
+                      f.write(json.dumps(diario, ensure_ascii=False, indent=1) + "\n")
+                  print(len(diario), "voci di diario")
           PY
+      - name: Cifra il diario, se e' cambiato
+        run: |
+          nuovo="$RUNNER_TEMP/diario.json"
+          [ -f "$nuovo" ] || { echo "niente diario da copiare"; exit 0; }
+          cifra="-aes-256-cbc -pbkdf2 -iter 200000 -a"
+          # si riscrive solo se il contenuto cambia: la cifratura cambia a ogni giro anche a parita' di diario
+          if [ -f data/diario.enc ] && openssl enc -d $cifra -in data/diario.enc -pass env:SILLAGE_CHIAVE 2>/dev/null | cmp -s - "$nuovo"; then
+            echo "diario invariato"
+          else
+            openssl enc $cifra -salt -in "$nuovo" -out data/diario.enc -pass env:SILLAGE_CHIAVE
+            echo "diario aggiornato"
+          fi
+          rm -f "$nuovo"
       - name: Commit se ci sono differenze
         run: |
-          if git diff --quiet -- data/; then echo "niente di nuovo"; exit 0; fi
+          git add data/
+          if git diff --cached --quiet; then echo "niente di nuovo"; exit 0; fi
           git config user.name "sillage-bot"
           git config user.email "sillage-bot@users.noreply.github.com"
-          git add data/
           git commit -m "Copia notturna del foglio"
           git push

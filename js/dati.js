@@ -52,15 +52,82 @@ async function leggiLocale() {
   return Object.fromEntries(nomi.map((n, i) => [n, parti[i]]));
 }
 
+/* ── La chiave di Sillage ──
+   Il link del foglio è nel codice, e il codice è pubblico: per leggere e
+   scrivere il diario, e per cambiare il residuo, il foglio vuole la chiave.
+   Si inserisce una volta dal Diario e resta sul telefono. Non è memoria
+   dello stato: l'app non ricorda dove eri, sa solo chi sei.
+   `serveChiave` dice se il foglio l'ha chiesta e non l'ha avuta. */
+const CHIAVE_ACCESSO = "sillage:chiave";
+let serveChiave = false;
+function chiave() {
+  try { return localStorage.getItem(CHIAVE_ACCESSO) || ""; } catch (e) { return ""; }
+}
+// le scritture al foglio: la chiave viaggia nel corpo, non nell'indirizzo
+function scriviAlFoglio(parametri) {
+  return fetch(ORIGINE_DATI.appsScript + "?" + new URLSearchParams(parametri),
+    { method: "POST", redirect: "follow", body: new URLSearchParams({ chiave: chiave() }) });
+}
+const rifiutoChiave = e => !!e && /^chiave/.test(e.errore || "");
+function chiediChiave() {
+  if (serveChiave) return;
+  serveChiave = true;
+  if (document.getElementById("vista-diario")?.classList.contains("attiva")) disegnaDiario();
+}
+
 /* Nessun AbortController: la richiesta non si interrompe. `attesaMax` decide
    solo quanto si sta fermi ad aspettarla prima di disegnare qualcos'altro;
-   se il foglio arriva dopo, arriva lo stesso e ha comunque l'ultima parola. */
-function chiediAlFoglio() {
+   se il foglio arriva dopo, arriva lo stesso e ha comunque l'ultima parola.
+   Con la chiave si chiede tutto (azione=leggi); uno script del foglio che
+   ancora non conosce leggi risponde "azione sconosciuta", e si ripiega sulla
+   lettura semplice, che con lo script vecchio porta ancora il diario. */
+function leggiSemplice() {
   return fetch(ORIGINE_DATI.appsScript, { redirect: "follow" })
     .then(r => {
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     });
+}
+async function chiediAlFoglio() {
+  if (!chiave()) return leggiSemplice();
+  const r = await fetch(ORIGINE_DATI.appsScript, { method: "POST", redirect: "follow",
+    body: new URLSearchParams({ azione: "leggi", chiave: chiave() }) });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const d = await r.json();
+  return d && d.errore ? leggiSemplice() : d;
+}
+
+/* Il foglio ha risposto senza diario: la chiave manca o è sbagliata. Il
+   diario che c'era (dalla cache) resta com'è, e si chiede la chiave. */
+function tieniDiario(d) {
+  if (!d || !d.diarioChiuso) { if (d && d.profumi) serveChiave = false; return d; }
+  delete d.diarioChiuso;
+  d.diario = diarioFoglio;
+  chiediChiave();
+  return d;
+}
+
+/* Dal pulsante nel Diario: si incolla la chiave, si manda quello che
+   aspettava in coda e si rilegge il diario dal foglio. */
+async function inserisciChiave() {
+  const k = (prompt("Incolla la chiave di Sillage") || "").trim();
+  if (!k) return;
+  try { localStorage.setItem(CHIAVE_ACCESSO, k); } catch (e) {}
+  serveChiave = false;
+  try {
+    const d = tieniDiario(await chiediAlFoglio());
+    if (serveChiave) { disegnaDiario(); avvisa("La chiave non è quella giusta"); return; }
+    if (Array.isArray(d.diario)) {
+      diarioFoglio = d.diario;
+      const c = leggiCache(); if (c) { c.diario = diarioFoglio; scriviCache(c); }
+    }
+    await sincronizzaDiario();
+    disegnaDiario(); disegnaNumeri();
+    avvisa("Chiave salvata: il diario è collegato al foglio");
+  } catch (e) {
+    disegnaDiario();
+    avvisa("Chiave salvata: il diario si collega appena c'è rete");
+  }
 }
 
 function scriviCache(d) {
@@ -107,7 +174,7 @@ async function caricaDati(mostra) {
     const dalFoglio = chiediAlFoglio();
     const arrivato = d => {
       try {
-        applicaDati(d);
+        applicaDati(tieniDiario(d));
       } catch (e) {
         console.warn("Sillage: risposta del foglio inutilizzabile —", e.message);
         return;

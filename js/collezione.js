@@ -187,8 +187,10 @@ async function sincronizzaDiario(){
       const uso={occasione:o.occasione||"",momento:o.momento||""};
       const q=new URLSearchParams({azione:"diario",op:o.op,id:o.id,data:o.data,t:o.t,
         ...(o.op==="nota"?{nota:o.nota||"",voto:o.voto||"",...uso}:o.op==="metti"&&(uso.occasione||uso.momento)?uso:{})});
-      const r=await fetch(ORIGINE_DATI.appsScript+"?"+q,{method:"POST",redirect:"follow"});
+      const r=await scriviAlFoglio(q);
       const e=await r.json();
+      // senza la chiave giusta la voce resta in coda, e il Diario la chiede
+      if(rifiutoChiave(e)){chiediChiave();break}
       // un rifiuto del foglio (voce non valida) toglie la voce dalla coda;
       // un errore di rete o un Web App vecchio la lasciano li' per la prossima
       if(!e||(!e.ok&&(!e.errore||/sconosciuta:/.test(e.errore))))break;
@@ -256,13 +258,14 @@ async function segnaResiduo(id,v){
   const prima=p.residuoPct;
   p.residuoPct=v;aggiornaResiduo(p);
   try{
-    const q=new URLSearchParams({azione:"residuo",id,valore:v});
-    const e=await (await fetch(ORIGINE_DATI.appsScript+"?"+q,{method:"POST",redirect:"follow"})).json();
+    const e=await (await scriviAlFoglio({azione:"residuo",id,valore:v})).json();
+    if(rifiutoChiave(e))chiediChiave();
     if(!e||!e.ok)throw new Error(e&&e.errore||"rifiutato");
     const c=leggiCache();if(c){const x=c.profumi.find(y=>y.id===id);if(x){x.residuoPct=v;scriviCache(c)}}
   }catch(err){
     p.residuoPct=prima;aggiornaResiduo(p);
-    avvisa(/sconosciuta/.test(err.message)?"Per salvarlo va aggiornato lo script del foglio":"Non salvato: riprova con la rete");
+    avvisa(/^chiave/.test(err.message)?"Non salvato: serve la chiave di Sillage, si inserisce dal Diario"
+      :/sconosciuta/.test(err.message)?"Per salvarlo va aggiornato lo script del foglio":"Non salvato: riprova con la rete");
   }
 }
 function aggiornaResiduo(p){

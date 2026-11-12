@@ -10,6 +10,7 @@ Il foglio [`sillage-profumi`](https://docs.google.com/spreadsheets/d/12SyJ5v4ypS
 | `Codice.gs` | `doGet()` — restituisce il foglio in JSON, già nella forma che l'app usa |
 | `Installa.gs` | `installa()` — da lanciare una volta: aggiunge al foglio colonne e tab mancanti |
 | `Correzioni.gs` | `correggi()` — applica al foglio le correzioni puntuali decise nel repo |
+| `Diario.gs` | il diario d'uso, scritto dall'app con la chiave di Sillage |
 
 ## Messa in opera
 
@@ -168,5 +169,48 @@ passando da `doPost` con `azione=diario`; la tab nasce da sola alla prima voce.
 Si può correggere a mano, lasciando la data nel formato AAAA-MM-GG.
 
 Se il Web App non risponde, le voci aspettano sul telefono e partono al
-prossimo avvio. Il link è pubblico, quindi ogni voce viene controllata: il
+prossimo avvio. Ogni voce viene controllata (serve la chiave, sotto): il
 profumo deve esistere e in un giorno non entrano più di dieci voci.
+
+## La chiave di Sillage
+
+Il link del Web App è scritto in `js/dati.js` e il repo è pubblico: chiunque può
+trovarlo. Per questo il diario (leggerlo e scriverlo) e il residuo delle
+boccette passano solo con la **chiave di Sillage**. Il resto del foglio si legge
+liberamente, come prima, e `azione=applica` resta libera: scrive solo quello che
+è già nel repo.
+
+La chiave sta in tre posti, e deve essere la stessa in tutti e tre:
+
+| dove | come si imposta |
+|---|---|
+| Apps Script | **Impostazioni progetto ▸ Proprietà script ▸ Aggiungi**: nome `CHIAVE`, valore la chiave |
+| GitHub | segreto `SILLAGE_CHIAVE` (Settings ▸ Secrets and variables ▸ Actions), per la copia notturna |
+| iPhone | Sillage ▸ Diario ▸ «Inserisci la chiave», una volta sola |
+
+Se la perdi, si rilegge dalle proprietà dello script. Per cambiarla, si cambia
+in tutti e tre i posti.
+
+Come si comporta:
+
+- `doGet` risponde senza il diario e con `diarioChiuso: true`.
+- `doPost` con `azione=leggi` e la chiave nel corpo restituisce tutto, diario
+  compreso; senza la chiave giusta risponde come `doGet`.
+- `azione=diario` e `azione=residuo` senza la chiave giusta rispondono
+  `chiave sconosciuta: …`. L'app tiene le voci in coda e nel Diario chiede la
+  chiave: niente si perde. Senza la proprietà `CHIAVE` non passa niente.
+- La chiave viaggia nel corpo della richiesta, mai nell'indirizzo.
+
+### La copia del diario
+
+Ogni notte `.github/workflows/copia-notturna.yml` legge il diario con la chiave
+e lo salva **cifrato** in `data/diario.enc` (AES-256, la chiave è la stessa).
+Il file cambia solo quando cambia il diario. Per rileggerlo, da Git Bash nella
+cartella del repo:
+
+```bash
+SILLAGE_CHIAVE='la chiave' openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -a -in data/diario.enc -pass env:SILLAGE_CHIAVE
+```
+
+Le versioni vecchie del file restano nella cronologia di git, ognuna con la
+chiave che c'era quella notte.
