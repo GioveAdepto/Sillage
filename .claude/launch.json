@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "app-nuova",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "app", "run", "anteprima", "--", "--port", "4173", "--host", "127.0.0.1", "--strictPort"],
+      "port": 4173
+    }
+  ]
+}

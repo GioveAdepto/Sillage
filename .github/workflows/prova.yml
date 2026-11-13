@@ -1,6 +1,6 @@
-# A ogni pubblicazione apre il sito in un browser vero (Chromium) e controlla
-# che non ci siano errori e che le sezioni principali si aprano. Se qualcosa
-# si rompe, GitHub lo segnala sul commit con una X rossa.
+# A ogni push costruisce l'app (app/, React) e la prova: i tipi, i quattro confronti con l'app di prima e
+# un giro in un browser vero (Chromium) con un ponte finto, compreso il passaggio dall'app di prima.
+# Se qualcosa si rompe, GitHub lo segnala sul commit con una X rossa. Nessuna richiesta va al ponte pubblicato.
 name: Prova del sito
 
 on:
@@ -15,19 +15,35 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
       - name: Prepara il browser
         run: |
           npm install --no-save --no-package-lock playwright@1
           npx playwright install --with-deps chromium
-      - name: Controllo della sintassi
-        # i file di js/ nell'ordine in cui index.html li carica, letti come uno solo
-        run: node -e "const fs=require('fs');const f=[...fs.readFileSync('index.html','utf8').matchAll(/<script src=\"(js\/[^?\"]+)/g)].map(m=>m[1]);console.log(f.join(' '));new Function(f.map(x=>fs.readFileSync(x,'utf8')).join('\n'))"
       - name: Controllo della sintassi del ponte
-        # ponte/ponte.js è un modulo: per Node 20 serve l'estensione .mjs
+        # ponte/ponte.js è un modulo: per Node serve l'estensione .mjs
         run: cp ponte/ponte.js "$RUNNER_TEMP/ponte.mjs" && node --check "$RUNNER_TEMP/ponte.mjs"
-      - name: Apre il sito e lo percorre
+      - name: Controllo della sintassi dell'app di prima
+        # js/ resta nel repo: i confronti qui sotto lo usano come riferimento
+        run: node -e "const fs=require('fs');const f=[...fs.readFileSync('index.html','utf8').matchAll(/<script src=\"(js\/[^?\"]+)/g)].map(m=>m[1]);console.log(f.join(' '));new Function(f.map(x=>fs.readFileSync(x,'utf8')).join('\n'))"
+      - name: Installa i pacchetti dell'app
+        working-directory: app
+        run: npm ci --no-audit --no-fund
+      - name: Costruisce l'app come la pubblica Cloudflare
+        run: node app/strumenti/costruisci-sito.mjs
+      - name: Confronti con l'app di prima
+        working-directory: app
         run: |
-          python3 -m http.server 8800 --bind 127.0.0.1 &
-          sleep 1
-          node prove/prova.mjs http://127.0.0.1:8800/
+          node strumenti/prima-dopo.mjs
+          node strumenti/verifica-viste.mjs
+          node strumenti/verifica-filtri.mjs
+          node strumenti/prova-coda.mjs
+      - name: Costruisce l'app col ponte finto
+        working-directory: app
+        run: npm run build
+        env:
+          VITE_PONTE: http://127.0.0.1:8800/api
+      - name: Apre l'app e la percorre
+        run: node prove/prova-nuova.mjs
+      - name: Passaggio dall'app di prima (alla radice e in /Sillage/)
+        run: node prove/prova-passaggio.mjs

@@ -1,0 +1,235 @@
+/* ——— Consigliami: strumenti, scelte, la prima scelta sul piedistallo, le alternative, le ore ——— */
+.consigliami {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.cons-testa {
+  display: grid;
+  gap: 8px;
+}
+.cons-testa h1 {
+  margin: 0;
+  font: 500 38px/1 var(--f-maison);
+}
+.cons-sotto {
+  margin: 0;
+  font: 400 13.5px/1.4 var(--f-dati);
+  color: var(--seppia);
+}
+.strumenti {
+  display: grid;
+  grid-template-columns: 0.8fr 0.8fr 1.45fr 1.1fr;
+  margin-top: 16px;
+  border-top: 1px solid var(--filo);
+  border-bottom: 1px solid var(--filo);
+}
+.strumenti div {
+  display: grid;
+  gap: 5px;
+  padding: 10px 6px 9px;
+  min-width: 0;
+}
+.strumenti div + div {
+  border-left: 1px solid var(--filo-2);
+}
+.strumenti .k {
+  font: 500 9px/1 var(--f-dati);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.strumenti .v {
+  font: 500 18px/1.05 var(--f-maison);
+  color: var(--inchiostro);
+  font-variant-numeric: lining-nums;
+  overflow-wrap: anywhere;
+}
+.gruppo {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+.gruppo .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* la prima scelta: una carta d'avorio col suo piedistallo */
+.scelta {
+  position: relative;
+  margin-top: 24px;
+  padding: 0 18px 20px;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+}
+.scelta-testa {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid var(--ottone);
+}
+.scelta-testa .incisa {
+  color: var(--inchiostro);
+}
+.scelta .scena {
+  height: 236px;
+  margin: 0 -18px;
+}
+.scelta .posa {
+  zoom: 0.76;
+  margin-bottom: 12px;
+}
+.scelta .binario {
+  left: 26%;
+  right: 26%;
+}
+.scelta .titolo {
+  margin-top: 2px;
+}
+.scelta .nome-grande {
+  font-size: 34px;
+}
+.cons-conto {
+  margin: 2px 0 0;
+  font: 400 11.5px/1.3 var(--f-dati);
+  color: var(--cenere);
+}
+.motivi {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+}
+.motivi li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid var(--filo-2);
+  font: 400 14.5px/1.35 var(--f-dati);
+  color: var(--inchiostro);
+}
+.motivi li:last-child {
+  border-bottom: 1px solid var(--filo-2);
+}
+.motivi em {
+  font: italic 500 16px/1 var(--f-maison);
+  color: var(--ottone-testo);
+}
+.motivi li.ma {
+  color: var(--seppia);
+}
+.motivi li.ma em {
+  color: var(--cenere);
+}
+.azioni {
+  display: grid;
+  margin-top: 16px;
+}
+.azioni .btn-filo {
+  margin-top: 0;
+}
+.btn-filo.pieno {
+  background: var(--inchiostro);
+  color: var(--su-inchiostro);
+  box-shadow:
+    inset 0 0 0 4px var(--inchiostro),
+    inset 0 0 0 5px var(--ottone);
+}
+
+/* le alternative: numero romano, boccetta piccola, i tre motivi più forti e il contro principale */
+.alt-cons .perche em {
+  font-style: normal;
+  color: var(--cenere);
+}
+
+/* le ore sulla pelle */
+.meteo svg.curva {
+  display: block;
+  width: 100%;
+  height: 64px;
+  color: var(--inchiostro);
+}
+.meteo svg .griglia {
+  stroke: var(--filo-2);
+}
+.meteo svg .adesso-linea {
+  stroke: var(--ottone-pieno);
+}
+.ore {
+  display: grid;
+  border-top: 1px solid var(--filo);
+}
+.fascia-ora {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 0 9px;
+  font: 400 11.5px/1 var(--f-dati);
+  color: var(--seppia);
+  font-variant-numeric: tabular-nums;
+}
+.fascia-ora svg {
+  width: 18px;
+  height: 18px;
+  color: var(--seppia);
+}
+.fascia-ora.pioggia svg {
+  color: var(--acqua);
+}
+.fascia-ora b {
+  font: 500 18px/1 var(--f-maison);
+  color: var(--inchiostro);
+  font-variant-numeric: lining-nums;
+}
+.fascia-ora.adesso {
+  background: var(--avorio);
+  box-shadow: inset 0 2px 0 var(--ottone);
+  color: var(--inchiostro);
+}
+
+.meteo-nota {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--filo);
+}
+.meteo-nota p {
+  margin: 10px 0 0;
+  font: 400 12.5px/1.45 var(--f-dati);
+  color: var(--cenere);
+}
+.meteo-nota .btn-filo {
+  margin-top: 0;
+  width: 100%;
+}
+.meteo-nota .btn-filo:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.collegamento {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ottone-testo);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+@media (min-width: 960px) {
+  /* schermo largo: a sinistra le scelte e il piedistallo, a destra le alternative e le ore */
+  .consigliami {
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 64px;
+    align-items: start;
+  }
+  .cons-destra > .sez:first-child {
+    margin-top: 0;
+  }
+}

@@ -5,11 +5,15 @@
   "observability": {
     "enabled": true
   },
-  // Il sito: i file del repo, serviti così come sono. Solo /api passa dal
+  // Il sito: l'app (app/, React) costruita in sito/ prima di ogni pubblicazione. Solo /api passa dal
   // ponte (ponte/ponte.js), che collega l'app al database.
   "main": "ponte/ponte.js",
+  // Prima di ogni pubblicazione si costruisce l'app (app/) nella cartella sito/ (app/LEGGIMI.md).
+  "build": {
+    "command": "node app/strumenti/costruisci-sito.mjs"
+  },
   "assets": {
-    "directory": ".",
+    "directory": "./sito",
     "run_worker_first": ["/api", "/api/*"]
   },
   "compatibility_flags": [

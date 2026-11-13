@@ -32,6 +32,8 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const u = new URL(req.url);
+  // /nuova/ è la nuova app in prova, col suo service worker: questo non la tocca (né la salva come pagina di Sillage)
+  if (u.pathname.startsWith("/nuova/") || u.pathname === "/nuova") return;
 
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).then(r => {

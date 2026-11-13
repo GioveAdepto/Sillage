@@ -1,0 +1,572 @@
+/* ——— Scheda: piedistallo col faretto, misure, righe sottili misurate ——— */
+.scheda {
+  max-width: 560px;
+  margin: 0 auto;
+}
+@media (min-width: 960px) {
+  /* schermo largo: la vetrina a sinistra resta ferma, i dati scorrono a destra */
+  .scheda {
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 64px;
+  }
+  .scheda-vetrina {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+  .scheda-dati > .sez:first-child {
+    margin-top: 52px;
+  }
+}
+
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 44px;
+  margin-top: -8px;
+}
+.torna {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 6px 0 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 400 14.5px/1 var(--f-dati);
+  color: var(--inchiostro);
+}
+.torna svg {
+  width: 18px;
+  height: 18px;
+}
+.nr-grande {
+  font: italic 500 16px/1 var(--f-maison);
+  color: var(--ottone-testo);
+  letter-spacing: 0.05em;
+}
+
+/* la scena: binario di luce, faretto, fascio, piedistallo di travertino */
+.scena {
+  position: relative;
+  isolation: isolate;
+  height: 324px;
+  margin: 0 calc(-1 * var(--margine));
+  overflow: hidden;
+  display: grid;
+  place-items: end center;
+}
+.scena .binario {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 10px;
+  height: 1px;
+  background: var(--ottone);
+}
+.scena .faretto {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 16px;
+  height: 20px;
+  margin-left: -8px;
+  border-radius: 2px 2px 6px 6px;
+  background: var(--faretto);
+  box-shadow: inset 0 -2px 0 var(--ottone);
+}
+.scena .fascio {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  width: 260px;
+  height: 250px;
+  margin-left: -130px;
+  background: linear-gradient(180deg, var(--fascio), transparent 92%);
+  clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%);
+  animation: accende 900ms ease-out both;
+}
+.scena .alone {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(40% 62% at 50% 62%, var(--alone), transparent 100%);
+  animation: accende 1200ms ease-out both;
+}
+.posa {
+  position: relative;
+  width: 210px;
+  height: 268px;
+  margin-bottom: 18px;
+}
+.piedistallo {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 88px;
+  background:
+    linear-gradient(180deg, var(--plinto-sopra) 0 12px, var(--ottone) 12px 13px, transparent 13px),
+    repeating-linear-gradient(
+      179deg,
+      transparent 0 5px,
+      var(--plinto-vena) 5px 6px,
+      transparent 6px 15px,
+      var(--plinto-vena) 15px 17px,
+      transparent 17px 26px
+    ),
+    linear-gradient(90deg, var(--plinto-a) 0, var(--plinto-b) 22%, var(--plinto-c) 60%, var(--plinto-d) 100%);
+  box-shadow: 0 22px 26px -18px var(--ombra-lunga);
+}
+.posa .ombra {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  width: 136px;
+  height: 16px;
+  margin-left: -68px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--ombra), transparent);
+  animation: ombra 1100ms 300ms var(--curva) both;
+}
+.posa .sopra {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 78px;
+  display: flex;
+  justify-content: center;
+}
+.posa .sopra .bottiglia {
+  height: 178px;
+  width: 172px;
+  filter: var(--bordo-luce) drop-shadow(0 2px 2px var(--ombra)) drop-shadow(10px 5px 10px var(--ombra-lunga));
+  animation: posa 1100ms 300ms var(--curva) both;
+}
+/* arrivata in volo dalla teca: la boccetta non ricade dall'alto */
+.scena.in-volo .sopra .bottiglia,
+.scena.in-volo .posa .ombra {
+  animation: none;
+}
+.pavimento {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18px;
+  background: linear-gradient(180deg, var(--pavimento), transparent);
+}
+
+.titolo {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  text-align: center;
+}
+.titolo .marca {
+  margin: 0;
+  font-size: 10.5px;
+}
+.nome-grande {
+  margin: 0;
+  font: 500 46px/1 var(--f-maison);
+  letter-spacing: 0.005em;
+  color: var(--inchiostro);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.titolo .sotto {
+  margin: 0;
+  font: 400 13.5px/1.35 var(--f-dati);
+  color: var(--seppia);
+}
+.targhe {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+.targa {
+  padding: 5px 8px 4px;
+  border: 1px solid var(--ottone);
+  font: 500 10px/1.1 var(--f-dati);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ottone-testo);
+}
+
+.misure {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 20px;
+  border-top: 1px solid var(--filo);
+  border-bottom: 1px solid var(--filo);
+}
+.misure div {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 5px;
+  padding: 12px 4px 11px;
+  text-align: center;
+}
+.misure div + div {
+  border-left: 1px solid var(--filo-2);
+}
+.misure .k {
+  font: 500 9.5px/1 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.misure .v {
+  font: 500 29px/1 var(--f-maison);
+  font-variant-numeric: lining-nums;
+  color: var(--inchiostro);
+}
+.misure .v small {
+  font: 400 12px var(--f-dati);
+  color: var(--seppia);
+}
+.misure .s {
+  font: 400 11.5px/1 var(--f-dati);
+  color: var(--seppia);
+  font-variant-numeric: tabular-nums;
+}
+
+.sez {
+  margin-top: 28px;
+}
+.sez-testa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+.sez-testa h3 {
+  margin: 0;
+  font: 500 10.5px/1 var(--f-dati);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--seppia);
+}
+.sez-testa .linea {
+  flex: 1;
+  height: 1px;
+  background: var(--ottone);
+  opacity: 0.6;
+}
+.sez-testa .scala {
+  font: 400 11.5px/1 var(--f-dati);
+  color: var(--cenere);
+}
+.semplice {
+  margin: 0;
+  font: italic 400 20px/1.3 var(--f-maison);
+}
+
+.piramide {
+  margin: 0;
+}
+.piramide .piano {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  border-bottom: 1px solid var(--filo-2);
+}
+.piramide .senza-livello {
+  grid-template-columns: minmax(0, 1fr);
+}
+.piramide dt,
+.piramide dd {
+  padding: 8px 0 7px;
+}
+.piramide dt {
+  padding-top: 12px;
+  font: 500 10px/1 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.piramide dd {
+  margin: 0;
+  font: italic 400 20px/1.25 var(--f-maison);
+  color: var(--inchiostro);
+}
+
+/* righe misurate: filo, tacche ogni 25, barretta d'inchiostro */
+.righe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.righe li {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 10px;
+  min-height: 31px;
+}
+.righe .n {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font: 400 14px/1.1 var(--f-dati);
+  color: var(--inchiostro);
+}
+.righe .n em {
+  font: italic 500 14px/1 var(--f-maison);
+  color: var(--ottone-testo);
+}
+.traccia {
+  position: relative;
+  height: 11px;
+  border-right: 1px solid var(--filo-3);
+  background:
+    linear-gradient(var(--filo), var(--filo)) 0 50% / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--filo-3) 0 1px, transparent 1px 25%);
+}
+.traccia i {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: var(--w, 0);
+  height: 3px;
+  background: var(--inchiostro);
+  transform-origin: left center;
+  animation: misura 900ms var(--curva) both;
+}
+.righe li:nth-child(2) .traccia i {
+  animation-delay: 70ms;
+}
+.righe li:nth-child(3) .traccia i {
+  animation-delay: 140ms;
+}
+.righe li:nth-child(4) .traccia i {
+  animation-delay: 210ms;
+}
+.righe li:nth-child(n + 5) .traccia i {
+  animation-delay: 280ms;
+}
+.righe li.attuale .traccia i {
+  background: var(--ottone-pieno);
+}
+.righe .v {
+  font: 400 12.5px/1 var(--f-dati);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--inchiostro);
+}
+.righe li.attuale .v {
+  font-weight: 500;
+}
+.scala-num {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) 34px;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+.scala-num span {
+  display: flex;
+  justify-content: space-between;
+  font: 400 10px/1 var(--f-dati);
+  color: var(--cenere);
+  font-variant-numeric: tabular-nums;
+}
+.scala-num b {
+  font-weight: 400;
+}
+
+.asta {
+  position: relative;
+  display: flex;
+  height: 8px;
+  margin: 4px 0 7px;
+  border: 1px solid var(--filo-3);
+}
+.asta i {
+  display: block;
+}
+.asta i:first-child {
+  background: var(--giorno);
+}
+.asta i + i {
+  background: var(--inchiostro);
+}
+.asta::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  bottom: -5px;
+  width: 1px;
+  background: var(--ottone);
+}
+.asta-leg {
+  display: flex;
+  justify-content: space-between;
+  font: 400 13px/1 var(--f-dati);
+  color: var(--inchiostro);
+  font-variant-numeric: tabular-nums;
+}
+
+.usi {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+}
+.usi li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 32px;
+  border-bottom: 1px solid var(--filo-2);
+  font: 400 14px/1.1 var(--f-dati);
+}
+.usi svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: var(--inchiostro);
+}
+.usi .con-misura {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--cenere);
+}
+.usi li.no,
+.usi li.no svg {
+  color: var(--cenere);
+}
+
+.citazione {
+  margin: 0;
+  font: italic 400 21px/1.3 var(--f-maison);
+  color: var(--inchiostro);
+  text-wrap: pretty;
+}
+.racconto {
+  margin: 0;
+  font: 400 15px/1.6 var(--f-dati);
+  color: var(--seppia);
+  text-wrap: pretty;
+}
+
+/* righe con la boccetta piccola: parentele e somiglianze */
+.alt {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.alt li {
+  border-bottom: 1px solid var(--filo-2);
+}
+.alt-riga {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  color: inherit;
+}
+.alt-testo {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.alt .marca {
+  margin: 0;
+}
+.alt .n {
+  font: 500 19px/1.05 var(--f-maison);
+  color: var(--inchiostro);
+}
+.alt .perche {
+  font: 400 12.5px/1.3 var(--f-dati);
+  color: var(--seppia);
+}
+.alt .nr {
+  align-self: start;
+  padding-top: 3px;
+  font: italic 500 14px/1 var(--f-maison);
+  color: var(--ottone-testo);
+  font-variant-numeric: tabular-nums;
+}
+.mini {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  width: 52px;
+  height: 64px;
+  padding-bottom: 3px;
+  background: radial-gradient(70% 80% at 50% 0%, var(--faro), var(--faro-0) 85%);
+  border-bottom: 2px solid var(--ottone);
+}
+.mini img {
+  display: block;
+  height: 54px;
+  width: 46px;
+  object-fit: contain;
+  object-position: 50% 100%;
+  filter: var(--bordo-luce) drop-shadow(0 1px 1px var(--ombra)) drop-shadow(3px 2px 3px var(--ombra-lunga));
+}
+@media (hover: hover) {
+  a.alt-riga:hover .n {
+    color: var(--ottone-testo);
+  }
+}
+
+/* la boccetta: formato e quanto ne resta (in sola lettura) */
+.boccetta-dati {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 12px;
+}
+.boccetta-dati div {
+  display: grid;
+  gap: 4px;
+}
+.boccetta-dati dt {
+  font: 500 9.5px/1 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.boccetta-dati dd {
+  margin: 0;
+  font: 500 22px/1.1 var(--f-maison);
+}
+.livello {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.livello i {
+  height: 10px;
+  border: 1px solid var(--filo-3);
+}
+.livello i.pieno {
+  background: var(--ottone-pieno);
+  border-color: var(--ottone-pieno);
+}
+.livello-eti {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font: 400 11px/1 var(--f-dati);
+  color: var(--cenere);
+}
+
+.btn-filo.esterno {
+  display: flex;
+  width: 100%;
+  margin-top: 32px;
+}

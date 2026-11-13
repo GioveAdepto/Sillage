@@ -1,0 +1,29 @@
+{
+  "name": "sillage-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "node strumenti/copia-dati.mjs",
+    "build": "tsc --noEmit && vite build",
+    "anteprima": "vite preview",
+    "controlla": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/jost": "^5.3.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router": "^7.9.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^4.7.0",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.6",
+    "vite-plugin-pwa": "^1.0.3"
+  }
+}
