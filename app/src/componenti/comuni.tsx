@@ -47,3 +47,8 @@ export function useTitolo(t: string) {
     document.title = t;
   }, [t]);
 }
+
+/** La boccetta in piccolo, sotto il suo faretto (la stessa nicchia della teca, ridotta). */
+export function Mini({ p, classe = "" }: { p?: Profumo | null; classe?: string }) {
+  return <span className={"mini " + classe}>{p ? <Boccetta p={p} className="" /> : null}</span>;
+}

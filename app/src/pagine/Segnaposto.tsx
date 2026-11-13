@@ -20,6 +20,7 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     titolo: "Numeri",
     breve: "Statistiche, stagioni, classifiche",
     tappa: "Tappa 4",
+    pronta: true,
     cosa: ["Statistiche della collezione", "Stagioni e classifiche", "Storico delle aggiunte", "Mappa olfattiva"]
   },
   {
@@ -27,6 +28,7 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     titolo: "Layering",
     breve: "Ricette a due strati",
     tappa: "Tappa 4",
+    pronta: true,
     cosa: ["Le ricette a due strati, sotto e sopra", "Da ogni scheda, le ricette in cui entra quel profumo"]
   },
   {
@@ -34,6 +36,7 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     titolo: "Guida",
     breve: "Cosa mettere per ogni occasione",
     tappa: "Tappa 4",
+    pronta: true,
     cosa: ["I profumi giusti per ufficio, serata, appuntamento, palestra e le altre occasioni"]
   },
   {
@@ -41,6 +44,7 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     titolo: "Acquisti",
     breve: "Le lacune e cosa comprare",
     tappa: "Tappa 4",
+    pronta: true,
     cosa: ["Le lacune della collezione", "Consigli d'acquisto"]
   },
   {
@@ -48,6 +52,7 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     titolo: "Confronta",
     breve: "Fino a tre profumi affiancati",
     tappa: "Tappa 4",
+    pronta: true,
     cosa: ["Fino a tre profumi affiancati, scelti dalla Collezione"]
   },
   {

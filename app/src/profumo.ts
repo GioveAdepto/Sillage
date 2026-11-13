@@ -171,7 +171,7 @@ export function livelloResiduo(p: Profumo): { v: number; l: string } | null {
 }
 
 /* Originale e clone si riconoscono dal nome: «dupe» contiene «Marchio Profumo» dell'originale. */
-const chiaveNome = (t: string) =>
+export const chiaveNome = (t: string) =>
   piega(String(t).split(" (")[0])
     .replace(/[^a-z0-9]+/g, " ")
     .trim();

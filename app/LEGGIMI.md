@@ -41,6 +41,7 @@ strumenti/scontorna.py   rifà le foto scontornate: python scontorna.py <cartell
 strumenti/prima-dopo.mjs confronta la classifica di Consigliami tra l'app di oggi e la nuova (vedi «Prove»)
 strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
 strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
+strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
 src/main.tsx             avvio: caratteri, stile, dati, router
 src/rotte.tsx            le pagine e i loro indirizzi
 src/tipi.ts              com'è fatto un profumo che arriva dal ponte
@@ -53,9 +54,14 @@ src/diario/coda.ts       il diario e la coda delle scritture (niente React: lo u
 src/diario/uso.tsx       useDiario, l'invio al ritorno della rete, useSegna
 src/diario/pezzi.tsx     «Lo metto oggi», occasione e momento di una voce, «Su di te»
 src/meteo-contesto.tsx   il meteo per tutta l'app (useMeteo): Consigliami e il filtro «Adesso»
-src/componenti/          Guscio (barra in basso), Icone, Piedistallo, Avvisi, pezzi comuni (Boccetta, meno movimento)
-src/pagine/              Collezione, Scheda, Consigliami, Diario, Impostazioni, Altro, Segnaposto (pagine in arrivo)
-src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, diario, pagine
+src/viste/calcoli.ts     i calcoli di Numeri, mappa olfattiva, Guida, Layering, Acquisti, Confronto (da js/viste.js)
+src/viste/condividi.ts   l'immagine della scheda da condividere (1080×1350)
+src/componenti/          Guscio, Icone, Piedistallo, Avvisi, Ruota (degli accordi), Righe (sezioni, classifiche),
+                         Tessera (profumo che porta alla teca), pezzi comuni (Boccetta, Mini, meno movimento)
+src/pagine/              Collezione, Scheda, Consigliami, Diario, Numeri, Layering, Guida, Acquisti, Confronta,
+                         Impostazioni, Altro, Segnaposto (pagina non trovata)
+src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, diario,
+                         viste, pagine
 ```
 
 - **Caratteri**: Cormorant Garamond e Jost sono dentro l'app (pacchetti `@fontsource`, solo l'alfabeto
@@ -89,7 +95,15 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
 | `#/diario?vista=settimana` | **La settimana**: un suggerimento al giorno da lunedì a domenica, con l'occasione da cambiare e «Lo metto» per oggi; i giorni passati dicono cosa hai messo | fatta (tappa 3) |
 | `#/impostazioni` | **Impostazioni**: la chiave di Sillage, la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3) |
-| `#/numeri`, `#/layering`, `#/guida`, `#/acquisti`, `#/confronta` | | segnaposto, tappa 4 |
+| `#/numeri` | **Numeri**: boccette, campioni, marchi, rating e durata medi, mappa olfattiva (anche coi campioni), stagione e famiglia, occasioni d'uso, accordi più presenti, classifiche per rating e durata, cloni e originali, storico delle aggiunte, il diario (questo mese, le più indossate, da riprendere, per stagione, rotazione del mese), profilo Fragrantica | fatta (tappa 4) |
+| `#/layering?tipo=app&ricetta=4` | **Layering**: le quattro regole, i filtri per tipo, le ricette da aprire (sopra e sotto con le dosi, come si fa, risultato, perché, quando) e «Lo faccio oggi» | fatta (tappa 4) |
+| `#/guida?occ=ufficio` | **Guida**: le sette occasioni; per ognuna le boccette per stagione (quella in corso prima), con moderazione, in ufficio anche le altre (1 spray), e i campioni | fatta (tappa 4) |
+| `#/acquisti` | **Acquisti**: le boccette che stanno finendo, lacune aperte con le idee (✓ se già in casa), le lacune chiuse, il profilo Fragrantica | fatta (tappa 4) |
+| `#/confronta?ids=3,24,7` | **Confronta**: due o tre profumi affiancati, cosa hanno in comune, la ruota degli accordi, profilo, accordi e note, quando indossarli; si scelgono qui, dalla Collezione («Confronta» e poi si toccano le teche) o dalla Scheda («Confronta con…») | fatta (tappa 4) |
+
+Da Numeri, Guida, Layering, Acquisti e Confronta un profumo porta alla Collezione, sulla sua teca chiusa che si
+illumina (`#/?vedi=ID`, regola dell'utente). Da Consigliami, Diario e dalle righe «Somiglia a» e «Parentele» della
+Scheda si apre invece la scheda del profumo (che dalla tappa 1 è una pagina): vedi l'inventario.
 
 «Collezione» in alto nella scheda: se si arriva dalla vetrina torna indietro (filtri e punto ritrovati);
 se si arriva da un'altra scheda dice «Indietro»; se la scheda è stata aperta da un link porta alla vetrina
@@ -151,6 +165,22 @@ cambiata anche qui.
 `npm run build` controlla i tipi e costruisce. Le prove automatiche di `.github/workflows/prova.yml`
 riguardano ancora l'app di oggi; quelle della nuova arrivano con la tappa 5.
 
+**Verifica delle viste** (Numeri, Guida, Layering, Acquisti, Confronto, somiglianze):
+
+```bash
+cd app
+node strumenti/verifica-viste.mjs            # profumi, layering e consigli da data/*.json
+node strumenti/verifica-viste.mjs --ponte    # gli stessi letti adesso dal ponte (sola lettura)
+```
+
+L'app di oggi gira in una sandbox con un DOM finto: si chiamano le sue funzioni di disegno (`disegnaNumeri`, anche
+con la mappa dei campioni; `disegnaGuida` per ogni occasione e per le due stagioni; `disegnaAcquisti`;
+`disegnaConfronto` su cinque coppie e terne) e dal loro HTML si leggono numeri e profumi nell'ordine in cui
+compaiono; le funzioni pure (`partiRicetta`, `indiceStrati`, `giaInCasa`, `similiA`, `posizioneOlfattiva`,
+`rinumera`) si chiamano direttamente. Diario finto uguale per le due app (mesi diversi, confini di stagione, un
+layering, una voce futura), orologio fermo. 328 controlli; differenze volute, normalizzate: la virgola nei numeri e
+«Nº» invece di «№».
+
 **Prove della coda del diario**:
 
 ```bash
@@ -196,3 +226,60 @@ Carica `js/dati.js`, `js/collezione.js` e `js/consigliami.js` dell'app di oggi i
 in primavera e autunno, tramonti veri per la stagione) confronta ordine, punteggio e motivi di ogni profumo
 in 224 casi: 4 date × mattina e sera × 7 occasioni × oggi/domani × con e senza meteo. Esce con errore se
 trova differenze. Unica differenza voluta: il voto nei motivi con la virgola («★ 4,3»).
+
+## Inventario: l'app di oggi e la nuova
+
+Per la tappa 5 (il passaggio). «c'è» = stessa funzione; «cambiata» = c'è, ma diversa apposta; «manca» = non c'è
+ancora.
+
+### Collezione e scheda
+
+| funzione dell'app di oggi | nella nuova |
+|---|---|
+| Boccette e campioni in due vetrine, numero di catalogo per vetrina | c'è |
+| Ricerca senza accenti (nome, marca, note, famiglia, accordi, dupe) | c'è |
+| Scelte rapide: Adesso, Ufficio, Appuntamento, Sera, Cloni, Novità | cambiata: restano Adesso e le tre famiglie; le altre stanno in Guida e Numeri |
+| Cassetto dei filtri (stagione, occasione, famiglia, momento, provenienza, note olfattive) e ordinamenti (nome, marchio, rating, famiglia, stagione, longevità, numero, aggiunti di recente) | manca: oggi solo famiglia, «Adesso» e ricerca; ordine fisso per numero di catalogo |
+| Filtri ricordati solo finché l'app è aperta | cambiata: stanno nell'indirizzo (`#/?f=verde&ora=1&q=…`), «indietro» li ritrova |
+| Teca che si apre sul posto (o nel pannello a destra su schermo largo) | cambiata: la scheda è una pagina (`#/profumo/ID`) |
+| Saltando a un profumo da un'altra sezione la teca resta chiusa, ancorata e illuminata | c'è per Numeri, Guida, Layering, Acquisti, Confronta e per i link esterni alla scheda; cambiata per Consigliami, Diario e le righe della Scheda, che aprono la scheda |
+| Piramide, accordi con la forza, stagioni, giorno/sera, uso, note personali, racconto | c'è (righe misurate della Boutique) |
+| Ruota degli accordi nella scheda | cambiata: nella scheda le righe con la forza; la ruota c'è in Confronta |
+| Icone delle note (emoji) | cambiata: tolte nello stile Boutique |
+| Parentele (originale e cloni), Somiglia a, Layering del profumo | c'è |
+| «Lo metto oggi», appunto, occasione e momento, «Su di te», residuo a sette tacche | c'è |
+| Condividi la scheda (immagine 1080×1350) | c'è, nei colori della Boutique in penombra |
+| Apri su Fragrantica | c'è |
+| Vassoio del confronto (+ su ogni teca, fino a tre) | cambiata: «Confronta» nella Collezione, poi si toccano le teche; vassoio in basso; anche «Confronta con…» dalla scheda |
+
+### Altre pagine
+
+| funzione | nella nuova |
+|---|---|
+| Consigliami (oggi e domani, occasioni, primo consiglio e alternative, motivi, meteo ora per ora, «Lo metto», mai indossati) | c'è, con lo stesso punteggio (prima/dopo); in più «Stasera»; da foglio è diventata pagina |
+| «Se vuoi osare, con…» (ricetta di layering in Consigliami) | manca |
+| Diario: mese, giorno, aggiungi un profumo o un layering, togli, appunto, cronologia; piano della settimana | c'è |
+| Chiave chiesta dal Diario con un prompt | cambiata: si inserisce in Altro ▸ Impostazioni |
+| Numeri, mappa olfattiva, storico, diario nei Numeri | c'è, stessi numeri (verifica-viste); il link «Le N novità →» manca (non c'è il filtro Novità) |
+| Layering, Guida, Acquisti, Confronto | c'è, stesse liste (verifica-viste) |
+| Profilo Fragrantica | c'è |
+| Barra in basso: Collezione, Diario, Layering, Guida, Acquisti, Numeri | cambiata: Collezione, Consigliami, Diario, Numeri, Altro (con Layering, Guida, Acquisti, Confronta, Impostazioni) |
+
+### Rifiniture
+
+| funzione | nella nuova |
+|---|---|
+| Vetrina di apertura (le due ante di vetro all'avvio) | manca |
+| Boccetta presa in mano (l'esame nella teca aperta) | manca; al suo posto la boccetta che vola dalla teca al piedistallo |
+| Tilt delle boccette e riflesso che segue il dito | manca |
+| View Transitions | c'è: teca → scheda e ritorno, Consigliami → scheda |
+| Boccette che si posano sulla mensola, barre che si allungano, faretto che si accende | c'è (prima apertura della vetrina) |
+| Scheletro durante l'attesa | cambiata: «Apro la vetrina…» |
+| Pillola che scorre sotto la voce attiva della barra | cambiata: filo d'ottone sopra la voce attiva, senza scorrimento |
+| Tasto indietro del telefono e link diretti alle sezioni | c'è: ogni pagina ha il suo indirizzo `#/…` |
+| Avviso «c'è una versione nuova» | cambiata: il service worker scarica la versione nuova e ricarica l'app da solo, senza avviso |
+| App installabile e senza rete (service worker, manifest, icone) | c'è (vite-plugin-pwa) |
+| Schermate d'avvio dell'iPhone (`img/avvio/`) | manca |
+| Tema | cambiata: Boutique chiara e scura, segue l'iPhone |
+| Avvisi brevi in basso | c'è |
+| Meno movimento per chi lo chiede | c'è |

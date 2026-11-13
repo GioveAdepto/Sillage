@@ -17,7 +17,8 @@ import {
   voto,
   type Vetrina
 } from "../profumo";
-import { Boccetta, useMenoMovimento, useTitolo } from "../componenti/comuni";
+import { Boccetta, Mini, useMenoMovimento, useTitolo } from "../componenti/comuni";
+import { useAvviso } from "../componenti/Avvisi";
 import { IconaCerca, IconaX } from "../componenti/Icone";
 import { useMeteo } from "../meteo-contesto";
 
@@ -44,6 +45,20 @@ export default function Collezione() {
     giaPosate = true;
   }, []);
   useTitolo("Sillage · Collezione");
+
+  // la scelta per il confronto: anche lei nell'indirizzo, niente memoria tra un'apertura e l'altra
+  const scegli = par.get("scegli") === "1";
+  const sel = (par.get("sel") || "")
+    .split(",")
+    .map(Number)
+    .filter((x) => x > 0)
+    .slice(0, 3);
+  const avvisa = useAvviso();
+  const scegliTeca = (id: number) => {
+    if (sel.includes(id)) imposta({ sel: sel.filter((x) => x !== id).join(",") || null });
+    else if (sel.length >= 3) avvisa("Al massimo tre profumi: togline uno dal vassoio.");
+    else imposta({ sel: [...sel, id].join(",") });
+  };
 
   /** Cambia i parametri dell'indirizzo senza aggiungere passi alla cronologia e senza scorrere. */
   const imposta = (cambi: Record<string, string | null>) => {
@@ -205,13 +220,30 @@ export default function Collezione() {
             : `${visibili.length} di ${inVetrina.length}`}
           {ora ? ` · ${momento.nome}, ${momento.momento === "sera" ? "sera" : "giorno"}` : ""}
         </span>
-        <span>per numero di catalogo</span>
+        <span>
+          {scegli ? (
+            "tocca fino a tre teche"
+          ) : (
+            <button type="button" className="collegamento" onClick={() => imposta({ scegli: "1" })}>
+              Confronta
+            </button>
+          )}
+        </span>
       </div>
 
       {visibili.length ? (
         <div className={"scaffale" + (prima.current && !riduci ? " prima-volta" : "")}>
           {visibili.map((p, i) => (
-            <Teca key={p.id} p={p} n={numeri.get(p.id) ?? p.id} i={i} illuminata={illuminata === p.id} riduci={riduci} />
+            <Teca
+              key={p.id}
+              p={p}
+              n={numeri.get(p.id) ?? p.id}
+              i={i}
+              illuminata={illuminata === p.id}
+              riduci={riduci}
+              scelta={scegli ? sel.includes(p.id) : undefined}
+              onScegli={scegli ? () => scegliTeca(p.id) : undefined}
+            />
           ))}
         </div>
       ) : (
@@ -224,11 +256,50 @@ export default function Collezione() {
           ) : null}
         </div>
       )}
+      {scegli ? (
+        <div className="vassoio" role="region" aria-label="Da confrontare">
+          <span className="vassoio-caselle">
+            {[0, 1, 2].map((k) => (
+              <Mini key={k} p={sel[k] ? perId.get(sel[k]) : null} classe={sel[k] ? "" : "vuota"} />
+            ))}
+          </span>
+          <span className="vassoio-conto">{sel.length} / 3</span>
+          <button type="button" className="collegamento" onClick={() => imposta({ scegli: null, sel: null })}>
+            Annulla
+          </button>
+          {sel.length >= 2 ? (
+            <Link className="btn-filo pieno" to={`/confronta?ids=${sel.join(",")}`}>
+              Confronta
+            </Link>
+          ) : (
+            <span className="btn-filo spento" aria-disabled="true">
+              Confronta
+            </span>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
 
-function Teca({ p, n, i, illuminata, riduci }: { p: Profumo; n: number; i: number; illuminata: boolean; riduci: boolean }) {
+function Teca({
+  p,
+  n,
+  i,
+  illuminata,
+  riduci,
+  scelta,
+  onScegli
+}: {
+  p: Profumo;
+  n: number;
+  i: number;
+  illuminata: boolean;
+  riduci: boolean;
+  /** in modalità confronto: se è nel vassoio */
+  scelta?: boolean;
+  onScegli?: () => void;
+}) {
   const verso = `/profumo/${p.id}`;
   // durante il volo verso la scheda (e al ritorno) la boccetta porta il nome della transizione
   const inVolo = useViewTransitionState(verso);
@@ -238,7 +309,16 @@ function Teca({ p, n, i, illuminata, riduci }: { p: Profumo; n: number; i: numbe
       viewTransition={!riduci}
       state={{ volo: !riduci, da: "collezione" }}
       id={"teca-" + p.id}
-      className={`voce ${p.colore}${illuminata ? " ancorata" : ""}`}
+      className={`voce ${p.colore}${illuminata ? " ancorata" : ""}${scelta ? " nel-vassoio" : ""}`}
+      aria-pressed={onScegli ? !!scelta : undefined}
+      onClick={
+        onScegli
+          ? (e) => {
+              e.preventDefault();
+              onScegli();
+            }
+          : undefined
+      }
       style={{ "--i": Math.min(i, 9) } as CSSProperties}
     >
       <div className="nicchia">

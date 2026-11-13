@@ -15,6 +15,7 @@ import "./stile/scheda.css";
 import "./stile/pagine.css";
 import "./stile/consigliami.css";
 import "./stile/diario.css";
+import "./stile/viste.css";
 import { DatiProvider } from "./dati";
 import { MeteoProvider } from "./meteo-contesto";
 import { AvvisiProvider } from "./componenti/Avvisi";

@@ -31,6 +31,8 @@ import { LoMetto, SuDiTe } from "../diario/pezzi";
 import { useDiario } from "../diario/uso";
 import { useAvviso } from "../componenti/Avvisi";
 import { rifiutoChiave, scriviAlPonte } from "../ponte";
+import { indiceStrati } from "../viste/calcoli";
+import { condividiScheda } from "../viste/condividi";
 import { IconaFuori, IconaIndietro, IconaMezzo, IconaNo, IconaSi } from "../componenti/Icone";
 
 /* La scheda di un profumo, pagina con indirizzo proprio (#/profumo/24).
@@ -358,12 +360,22 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
           <Residuo p={p} />
         </Sezione>
 
-        {p.fragrantica ? (
-          <a className="btn-filo esterno" href={p.fragrantica} target="_blank" rel="noopener noreferrer">
-            Apri su Fragrantica
-            <IconaFuori />
-          </a>
-        ) : null}
+        <RicetteDi p={p} />
+
+        <div className="scheda-azioni">
+          {p.fragrantica ? (
+            <a className="btn-filo esterno" href={p.fragrantica} target="_blank" rel="noopener noreferrer">
+              Apri su Fragrantica
+              <IconaFuori />
+            </a>
+          ) : null}
+          <Link className="btn-filo" to={`/confronta?ids=${p.id}`}>
+            Confronta con…
+          </Link>
+          <button type="button" className="btn-filo" onClick={() => void condividiScheda(p)}>
+            Condividi la scheda
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -456,5 +468,28 @@ function Residuo({ p }: { p: Profumo }) {
       </div>
       <p className="nota-piccola">Tocca una tacca per dire quanto ne resta: si salva nel database, con la chiave.</p>
     </>
+  );
+}
+
+/** Le ricette di layering in cui entra questo profumo, con il suo ruolo: portano alla ricetta aperta. */
+function RicetteDi({ p }: { p: Profumo }) {
+  const { dati } = useDati();
+  const ric = indiceStrati(dati?.layering ?? []).get(p.id) ?? [];
+  if (!ric.length) return null;
+  return (
+    <Sezione titolo="Layering" scala={`${ric.length} ${ric.length === 1 ? "ricetta" : "ricette"}`}>
+      <ul className="righe-vedi">
+        {ric.map((r) => (
+          <li key={r.i}>
+            <Link className="riga-vedi senza-mini" to={`/layering?ricetta=${r.i}`}>
+              <span className="riga-testo">
+                <b>{r.nome}</b>
+                <small>{r.ruolo === "sotto" ? "qui sta sotto, il più denso" : "qui sta sopra, il più leggero"}</small>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Sezione>
   );
 }
