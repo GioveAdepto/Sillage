@@ -10,6 +10,9 @@ Ponte e database sono gli stessi: l'app legge da `https://sillage.danilo-moro96.
 
 ## Il passaggio
 
+**Fatto il 13 novembre 2026** (unione `985e662` su `main`). Da quel giorno GitHub Pages è impostato su
+«GitHub Actions» e i due indirizzi pubblicano l'app nuova. Quello che segue resta come spiegazione e per tornare indietro.
+
 Stessi due indirizzi di prima, con l'app nuova alla radice: chi ha l'icona sulla schermata Home non la reinstalla.
 
 | indirizzo | come si pubblica |
