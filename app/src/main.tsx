@@ -13,13 +13,17 @@ import "./stile/base.css";
 import "./stile/collezione.css";
 import "./stile/scheda.css";
 import "./stile/pagine.css";
+import "./stile/consigliami.css";
 import { DatiProvider } from "./dati";
+import { MeteoProvider } from "./meteo-contesto";
 import { router } from "./rotte";
 
 createRoot(document.getElementById("radice")!).render(
   <StrictMode>
     <DatiProvider>
-      <RouterProvider router={router} />
+      <MeteoProvider>
+        <RouterProvider router={router} />
+      </MeteoProvider>
     </DatiProvider>
   </StrictMode>
 );

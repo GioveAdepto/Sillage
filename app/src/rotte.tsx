@@ -3,6 +3,7 @@ import Guscio from "./componenti/Guscio";
 import Collezione from "./pagine/Collezione";
 import Scheda from "./pagine/Scheda";
 import Altro from "./pagine/Altro";
+import Consigliami from "./pagine/Consigliami";
 import Segnaposto, { IN_ARRIVO } from "./pagine/Segnaposto";
 
 /* Router a cancelletto (#/profumo/24): funziona su qualunque hosting e offline,
@@ -14,6 +15,7 @@ export const router = createHashRouter([
     children: [
       { index: true, element: <Collezione /> },
       { path: "profumo/:id", element: <Scheda /> },
+      { path: "consigliami", element: <Consigliami /> },
       { path: "altro", element: <Altro /> },
       ...IN_ARRIVO.map((p) => ({ path: p.percorso, element: <Segnaposto pagina={p} /> })),
       { path: "*", element: <Segnaposto /> }

@@ -1,4 +1,5 @@
 import type { Colore, Profumo, SiNo } from "./tipi";
+import type { Meteo } from "./meteo";
 
 /* Le regole dell'app di oggi (js/collezione.js, js/dati.js), riscritte una per una.
    Se cambia una regola là, va cambiata anche qui (e viceversa) finché le due app convivono. */
@@ -98,26 +99,41 @@ export const valoreUso = (v: SiNo) => (v === "si" ? "si" : v === "si-mod" ? "mis
 export const stagLbl = (s: string) => (s === "pe" ? "Primavera / Estate" : s === "ai" ? "Autunno / Inverno" : "Tutto l'anno");
 export const momLbl = (m: string) => (m === "entrambi" ? "Giorno e sera" : m === "sera" ? "Sera" : "Giorno");
 
-/* Adesso: stagioni agli equinozi e ai solstizi. Senza meteo la sera comincia alle 18
-   (con il meteo, come in js/dati.js adesso(): mezz'ora dopo il tramonto, al più tardi alle 19;
-   il meteo arriva con Consigliami, tappa 2). */
+/* Adesso: una fonte sola per il filtro rapido della Collezione e per Consigliami (js/dati.js adesso()).
+   Le stagioni cambiano agli equinozi e ai solstizi. La sera comincia mezz'ora dopo il tramonto, e comunque
+   alle 19: d'inverno alle cinque e mezza è già sera, d'estate alle nove no. Senza meteo il tramonto non
+   si sa, e la sera comincia alle 18. Il meteo vale come «adesso» solo se ha meno di 3 ore. */
 export type NomeStagione = "inverno" | "primavera" | "estate" | "autunno";
 export const STAGIONI: NomeStagione[] = ["inverno", "primavera", "estate", "autunno"];
-export function adesso(d = new Date()) {
+export const oggiISO = (d = new Date()) =>
+  d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+export function adesso(d = new Date(), meteo: Meteo | null = null) {
   const k = (d.getMonth() + 1) * 100 + d.getDate();
   const h = d.getHours();
   const nome: NomeStagione =
     k >= 321 && k < 621 ? "primavera" : k >= 621 && k < 923 ? "estate" : k >= 923 && k < 1221 ? "autunno" : "inverno";
-  const sera = h >= 18 || h < 5;
+  let inizioSera = new Date(d);
+  inizioSera.setHours(18, 0, 0, 0);
+  const tramonto = meteo && (meteo.tramonti || [meteo.tramonto]).find((s) => s && s.slice(0, 10) === oggiISO(d));
+  if (tramonto) {
+    const t = new Date(tramonto).getTime() + 30 * 6e4,
+      diciannove = new Date(d).setHours(19, 0, 0, 0);
+    inizioSera = new Date(Math.min(t, diciannove));
+  }
+  const sera = d >= inizioSera || h < 5;
   return {
-    nome,
     stagione: (nome === "primavera" || nome === "estate" ? "pe" : "ai") as "pe" | "ai",
-    momento: (sera ? "sera" : "giorno") as "giorno" | "sera"
+    nome,
+    momento: (sera ? "sera" : "giorno") as "giorno" | "sera",
+    giorno: d.getDay(),
+    ora: h,
+    meteo: meteo && Date.now() - meteo.quando < 3 * 3600e3 ? meteo : null
   };
 }
+export type Adesso = ReturnType<typeof adesso>;
 
 /** Il filtro rapido «Adesso»: la stagione giusta (o tutto l'anno) e il momento giusto (o entrambi). */
-export function vaBeneAdesso(p: Profumo, a = adesso()) {
+export function vaBeneAdesso(p: Profumo, a: Pick<Adesso, "stagione" | "momento">) {
   return (p.stagione === a.stagione || p.stagione === "tutto") && (p.momento === a.momento || p.momento === "entrambi");
 }
 
@@ -173,7 +189,7 @@ const forzeAccordi = (p: Profumo) => {
     .filter((n) => n > 0);
   return f.length ? f : null;
 };
-const pesoAccordo = (p: Profumo, i: number) => {
+export const pesoAccordo = (p: Profumo, i: number) => {
   const f = forzeAccordi(p);
   return f && f[i] ? f[i] / 100 : 1 / (1 + i * 0.35);
 };

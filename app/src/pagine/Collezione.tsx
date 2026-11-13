@@ -19,6 +19,7 @@ import {
 } from "../profumo";
 import { Boccetta, useMenoMovimento, useTitolo } from "../componenti/comuni";
 import { IconaCerca, IconaX } from "../componenti/Icone";
+import { useMeteo } from "../meteo-contesto";
 
 /* La collezione: due vetrine (boccette e campioni), la ricerca, i filtri rapidi e le mensole.
    I filtri vivono nell'indirizzo (#/?v=campioni&f=verde&ora=1&q=vetiver): «indietro» li ritrova,
@@ -55,7 +56,8 @@ export default function Collezione() {
   };
 
   const profumi = dati?.profumi ?? [];
-  const momento = adesso();
+  const { meteo, ora: orologio } = useMeteo();
+  const momento = useMemo(() => adesso(new Date(orologio), meteo), [orologio, meteo]);
   const inVetrina = useMemo(() => profumi.filter((p) => vetrinaDi(p) === vetrina), [profumi, vetrina]);
   const quanti = useMemo(
     () => ({ boccette: profumi.filter((p) => !eCampione(p)).length, campioni: profumi.filter(eCampione).length }),

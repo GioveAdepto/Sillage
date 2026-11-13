@@ -14,18 +14,6 @@ export interface PaginaInArrivo {
 
 export const IN_ARRIVO: PaginaInArrivo[] = [
   {
-    percorso: "consigliami",
-    titolo: "Consigliami",
-    breve: "Cosa mettere oggi, domani o stasera",
-    tappa: "Tappa 2",
-    cosa: [
-      "Oggi, domani o stasera, e l'occasione",
-      "Prima la stagione (voti di Fragrantica, calendario e meteo ora per ora), poi l'occasione, poi giorno o sera",
-      "La prima scelta sul piedistallo, con i motivi, e le alternative",
-      "Lo stesso punteggio dell'app di oggi, verificato con un prima/dopo"
-    ]
-  },
-  {
     percorso: "diario",
     titolo: "Diario",
     breve: "Quando hai messo cosa",

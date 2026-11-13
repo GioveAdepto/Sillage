@@ -26,6 +26,7 @@ import {
   voto
 } from "../profumo";
 import { Boccetta, useMenoMovimento, useTitolo } from "../componenti/comuni";
+import Piedistallo from "../componenti/Piedistallo";
 import { IconaFuori, IconaIndietro, IconaMezzo, IconaNo, IconaSi } from "../componenti/Icone";
 
 /* La scheda di un profumo, pagina con indirizzo proprio (#/profumo/24).
@@ -56,7 +57,7 @@ export default function Scheda() {
 }
 
 /** Da dove si è arrivati, scritto nello stato della navigazione dai link dell'app. */
-type Provenienza = { volo?: boolean; da?: "collezione" | "scheda" } | null;
+type Provenienza = { volo?: boolean; da?: "collezione" | "scheda" | "consigliami" } | null;
 
 /** In alto a sinistra. Dalla vetrina si torna indietro (filtri e scorrimento ritrovati);
     da un'altra scheda si torna a quella; da un link esterno si va alla vetrina, sulla teca di questo profumo. */
@@ -74,7 +75,7 @@ function Torna({ id }: { id: number | null }) {
       }}
     >
       <IconaIndietro />
-      {da === "scheda" ? "Indietro" : "Collezione"}
+      {da === "scheda" ? "Indietro" : da === "consigliami" ? "Consigliami" : "Collezione"}
     </button>
   );
 }
@@ -120,20 +121,7 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
           </span>
         </div>
 
-        <div className={"scena" + (volo ? " in-volo" : "")}>
-          <span className="alone" />
-          <span className="fascio" />
-          <span className="binario" />
-          <span className="faretto" />
-          <span className="pavimento" />
-          <div className="posa">
-            <div className="piedistallo" />
-            <span className="ombra" />
-            <div className="sopra">
-              <Boccetta p={p} pigra={false} nomeVolo={"boccetta-" + p.id} />
-            </div>
-          </div>
-        </div>
+        <Piedistallo p={p} inVolo={volo} nomeVolo={"boccetta-" + p.id} />
 
         <div className="titolo">
           <p className="marca">{p.brand}</p>
