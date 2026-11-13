@@ -32,6 +32,8 @@ in `prove/prova-passaggio.mjs`, alla radice e in `/Sillage/`:
    la copia dei dati e del diario, la posizione e il meteo.
 4. Se l'app di prima è rimasta aperta, il suo controllo della versione trova la pagina nuova (una riga apposta
    in `index.html`) e propone «Aggiorna».
+5. Chi aveva aperto l'indirizzo di prova `/nuova/` (solo sull'anteprima del branch) aveva un service worker in
+   più: l'app lo toglie da sola, con la sua cache (`togliIndirizzoDiProva` in `src/migrazione.ts`).
 
 ### I passi all'unione (li fa chi unisce, nell'ordine)
 

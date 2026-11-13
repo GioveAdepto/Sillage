@@ -69,3 +69,17 @@ export function riprendiDallAppDiOggi() {
     if (Array.isArray(d.diario) && !leggi("sillage-app:diario")) scrivi("sillage-app:diario", JSON.stringify(d.diario));
   }
 }
+
+/** L'indirizzo di prova /nuova/ (usato prima del passaggio) aveva un suo service worker e una sua cache: non
+    serve più, e si toglie da solo. Riguarda solo chi l'ha aperto, sull'anteprima del branch. */
+export function togliIndirizzoDiProva() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((rs) => rs.filter((r) => new URL(r.scope).pathname.endsWith("/nuova/")).forEach((r) => r.unregister()))
+    .catch(() => {});
+  caches
+    ?.keys()
+    .then((k) => k.filter((n) => n.endsWith("/nuova/")).forEach((n) => caches.delete(n)))
+    .catch(() => {});
+}
