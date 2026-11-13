@@ -24,10 +24,13 @@ const VOLUTE = [[/★ (\d),(\d)/g, "★ $1.$2"]];
 const normalizza = (t) => VOLUTE.reduce((s, [re, a]) => s.replace(re, a), t);
 
 // ── i dati ────────────────────────────────────────────────────────────────
-let profumi;
+let profumi, layering;
 if (process.argv.includes("--ponte")) {
-  profumi = (await (await fetch("https://sillage.danilo-moro96.workers.dev/api")).json()).profumi;
-} else profumi = JSON.parse(readFileSync(join(REPO, "data", "profumi.json"), "utf8"));
+  ({ profumi, layering } = await (await fetch("https://sillage.danilo-moro96.workers.dev/api")).json());
+} else {
+  profumi = JSON.parse(readFileSync(join(REPO, "data", "profumi.json"), "utf8"));
+  layering = JSON.parse(readFileSync(join(REPO, "data", "layering.json"), "utf8"));
+}
 
 // ── l'orologio finto: new Date() e Date.now() rispondono con l'ora del caso ──
 const VeraData = Date;
@@ -103,25 +106,32 @@ const sandbox = {
   fetch: () => Promise.reject(new Error("niente rete nel prima/dopo")),
   localStorage: { getItem: (k) => memoria.get(k) ?? null, setItem: (k, v) => memoria.set(k, String(v)), removeItem: (k) => memoria.delete(k) },
   IntersectionObserver: class { observe() {} },
-  ResizeObserver: class { observe() {} }
+  ResizeObserver: class { observe() {} },
+  recensioni: (n) => String(n)
 };
 vm.createContext(sandbox);
-const vecchio = ["dati.js", "collezione.js", "consigliami.js"].map((f) => readFileSync(join(REPO, "js", f), "utf8")).join("\n;\n");
+const vecchio = ["dati.js", "collezione.js", "consigliami.js", "viste.js"].map((f) => readFileSync(join(REPO, "js", f), "utf8")).join("\n;\n");
 vm.runInContext(vecchio, sandbox, { filename: "app-di-oggi.js" });
 sandbox.__profumi = profumi;
-vm.runInContext("profumi = __profumi; diarioFoglio = [];", sandbox);
+sandbox.__layering = layering;
+vm.runInContext("profumi = __profumi; layering = __layering; diarioFoglio = []; strati = indiceStrati();", sandbox);
 const prima = (occ, quando, meteo) => {
   sandbox.__meteo = meteo;
   vm.runInContext("meteo = __meteo", sandbox);
   return {
     probabile: vm.runInContext(`occasioneProbabile(${JSON.stringify(quando)})`, sandbox),
-    lista: sandbox.candidatiOggi(occ, quando).map((c) => ({ id: c.p.id, s: c.s, pro: [...c.pro], contro: [...c.contro] }))
+    lista: sandbox.candidatiOggi(occ, quando).map((c) => ({ id: c.p.id, s: c.s, pro: [...c.pro], contro: [...c.contro] })),
+    // «Se vuoi osare, con…»: la ricetta proposta col primo consiglio (ricettaPer guarda quandoOggi)
+    osare: vm.runInContext(
+      `quandoOggi=${JSON.stringify(quando)}; (c=>{const r=c&&ricettaPer(c.p,${JSON.stringify(occ)});if(!r)return null;const a=profumi.find(x=>x.id===[...r.l.s.matchAll(/№\\s*(\\d+)/g)].map(m=>+m[1]).find(id=>id!==c.p.id));return {i:r.i,altro:a?a.id:null}})(candidatiOggi(${JSON.stringify(occ)},${JSON.stringify(quando)})[0])`,
+      sandbox
+    )
   };
 };
 
 // ── la nuova, compilata al volo con esbuild (lo stesso di Vite) ──
 const uscita = await build({
-  entryPoints: [join(APP, "src", "consiglio.ts")],
+  stdin: { contents: `export * from "./src/consiglio"; export { ricettaPer } from "./src/viste/osare";`, resolveDir: APP, loader: "ts" },
   bundle: true,
   format: "esm",
   platform: "node",
@@ -132,6 +142,7 @@ const cartella = mkdtempSync(join(tmpdir(), "sillage-prima-dopo-"));
 const file = join(cartella, "consiglio.mjs");
 writeFileSync(file, uscita.outputFiles[0].text);
 const nuovo = await import(pathToFileURL(file).href);
+const perId = new Map(profumi.map((p) => [p.id, p]));
 const dopo = (occ, quando, meteo) => {
   globalThis.Date = DataFinta;
   try {
@@ -142,7 +153,12 @@ const dopo = (occ, quando, meteo) => {
         s: c.s,
         pro: c.pro.map(normalizza),
         contro: c.contro.map(normalizza)
-      }))
+      })),
+      osare: (() => {
+        const c = nuovo.candidati(profumi, occ, quando, { meteo })[0];
+        const r = c && nuovo.ricettaPer(c.p, occ, quando, layering, perId, meteo);
+        return r ? { i: r.i, altro: r.altro ? r.altro.id : null } : null;
+      })()
     };
   } finally {
     globalThis.Date = VeraData;
@@ -162,6 +178,7 @@ const ORE = [
 ];
 const OCCASIONI = ["ufficio", "quotidiano", "appuntamento", "formale", "casa", "festivita", "palestra"];
 
+let conOsare = 0;
 let casi = 0,
   differenze = 0;
 const righe = [];
@@ -181,6 +198,8 @@ for (const d of DATE)
           const caso = `${d.nome}, ${nomeOra} · ${quando} · ${occ} · ${nomeMeteo}`;
           const errori = [];
           if (a.probabile !== b.probabile) errori.push(`occasione probabile: prima ${a.probabile}, dopo ${b.probabile}`);
+          if (JSON.stringify(a.osare) !== JSON.stringify(b.osare)) errori.push(`se vuoi osare: prima ${JSON.stringify(a.osare)}, dopo ${JSON.stringify(b.osare)}`);
+          if (a.osare) conOsare++;
           if (a.lista.length !== b.lista.length) errori.push(`quanti: prima ${a.lista.length}, dopo ${b.lista.length}`);
           a.lista.forEach((x, i) => {
             const y = b.lista[i];
@@ -199,5 +218,6 @@ for (const d of DATE)
 
 console.log(righe.join("\n"));
 console.log(`\n${casi} casi, ${differenze} con differenze (${profumi.length} profumi, ${process.argv.includes("--ponte") ? "dal ponte" : "da data/profumi.json"}).`);
+console.log(`«Se vuoi osare, con…» confrontata anche lei: proposta in ${conOsare} casi su ${casi}.`);
 console.log("Differenze volute, escluse dal confronto: il voto nei motivi con la virgola («★ 4,3»).");
 process.exit(differenze ? 1 : 0);

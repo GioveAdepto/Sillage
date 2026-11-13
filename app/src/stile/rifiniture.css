@@ -1,0 +1,449 @@
+/* ——— Rifiniture: la vetrina che si apre, la luce sul vetro, la boccetta presa in mano, l'avviso di versione,
+   il cassetto dei filtri. Tutte spente con «meno movimento». ——— */
+
+/* la vetrina che si apre: due ante di travertino con il filo d'ottone */
+.apertura {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--parete);
+  perspective: 1600px;
+  overflow: hidden;
+  transition: background-color 900ms var(--curva);
+}
+.apertura::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 3;
+  width: 1px;
+  background: var(--ottone);
+  transition: opacity 400ms var(--curva);
+}
+.anta {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 50%;
+  background:
+    repeating-linear-gradient(179.3deg, transparent 0 7px, var(--vena) 7px 8px, transparent 8px 19px, var(--vena-2) 19px 21px, transparent 21px 37px, var(--vena) 37px 38px, transparent 38px 61px),
+    linear-gradient(90deg, var(--plinto-b), var(--plinto-c) 60%, var(--plinto-b));
+  box-shadow: inset 0 0 0 14px var(--parete), inset 0 0 0 15px var(--ottone);
+  transition:
+    transform 1200ms var(--curva),
+    opacity 1200ms var(--curva);
+}
+.anta.sinistra {
+  left: 0;
+  transform-origin: left center;
+}
+.anta.destra {
+  right: 0;
+  transform-origin: right center;
+}
+.maniglia {
+  position: absolute;
+  top: 66%;
+  width: 3px;
+  height: 84px;
+  margin-top: -42px;
+  background: var(--ottone);
+  box-shadow: 0 2px 6px var(--ombra);
+}
+.sinistra .maniglia {
+  right: 28px;
+}
+.destra .maniglia {
+  left: 28px;
+}
+.apertura-marchio {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 18px 22px;
+  transform: translate(-50%, -50%);
+  background: var(--parete);
+  transition:
+    opacity 600ms var(--curva),
+    transform 900ms var(--curva);
+}
+.apertura-s {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--ottone);
+  border-radius: 50%;
+  font: italic 500 40px/1 var(--f-maison);
+  color: var(--ottone-testo);
+}
+.apertura-nome {
+  margin-right: -0.32em;
+  font: 500 26px/1 var(--f-maison);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--inchiostro);
+}
+.apertura-sotto {
+  font: 500 9.5px/1 var(--f-dati);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--seppia);
+}
+.apertura.apri {
+  background-color: transparent;
+  pointer-events: none;
+}
+.apertura.apri::before {
+  opacity: 0;
+}
+.apertura.apri .sinistra {
+  transform: rotateY(-82deg);
+  opacity: 0;
+}
+.apertura.apri .destra {
+  transform: rotateY(82deg);
+  opacity: 0;
+}
+.apertura.apri .apertura-marchio {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+/* la luce sul vetro: la nicchia si inclina verso il mouse, il riflesso lo segue; col dito passa una volta */
+.vetro {
+  position: relative;
+  display: block;
+  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 450ms var(--curva);
+}
+.nicchia.inclinata .vetro {
+  transition-duration: 90ms;
+}
+.bagliore,
+.riflesso {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  -webkit-mask: var(--maschera) 50% 100% / contain no-repeat;
+  mask: var(--maschera) 50% 100% / contain no-repeat;
+}
+.bagliore {
+  opacity: 0;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgba(255, 252, 240, 0.55), rgba(255, 252, 240, 0) 55%);
+  transition: opacity 300ms var(--curva);
+}
+.nicchia.inclinata .bagliore {
+  opacity: 1;
+}
+.riflesso {
+  opacity: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 252, 240, 0.65) 48%, transparent 66%) -150% 0 / 250% 100% no-repeat;
+}
+.riflesso.passa {
+  animation: riflesso 1100ms var(--curva) 1 both;
+}
+.scena.in-mano .riflesso.passa {
+  animation-delay: 700ms;
+}
+@keyframes riflesso {
+  0% {
+    opacity: 1;
+    background-position: -150% 0;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: 160% 0;
+  }
+}
+
+/* la boccetta presa in mano: posata sul piedistallo, ondeggia appena */
+.tasto-esame {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.scena.in-mano .sopra .vetro {
+  animation: in-mano 6s ease-in-out 1.6s infinite;
+}
+@keyframes in-mano {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.2deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1.2deg);
+  }
+}
+/* da vicino */
+.esame {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  justify-items: center;
+  align-items: end;
+  padding: calc(env(safe-area-inset-top) + 40px) 20px calc(env(safe-area-inset-bottom) + 40px);
+  background:
+    repeating-linear-gradient(179.3deg, transparent 0 7px, var(--vena) 7px 8px, transparent 8px 19px, var(--vena-2) 19px 21px, transparent 21px 37px),
+    var(--parete);
+  cursor: zoom-out;
+  animation: accende 400ms var(--curva) both;
+  outline: none;
+}
+.esame-luce {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(560px, 120vw);
+  height: 78%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--fascio), transparent 92%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+.esame-vetro {
+  position: relative;
+  animation: in-mano 6s ease-in-out infinite;
+}
+.esame-img {
+  display: block;
+  height: min(62vh, 520px);
+  width: min(86vw, 460px);
+  object-fit: contain;
+  object-position: 50% 100%;
+  filter: var(--bordo-luce) drop-shadow(0 4px 4px var(--ombra)) drop-shadow(16px 8px 18px var(--ombra-lunga));
+}
+.esame-ombra {
+  width: 220px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--ombra), transparent);
+}
+.esame-nome {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin: 16px 0 0;
+  font: 500 30px/1.05 var(--f-maison);
+  text-align: center;
+}
+.esame-nome .marca {
+  margin: 0;
+}
+.esame-chiudi {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: 12px;
+}
+
+/* l'avviso di versione nuova */
+.aggiornamento {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + var(--altezza-timone) + 14px);
+  z-index: 13;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(520px, calc(100vw - 24px));
+  padding: 10px 6px 10px 14px;
+  transform: translateX(-50%);
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+  box-shadow:
+    inset 3px 0 0 var(--ottone),
+    0 18px 30px -20px var(--ombra-tel);
+  animation: accende 400ms var(--curva) both;
+}
+.aggiornamento-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  background: var(--ottone-pieno);
+}
+.aggiornamento-testo {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  font: 400 12px/1.35 var(--f-dati);
+  color: var(--seppia);
+}
+.aggiornamento-testo b {
+  font: 500 17px/1.1 var(--f-maison);
+  color: var(--inchiostro);
+}
+.aggiornamento .btn-filo {
+  margin-top: 0;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+/* il cassetto dei filtri */
+.senza-scorrimento,
+.senza-scorrimento body {
+  overflow: hidden;
+}
+.fondale {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(20, 16, 12, 0.42);
+  animation: accende 250ms var(--curva) both;
+}
+.cassetto {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(640px, 100%);
+  max-height: calc(100dvh - env(safe-area-inset-top) - 24px);
+  background:
+    repeating-linear-gradient(179.3deg, transparent 0 7px, var(--vena) 7px 8px, transparent 8px 19px, var(--vena-2) 19px 21px, transparent 21px 37px),
+    var(--parete);
+  border-top: 1px solid var(--ottone);
+  box-shadow: 0 -20px 40px -20px var(--ombra-tel);
+  animation: sale 380ms var(--curva) both;
+  outline: none;
+}
+@keyframes sale {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.cassetto-testa {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 16px 10px 20px;
+  border-bottom: 1px solid var(--filo);
+}
+.cassetto-testa h2 {
+  margin: 4px 0 0;
+  font: 500 26px/1.05 var(--f-maison);
+}
+.cassetto-corpo {
+  overflow-y: auto;
+  padding: 4px 20px 16px;
+  overscroll-behavior: contain;
+}
+.cassetto-gruppo {
+  padding: 12px 0 4px;
+}
+.cassetto-gruppo .incisa {
+  margin-bottom: 8px;
+}
+.cassetto-gruppo .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cassetto-gruppo .collegamento {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.cassetto-piede {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px 20px calc(env(safe-area-inset-bottom) + 14px);
+  border-top: 1px solid var(--filo);
+}
+.cassetto-piede .btn-filo {
+  margin-top: 0;
+}
+.cassetto-piede .btn-filo:disabled {
+  opacity: 0.4;
+}
+.chip.zero {
+  opacity: 0.45;
+}
+.chip-cassetto.acceso {
+  border-color: var(--ottone);
+  box-shadow: inset 0 -2px 0 var(--ottone);
+}
+.chip-cassetto small {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  background: var(--inchiostro);
+  color: var(--su-inchiostro) !important;
+  font-size: 10.5px !important;
+}
+.attivi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.tolgo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--inchiostro);
+  background: var(--inchiostro);
+  color: var(--su-inchiostro);
+  font: 400 12.5px/1 var(--f-dati);
+  cursor: pointer;
+}
+.tolgo.nota {
+  background: transparent;
+  color: var(--inchiostro);
+}
+.tolgo svg {
+  width: 12px;
+  height: 12px;
+}
+.attivi .collegamento {
+  font-size: 12.5px;
+}
+.tra-campioni {
+  margin-top: 34px;
+}
+
+/* «Se vuoi osare, con…» in Consigliami */
+.osare {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 4px;
+  border-top: 1px solid var(--ottone);
+}
+.osare .alt-riga {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apertura,
+  .riflesso,
+  .bagliore {
+    display: none;
+  }
+  .vetro {
+    transform: none !important;
+  }
+}

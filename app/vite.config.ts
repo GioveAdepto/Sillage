@@ -9,7 +9,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
+      injectRegister: false,
       manifest: {
         name: "Sillage",
         short_name: "Sillage",
@@ -29,6 +30,8 @@ export default defineConfig({
       workbox: {
         // tutto quello che serve per aprirla senza rete: codice, foto, icone e caratteri (Cormorant e Jost, inclusi nell'app)
         globPatterns: ["**/*.{js,css,html,webp,png,svg,woff2}"],
+        // le schermate d'avvio le legge solo l'iPhone quando apre l'app: non servono nella cache
+        globIgnores: ["**/img/avvio/**"],
         navigateFallback: "index.html",
         runtimeCaching: [
           {

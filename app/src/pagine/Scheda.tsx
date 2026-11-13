@@ -32,6 +32,7 @@ import { useDiario } from "../diario/uso";
 import { useAvviso } from "../componenti/Avvisi";
 import { rifiutoChiave, scriviAlPonte } from "../ponte";
 import { indiceStrati } from "../viste/calcoli";
+import { vediIn } from "../componenti/Tessera";
 import { condividiScheda } from "../viste/condividi";
 import { IconaFuori, IconaIndietro, IconaMezzo, IconaNo, IconaSi } from "../componenti/Icone";
 
@@ -127,7 +128,7 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
           </span>
         </div>
 
-        <Piedistallo p={p} inVolo={volo} nomeVolo={"boccetta-" + p.id} />
+        <Piedistallo p={p} inVolo={volo} nomeVolo={"boccetta-" + p.id} inMano />
 
         <div className="titolo">
           <p className="marca">{p.brand}</p>
@@ -381,7 +382,7 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
   );
 }
 
-/** Una riga con la boccetta piccola: porta alla scheda di quel profumo, se è in collezione. */
+/** Una riga con la boccetta piccola: porta alla teca di quel profumo nella Collezione (chiusa e illuminata), se c'è. */
 function RigaAlt({ q, sopra, nome, sotto, destra }: { q: Profumo | null; sopra: string; nome: string; sotto: string; destra: string | null }) {
   const dentro = (
     <>
@@ -400,7 +401,7 @@ function RigaAlt({ q, sopra, nome, sotto, destra }: { q: Profumo | null; sopra: 
       {destra ? <span className="nr">{destra}</span> : <span />}
     </>
   );
-  return <li>{q ? <Link className="alt-riga" to={`/profumo/${q.id}`} state={{ da: "scheda" }}>{dentro}</Link> : <div className="alt-riga">{dentro}</div>}</li>;
+  return <li>{q ? <Link className="alt-riga" to={vediIn(q)}>{dentro}</Link> : <div className="alt-riga">{dentro}</div>}</li>;
 }
 
 /** «Su di te», solo se il diario ha qualcosa da dire su questo profumo. */

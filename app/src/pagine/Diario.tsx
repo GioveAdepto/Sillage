@@ -320,10 +320,10 @@ function Giorno({
             </span>
             <span className="diario-voce-testo">
               <span className="incisa">Layering</span>
-              <Link to={`/profumo/${layG.sopra}`} state={{ da: "scheda" }}>
+              <Link to={`/?vedi=${layG.sopra}`}>
                 <small>sopra</small> {perId.get(layG.sopra)?.name}
               </Link>
-              <Link to={`/profumo/${layG.sotto}`} state={{ da: "scheda" }}>
+              <Link to={`/?vedi=${layG.sotto}`}>
                 <small>sotto</small> {perId.get(layG.sotto)?.name}
               </Link>
             </span>
@@ -336,7 +336,7 @@ function Giorno({
       {singoli.map(({ x, p }) => (
         <div className="diario-blocco" key={x.t}>
           <div className="diario-voce">
-            <Link className="diario-voce-apri" to={`/profumo/${p.id}`} state={{ da: "scheda" }}>
+            <Link className="diario-voce-apri" to={`/?vedi=${p.id}`}>
               <Mini p={p} />
               <span className="diario-voce-testo">
                 <b>{p.name}</b>
@@ -715,7 +715,7 @@ function Settimana({ perGiorno }: { perGiorno: Map<string, Voce[]> }) {
                 {x.indossati.map((p, i) => (
                   <span key={p.id}>
                     {i ? " e " : ""}
-                    <Link className="collegamento" to={`/profumo/${p.id}`} state={{ da: "scheda" }}>
+                    <Link className="collegamento" to={`/?vedi=${p.id}`}>
                       {p.name}
                     </Link>
                   </span>
@@ -747,7 +747,7 @@ function Settimana({ perGiorno }: { perGiorno: Map<string, Voce[]> }) {
 function Proposta({ c, titolo, oggi, occ, momento }: { c: Candidato; titolo: string; oggi: boolean; occ: Occasione; momento: "giorno" | "sera" }) {
   return (
     <div className="sett-proposta">
-      <Link className="alt-riga" to={`/profumo/${c.p.id}`} state={{ da: "scheda" }}>
+      <Link className="alt-riga" to={`/?vedi=${c.p.id}`}>
         <Mini p={c.p} />
         <span className="alt-testo">
           <span className="marca">{titolo}</span>

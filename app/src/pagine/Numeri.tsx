@@ -257,7 +257,16 @@ function Mappa({ conCampioni, setConCampioni }: { conCampioni: boolean; setConCa
 function Storico({ n }: { n: DatiNumeri }) {
   if (!n.storico.length) return null;
   return (
-    <Sezione titolo="Storico aggiunte" scala={n.novita ? `${n.novita} novità` : undefined}>
+    <Sezione
+      titolo="Storico aggiunte"
+      scala={
+        n.novita ? (
+          <Link className="collegamento" to="/?f=recenti">
+            Le {n.novita} novità →
+          </Link>
+        ) : undefined
+      }
+    >
       {n.storico.map(({ mese, lista }) => (
         <div key={mese}>
           <p className="mese-storico">

@@ -1,4 +1,5 @@
-import { Link, useSearchParams, useViewTransitionState } from "react-router";
+import type { Profumo } from "../tipi";
+import { Link, useSearchParams } from "react-router";
 import { useMemo } from "react";
 import { useDati } from "../dati";
 import { useMeteo } from "../meteo-contesto";
@@ -7,8 +8,13 @@ import { CIELI, finestraMeteo, piovosa, type Finestra, type OraMeteo } from "../
 import { OCCASIONI, ORA_PER_OCCASIONE, candidati, eOccasione, inizioPer, maiuscola, occasioneProbabile, type Candidato, type Occasione, type Quando } from "../consiglio";
 import Piedistallo from "../componenti/Piedistallo";
 import { LoMetto } from "../diario/pezzi";
+import { ricettaPer } from "../viste/osare";
+import { vediIn } from "../componenti/Tessera";
+import { useAvviso } from "../componenti/Avvisi";
+import { oggiISO } from "../diario/coda";
+import { Mini } from "../componenti/comuni";
 import { useDiario } from "../diario/uso";
-import { Boccetta, useMenoMovimento, useTitolo } from "../componenti/comuni";
+import { Boccetta, useTitolo } from "../componenti/comuni";
 
 /* Consigliami: oggi, stasera o domani, e l'occasione. La prima scelta sul piedistallo con i suoi motivi,
    quattro alternative, e le ore che il profumo passerà sulla pelle. Il punteggio è in consiglio.ts.
@@ -152,7 +158,7 @@ export default function Consigliami() {
               <ol className="alt alt-cons">
                 {resto.map((x, i) => (
                   <li key={x.p.id}>
-                    <Link className="alt-riga" to={`/profumo/${x.p.id}`} state={{ da: "consigliami" }}>
+                    <Link className="alt-riga" to={vediIn(x.p)}>
                       <span className="mini">
                         <Boccetta p={x.p} className="" />
                       </span>
@@ -211,9 +217,9 @@ function Scelta({ c, n, totale, occ, quando, da }: { c: Candidato; n: number; to
   const { p } = c;
   const puoMettere = quando !== "domani";
   const momentoUso = momentoPer(occ, da);
-  const riduci = useMenoMovimento();
-  const verso = `/profumo/${p.id}`;
-  const inVolo = useViewTransitionState(verso);
+  const { dati, perId } = useDati();
+  const { meteo } = useMeteo();
+  const osare = dati ? ricettaPer(p, occ, quando, dati.layering, perId, meteo) : null;
   const quale = quando === "domani" ? "di domani" : quando === "stasera" ? "di stasera" : "di oggi";
   return (
     <article className="scelta" aria-labelledby="t-scelta">
@@ -221,7 +227,7 @@ function Scelta({ c, n, totale, occ, quando, da }: { c: Candidato; n: number; to
         <p className="incisa">La scelta {quale}</p>
         <span className="nr-grande">{(eCampione(p) ? "Campione " : "") + nr(n)}</span>
       </div>
-      <Piedistallo key={p.id} p={p} nomeVolo={inVolo ? "boccetta-" + p.id : undefined} />
+      <Piedistallo key={p.id} p={p} />
       <div className="titolo">
         <p className="marca">{p.brand}</p>
         <h2 className="nome-grande" id="t-scelta">
@@ -249,10 +255,12 @@ function Scelta({ c, n, totale, occ, quando, da }: { c: Candidato; n: number; to
           </li>
         ))}
       </ol>
+      {osare && osare.altro ? <Osare r={osare} p={p} occ={occ} momento={momentoUso} puoMettere={puoMettere} /> : null}
       <div className="azioni">
         {puoMettere ? <LoMetto p={p} uso={{ occasione: occ, momento: momentoUso }} /> : null}
-        <Link className={"btn-filo" + (puoMettere ? "" : " pieno")} to={verso} viewTransition={!riduci} state={{ volo: !riduci, da: "consigliami" }}>
-          Apri la scheda
+        {/* la regola dell'utente: dal consiglio si arriva alla teca, chiusa e illuminata; aprirla è una scelta */}
+        <Link className={"btn-filo" + (puoMettere ? "" : " pieno")} to={vediIn(p)}>
+          Trovalo in collezione
         </Link>
       </div>
     </article>
@@ -357,11 +365,53 @@ function MaiIndossati({ lista }: { lista: Candidato[] }) {
       {mai.map((x, i) => (
         <span key={x.p.id}>
           {i ? " · " : ""}
-          <Link className="collegamento" to={`/profumo/${x.p.id}`} state={{ da: "consigliami" }}>
+          <Link className="collegamento" to={vediIn(x.p)}>
             {x.p.name}
           </Link>
         </span>
       ))}
     </p>
+  );
+}
+
+/* «Se vuoi osare, con…»: la ricetta di layering col primo consiglio, e «Lo faccio» per segnarla oggi
+   (di nuovo, la toglie: faiLayering nell'app di oggi). Non cambia la classifica. */
+function Osare({ r, p, occ, momento, puoMettere }: { r: NonNullable<ReturnType<typeof ricettaPer>>; p: Profumo; occ: Occasione; momento: "giorno" | "sera"; puoMettere: boolean }) {
+  const { diario, ids } = useDiario();
+  const { perId } = useDati();
+  const avvisa = useAvviso();
+  const { sotto, sopra } = r.parti;
+  const oggi = oggiISO();
+  const l = diario.layeringDel(oggi);
+  const fatto = !!(sotto && sopra && l && l.sotto === sotto.id && l.sopra === sopra.id);
+  return (
+    <div className="osare">
+      <Link className="alt-riga" to={`/layering?ricetta=${r.i}`}>
+        <Mini p={r.altro} />
+        <span className="alt-testo">
+          <span className="marca">Se vuoi osare, con</span>
+          <span className="n">{r.altro!.name}</span>
+          <span className="perche">{r.nome}</span>
+        </span>
+        <span />
+      </Link>
+      {puoMettere && sotto && sopra ? (
+        <button
+          type="button"
+          className={"metto-piccolo" + (fatto ? " fatto" : "")}
+          aria-pressed={fatto}
+          onClick={() => {
+            if (fatto) diario.segna(sotto.id, oggi, undefined, ids);
+            else {
+              const e = diario.segnaLayering(sotto.id, sopra.id, oggi, { occasione: occ, momento }, ids, (id) => perId.get(id)?.name ?? "");
+              avvisa(e.ok ? "Layering segnato nel diario di oggi." : e.avviso);
+            }
+          }}
+        >
+          {fatto ? "Segnato" : "Lo faccio"}
+        </button>
+      ) : null}
+      <span className="vh">{p.name}</span>
+    </div>
   );
 }
