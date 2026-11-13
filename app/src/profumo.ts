@@ -228,3 +228,6 @@ export const voto = (r: number) => r.toFixed(1).replace(".", ",");
 export const migliaia = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 /** Le foto stanno in public/img con lo stesso nome dell'app di oggi («img/…webp»). */
 export const immagine = (p: Profumo) => (p.img ? import.meta.env.BASE_URL + p.img.replace(/^\.?\//, "") : "");
+/** La stessa foto con l'indirizzo completo: serve dentro il CSS (maschere), che risolverebbe un indirizzo
+    relativo dalla cartella dei fogli di stile invece che dalla pagina. */
+export const immagineAssoluta = (p: Profumo) => (p.img ? new URL(immagine(p), document.baseURI).href : "");

@@ -8,6 +8,11 @@
   // Il sito: i file del repo, serviti così come sono. Solo /api passa dal
   // ponte (ponte/ponte.js), che collega l'app al database.
   "main": "ponte/ponte.js",
+  // Prima di ogni pubblicazione si costruisce la nuova app (app/) nella cartella nuova/, servita su /nuova/:
+  // è l'indirizzo di prova dell'app in React (app/LEGGIMI.md). La radice resta l'app di oggi.
+  "build": {
+    "command": "node app/strumenti/costruisci-nuova.mjs"
+  },
   "assets": {
     "directory": ".",
     "run_worker_first": ["/api", "/api/*"]

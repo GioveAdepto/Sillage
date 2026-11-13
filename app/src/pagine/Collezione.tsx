@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate, useSearchParams, useViewTransitionState
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { Profumo } from "../tipi";
 import { useDati } from "../dati";
-import { COLORI, FAMIGLIE, adesso, eCampione, eNovita, immagine, migliaia, nr, voto, type Vetrina } from "../profumo";
+import { COLORI, FAMIGLIE, adesso, eCampione, eNovita, immagineAssoluta, migliaia, nr, voto, type Vetrina } from "../profumo";
 import { ETICHETTE_FILTRO, FILTRI_VALIDI, GRUPPI_FILTRO, ORDINAMENTI, ORDINE_DI_PARTENZA, quantiCon, selezione, type Scelte } from "../viste/filtri";
 import { Boccetta, Mini, useMenoMovimento, useTitolo } from "../componenti/comuni";
 import { useAvviso } from "../componenti/Avvisi";
@@ -545,7 +545,7 @@ function Teca({
       style={{ "--i": Math.min(i, 9) } as CSSProperties}
     >
       <div className="nicchia">
-        <span className="vetro" style={{ "--maschera": `url("${immagine(p)}")` } as CSSProperties}>
+        <span className="vetro" style={{ "--maschera": `url("${immagineAssoluta(p)}")` } as CSSProperties}>
           <Boccetta p={p} pigra={i > 5} nomeVolo={inVolo ? "boccetta-" + p.id : undefined} />
           <span className="bagliore" aria-hidden="true" />
           <span className="riflesso" aria-hidden="true" />

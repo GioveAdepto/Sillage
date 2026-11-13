@@ -8,6 +8,21 @@ resta quella pubblicata** e non viene toccata.
 Ponte e database sono gli stessi dell'app di oggi: questa app legge da
 `https://sillage.danilo-moro96.workers.dev/api` (vedi `ponte/LEGGIMI.md`).
 
+## Indirizzo di prova
+
+**<https://riscrittura-react-sillage.danilo-moro96.workers.dev/nuova/>** — solo per provarla (anche sull'iPhone,
+da Safari ▸ Condividi ▸ Aggiungi alla schermata Home). Non è la pubblicazione: la radice di quell'indirizzo è
+ancora l'app di oggi, e l'app vera resta quella su `main`.
+
+- È l'anteprima del branch `riscrittura-react` fatta da Cloudflare Workers Builds a ogni push: `wrangler.jsonc`
+  ha una build (`"build": { "command": "node app/strumenti/costruisci-nuova.mjs" }`) che costruisce `app/` in
+  `nuova/` alla radice del repo (fuori da git, in `.gitignore`; non in `.assetsignore`, così viene servita).
+  La lancia anche `wrangler dev` in locale: la prima volta installa i pacchetti di `app/`.
+- Parla col ponte pubblicato, quindi i dati sono quelli veri: con la chiave vera, diario e residuo scritti da
+  lì finiscono nel database vero.
+- Il service worker dell'app di oggi (ambito radice) lascia passare `/nuova/` (una riga in `sw.js`); quello della
+  nuova ha ambito `/nuova/` e non tocca la radice. Manifest, icone e schermate d'avvio sono relativi alla cartella.
+
 ## Avviarla
 
 Serve Node 20 o più recente.

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { Profumo } from "../tipi";
-import { immagine } from "../profumo";
+import { immagineAssoluta } from "../profumo";
 import { Boccetta, useMenoMovimento } from "./comuni";
 import { IconaX } from "./Icone";
 
@@ -12,7 +12,7 @@ import { IconaX } from "./Icone";
 export default function Piedistallo({ p, inVolo = false, nomeVolo, inMano = false }: { p: Profumo; inVolo?: boolean; nomeVolo?: string; inMano?: boolean }) {
   const [esame, setEsame] = useState(false);
   const riduci = useMenoMovimento();
-  const maschera = { "--maschera": `url("${immagine(p)}")` } as CSSProperties;
+  const maschera = { "--maschera": `url("${immagineAssoluta(p)}")` } as CSSProperties;
   const boccetta = (
     <>
       <Boccetta p={p} pigra={false} nomeVolo={nomeVolo} />

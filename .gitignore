@@ -19,3 +19,5 @@ report/
 # la nuova app (app/): pacchetti e build si rifanno con npm
 app/node_modules/
 app/dist/
+# la nuova app costruita per l'indirizzo di prova /nuova/ (la fa wrangler a ogni pubblicazione)
+nuova/
