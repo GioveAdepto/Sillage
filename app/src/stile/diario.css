@@ -1,0 +1,795 @@
+/* ——— Diario, «Lo metto oggi», residuo, Impostazioni, avvisi ——— */
+
+/* l'avviso breve sopra la barra */
+.avviso {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + var(--altezza-timone) + 18px);
+  z-index: 12;
+  max-width: min(440px, calc(100vw - 32px));
+  padding: 12px 16px;
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  background: var(--inchiostro);
+  color: var(--su-inchiostro);
+  box-shadow: inset 0 0 0 3px var(--inchiostro), inset 0 0 0 4px var(--ottone);
+  font: 400 13.5px/1.4 var(--f-dati);
+  transition:
+    opacity 250ms var(--curva),
+    transform 350ms var(--curva);
+}
+.avviso.mostra {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* «Lo metto oggi»: il bottone di maison della tavola, pieno finché non lo metti */
+.lo-metto {
+  margin-top: 20px;
+}
+.indossa {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 54px;
+  overflow: hidden;
+  border: 0;
+  cursor: pointer;
+  background: var(--inchiostro);
+  color: var(--su-inchiostro);
+  font: 500 12.5px/1 var(--f-dati);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 0 0 4px var(--inchiostro),
+    inset 0 0 0 5px var(--ottone);
+  transition:
+    background-color 450ms var(--curva),
+    color 450ms var(--curva),
+    box-shadow 450ms var(--curva);
+}
+.indossa span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.indossa svg {
+  width: 16px;
+  height: 16px;
+}
+.indossa::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--ottone);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 800ms var(--curva);
+}
+.indossa.fatto {
+  background: var(--avorio);
+  color: var(--inchiostro);
+  box-shadow: inset 0 0 0 1px var(--inchiostro);
+}
+.indossa.fatto::after {
+  transform: scaleX(1);
+}
+.lo-metto-nota {
+  margin: 8px 0 0;
+  font: 400 12.5px/1.45 var(--f-dati);
+  color: var(--seppia);
+  text-align: center;
+}
+.metto-piccolo {
+  flex: none;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--inchiostro);
+  background: transparent;
+  cursor: pointer;
+  font: 500 10.5px/1 var(--f-dati);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--inchiostro);
+}
+.metto-piccolo.fatto {
+  background: var(--inchiostro);
+  color: var(--su-inchiostro);
+}
+
+/* occasione e momento di una voce */
+.uso-voce {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.diario-blocco .uso-voce {
+  justify-content: flex-start;
+  margin: 2px 0 6px 64px;
+}
+.uso-occ select {
+  height: 34px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--filo);
+  border-radius: 2px;
+  background: var(--chip)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.8'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    right 8px center / 14px no-repeat;
+  font: 400 13px/1 var(--f-dati);
+  color: var(--inchiostro);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.uso-mom {
+  display: flex;
+  gap: 4px;
+}
+.uso-mom button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--filo);
+  border-radius: 2px;
+  background: var(--chip);
+  color: var(--seppia);
+  cursor: pointer;
+}
+.uso-mom button svg {
+  width: 16px;
+  height: 16px;
+}
+.uso-mom button[aria-pressed="true"] {
+  background: var(--inchiostro);
+  border-color: var(--inchiostro);
+  color: var(--su-inchiostro);
+}
+
+/* residuo: le sette tacche diventano bottoni */
+.livello button {
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--filo-3);
+  background: transparent;
+  cursor: pointer;
+}
+.livello button.pieno {
+  background: var(--ottone-pieno);
+  border-color: var(--ottone-pieno);
+}
+.livello button.on {
+  box-shadow: 0 0 0 1px var(--inchiostro);
+}
+.livello[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+/* su di te, nella scheda */
+.su-di-te {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.su-di-te div {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+.su-di-te dt {
+  font: 500 9.5px/1 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.su-di-te dd {
+  margin: 0;
+  font: 400 14px/1.4 var(--f-dati);
+}
+.su-di-te small {
+  color: var(--seppia);
+}
+.stelle {
+  color: var(--ottone-pieno);
+  letter-spacing: 0.1em;
+}
+.citazione-piccola {
+  font: italic 400 18px/1.3 var(--f-maison) !important;
+}
+
+/* Consigliami: «Lo metto» accanto alla scheda, e nelle alternative */
+.azioni {
+  gap: 8px;
+}
+.azioni .lo-metto {
+  margin-top: 0;
+}
+.alt-cons li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.alt-cons .alt-riga {
+  flex: 1;
+  min-width: 0;
+}
+.mai-indossati {
+  margin: 22px 0 0;
+  font: 400 13.5px/1.6 var(--f-dati);
+  color: var(--seppia);
+}
+.mai-indossati .incisa {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ——— la pagina del Diario ——— */
+.diario {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.diario-chiave {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+  box-shadow: inset 3px 0 0 var(--ottone);
+}
+.diario-chiave p {
+  margin: 0;
+  font: 400 14px/1.5 var(--f-dati);
+  color: var(--inchiostro);
+}
+.diario-attesa {
+  margin: 10px 0 0;
+  font: 400 12.5px/1.4 var(--f-dati);
+  color: var(--cenere);
+}
+.diario-viste {
+  margin: 14px 0 6px;
+}
+.diario-griglia {
+  display: grid;
+  gap: 0 56px;
+}
+@media (min-width: 960px) {
+  .diario-griglia {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .diario-griglia .cronologia {
+    grid-column: 1;
+  }
+  .diario-griglia .diario-giorno {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 24px;
+  }
+}
+
+/* il calendario */
+.cal {
+  margin-top: 8px;
+}
+.cal-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ottone);
+  padding-bottom: 6px;
+}
+.cal-mese {
+  margin: 0;
+  font: 500 26px/1 var(--f-maison);
+}
+.cal-mese span {
+  color: var(--seppia);
+}
+.cal-freccia {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--inchiostro);
+  cursor: pointer;
+}
+.cal-freccia svg {
+  width: 20px;
+  height: 20px;
+}
+.cal-freccia:disabled {
+  color: var(--filo-3);
+  cursor: default;
+}
+.cal-riassunto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 10px;
+  font: 400 12.5px/1.3 var(--f-dati);
+  color: var(--seppia);
+}
+.cal-riassunto b {
+  font-weight: 500;
+  color: var(--inchiostro);
+}
+.cal-giorni {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.cal-sett {
+  padding: 4px 0;
+  text-align: center;
+  font: 500 9.5px/1 var(--f-dati);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cenere);
+}
+.cal-g {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  justify-items: center;
+  min-height: 62px;
+  padding: 4px 0 3px;
+  border: 1px solid var(--filo-2);
+  background: transparent;
+  cursor: pointer;
+  color: var(--inchiostro);
+}
+.cal-g:disabled {
+  cursor: default;
+  color: var(--filo-3);
+}
+.cal-g.pieno {
+  background: var(--avorio);
+}
+.cal-g.oggi .cal-n {
+  color: var(--ottone-testo);
+  font-weight: 600;
+}
+.cal-g.scelto {
+  border-color: var(--inchiostro);
+  box-shadow: inset 0 -2px 0 var(--ottone);
+}
+.cal-n {
+  font: 500 14px/1 var(--f-maison);
+  font-variant-numeric: lining-nums;
+}
+.cal-foto {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
+.cal-foto .mini {
+  width: 26px;
+  height: 34px;
+  padding: 0;
+  border-bottom-width: 1px;
+  background: none;
+}
+.cal-foto .mini img {
+  width: 24px;
+  height: 32px;
+}
+.cal-foto i {
+  position: absolute;
+  right: -10px;
+  top: 0;
+  font: 500 9.5px/1 var(--f-dati);
+  font-style: normal;
+  color: var(--seppia);
+}
+.coppia {
+  display: inline-flex;
+  align-items: end;
+}
+.coppia .mini.sopra {
+  margin-left: -18px;
+}
+.cal-foto.coppia .mini.sopra {
+  margin-left: -12px;
+}
+
+/* il giorno scelto */
+.diario-giorno {
+  margin-top: 26px;
+  scroll-margin-top: 20px;
+}
+.diario-giorno-t {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--filo);
+}
+.diario-giorno-t h2,
+.sett-dettaglio-t h2 {
+  margin: 0;
+  font: 500 26px/1.05 var(--f-maison);
+}
+.diario-blocco {
+  border-bottom: 1px solid var(--filo-2);
+  padding-bottom: 6px;
+}
+.diario-voce {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 4px;
+}
+.diario-blocco .diario-voce:has(.coppia) {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.diario-voce-apri {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+.diario-voce-testo {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.diario-voce-testo b {
+  font: 500 19px/1.1 var(--f-maison);
+}
+.diario-voce-testo small,
+.diario-voce-testo a small {
+  font: 400 12px/1.3 var(--f-dati);
+  color: var(--seppia);
+}
+.diario-voce-testo a {
+  font: 500 17px/1.2 var(--f-maison);
+}
+.diario-togli {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: none;
+  color: var(--seppia);
+  cursor: pointer;
+}
+.diario-togli svg {
+  width: 16px;
+  height: 16px;
+}
+.diario-vuoto {
+  margin: 14px 0 0;
+  font: 400 14px/1.5 var(--f-dati);
+  color: var(--seppia);
+}
+.diario-pulsanti {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+}
+.chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.appunto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  margin: 2px 0 4px 64px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: italic 400 17px/1.3 var(--f-maison);
+  color: var(--inchiostro);
+}
+.appunto.vuoto {
+  font: 400 12.5px/1.3 var(--f-dati);
+  color: var(--ottone-testo);
+}
+.appunto-editor {
+  display: grid;
+  gap: 8px;
+  margin: 6px 0 10px;
+  padding: 12px;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+}
+.appunto-stelle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.appunto-stelle button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  font-size: 22px;
+  color: var(--filo-3);
+  cursor: pointer;
+}
+.appunto-stelle button.on {
+  color: var(--ottone-pieno);
+}
+.appunto-stelle span {
+  margin-left: 8px;
+  font: 400 13px/1 var(--f-dati);
+  color: var(--seppia);
+}
+.appunto-azioni,
+.chiave-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.appunto-azioni .btn-filo,
+.chiave-azioni .btn-filo {
+  margin-top: 0;
+  min-height: 46px;
+}
+
+/* scegliere un profumo o un layering */
+.diario-scelta {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.diario-elenco {
+  max-height: 360px;
+  overflow-y: auto;
+  border-top: 1px solid var(--filo);
+}
+.scelta-voce {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 24px;
+  width: 100%;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--filo-2);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--inchiostro);
+}
+.scelta-voce:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.diario-azione {
+  font: 400 20px/1 var(--f-dati);
+  color: var(--ottone-testo);
+}
+.strato-slot-coppia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
+  gap: 6px;
+}
+.strato-slot {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid var(--filo);
+  background: var(--chip);
+  text-align: left;
+  cursor: pointer;
+  color: var(--inchiostro);
+}
+.strato-slot[aria-pressed="true"] {
+  border-color: var(--inchiostro);
+  box-shadow: inset 0 -2px 0 var(--ottone);
+}
+.strato-slot .diario-voce-testo b {
+  font-size: 16px;
+}
+.strato-inverti {
+  border: 1px solid var(--filo);
+  background: var(--chip);
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--inchiostro);
+}
+.diario-ricette-t {
+  margin: 4px 0 0;
+}
+.diario-scelta .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mini.vuota {
+  background: radial-gradient(70% 80% at 50% 0%, var(--faro), var(--faro-0) 85%);
+}
+
+/* la cronologia */
+.diario-storia-mese {
+  margin: 16px 0 4px;
+  font: 500 10.5px/1 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ottone-testo);
+}
+.diario-riga {
+  display: grid;
+  grid-template-columns: 38px auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--filo-2);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--inchiostro);
+}
+.diario-data {
+  display: grid;
+  justify-items: center;
+}
+.diario-data b {
+  font: 500 22px/1 var(--f-maison);
+}
+.diario-data small {
+  font: 400 10.5px/1.2 var(--f-dati);
+  color: var(--cenere);
+}
+
+/* la settimana */
+.settimana-nota {
+  margin: 6px 0 10px;
+  font: 400 12.5px/1.4 var(--f-dati);
+  color: var(--cenere);
+}
+.settimana-giorni {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(92px, 1fr);
+  gap: 4px;
+  margin: 0 calc(-1 * var(--margine));
+  padding: 0 var(--margine) 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.settimana-giorni::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 760px) {
+  .settimana-giorni {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+}
+.sett-giorno {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 4px 10px;
+  border: 1px solid var(--filo-2);
+  background: var(--chip);
+  cursor: pointer;
+  text-align: center;
+  color: var(--inchiostro);
+}
+.sett-giorno.passato {
+  opacity: 0.75;
+}
+.sett-giorno.oggi .sett-data b {
+  color: var(--ottone-testo);
+}
+.sett-giorno[aria-pressed="true"] {
+  border-color: var(--inchiostro);
+  box-shadow: inset 0 -2px 0 var(--ottone);
+  background: var(--avorio);
+}
+.sett-data {
+  font: 400 12px/1 var(--f-dati);
+}
+.sett-data b {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.sett-cielo,
+.sett-occ {
+  font: 400 11px/1.2 var(--f-dati);
+  color: var(--seppia);
+}
+.sett-nome {
+  font: 500 14px/1.1 var(--f-maison);
+  min-height: 2.2em;
+  overflow-wrap: anywhere;
+}
+.sett-dettaglio {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.sett-dettaglio-t {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ottone);
+}
+.sett-dettaglio-t span {
+  font: 400 13px/1.3 var(--f-dati);
+  color: var(--seppia);
+}
+.sett-dettaglio .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sett-proposta {
+  padding: 4px 16px 16px;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+}
+.sett-proposta .motivi {
+  margin-top: 4px;
+}
+.sett-proposta .metto-piccolo {
+  margin-top: 12px;
+}
+@media (min-width: 960px) {
+  .sett-dettaglio {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .sett-dettaglio > .sett-dettaglio-t,
+  .sett-dettaglio > .chips,
+  .sett-dettaglio > .diario-vuoto {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Impostazioni */
+.impostazioni {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.testo-piccolo {
+  margin: 0 0 10px;
+  font: 400 14px/1.55 var(--f-dati);
+  color: var(--seppia);
+}
+.stato-chiave {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+  font: 400 13.5px/1.4 var(--f-dati);
+}
+.stato-chiave.giusta {
+  box-shadow: inset 3px 0 0 var(--bosco);
+}
+.stato-chiave.sbagliata {
+  box-shadow: inset 3px 0 0 var(--ambra);
+}
+.stato-chiave.assente,
+.stato-chiave.da-provare {
+  box-shadow: inset 3px 0 0 var(--ottone);
+}
+.chiave-form {
+  display: grid;
+  gap: 12px;
+}

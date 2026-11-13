@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router";
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import type { Profumo } from "../tipi";
 import { useDati } from "../dati";
 import {
@@ -27,6 +27,10 @@ import {
 } from "../profumo";
 import { Boccetta, useMenoMovimento, useTitolo } from "../componenti/comuni";
 import Piedistallo from "../componenti/Piedistallo";
+import { LoMetto, SuDiTe } from "../diario/pezzi";
+import { useDiario } from "../diario/uso";
+import { useAvviso } from "../componenti/Avvisi";
+import { rifiutoChiave, scriviAlPonte } from "../ponte";
 import { IconaFuori, IconaIndietro, IconaMezzo, IconaNo, IconaSi } from "../componenti/Icone";
 
 /* La scheda di un profumo, pagina con indirizzo proprio (#/profumo/24).
@@ -162,6 +166,7 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
             <span className="s">scia</span>
           </div>
         </div>
+        <LoMetto p={p} />
       </div>
 
       <div className="scheda-dati">
@@ -285,6 +290,8 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
           </Sezione>
         ) : null}
 
+        <SuDiTeSezione p={p} />
+
         {p.desc ? (
           <Sezione titolo="Racconto">
             <p className="racconto">{rinumera(p.desc, numeri)}</p>
@@ -343,28 +350,12 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
               <dt>Formato</dt>
               <dd>{p.formatoMl ? `${p.formatoMl} ml` : "Non indicato"}</dd>
             </div>
-            {campione ? null : (
-              <div>
-                <dt>Quanto ne resta</dt>
-                <dd>{residuo ? residuo.l : "Non indicato"}</dd>
-              </div>
-            )}
+            <div>
+              <dt>Quanto ne resta</dt>
+              <dd>{residuo ? residuo.l : "Non indicato"}</dd>
+            </div>
           </dl>
-          {campione ? null : (
-            <>
-              <div className="livello" role="img" aria-label={`Quanto ne resta: ${residuo ? residuo.l : "non indicato"}`}>
-                {[...LIVELLI].reverse().map(([v, l]) => (
-                  <i key={v} title={l} className={residuo && v <= residuo.v && residuo.v > 0 ? "pieno" : undefined} />
-                ))}
-              </div>
-              <div className="livello-eti" aria-hidden="true">
-                <span>Finita</span>
-                <span>Mezza</span>
-                <span>Piena</span>
-              </div>
-              <p className="nota-piccola">Il residuo si cambia ancora nell'app di oggi; qui arriva con il Diario.</p>
-            </>
-          )}
+          <Residuo p={p} />
         </Sezione>
 
         {p.fragrantica ? (
@@ -398,4 +389,72 @@ function RigaAlt({ q, sopra, nome, sotto, destra }: { q: Profumo | null; sopra: 
     </>
   );
   return <li>{q ? <Link className="alt-riga" to={`/profumo/${q.id}`} state={{ da: "scheda" }}>{dentro}</Link> : <div className="alt-riga">{dentro}</div>}</li>;
+}
+
+/** «Su di te», solo se il diario ha qualcosa da dire su questo profumo. */
+function SuDiTeSezione({ p }: { p: Profumo }) {
+  const { diario } = useDiario();
+  const qualcosa = diario.voci().some((v) => +v.id === p.id && (v.voto || v.nota || v.occasione));
+  return qualcosa ? (
+    <Sezione titolo="Su di te">
+      <SuDiTe p={p} />
+    </Sezione>
+  ) : null;
+}
+
+/* Quanto ne resta, scelto a mano a occhio: sette tacche, dalla boccetta finita (sinistra) a quella piena (destra),
+   come l'indicatore della benzina. Va subito al database con la chiave (come nell'app di oggi: niente coda);
+   se non riesce, torna com'era e lo dice. */
+function Residuo({ p }: { p: Profumo }) {
+  const { aggiornaProfumo } = useDati();
+  const avvisa = useAvviso();
+  const [invio, setInvio] = useState(false);
+  const r = livelloResiduo(p);
+  const segna = async (v: number) => {
+    if (invio || (r && r.v === v)) return;
+    const prima = p.residuoPct ?? null;
+    aggiornaProfumo(p.id, { residuoPct: v });
+    setInvio(true);
+    try {
+      const { stato, corpo } = await scriviAlPonte({ azione: "residuo", id: String(p.id), valore: String(v) });
+      if (rifiutoChiave(corpo)) throw new Error("chiave");
+      if (stato >= 400 || !corpo || !corpo.ok) throw new Error(String(corpo?.errore || "rifiutato"));
+    } catch (e) {
+      aggiornaProfumo(p.id, { residuoPct: prima });
+      const m = String((e as Error).message);
+      avvisa(
+        m === "chiave"
+          ? "Non salvato: serve la chiave di Sillage, in Altro ▸ Impostazioni"
+          : /fetch|network|load failed/i.test(m)
+            ? "Non salvato: riprova con la rete"
+            : "Non salvato: " + m
+      );
+    } finally {
+      setInvio(false);
+    }
+  };
+  return (
+    <>
+      <div className="livello" role="radiogroup" aria-label="Quanto ne resta" aria-busy={invio}>
+        {[...LIVELLI].reverse().map(([v, l]) => (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={!!r && r.v === v}
+            aria-label={l}
+            title={l}
+            className={(r && v <= r.v && r.v > 0 ? "pieno" : "") + (r && r.v === v ? " on" : "")}
+            onClick={() => segna(v)}
+          />
+        ))}
+      </div>
+      <div className="livello-eti" aria-hidden="true">
+        <span>Finita</span>
+        <span>Mezza</span>
+        <span>Piena</span>
+      </div>
+      <p className="nota-piccola">Tocca una tacca per dire quanto ne resta: si salva nel database, con la chiave.</p>
+    </>
+  );
 }

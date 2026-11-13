@@ -10,21 +10,11 @@ export interface PaginaInArrivo {
   breve: string;
   tappa: string;
   cosa: string[];
+  /** la pagina c'è già: niente segnaposto, e in Altro niente «tappa» */
+  pronta?: boolean;
 }
 
 export const IN_ARRIVO: PaginaInArrivo[] = [
-  {
-    percorso: "diario",
-    titolo: "Diario",
-    breve: "Quando hai messo cosa",
-    tappa: "Tappa 3",
-    cosa: [
-      "Il mese e il giorno, con gli usi e i layering",
-      "Appunti col voto",
-      "«Lo metto oggi» dalla scheda di ogni profumo",
-      "La chiave di Sillage e la coda delle scritture che aspetta la rete"
-    ]
-  },
   {
     percorso: "numeri",
     titolo: "Numeri",
@@ -64,7 +54,8 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     percorso: "impostazioni",
     titolo: "Impostazioni",
     breve: "Chiave, posizione per il meteo, dati",
-    tappa: "Tappe 2 e 3",
+    tappa: "Tappa 3",
+    pronta: true,
     cosa: ["La chiave di Sillage", "La posizione per il meteo", "Da dove arrivano i dati e la versione dell'app"]
   }
 ];
@@ -122,7 +113,6 @@ export default function Segnaposto({ pagina }: { pagina?: PaginaInArrivo }) {
           <li key={c}>{c}</li>
         ))}
       </ul>
-      {pagina.percorso === "impostazioni" ? <OrigineDati /> : null}
       <Link className="btn-filo" to="/">
         Torna alla collezione
       </Link>

@@ -39,17 +39,23 @@ vite.config.ts           Vite, React e la PWA (manifest, cache per l'uso senza r
 public/img/              41 boccette scontornate (webp con trasparenza) e le icone dell'app
 strumenti/scontorna.py   rifà le foto scontornate: python scontorna.py <cartella-originali> <cartella-uscita>
 strumenti/prima-dopo.mjs confronta la classifica di Consigliami tra l'app di oggi e la nuova (vedi «Prove»)
+strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
+strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
 src/main.tsx             avvio: caratteri, stile, dati, router
 src/rotte.tsx            le pagine e i loro indirizzi
 src/tipi.ts              com'è fatto un profumo che arriva dal ponte
 src/profumo.ts           le regole portate da js/collezione.js e js/dati.js, compreso adesso() col tramonto
 src/consiglio.ts         il punteggio di Consigliami, portato da js/consigliami.js (niente React: lo usa anche il prima/dopo)
 src/meteo.ts             Open-Meteo: posizione, scaricamento, finestra delle ore sulla pelle (da js/dati.js)
-src/dati.tsx             lettura dal ponte, copia in localStorage, contesto React (useDati)
+src/dati.tsx             lettura dal ponte (con la chiave anche il diario), copia in localStorage, useDati
+src/ponte.ts             l'indirizzo del ponte, la chiave, le scritture, il diario unico dell'app
+src/diario/coda.ts       il diario e la coda delle scritture (niente React: lo usano anche le prove)
+src/diario/uso.tsx       useDiario, l'invio al ritorno della rete, useSegna
+src/diario/pezzi.tsx     «Lo metto oggi», occasione e momento di una voce, «Su di te»
 src/meteo-contesto.tsx   il meteo per tutta l'app (useMeteo): Consigliami e il filtro «Adesso»
-src/componenti/          Guscio (barra in basso), Icone, Piedistallo, pezzi comuni (Boccetta, meno movimento)
-src/pagine/              Collezione, Scheda, Consigliami, Altro, Segnaposto (pagine in arrivo)
-src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, pagine
+src/componenti/          Guscio (barra in basso), Icone, Piedistallo, Avvisi, pezzi comuni (Boccetta, meno movimento)
+src/pagine/              Collezione, Scheda, Consigliami, Diario, Impostazioni, Altro, Segnaposto (pagine in arrivo)
+src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, diario, pagine
 ```
 
 - **Caratteri**: Cormorant Garamond e Jost sono dentro l'app (pacchetti `@fontsource`, solo l'alfabeto
@@ -64,8 +70,8 @@ src/stile/               token.css (tutti i colori, chiaro e scuro), base, colle
 All'avvio l'app mostra subito l'ultima copia salvata sul telefono (`localStorage`, chiave
 `sillage-app:dati`) e intanto chiede i dati al ponte (al massimo 8 secondi). Se il ponte risponde, la
 copia si aggiorna; se no, si resta sulla copia. In più il service worker tiene l'ultima risposta del ponte.
-Alla prima apertura in assoluto serve la rete. Il diario cifrato che il ponte manda non viene salvato:
-arriva con la tappa 3.
+Alla prima apertura in assoluto serve la rete. Con la chiave la lettura è `POST azione=leggi` (chiave nel
+corpo) e porta anche il diario; senza, `GET` e niente diario (`diarioChiuso`).
 
 ## Pagine
 
@@ -77,12 +83,13 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/` | **Collezione**: Boccette / Campioni, cerca, filtri per famiglia e «Adesso», mensole con i cartellini | fatta |
 | `#/?v=campioni&f=verde&ora=1&q=vetiver` | i filtri stanno nell'indirizzo: «indietro» li ritrova, una nuova apertura riparte pulita | fatta |
 | `#/?vedi=24` | arrivo da un'altra pagina: vetrina giusta, filtri tolti, si scorre alla teca (chiusa) e si illumina | fatta |
-| `#/profumo/24` | **Scheda**: piedistallo col faretto, voto/durata/sillage, piramide, accordi con la forza, stagioni (quella di ora in ottone), giorno e sera, uso, note personali, racconto, parentele (copia di…), somiglia a, formato e residuo in sola lettura, link a Fragrantica. La boccetta vola dalla teca al piedistallo (View Transition) | fatta |
+| `#/profumo/24` | **Scheda**: piedistallo col faretto, voto/durata/sillage, «Lo metto oggi» (con occasione e momento, e il link all'appunto), piramide, accordi con la forza, stagioni (quella di ora in ottone), giorno e sera, uso, note personali, «Su di te» (dagli appunti), racconto, parentele (copia di…), somiglia a, formato e residuo da toccare, link a Fragrantica. La boccetta vola dalla teca al piedistallo (View Transition) | fatta |
 | `#/altro` | **Altro**: indice di Layering, Guida, Acquisti, Confronta, Impostazioni, e da dove arrivano i dati | fatta |
-| `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro); quattro alternative coi tre motivi più forti; le ore sulla pelle con la curva della temperatura percepita; il pulsante per il meteo di dove sei | fatta (tappa 2) |
-| `#/diario` | Diario, con «Lo metto oggi» e il residuo modificabile | segnaposto, tappa 3 |
+| `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro) e «Lo metto oggi»; quattro alternative coi tre motivi più forti e «Lo metto»; le ore sulla pelle; «Mai indossati, se vuoi riscoprirli»; il pulsante per il meteo di dove sei | fatta (tappe 2 e 3) |
+| `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
+| `#/diario?vista=settimana` | **La settimana**: un suggerimento al giorno da lunedì a domenica, con l'occasione da cambiare e «Lo metto» per oggi; i giorni passati dicono cosa hai messo | fatta (tappa 3) |
+| `#/impostazioni` | **Impostazioni**: la chiave di Sillage, la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3) |
 | `#/numeri`, `#/layering`, `#/guida`, `#/acquisti`, `#/confronta` | | segnaposto, tappa 4 |
-| `#/impostazioni` | chiave, posizione per il meteo, origine dei dati | segnaposto, tappe 2 e 3 |
 
 «Collezione» in alto nella scheda: se si arriva dalla vetrina torna indietro (filtri e punto ritrovati);
 se si arriva da un'altra scheda dice «Indietro»; se la scheda è stata aperta da un link porta alla vetrina
@@ -102,9 +109,34 @@ rating. Diario e voti personali non entrano. Boccette e campioni insieme.
   «non usarlo più» cancella tutti e due.
 - Il filtro «Adesso» della Collezione usa lo stesso `adesso()`: con il meteo la sera comincia mezz'ora dopo
   il tramonto (al più tardi alle 19), senza alle 18.
-- Mancano ancora, perché dipendono dal Diario o dal Layering: «Lo metto», «Mai indossati, se vuoi
-  riscoprirli», la frase «è un campione: buona occasione per provarlo» (solo per i campioni mai indossati) e
-  «Se vuoi osare, con…» (la ricetta di layering). Nessuna di queste cambia la classifica.
+- Dal diario arrivano solo cose che non cambiano la classifica: «Lo metto», «Mai indossati, se vuoi
+  riscoprirli» e la frase «è un campione: buona occasione per provarlo». Manca ancora «Se vuoi osare, con…»
+  (la ricetta di layering), che arriva con la pagina Layering (tappa 4).
+
+## Diario, chiave e residuo
+
+- **La chiave** si inserisce in Altro ▸ Impostazioni e resta solo nel `localStorage` di questo telefono
+  (`sillage-app:chiave`). Viaggia sempre nel corpo della richiesta, mai nell'indirizzo, e non si mostra.
+  Senza chiave (o con quella sbagliata) il diario non si legge e la pagina lo dice; quello che segni resta
+  in coda sul telefono e parte appena la chiave è giusta.
+- **La coda** (`src/diario/coda.ts`, chiave `sillage-app:diario-coda`) è quella dell'app di oggi: ogni voce
+  messa, tolta o annotata si vede subito e aspetta lì finché il ponte non la conferma. È salvata prima di
+  ogni invio, quindi chiudere l'app con la coda piena non perde niente. Parte a ogni scrittura, all'avvio,
+  quando torna la rete e quando l'app torna in primo piano; un invio alla volta, e chi lo chiede mentre
+  uno è in corso ottiene un altro giro subito dopo. Una voce tolta prima dell'invio sparisce dalla coda.
+  Le voci confermate hanno la loro copia (`sillage-app:diario`).
+- **Quando il ponte dice di no**: rete assente, errore HTTP (500), chiave sbagliata o «…sconosciuta:» →
+  la voce resta in coda e riparte dopo. Un rifiuto definitivo (voce non valida, troppe voci in un giorno,
+  voce non trovata, profumo che il database non ha) la toglie dalla coda, come nell'app di oggi, e l'app lo
+  dice con un avviso.
+- **Due differenze volute dall'app di oggi**, entrambe per non perdere niente: un errore 500 del ponte lascia
+  la voce in coda (prima la toglieva), e un appunto scritto su una voce ancora in coda arriva al ponte subito
+  dopo la voce (prima si perdeva se la voce partiva senza).
+- **Regole**: al massimo due profumi al giorno, o un layering (sotto e sopra) che prende il giorno intero;
+  togliere metà di un layering lo toglie tutto. Niente promemoria. Il diario non entra nel punteggio di
+  Consigliami; il piano della settimana evita solo di riproporre lo stesso profumo due volte.
+- **Il residuo** si tocca nella scheda (sette tacche) e va subito al database con la chiave, come nell'app di
+  oggi: niente coda. Se non riesce torna com'era e lo dice.
 
 ## Regole portate dall'app di oggi
 
@@ -118,6 +150,38 @@ cambiata anche qui.
 
 `npm run build` controlla i tipi e costruisce. Le prove automatiche di `.github/workflows/prova.yml`
 riguardano ancora l'app di oggi; quelle della nuova arrivano con la tappa 5.
+
+**Prove della coda del diario**:
+
+```bash
+cd app
+node strumenti/prova-coda.mjs                  # ponte finto in memoria, stesse regole di ponte/ponte.js
+node strumenti/prova-coda.mjs --ponte-locale   # in più, contro il ponte locale (vedi sotto)
+```
+
+Metti senza rete → voce visibile → torna la rete → un invio solo (anche con tre richiami insieme); app chiusa
+con la coda piena; togli prima dell'invio; togli di una voce confermata senza rete; appunto su voce in coda e
+su voce confermata; errore 500, chiave sbagliata e «sconosciuta:» → la voce resta; rifiuto definitivo → esce
+e l'app lo sa; limite di due al giorno e layering. Mai contro il ponte pubblicato.
+
+**Provarla col ponte locale** (nessuna scrittura arriva al database vero né al foglio):
+
+```bash
+cd app
+node strumenti/foglio-finto.mjs                       # porta 8899, il catalogo da data/*.json
+```
+```bash
+npx wrangler@4 dev --port 8787 --ip 127.0.0.1 --var FOGLIO_URL:http://127.0.0.1:8899/exec --var SILLAGE_CHIAVE:prova
+```
+```bash
+cd app
+VITE_PONTE=http://127.0.0.1:8787/api npm run build
+npm run anteprima
+```
+
+(il secondo dalla radice del repo). In Impostazioni la chiave è `prova`; Impostazioni ▸ I dati dice
+«ponte locale di prova». Prima di pubblicare si ricostruisce senza `VITE_PONTE`. Il database locale sta in
+`.wrangler/` (fuori da git).
 
 **Prima/dopo di Consigliami** (obbligatorio a ogni modifica del punteggio, regola dell'utente):
 

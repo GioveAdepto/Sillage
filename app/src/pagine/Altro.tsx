@@ -24,7 +24,7 @@ export default function Altro() {
                 <b>{p.titolo}</b>
                 <span>{p.breve}</span>
               </span>
-              <span className="indice-tappa">{p.tappa}</span>
+              <span className="indice-tappa">{p.pronta ? "" : p.tappa}</span>
               <IconaAvanti className="indice-freccia" />
             </Link>
           </li>

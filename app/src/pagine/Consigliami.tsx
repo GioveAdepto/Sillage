@@ -4,8 +4,10 @@ import { useDati } from "../dati";
 import { useMeteo } from "../meteo-contesto";
 import { adesso, concPerEsteso, eCampione, nr } from "../profumo";
 import { CIELI, finestraMeteo, piovosa, type Finestra, type OraMeteo } from "../meteo";
-import { OCCASIONI, candidati, eOccasione, inizioPer, maiuscola, occasioneProbabile, type Candidato, type Occasione, type Quando } from "../consiglio";
+import { OCCASIONI, ORA_PER_OCCASIONE, candidati, eOccasione, inizioPer, maiuscola, occasioneProbabile, type Candidato, type Occasione, type Quando } from "../consiglio";
 import Piedistallo from "../componenti/Piedistallo";
+import { LoMetto } from "../diario/pezzi";
+import { useDiario } from "../diario/uso";
 import { Boccetta, useMenoMovimento, useTitolo } from "../componenti/comuni";
 
 /* Consigliami: oggi, stasera o domani, e l'occasione. La prima scelta sul piedistallo con i suoi motivi,
@@ -24,6 +26,7 @@ const ROMANI = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 export default function Consigliami() {
   const { dati, numeri, carica } = useDati();
   const { meteo, conPosto, cercando, ora, chiedi, scorda } = useMeteo();
+  const { diario, versione } = useDiario();
   const [par, setPar] = useSearchParams();
   useTitolo("Consigliami · Sillage");
 
@@ -41,9 +44,11 @@ export default function Consigliami() {
   // «ora» cambia ogni cinque minuti e quando arriva il meteo: la classifica si ricalcola
   const { lista, da, a } = useMemo(() => {
     const da = inizioPer(quando, occ);
-    return { lista: dati ? candidati(dati.profumi, occ, quando, { meteo }) : [], da, a: adesso(da, meteo) };
+    // il diario aggiunge solo una frase ai campioni mai indossati: il punteggio non cambia
+    const maiIndossato = (id: number) => diario.giorniDa(id) === null;
+    return { lista: dati ? candidati(dati.profumi, occ, quando, { meteo, maiIndossato }) : [], da, a: adesso(da, meteo) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dati, occ, quando, meteo, ora]);
+  }, [dati, occ, quando, meteo, ora, versione]);
 
   if (!dati)
     return (
@@ -164,12 +169,14 @@ export default function Consigliami() {
                       </span>
                       <span className="nr">{ROMANI[i + 1]}.</span>
                     </Link>
+                    {quando !== "domani" ? <LoMetto p={x.p} uso={{ occasione: occ, momento: momentoPer(occ, da) }} compatto /> : null}
                   </li>
                 ))}
               </ol>
             </section>
           ) : null}
           <Giornata f={primo.f} />
+          <MaiIndossati lista={lista} />
         </>
       ) : null}
 
@@ -197,8 +204,13 @@ export default function Consigliami() {
   );
 }
 
+/** Da Consigliami il profumo si segna con l'occasione scelta e il momento in cui lo porterai (come l'app di oggi). */
+const momentoPer = (occ: Occasione, da: Date): "giorno" | "sera" => ((ORA_PER_OCCASIONE[occ] || 9) >= 17 ? "sera" : adesso(da).momento);
+
 function Scelta({ c, n, totale, occ, quando, da }: { c: Candidato; n: number; totale: number; occ: Occasione; quando: Quando; da: Date }) {
   const { p } = c;
+  const puoMettere = quando !== "domani";
+  const momentoUso = momentoPer(occ, da);
   const riduci = useMenoMovimento();
   const verso = `/profumo/${p.id}`;
   const inVolo = useViewTransitionState(verso);
@@ -238,7 +250,8 @@ function Scelta({ c, n, totale, occ, quando, da }: { c: Candidato; n: number; to
         ))}
       </ol>
       <div className="azioni">
-        <Link className="btn-filo pieno" to={verso} viewTransition={!riduci} state={{ volo: !riduci, da: "consigliami" }}>
+        {puoMettere ? <LoMetto p={p} uso={{ occasione: occ, momento: momentoUso }} /> : null}
+        <Link className={"btn-filo" + (puoMettere ? "" : " pieno")} to={verso} viewTransition={!riduci} state={{ volo: !riduci, da: "consigliami" }}>
           Apri la scheda
         </Link>
       </div>
@@ -331,3 +344,24 @@ function Cielo({ o }: { o: OraMeteo }) {
   );
 }
 
+
+/* Fuori classifica, in piccolo: tra quelli adatti, i mai indossati. Un promemoria, non un consiglio. */
+function MaiIndossati({ lista }: { lista: Candidato[] }) {
+  const { diario } = useDiario();
+  const cinque = new Set(lista.slice(0, 5).map((x) => x.p.id));
+  const mai = lista.filter((x) => !cinque.has(x.p.id) && diario.giorniDa(x.p.id) === null && x.s > 0).slice(0, 4);
+  if (!mai.length) return null;
+  return (
+    <p className="mai-indossati">
+      <span className="incisa">Mai indossati, se vuoi riscoprirli</span>
+      {mai.map((x, i) => (
+        <span key={x.p.id}>
+          {i ? " · " : ""}
+          <Link className="collegamento" to={`/profumo/${x.p.id}`} state={{ da: "consigliami" }}>
+            {x.p.name}
+          </Link>
+        </span>
+      ))}
+    </p>
+  );
+}

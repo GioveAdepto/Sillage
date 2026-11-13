@@ -2,6 +2,7 @@ import { Link, Outlet, ScrollRestoration, useLocation } from "react-router";
 import type { ComponentType } from "react";
 import { IconaAltro, IconaCollezione, IconaDiario, IconaGoccia, IconaNumeri } from "./Icone";
 import { SOTTO_ALTRO } from "../pagine/Segnaposto";
+import { DiarioVivo } from "../diario/uso";
 
 /* Il guscio: la pagina scelta e, in basso, la barra con le cinque voci (il «timone»). */
 const VOCI: { a: string; nome: string; Icona: ComponentType<{ className?: string }>; anche: (p: string) => boolean }[] = [
@@ -34,6 +35,7 @@ export default function Guscio() {
           ))}
         </ul>
       </nav>
+      <DiarioVivo />
       <ScrollRestoration />
     </>
   );

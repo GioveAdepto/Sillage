@@ -1,15 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Dati, Profumo } from "./tipi";
 import { numeraCatalogo } from "./profumo";
+import { PONTE, diario, leggiChiave } from "./ponte";
+import type { Voce } from "./diario/coda";
 
 /* Da dove arrivano i profumi: il ponte verso il database (ponte/ponte.js), con CORS aperto.
-   L'ultima risposta buona resta in localStorage: senza rete l'app riparte da lì.
-   (Anche il service worker tiene una copia della risposta, ma il telefono può buttarla.) */
-export const PONTE = "https://sillage.danilo-moro96.workers.dev/api";
+   Con la chiave si chiede tutto, diario compreso (POST azione=leggi, chiave nel corpo); senza, il catalogo
+   (GET). L'ultima risposta buona resta in localStorage: senza rete l'app riparte da lì. Il diario confermato
+   ha la sua copia (src/diario/coda.ts). */
+export { PONTE };
 const CHIAVE_COPIA = "sillage-app:dati";
 const ATTESA_MAX = 8000; // ms oltre i quali si rinuncia al ponte e si resta sulla copia
 
 export type Origine = "ponte" | "copia" | "nessuna";
+/** assente: nessuna chiave sul telefono; giusta: il ponte ha dato il diario; sbagliata: il ponte l'ha rifiutata;
+    da-provare: c'è, ma il ponte non ha ancora risposto */
+export type StatoChiave = "assente" | "giusta" | "sbagliata" | "da-provare";
 
 interface StatoDati {
   dati: Dati | null;
@@ -20,7 +26,10 @@ interface StatoDati {
   errore: string | null;
   numeri: Map<number, number>;
   perId: Map<number, Profumo>;
+  statoChiave: StatoChiave;
   riprova: () => void;
+  /** cambia un profumo sul telefono (per esempio il residuo appena salvato) */
+  aggiornaProfumo: (id: number, campi: Partial<Profumo>) => void;
 }
 
 const Contesto = createContext<StatoDati | null>(null);
@@ -63,13 +72,36 @@ export function DatiProvider({ children }: { children: ReactNode }) {
   const [carica, setCarica] = useState(true);
   const [errore, setErrore] = useState<string | null>(null);
   const [giro, setGiro] = useState(0);
+  const [statoChiave, setStatoChiave] = useState<StatoChiave>(() => (leggiChiave() ? "da-provare" : "assente"));
+
+  // una chiave nuova (o tolta) in Impostazioni: si rilegge subito
+  useEffect(() => {
+    const cambia = () => {
+      setStatoChiave(leggiChiave() ? "da-provare" : "assente");
+      setGiro((g) => g + 1);
+    };
+    // tornata la rete: si rilegge, così il diario e lo stato della chiave tornano veri
+    const rete = () => setGiro((g) => g + 1);
+    window.addEventListener("sillage-chiave", cambia);
+    window.addEventListener("online", rete);
+    return () => {
+      window.removeEventListener("sillage-chiave", cambia);
+      window.removeEventListener("online", rete);
+    };
+  }, []);
 
   useEffect(() => {
     const ctrl = new AbortController();
     let vivo = true; // falso quando il componente rinuncia a questa richiesta
     const timer = setTimeout(() => ctrl.abort(), ATTESA_MAX);
     setCarica(true);
-    fetch(PONTE, { signal: ctrl.signal, cache: "no-store" })
+    const chiave = leggiChiave();
+    fetch(
+      PONTE,
+      chiave
+        ? { method: "POST", signal: ctrl.signal, cache: "no-store", body: new URLSearchParams({ azione: "leggi", chiave }) }
+        : { signal: ctrl.signal, cache: "no-store" }
+    )
       .then((r) => {
         if (!r.ok) throw new Error("il ponte ha risposto " + r.status);
         return r.json();
@@ -77,6 +109,15 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       .then((grezzo) => {
         if (!vivo) return;
         const d = pulisci(grezzo);
+        const g = grezzo as { diario?: Voce[]; diarioChiuso?: boolean };
+        if (Array.isArray(g.diario)) {
+          diario.impostaConfermate(g.diario);
+          setStatoChiave("giusta");
+          void diario.sincronizza(); // con la chiave giusta parte quello che aspettava
+        } else if (chiave) {
+          diario.segnalaChiave();
+          setStatoChiave("sbagliata");
+        } else setStatoChiave("assente");
         setDati(d);
         setOrigine("ponte");
         setErrore(null);
@@ -98,6 +139,14 @@ export function DatiProvider({ children }: { children: ReactNode }) {
   }, [giro]);
 
   const riprova = useCallback(() => setGiro((g) => g + 1), []);
+  const aggiornaProfumo = useCallback((id: number, campi: Partial<Profumo>) => {
+    setDati((d) => {
+      if (!d) return d;
+      const nuovi = { ...d, profumi: d.profumi.map((p) => (p.id === id ? { ...p, ...campi } : p)) };
+      scriviCopia(nuovi);
+      return nuovi;
+    });
+  }, []);
   const valore = useMemo<StatoDati>(() => {
     const profumi = dati?.profumi ?? [];
     return {
@@ -107,9 +156,11 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       errore,
       numeri: numeraCatalogo(profumi),
       perId: new Map(profumi.map((p) => [p.id, p])),
-      riprova
+      statoChiave,
+      riprova,
+      aggiornaProfumo
     };
-  }, [dati, origine, carica, errore, riprova]);
+  }, [dati, origine, carica, errore, riprova, statoChiave, aggiornaProfumo]);
 
   return <Contesto.Provider value={valore}>{children}</Contesto.Provider>;
 }
