@@ -1,27 +1,62 @@
-# La nuova Sillage (React + TypeScript)
+# Sillage, l'app (React + TypeScript)
 
-La riscrittura dell'app in React, con lo stile «Boutique di nicchia» (anteprima D, prima versione):
+L'app di Sillage riscritta in React, con lo stile «Boutique di nicchia» (anteprima D, prima versione):
 travertino e avorio con fili d'ottone, e lo stesso negozio in penombra quando l'iPhone è in modalità scura.
-Vive in questa cartella finché l'utente non decide il passaggio: **l'app di oggi (nella radice del repo)
-resta quella pubblicata** e non viene toccata.
+Dal passaggio (tappa 5) è lei l'app pubblicata, agli stessi due indirizzi di prima. L'app di prima
+(`index.html`, `js/`, `css/` nella radice del repo) resta come riferimento dei confronti in `strumenti/`.
 
-Ponte e database sono gli stessi dell'app di oggi: questa app legge da
-`https://sillage.danilo-moro96.workers.dev/api` (vedi `ponte/LEGGIMI.md`).
+Ponte e database sono gli stessi: l'app legge da `https://sillage.danilo-moro96.workers.dev/api`
+(vedi `ponte/LEGGIMI.md`). Qui sotto «l'app di oggi» vuol dire l'app di prima del passaggio.
 
-## Indirizzo di prova
+## Il passaggio
 
-**<https://riscrittura-react-sillage.danilo-moro96.workers.dev/nuova/>** — solo per provarla (anche sull'iPhone,
-da Safari ▸ Condividi ▸ Aggiungi alla schermata Home). Non è la pubblicazione: la radice di quell'indirizzo è
-ancora l'app di oggi, e l'app vera resta quella su `main`.
+Stessi due indirizzi di prima, con l'app nuova alla radice: chi ha l'icona sulla schermata Home non la reinstalla.
 
-- È l'anteprima del branch `riscrittura-react` fatta da Cloudflare Workers Builds a ogni push: `wrangler.jsonc`
-  ha una build (`"build": { "command": "node app/strumenti/costruisci-nuova.mjs" }`) che costruisce `app/` in
-  `nuova/` alla radice del repo (fuori da git, in `.gitignore`; non in `.assetsignore`, così viene servita).
-  La lancia anche `wrangler dev` in locale: la prima volta installa i pacchetti di `app/`.
-- Parla col ponte pubblicato, quindi i dati sono quelli veri: con la chiave vera, diario e residuo scritti da
-  lì finiscono nel database vero.
-- Il service worker dell'app di oggi (ambito radice) lascia passare `/nuova/` (una riga in `sw.js`); quello della
-  nuova ha ambito `/nuova/` e non tocca la radice. Manifest, icone e schermate d'avvio sono relativi alla cartella.
+| indirizzo | come si pubblica |
+|---|---|
+| <https://sillage.danilo-moro96.workers.dev/> | Cloudflare Workers Builds a ogni push su `main`: `wrangler.jsonc` costruisce `app/` in `sito/` (`"build"`: `node app/strumenti/costruisci-sito.mjs`) e serve quella cartella (`"assets"`: `./sito`); `/api` resta il ponte. Ponte, database, cron e `keep_vars` non cambiano. |
+| <https://gioveadepto.github.io/Sillage/> | `.github/workflows/pagine.yml` a ogni push su `main`: costruisce `app/` e la pubblica, **solo** se Pages è impostato su «GitHub Actions». Finché pubblica «dal branch», il workflow salta senza errori e Pages continua a servire l'app di prima dalla radice del repo. |
+
+Le anteprime dei branch su Cloudflare (`https://<branch>-sillage.danilo-moro96.workers.dev/`) mostrano
+anch'esse l'app nuova alla radice.
+
+**Cosa succede sul telefono di chi ha già l'app di prima** (stesso indirizzo, stesso `localStorage`), provato
+in `prove/prova-passaggio.mjs`, alla radice e in `/Sillage/`:
+
+1. Il service worker di prima chiede la pagina alla rete (per lui viene sempre prima la rete): arriva la nuova.
+2. L'app nuova registra `sw.js` allo stesso indirizzo. Il suo pezzo di passaggio (`public/pulizia-sw.js`) vede la
+   cache di prima (`sillage-v3`): prende subito il posto del vecchio e la cancella. Dalla volta dopo le versioni
+   nuove aspettano «Aggiorna», come sempre.
+3. Prima di leggere qualunque cosa, l'app riprende quello che l'altra aveva salvato (`src/migrazione.ts`): la
+   chiave (`sillage:chiave`), la coda del diario (`sillage:diario-coda`, passata una volta sola e poi cancellata),
+   la copia dei dati e del diario, la posizione e il meteo.
+4. Se l'app di prima è rimasta aperta, il suo controllo della versione trova la pagina nuova (una riga apposta
+   in `index.html`) e propone «Aggiorna».
+
+### I passi all'unione (li fa chi unisce, nell'ordine)
+
+1. Controllare che sul branch siano verdi la prova (`Prova del sito`) e la build di Cloudflare, e aprire
+   l'anteprima del branch alla radice.
+2. Unire su `main` con `--no-ff` (un'unione sola: per tornare indietro si annulla quella).
+3. Cloudflare: la build di `main` parte da sola (Workers Builds); controllare che sia verde e aprire
+   <https://sillage.danilo-moro96.workers.dev/>: deve esserci l'app nuova. Poi, come dopo ogni pubblicazione
+   che tocca il ponte, `azione=sincronizza` con la chiave deve rispondere `ok`.
+4. GitHub Pages, col sì dell'utente: Settings ▸ Pages ▸ Build and deployment ▸ Source → «GitHub Actions».
+   Poi Actions ▸ «Pubblica su GitHub Pages» ▸ Run workflow (o il prossimo push su `main`) e aprire
+   <https://gioveadepto.github.io/Sillage/>. Finché questo passo non è fatto, Pages serve l'app di prima.
+5. Sull'iPhone: aprire l'app dalla Home. La prima volta arriva la nuova (con la chiave e il diario di prima);
+   se l'app di prima era rimasta aperta in sottofondo, toccare «Aggiorna».
+
+### Per tornare indietro
+
+- **Tutto**: annullare l'unione su `main` (`git revert -m 1 <commit dell'unione>`) e pushare. Cloudflare torna a
+  servire la radice del repo con l'app di prima; per Pages, rimettere Source su «Deploy from a branch» (`main`,
+  `/`). Sul telefono l'app di prima ritrova la sua chiave (`sillage:chiave` non viene cancellata); le voci del
+  diario passate alla coda nuova sono già arrivate al database, o partono alla prossima apertura dell'app nuova.
+- **Solo Pages**: rimettere Source su «Deploy from a branch»: torna l'app di prima su GitHub Pages, Cloudflare
+  resta con la nuova.
+- Il service worker nuovo resta registrato sul telefono finché il vecchio non lo sostituisce (alla prima
+  apertura dopo il ritorno, perché `sw.js` cambia): niente da fare a mano.
 
 ## Avviarla
 
@@ -62,7 +97,11 @@ strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (ved
 strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
 strumenti/verifica-filtri.mjs confronta filtri, scelte rapide e ordinamenti della Collezione con l'app di oggi
 strumenti/schermate-avvio.py rifà le schermate d'avvio (la vetrina chiusa, chiara e scura)
+strumenti/costruisci-sito.mjs costruisce l'app in sito/ (la lancia wrangler prima di ogni pubblicazione)
+strumenti/copia-dati.mjs copia data/*.json in public/data/ prima di ogni build (ripiego senza rete)
 src/main.tsx             avvio: caratteri, stile, dati, router
+src/migrazione.ts        il passaggio: riprende chiave, coda del diario e copie lasciate dall'app di prima
+public/pulizia-sw.js     il passaggio: il service worker nuovo prende il posto del vecchio e ne cancella la cache
 src/rotte.tsx            le pagine e i loro indirizzi
 src/tipi.ts              com'è fatto un profumo che arriva dal ponte
 src/profumo.ts           le regole portate da js/collezione.js e js/dati.js, compreso adesso() col tramonto
@@ -99,7 +138,9 @@ src/stile/               token.css (tutti i colori, chiaro e scuro), base, colle
 All'avvio l'app mostra subito l'ultima copia salvata sul telefono (`localStorage`, chiave
 `sillage-app:dati`) e intanto chiede i dati al ponte (al massimo 8 secondi). Se il ponte risponde, la
 copia si aggiorna; se no, si resta sulla copia. In più il service worker tiene l'ultima risposta del ponte.
-Alla prima apertura in assoluto serve la rete. Con la chiave la lettura è `POST azione=leggi` (chiave nel
+All'avvio a freddo, senza copia e col ponte che non risponde, l'app legge la copia notturna del repo
+(`data/*.json`, copiata in `public/data/` prima di ogni build da `strumenti/copia-dati.mjs` e tenuta in cache
+dal service worker), come faceva l'app di prima. Con la chiave la lettura è `POST azione=leggi` (chiave nel
 corpo) e porta anche il diario; senza, `GET` e niente diario (`diarioChiuso`).
 
 ## Pagine
@@ -185,8 +226,25 @@ cambiata anche qui.
 
 ## Prove
 
-`npm run build` controlla i tipi e costruisce. Le prove automatiche di `.github/workflows/prova.yml`
-riguardano ancora l'app di oggi; quelle della nuova arrivano con la tappa 5.
+`npm run build` controlla i tipi e costruisce. `.github/workflows/prova.yml`, a ogni push: la sintassi del
+ponte e dell'app di prima, la build come la fa Cloudflare, i quattro confronti qui sotto, poi due giri in
+Chromium col ponte finto (`prove/server-finto.mjs`, nessuna richiesta al ponte pubblicato):
+
+- `prove/prova-nuova.mjs`: Collezione con 41 profumi, Scheda, Consigliami, una voce messa senza rete (resta in
+  coda, si vede, parte una volta sola al ritorno), il Diario, la riapertura senza rete, l'avvio a freddo col
+  ponte giù (data/*.json);
+- `prove/prova-passaggio.mjs`: il passaggio dall'app di prima, alla radice e in `/Sillage/` (vedi «Il passaggio»).
+
+In locale, dalla radice del repo (serve Playwright: `npm install --no-save playwright@1` e
+`npx playwright install chromium`):
+
+```bash
+cd app
+VITE_PONTE=http://127.0.0.1:8800/api npm run build
+cd ..
+node prove/prova-nuova.mjs
+node prove/prova-passaggio.mjs
+```
 
 **Verifica di filtri, scelte rapide e ordinamenti** della Collezione:
 

@@ -12,7 +12,7 @@ export { PONTE };
 const CHIAVE_COPIA = "sillage-app:dati";
 const ATTESA_MAX = 8000; // ms oltre i quali si rinuncia al ponte e si resta sulla copia
 
-export type Origine = "ponte" | "copia" | "nessuna";
+export type Origine = "ponte" | "copia" | "repo" | "nessuna";
 /** assente: nessuna chiave sul telefono; giusta: il ponte ha dato il diario; sbagliata: il ponte l'ha rifiutata;
     da-provare: c'è, ma il ponte non ha ancora risposto */
 export type StatoChiave = "assente" | "giusta" | "sbagliata" | "da-provare";
@@ -47,6 +47,18 @@ function scriviCopia(d: Dati) {
     localStorage.setItem(CHIAVE_COPIA, JSON.stringify(d));
   } catch {
     /* memoria piena o navigazione privata: pazienza, si rilegge dal ponte */
+  }
+}
+
+/** La copia notturna dei dati (data/*.json del repo, copiata nell'app a ogni build): il ripiego dell'avvio a
+    freddo senza rete, come nell'app di oggi. Il service worker la tiene in cache. */
+async function leggiDalRepo(): Promise<Dati | null> {
+  try {
+    const nomi = ["profumi", "note", "layering", "consigli"] as const;
+    const parti = await Promise.all(nomi.map((n) => fetch(`${import.meta.env.BASE_URL}data/${n}.json`).then((r) => (r.ok ? r.json() : Promise.reject(r.status)))));
+    return pulisci(Object.fromEntries(nomi.map((n, i) => [n, parti[i]])));
+  } catch {
+    return null;
   }
 }
 
@@ -123,7 +135,16 @@ export function DatiProvider({ children }: { children: ReactNode }) {
         setErrore(null);
         scriviCopia(d);
       })
-      .catch((e: unknown) => {
+      .catch(async (e: unknown) => {
+        if (!vivo) return;
+        // avvio a freddo senza rete e senza copia sul telefono: la copia notturna del repo (data/*.json)
+        if (!leggiCopia()) {
+          const d = await leggiDalRepo();
+          if (d && vivo) {
+            setDati(d);
+            setOrigine("repo");
+          }
+        }
         if (!vivo) return;
         setErrore(ctrl.signal.aborted ? "il ponte non ha risposto in tempo" : String((e as Error)?.message ?? e));
       })

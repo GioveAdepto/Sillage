@@ -21,6 +21,10 @@ import { DatiProvider } from "./dati";
 import { MeteoProvider } from "./meteo-contesto";
 import { AvvisiProvider } from "./componenti/Avvisi";
 import { router } from "./rotte";
+import { riprendiDallAppDiOggi } from "./migrazione";
+
+// prima di leggere qualunque cosa: quello che l'app di oggi ha lasciato sul telefono
+riprendiDallAppDiOggi();
 
 createRoot(document.getElementById("radice")!).render(
   <StrictMode>

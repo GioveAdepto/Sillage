@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node strumenti/copia-dati.mjs",
     "build": "tsc --noEmit && vite build",
     "anteprima": "vite preview",
     "controlla": "tsc --noEmit"

@@ -1,0 +1,63 @@
+# Pubblica l'app (app/, React) su GitHub Pages a ogni push su main: https://gioveadepto.github.io/Sillage/
+# Funziona solo con Pages impostato su «GitHub Actions» (Settings ▸ Pages ▸ Build and deployment ▸ Source).
+# Finché Pages pubblica ancora «dal branch» (main, radice), questo workflow lo vede e salta la pubblicazione
+# senza errori: Pages continua a servire i file della radice del repo. L'ordine dei passi è in app/LEGGIMI.md.
+name: Pubblica su GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pagine
+  cancel-in-progress: false
+
+jobs:
+  costruisci:
+    runs-on: ubuntu-latest
+    outputs:
+      modo: ${{ steps.modo.outputs.modo }}
+    steps:
+      - name: Come pubblica Pages?
+        id: modo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          modo=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || echo nessuno)
+          echo "modo=$modo" >> "$GITHUB_OUTPUT"
+          if [ "$modo" != "workflow" ]; then
+            echo "::notice::Pages pubblica ancora dal branch ($modo): salto. Per pubblicare l'app costruita va impostato su «GitHub Actions»."
+          fi
+      - uses: actions/checkout@v5
+        if: steps.modo.outputs.modo == 'workflow'
+      - uses: actions/setup-node@v5
+        if: steps.modo.outputs.modo == 'workflow'
+        with:
+          node-version: 22
+      - name: Costruisce l'app
+        if: steps.modo.outputs.modo == 'workflow'
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.modo.outputs.modo == 'workflow'
+        with:
+          path: app/dist
+
+  pubblica:
+    needs: costruisci
+    if: needs.costruisci.outputs.modo == 'workflow'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pubblicazione.outputs.page_url }}
+    steps:
+      - id: pubblicazione
+        uses: actions/deploy-pages@v4

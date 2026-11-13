@@ -67,7 +67,7 @@ La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 - La chiave di Sillage sta nel Worker come **Secret**: Cloudflare ▸ Workers ▸
   sillage ▸ Settings ▸ **Variables and Secrets** (il riquadro in cima, *non*
   quello dentro Builds) ▸ Add ▸ tipo *Secret*, nome `SILLAGE_CHIAVE`.
-- Ogni unione su `main` ripubblica il ponte da sola. Dopo, un controllo:
+- Ogni unione su `main` ripubblica il ponte da sola, insieme all'app (`sito/`, costruita da `wrangler.jsonc`). Dopo, un controllo:
   `azione=sincronizza` con la chiave deve rispondere `ok`.
 
 ## Per tornare indietro
@@ -88,5 +88,9 @@ npx wrangler@4 dev --test-scheduled --var FOGLIO_URL:http://127.0.0.1:8899/exec 
 ```
 
 con un Web App finto su 8899 che risponde a `grezzo` e `specchio` (nessuna
-scrittura arriva al foglio vero). `curl "http://127.0.0.1:8787/__scheduled?cron=*/5+*+*+*+*"`
+scrittura arriva al foglio vero): `node app/strumenti/foglio-finto.mjs`.
+
+`wrangler dev` (come ogni pubblicazione) prima costruisce l'app in `sito/` e la serve alla radice: la prima
+volta installa i pacchetti di `app/`. Attenzione: costruita così l'app parla col ponte **pubblicato**; per farle
+usare il ponte locale va lanciato con `VITE_PONTE=http://127.0.0.1:8787/api` davanti (vedi `app/LEGGIMI.md`). `curl "http://127.0.0.1:8787/__scheduled?cron=*/5+*+*+*+*"`
 lancia un giro. Il database locale sta in `.wrangler/` (fuori da git).

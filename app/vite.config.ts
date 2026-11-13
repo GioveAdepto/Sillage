@@ -29,7 +29,9 @@ export default defineConfig({
       },
       workbox: {
         // tutto quello che serve per aprirla senza rete: codice, foto, icone e caratteri (Cormorant e Jost, inclusi nell'app)
-        globPatterns: ["**/*.{js,css,html,webp,png,svg,woff2}"],
+        globPatterns: ["**/*.{js,css,html,webp,png,svg,woff2,json}"],
+        // il passaggio dall'app di oggi: prende il posto del suo service worker e ne cancella la cache
+        importScripts: ["pulizia-sw.js"],
         // le schermate d'avvio le legge solo l'iPhone quando apre l'app: non servono nella cache
         globIgnores: ["**/img/avvio/**"],
         navigateFallback: "index.html",

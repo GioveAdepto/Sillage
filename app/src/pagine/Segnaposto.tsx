@@ -78,11 +78,13 @@ export function OrigineDati() {
       ? "dal database, appena letti"
       : origine === "copia"
         ? "dalla copia salvata sul telefono" + (errore ? " (il database ora non risponde)" : "")
-        : "nessuna copia ancora";
+        : origine === "repo"
+          ? "dalla copia notturna inclusa nell'app (senza rete)"
+          : "nessuna copia ancora";
   return (
     <p className="origine">
       Dati {carica && origine !== "ponte" ? "in arrivo…" : da}
-      {dati ? <> · aggiornati il {dataOra(dati.aggiornato)}</> : null}
+      {dati && dati.aggiornato ? <> · aggiornati il {dataOra(dati.aggiornato)}</> : null}
     </p>
   );
 }

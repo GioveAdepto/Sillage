@@ -1,32 +1,25 @@
 # Sillage
 
-Vetrina di una collezione privata di profumi. Pagina statica, nessuna
-compilazione: si apre servendo la cartella così com'è.
+Vetrina di una collezione privata di profumi: un'app in React + TypeScript (Vite, installabile, funziona anche
+senza rete) che parla col database attraverso il ponte. Istruzioni dell'app in [`app/LEGGIMI.md`](app/LEGGIMI.md),
+stile in [`DESIGN.md`](DESIGN.md).
 
 ## Struttura
 
 ```
-index.html            solo markup; carica CSS e JS con ?v= per svuotare le cache
-css/sillage.css       lo stile (vedi DESIGN.md)
-css/transitions.css   animazioni e View Transitions
-js/dati.js            da dove arrivano i dati, etichette, stagione, ora e meteo
-js/collezione.js      filtri, teca, boccetta presa in mano, dettaglio, coda del diario
-js/consigliami.js     scelte rapide, cassetto dei filtri, Consigliami
-js/viste.js           confronto, Guida, Layering, Acquisti, Numeri, condivisione
-js/diario.js          il diario e il piano della settimana
-js/app.js             navigazione, vetrina di apertura, app installabile, avvio
-sw.js                 service worker: l'app funziona anche senza rete
-data/*.json           copia notturna dei dati (ripiego e avvio a freddo)
-data/diario.enc       copia cifrata del diario
-img/*.webp            41 flaconi, 176×208, più il segnaposto; img/avvio le schermate d'avvio iPhone
+app/                  l'app (React + TypeScript): sorgenti, foto, strumenti e confronti (app/LEGGIMI.md)
+sito/                 l'app costruita, servita da Cloudflare (fuori da git, la rifà wrangler)
 ponte/                il Worker con il database (ponte.js, applica.mjs)
+data/*.json           copia notturna dei dati: ripiego dell'avvio a freddo, copiata nell'app a ogni build
+data/diario.enc       copia cifrata del diario
 apps-script/          lo script del foglio Google, oggi una copia
-prove/prova.mjs       prove Playwright lanciate da .github/workflows/prova.yml
-app/                  la nuova app in React + TypeScript, in prova su /nuova/ dell'anteprima del branch (app/LEGGIMI.md)
+prove/                prove in un browser vero: l'app (prova-nuova), il passaggio dall'app di prima
+                      (prova-passaggio), il ponte finto (server-finto)
+index.html, js/, css/, img/, sw.js, manifest.webmanifest
+                      l'app di prima (statica, senza build): non è più pubblicata su Cloudflare; resta nel
+                      repo come riferimento dei confronti (app/strumenti/) e per GitHub Pages finché Pages
+                      pubblica «dal branch» (vedi app/LEGGIMI.md, «Il passaggio»)
 ```
-
-I sei script sono classici (niente moduli): si caricano in quest'ordine e
-condividono variabili globali.
 
 ## Da dove arrivano i dati
 
@@ -34,25 +27,26 @@ L'originale è il **database** su Cloudflare, dietro il ponte
 [`ponte/ponte.js`](ponte/ponte.js) — istruzioni in [`ponte/LEGGIMI.md`](ponte/LEGGIMI.md).
 Il foglio Google **sillage-profumi** ne è una copia da guardare, riscritta
 dopo ogni modifica. `data/*.json` è la copia notturna versionata: l'app la usa
-quando il ponte non risponde.
+all'avvio a freddo quando il ponte non risponde.
 
-Le immagini restano file nel repo, non passano dal foglio: il foglio contiene
-solo il percorso, nella colonna `img`.
+Le immagini delle boccette stanno in `app/public/img/` (scontornate); il catalogo contiene solo il percorso,
+nella colonna `img`.
 
 ## Provarla in locale
 
-Serve un server, perché i dati si caricano con `fetch`:
-
 ```bash
-python -m http.server 8765
+cd app
+npm install
+npm run dev
 ```
 
-poi <http://127.0.0.1:8765>. Aprire `index.html` con doppio clic non funziona.
+poi <http://127.0.0.1:5173>. Versione finale e prove: [`app/LEGGIMI.md`](app/LEGGIMI.md).
 
 ## Pubblicazione
 
-GitHub Pages sul ramo `main`. `wrangler.jsonc` tiene in piedi in parallelo la
-distribuzione Cloudflare Workers, che serve la stessa cartella e, sotto `/api`,
-il ponte verso il database: vedi [`ponte/LEGGIMI.md`](ponte/LEGGIMI.md).
+Due indirizzi, la stessa app:
 
-Per disegnare una pagina nuova: colori, caratteri, componenti e movimento sono riassunti in [`DESIGN.md`](DESIGN.md).
+- **Cloudflare** <https://sillage.danilo-moro96.workers.dev/>: `wrangler.jsonc` costruisce `app/` in `sito/`
+  a ogni pubblicazione (Workers Builds) e la serve; sotto `/api` c'è il ponte.
+- **GitHub Pages** <https://gioveadepto.github.io/Sillage/>: `.github/workflows/pagine.yml` costruisce `app/` e
+  la pubblica a ogni push su `main`, quando Pages è impostato su «GitHub Actions».
