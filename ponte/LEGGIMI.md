@@ -30,17 +30,8 @@ richieste, stesse risposte.
 
 ## Come è fatto
 
-Nel database il catalogo sta con **le stesse colonne del foglio** (tab
-Profumi, Layering, Consigli, ConsigliVoci, Note): una riga di database per
-tab, con dentro tutte le sue righe. Il piano gratuito concede 50 operazioni
-per richiesta, e così ne bastano poche. Da lì il ponte ricava il JSON per
-l'app con le stesse regole di `apps-script/Codice.gs` e lo tiene pronto.
-Il diario è una tabella a sé, una riga per voce.
-
-### Le tabelle per persona (account, tappa 1)
-
-In preparazione degli account (ognuno con collezione e diario suoi) ci sono già le tabelle nuove,
-**ancora non usate dall'app**: il ponte legge e scrive sempre quelle qui sopra.
+Dalla tappa 2 degli account (ognuno con collezione e diario suoi) i dati stanno nelle **tabelle per
+persona**. Per ora c'è una persona sola, `danilo`: la chiave, e chi legge senza chiave, vuol dire lui.
 
 | tabella | cosa contiene |
 |---|---|
@@ -49,14 +40,19 @@ In preparazione degli account (ognuno con collezione e diario suoi) ci sono già
 | `possessi` | chi ha quale profumo: `tipo_possesso`, `formato_ml`, `num_flaconi`, `residuo_pct`, `note_personali`, `aggiunto`, `attivo`, `nuovo`, e `posto` (l'ordine delle righe nel catalogo) |
 | `voci` | il diario, con la colonna `persona` |
 | `tab_persona` | Layering, Consigli e ConsigliVoci di ciascuno (la tab Note resta comune, in `tabelle`) |
+| `stato` | `vista:<persona>` (il catalogo pronto per l'app), `ids:<persona>`, `colonne-profumi` (l'ordine delle colonne del foglio), la copia nel foglio |
 
-Le riempie `azione=migra` (con la chiave): rifà le tabelle nuove copiando quelle vecchie a `danilo`,
-tutto in un colpo solo, e lascia le vecchie come sono. Poi le rilegge e confronta: `identiche: true` vuol
-dire che l'app riceverebbe dalle nuove esattamente quello che riceve oggi (profumi, layering, consigli, note)
-e che il diario ha le stesse voci. Con `prova=1` fa solo il confronto, senza scrivere. Rilanciarla non fa
-danni. Finché l'app usa le tabelle vecchie, diario e residuo nuovi arrivano solo lì: `azione=confronta` lo
-mostra (`differenze`), e una nuova `azione=migra` riallinea. Prima della tappa 2 (il ponte che legge dalle
-nuove) si rilancia un'ultima volta.
+Il ponte lavora ancora con le **tab del foglio**, con le stesse colonne: per leggere ricompone schede e
+possessi di una persona nella tab Profumi; per scrivere (residuo, modifiche del catalogo) la divide di
+nuovo. Ne ricava il JSON per l'app con le stesse regole di `apps-script/Codice.gs` e lo tiene pronto. Il
+piano gratuito concede 50 operazioni per richiesta: una lettura ne usa due o tre, una scrittura meno di dieci.
+Una scheda non si cancella mai (un'altra persona potrebbe averla); i possessi di una persona si riscrivono.
+
+**Il passaggio** dalle tabelle di prima (`tabelle` con una riga per tab, `diario`) è fatto da solo, alla
+prima richiesta dopo la pubblicazione della tappa 2: il ponte vede che manca `vista:danilo` e copia tutto,
+diario compreso, in un colpo solo. Se arrivano più richieste insieme, solo la prima scrive. Le tabelle di
+prima restano com'erano in quel momento: `azione=confronta` (con la chiave) le confronta con le nuove,
+e subito dopo il passaggio deve dire `identiche: true`; poi le differenze sono le scritture nuove.
 
 La copia nel foglio passa dal Web App (`azione=specchio`, con la chiave): il
 ponte manda tutte le tab, lo script le riscrive come testo semplice, con le
@@ -76,9 +72,9 @@ una volta al giorno (verso le 3 UTC) la copia si rifà comunque.
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |
 | `POST /api?azione=importa&conferma=si` | ricopia il catalogo **dal** foglio: solo per rimediare, con la chiave |
-| `POST /api?azione=migra` (`prova=1` per provare) | rifà le tabelle per persona dalle vecchie e le confronta, con la chiave |
-| `POST /api?azione=confronta` | le tabelle per persona danno lo stesso di quelle vecchie?, con la chiave |
-| `GET /api?stato=1` | quanti profumi, ultima copia nel foglio, se una copia è in attesa, quando sono state riempite le tabelle per persona |
+| `POST /api?azione=confronta` | le tabelle per persona danno lo stesso di quelle di prima?, con la chiave |
+| `POST /api?azione=riporta&conferma=si` | riscrive le tabelle di prima con quelle per persona (per tornare indietro), con la chiave |
+| `GET /api?stato=1` | quanti profumi, ultima copia nel foglio, se una copia è in attesa, da quando ci sono le tabelle per persona |
 
 La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 
@@ -86,7 +82,7 @@ La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 
 - Il database `sillage` l'ha creato Cloudflare alla prima pubblicazione. Le
   tabelle le crea il ponte; la prima volta che parte senza catalogo lo copia
-  dal foglio da solo (`azione=grezzo` del Web App).
+  dal foglio da solo (`azione=grezzo` del Web App) e lo dà a `danilo`.
 - La chiave di Sillage sta nel Worker come **Secret**: Cloudflare ▸ Workers ▸
   sillage ▸ Settings ▸ **Variables and Secrets** (il riquadro in cima, *non*
   quello dentro Builds) ▸ Add ▸ tipo *Secret*, nome `SILLAGE_CHIAVE`.
@@ -98,8 +94,11 @@ La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 Il foglio ha sempre tutto, perché ogni modifica gli viene copiata. Prima di
 tornare indietro: `GET /api?stato=1` deve dire `copiaInAttesa: false`.
 
-- **Dalle tabelle per persona** (tappa 1): annullare il commit; le tabelle nuove restano nel database,
-  inutilizzate, e quelle vecchie non sono mai state toccate.
+- **Dalle tabelle per persona** (tappa 2) **alle tabelle di prima**: prima `azione=riporta&conferma=si`
+  con la chiave (riscrive `tabelle` e `diario` con tutto quello che c'è nelle nuove, poi le confronta:
+  deve dire `identiche: true`), poi annullare l'unione della tappa 2. Il ponte di prima riparte senza
+  perdere niente; provato in locale.
+- **Tappa 1**: annullare il commit; le tabelle nuove restano nel database, inutilizzate.
 
 - **Al foglio come originale del catalogo** (diario e residuo restano al
   database): annullare il commit che ha portato questa versione del ponte.
