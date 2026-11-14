@@ -11,19 +11,23 @@
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
      POST /api?azione=importa&conferma=si  ricopia il catalogo DAL foglio (solo per rimediare), con la chiave
-     POST /api?azione=migra            rifà le tabelle per persona dalle vecchie (prova=1 per provare), con la chiave
-     POST /api?azione=confronta        le tabelle per persona danno lo stesso di quelle vecchie?, con la chiave
+     POST /api?azione=confronta        le tabelle per persona danno lo stesso di quelle di prima?, con la chiave
+     POST /api?azione=riporta&conferma=si  riscrive le tabelle di prima con quelle per persona (per tornare indietro), con la chiave
      GET  /api?stato=1                 a che punto è la copia nel foglio
    La chiave arriva nel corpo della richiesta (chiave=...), mai nell'indirizzo.
 
-   Il catalogo sta nel database con le stesse colonne del foglio (tab Profumi,
-   Layering, Consigli, ConsigliVoci, Note), una riga per tab con tutte le sue
-   righe: il piano gratuito concede 50 operazioni per richiesta, e così ne
-   bastano poche. Da lì il ponte ricava il JSON per l'app, con le stesse
-   regole di Codice.gs, e lo tiene pronto in `stato.vista`.
+   Dalla tappa 2 degli account i dati stanno nelle tabelle per persona:
+   schede (i profumi, uguali per tutti), possessi, voci del diario e tab di
+   ciascuno (Layering, Consigli, ConsigliVoci); la tab Note è comune. Il
+   ponte le ricompone nelle tab del foglio, con le stesse colonne, e ne ricava
+   il JSON per l'app con le stesse regole di Codice.gs, tenuto pronto in
+   `stato.vista:<persona>`. Il piano gratuito concede 50 operazioni per
+   richiesta: ogni richiesta ne usa poche. Per ora c'è una persona sola, Danilo.
+   Le tabelle di prima (tabelle, diario) restano come erano al passaggio.
 
-   Le tabelle nascono da sole alla prima richiesta, e la prima volta il
-   catalogo viene copiato dal foglio: nessun passo a mano. */
+   Le tabelle nascono da sole alla prima richiesta; la prima volta il
+   catalogo viene copiato dal foglio, e un database di prima della tappa 2 fa
+   da solo il passaggio: nessun passo a mano. */
 
 const OCCASIONI = ["ufficio", "quotidiano", "appuntamento", "formale", "casa", "festivita", "palestra"];
 const RESIDUI = [100, 90, 75, 50, 25, 10, 0];
@@ -51,9 +55,9 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS stato (chiave TEXT PRIMARY KEY, valore TEXT)`,
   // dalla versione di prima: le voci tolte aspettavano lì di essere mandate al foglio
   `DELETE FROM diario WHERE tolta = 1`,
-  /* Le tabelle per persona (account, tappa 1): nascono vuote e le riempie azione=migra. Finché non
-     arriva la tappa 2 il ponte legge e scrive ancora le tabelle qui sopra. Le colonne di possessi non
-     hanno tipo apposta: tengono i valori come arrivano dal catalogo (testo o numero), senza convertirli. */
+  /* Le tabelle per persona (account): dalla tappa 2 sono l'originale; quelle qui sopra restano come
+     erano al passaggio (vedi «IL PASSAGGIO»). Le colonne di possessi non hanno tipo apposta: tengono i
+     valori come arrivano dal catalogo (testo o numero), senza convertirli. */
   `CREATE TABLE IF NOT EXISTS persone (id TEXT PRIMARY KEY, account TEXT UNIQUE, nome TEXT NOT NULL,
      ruolo TEXT NOT NULL DEFAULT 'persona', creata INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS schede (id INTEGER PRIMARY KEY, dati TEXT NOT NULL, aggiornato INTEGER NOT NULL)`,
@@ -172,54 +176,63 @@ async function salvaTabs(db, t, cambiate) {
 }
 
 /* La prima volta (o per rimediare) il catalogo viene preso dal foglio così
-   com'è, colonna per colonna. Il diario no: quello il database l'ha già. */
+   com'è, colonna per colonna, e diventa quello di Danilo. Il diario no: quello il database l'ha già. */
 async function importa(env) {
   const d = await alFoglio(env, { azione: "grezzo" });
   if (!d.tabs || !d.tabs.Profumi || !d.tabs.Profumi.righe.length) throw new Error("il foglio non ha dato il catalogo: " + (d.errore || "risposta vuota"));
   const t = {};
   TABS.forEach(n => { t[n] = d.tabs[n] ? { colonne: d.tabs[n].colonne, righe: d.tabs[n].righe } : { colonne: [], righe: [] }; });
-  await salvaTabs(env.DB, t, TABS);
+  await salvaCatalogo(env.DB, PRIMA_PERSONA.id, t, TABS);
   await env.DB.batch([scriviStato(env.DB, "importato", new Date().toISOString()), scriviStato(env.DB, "da-copiare", "")]);
   return { profumi: t.Profumi.righe.length };
 }
-async function pronto(env) {
+/* Pronto quando c'è la vista di Danilo nelle tabelle per persona. Se no: un database di prima della
+   tappa 2 fa il passaggio, uno vuoto prende il catalogo dal foglio.
+   Le anteprime dei branch su Cloudflare usano lo stesso database: il passaggio lo fa solo il ponte
+   pubblicato (o quello locale delle prove), mai un'anteprima, così nessuna scrittura resta indietro.
+   Il giro ogni 5 minuti (senza indirizzo) gira solo sul ponte pubblicato. */
+const PUO_FARE_IL_PASSAGGIO = /^(sillage\.danilo-moro96\.workers\.dev|127\.0\.0\.1|localhost)$/;
+async function pronto(env, host) {
   await schema(env);
-  if (await leggiStato(env.DB, "vista")) return true;
-  await importa(env);
+  if (await leggiStato(env.DB, "vista:" + PRIMA_PERSONA.id)) return true;
+  if (await leggiStato(env.DB, "vista")) {
+    if (host && !PUO_FARE_IL_PASSAGGIO.test(host)) throw new Error("questa è un'anteprima: il passaggio alle tabelle per persona lo fa solo il ponte pubblicato");
+    await passaggio(env.DB);
+  } else await importa(env);
   return true;
 }
 
 // ── LETTURA ───────────────────────────────────────────────────────────────
 const vocePerApp = r => ({ data: r.data, id: r.id, t: r.t, nota: r.nota, voto: r.voto, occasione: r.occasione, momento: r.momento });
-async function corpo(db, conDiario) {
-  const pezzo = await leggiStato(db, "vista");
+async function corpo(db, persona, conDiario) {
+  const pezzo = await leggiStato(db, "vista:" + persona);
   if (!pezzo) return null;
   let s = "{" + pezzo;
   if (conDiario) {
-    const voci = (await db.prepare("SELECT * FROM diario ORDER BY t").all()).results;
+    const voci = (await db.prepare("SELECT * FROM voci WHERE persona = ? ORDER BY t").bind(persona).all()).results;
     s += ',"diario":' + JSON.stringify(voci.map(vocePerApp));
   } else s += ',"diarioChiuso":true';
   return s + ',"aggiornato":' + JSON.stringify(new Date().toISOString()) + "}";
 }
 
 // ── SCRITTURE DALL'APP ────────────────────────────────────────────────────
-async function idValidi(db) {
-  const s = await leggiStato(db, "ids");
+async function idValidi(db, persona) {
+  const s = await leggiStato(db, "ids:" + persona);
   return new Set(s ? JSON.parse(s) : []);
 }
 
-/* Le stesse regole del Web App (Diario.gs), con le stesse risposte. */
-async function scriviDiario(db, p) {
+/* Le stesse regole del Web App (Diario.gs), con le stesse risposte, sul diario di una persona. */
+async function scriviDiario(db, persona, p) {
   const id = Number(p.get("id")), data = String(p.get("data") || ""), t = String(p.get("t") || ""), op = p.get("op");
   if (!id || !/^\d{4}-\d{2}-\d{2}$/.test(data) || !/^\d{10,16}$/.test(t)) return { errore: "voce non valida" };
-  if (!(await idValidi(db)).has(id)) return { errore: "profumo sconosciuto: " + id };
+  if (!(await idValidi(db, persona)).has(id)) return { errore: "profumo sconosciuto: " + id };
   const ora = Date.now();
-  const v = await db.prepare("SELECT * FROM diario WHERE t = ?").bind(t).first();
+  const v = await db.prepare("SELECT * FROM voci WHERE persona = ? AND t = ?").bind(persona, t).first();
   const segna = scriviStato(db, "da-copiare", ora);
 
   if (op === "togli") {
     if (!v) return { ok: true, assente: true };
-    await db.batch([db.prepare("DELETE FROM diario WHERE t = ?").bind(t), segna]);
+    await db.batch([db.prepare("DELETE FROM voci WHERE persona = ? AND t = ?").bind(persona, t), segna]);
     return { ok: true, tolta: true };
   }
   const uso = {
@@ -230,27 +243,32 @@ async function scriviDiario(db, p) {
     if (!v) return { errore: "voce non trovata" };
     const nota = String(p.get("nota") || "").replace(/\s+/g, " ").trim().slice(0, 200);
     const voto = Number(p.get("voto")), vv = voto >= 1 && voto <= 5 ? Math.round(voto) : null;
-    await db.batch([db.prepare("UPDATE diario SET nota = ?, voto = ?, occasione = ?, momento = ?, aggiornato = ? WHERE t = ?")
-      .bind(nota, vv, uso.occasione, uso.momento, ora, t), segna]);
+    await db.batch([db.prepare("UPDATE voci SET nota = ?, voto = ?, occasione = ?, momento = ?, aggiornato = ? WHERE persona = ? AND t = ?")
+      .bind(nota, vv, uso.occasione, uso.momento, ora, persona, t), segna]);
     return { ok: true, nota: true, uso: true };
   }
   if (v) return { ok: true, gia: true };
-  const nelGiorno = await db.prepare("SELECT COUNT(*) AS n FROM diario WHERE data = ?").bind(data).first("n");
+  const nelGiorno = await db.prepare("SELECT COUNT(*) AS n FROM voci WHERE persona = ? AND data = ?").bind(persona, data).first("n");
   if (nelGiorno >= MAX_GIORNO) return { errore: "troppe voci per il " + data };
-  await db.batch([db.prepare("INSERT INTO diario (t, data, id, occasione, momento, aggiornato) VALUES (?, ?, ?, ?, ?, ?)")
-    .bind(t, data, id, uso.occasione, uso.momento, ora), segna]);
+  await db.batch([db.prepare("INSERT INTO voci (persona, t, data, id, occasione, momento, aggiornato) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .bind(persona, t, data, id, uso.occasione, uso.momento, ora), segna]);
   return { ok: true, uso: true };
 }
 
-async function segnaResiduo(db, p) {
+/* Il residuo cambia una cella del possesso; la vista della persona si ricalcola nello stesso colpo. */
+async function segnaResiduo(db, persona, p) {
   const id = Number(p.get("id")), v = Number(p.get("valore"));
   if (!id || !RESIDUI.includes(v)) return { errore: "valore non valido" };
-  const t = await leggiTabs(db);
+  const t = await leggiTabsPersona(db, persona);
   const r = t.Profumi.righe.find(x => Number(x.id) === id);
   if (!r) return { errore: "profumo sconosciuto: " + id };
   if (!t.Profumi.colonne.includes("residuo_pct")) return { errore: "manca la colonna residuo_pct" };
   r.residuo_pct = String(v);
-  await salvaTabs(db, t, ["Profumi"]);
+  const ora = Date.now();
+  await db.batch([
+    db.prepare("UPDATE possessi SET residuo_pct = ?, aggiornato = ? WHERE persona = ? AND scheda = ?").bind(String(v), ora, persona, id),
+    ...passiVista(db, persona, t, ora)
+  ]);
   return { ok: true };
 }
 
@@ -313,11 +331,11 @@ function applicaModifiche(t, m, soloProva) {
 }
 
 // ── LE TABELLE PER PERSONA (account, tappa 1) ─────────────────────────────
-/* Il catalogo di oggi è di Danilo. Ogni riga di Profumi si divide nella scheda (i dati del profumo,
+/* Dalla tappa 2 queste sono l'originale. Ogni riga di Profumi è divisa nella scheda (i dati del profumo,
    uguali per tutti) e nel possesso (boccetta o campione, ml, residuo, note personali di chi lo ha).
-   Diario, layering e consigli passano a lui; le note olfattive restano comuni (tab Note).
-   azione=migra rifà le tabelle nuove dalle vecchie, che restano intatte: rilanciarla non fa danni.
-   Poi le rilegge e controlla che diano all'app esattamente quello che le dà oggi il ponte. */
+   Diario (voci), layering e consigli sono di ciascuno; le note olfattive restano comuni (tab Note, in
+   `tabelle`). Il ponte continua a lavorare con le «tab» del foglio: leggiTabsPersona le ricompone,
+   salvaCatalogo le divide di nuovo. Per ora c'è una persona sola, Danilo. */
 const PRIMA_PERSONA = { id: "danilo", nome: "Danilo", ruolo: "curatore" };
 const COLONNE_POSSESSO = ["tipo_possesso", "formato_ml", "num_flaconi", "residuo_pct", "note_personali", "aggiunto", "attivo", "nuovo"];
 const TABS_PERSONA = ["Layering", "Consigli", "ConsigliVoci"];
@@ -366,33 +384,37 @@ function confrontaViste(vecchia, nuova) {
     const q = perId.get(p.id);
     if (!q) return;
     const campi = [...new Set([...Object.keys(p), ...Object.keys(q)])].filter(c => canonico(p[c]) !== canonico(q[c]));
-    if (campi.length) differenze.push("profumo " + p.id + ": " + campi.join(", "));
+    if (campi.length) differenze.push("profumo " + p.id + ": " +
+      campi.map(c => c + " " + breve(canonico(p[c]) ?? "—") + " → " + breve(canonico(q[c]) ?? "—")).join(", "));
   });
   return { identiche: !differenze.length, stessoTesto: vecchia.pezzo === nuova.pezzo, differenze: differenze.slice(0, 20) };
 }
 
-/** Le tab di una persona lette dalle tabelle nuove, nella stessa forma di leggiTabs. */
-async function leggiTabsPersona(db, persona, note) {
-  const [s, p, tp, col] = await db.batch([
-    db.prepare("SELECT id, dati FROM schede"),
+/** Le tab di una persona lette dalle tabelle nuove, nella stessa forma di leggiTabs: le sue schede e i suoi
+    possessi ricomposti in Profumi, le sue tab, e la tab Note comune. Cinque letture in un colpo solo. */
+async function leggiTabsPersona(db, persona) {
+  const [s, p, tp, col, n] = await db.batch([
+    db.prepare("SELECT id, dati FROM schede WHERE id IN (SELECT scheda FROM possessi WHERE persona = ?)").bind(persona),
     db.prepare("SELECT * FROM possessi WHERE persona = ? ORDER BY posto").bind(persona),
     db.prepare("SELECT tab, colonne, righe FROM tab_persona WHERE persona = ?").bind(persona),
-    db.prepare("SELECT valore FROM stato WHERE chiave = 'colonne-profumi'")
+    db.prepare("SELECT valore FROM stato WHERE chiave = 'colonne-profumi'"),
+    db.prepare("SELECT colonne, righe FROM tabelle WHERE tab = 'Note'")
   ]);
   const colonne = JSON.parse((col.results[0] && col.results[0].valore) || "[]");
+  const note = n.results[0] ? { colonne: JSON.parse(n.results[0].colonne), righe: JSON.parse(n.results[0].righe) } : { colonne: [], righe: [] };
   const t = { Profumi: ricomponiProfumi(colonne, s.results.map(r => ({ id: r.id, dati: JSON.parse(r.dati) })), p.results), Note: note };
   TABS_PERSONA.forEach(n => { t[n] = { colonne: [], righe: [] }; });
   tp.results.forEach(r => { t[r.tab] = { colonne: JSON.parse(r.colonne), righe: JSON.parse(r.righe) }; });
   return t;
 }
 
-/** Rilegge le tabelle nuove e le confronta con le vecchie: catalogo per l'app e diario, voce per voce. */
-async function confronta(db, vecchie) {
+/** Confronta le tabelle per persona con quelle di prima: catalogo per l'app e diario, voce per voce. Subito
+    dopo il passaggio (o dopo azione=riporta) devono essere identiche; poi le differenze sono le scritture nuove. */
+async function confronta(db) {
   const migrato = await leggiStato(db, "migrato");
-  if (!migrato) return { errore: "le tabelle nuove sono ancora vuote: prima azione=migra" };
-  vecchie = vecchie || await leggiTabs(db);
+  if (!migrato) return { errore: "le tabelle per persona sono ancora vuote" };
   const P = PRIMA_PERSONA.id;
-  const esito = confrontaViste(vista(vecchie), vista(await leggiTabsPersona(db, P, vecchie.Note)));
+  const esito = confrontaViste(vista(await leggiTabs(db)), vista(await leggiTabsPersona(db, P)));
   const COL = "t, data, id, nota, voto, occasione, momento";
   const d = await db.prepare(`SELECT
       (SELECT COUNT(*) FROM (SELECT ${COL} FROM diario EXCEPT SELECT ${COL} FROM voci WHERE persona = ?)) AS mancano,
@@ -404,41 +426,95 @@ async function confronta(db, vecchie) {
   return { migrato, ...esito };
 }
 
-/** Rifà le tabelle nuove dalle vecchie (prova=1: solo il confronto, senza scrivere). Tutto in un colpo solo. */
-async function migra(db, soloProva) {
-  const vecchie = await leggiTabs(db);
-  const { schede, possessi, problemi } = dividiProfumi(vecchie.Profumi);
-  const base = { persona: PRIMA_PERSONA.id, schede: schede.length, possessi: possessi.length,
-                 voci: await db.prepare("SELECT COUNT(*) AS n FROM diario").first("n") };
-  if (problemi.length) return { errore: "catalogo da sistemare prima di migrare", problemi, ...base };
-  if (soloProva) {
-    const t = { ...vecchie, Profumi: ricomponiProfumi(vecchie.Profumi.colonne, schede, possessi) };
-    return { ok: true, prova: "PROVA A VUOTO, niente è stato scritto", ...base, ...confrontaViste(vista(vecchie), vista(t)) };
-  }
-  const ora = Date.now(), P = PRIMA_PERSONA.id;
+// ── SCRIVERE LE TABELLE PER PERSONA ───────────────────────────────────────
+/* `cond` serve al passaggio: un pezzo di SQL («AND …») che ferma la scrittura se il passaggio è già fatto. */
+const conPersona = (db, persona, ora, cond = "") => db.prepare(
+  `INSERT INTO persone (id, nome, ruolo, creata) SELECT ?, ?, ?, ? WHERE 1${cond} ON CONFLICT(id) DO NOTHING`)
+  .bind(persona, persona === PRIMA_PERSONA.id ? PRIMA_PERSONA.nome : persona, persona === PRIMA_PERSONA.id ? PRIMA_PERSONA.ruolo : "persona", ora);
+
+/** Schede (aggiornate, mai cancellate: altri possono averle) e possessi di una persona (riscritti). Tre operazioni. */
+function scritturaProfumi(db, persona, schede, possessi, ora, cond = "") {
   const daPossessi = possessi.map(p => Object.fromEntries(
     [["scheda", p.scheda], ["posto", p.posto], ...COLONNE_POSSESSO.map(c => [c, p[c] ?? null])]));
-  await db.batch([
-    db.prepare("INSERT INTO persone (id, nome, ruolo, creata) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO NOTHING")
-      .bind(P, PRIMA_PERSONA.nome, PRIMA_PERSONA.ruolo, ora),
-    db.prepare("DELETE FROM schede"),
-    db.prepare("INSERT INTO schede (id, dati, aggiornato) SELECT json_extract(value, '$.id'), json_extract(value, '$.dati'), ? FROM json_each(?)")
+  return [
+    db.prepare(`INSERT INTO schede (id, dati, aggiornato)
+      SELECT json_extract(value, '$.id'), json_extract(value, '$.dati'), ? FROM json_each(?) WHERE 1${cond}
+      ON CONFLICT(id) DO UPDATE SET dati = excluded.dati, aggiornato = excluded.aggiornato`)
       .bind(ora, JSON.stringify(schede.map(s => ({ id: s.id, dati: JSON.stringify(s.dati) })))),
-    db.prepare("DELETE FROM possessi WHERE persona = ?").bind(P),
+    db.prepare(`DELETE FROM possessi WHERE persona = ?${cond}`).bind(persona),
     db.prepare(`INSERT INTO possessi (persona, scheda, posto, ${COLONNE_POSSESSO.join(", ")}, aggiornato)
       SELECT ?, json_extract(value, '$.scheda'), json_extract(value, '$.posto'),
-             ${COLONNE_POSSESSO.map(c => `json_extract(value, '$.${c}')`).join(", ")}, ? FROM json_each(?)`)
-      .bind(P, ora, JSON.stringify(daPossessi)),
-    db.prepare("DELETE FROM voci WHERE persona = ?").bind(P),
+             ${COLONNE_POSSESSO.map(c => `json_extract(value, '$.${c}')`).join(", ")}, ? FROM json_each(?) WHERE 1${cond}`)
+      .bind(persona, ora, JSON.stringify(daPossessi))
+  ];
+}
+const scritturaTab = (db, persona, n, tab, ora, cond = "") => db.prepare(
+  `INSERT INTO tab_persona (persona, tab, colonne, righe, aggiornato) SELECT ?, ?, ?, ?, ? WHERE 1${cond}
+   ON CONFLICT(persona, tab) DO UPDATE SET colonne = excluded.colonne, righe = excluded.righe, aggiornato = excluded.aggiornato`)
+  .bind(persona, n, JSON.stringify(tab.colonne), JSON.stringify(tab.righe), ora);
+const scriviStatoSe = (db, k, v, cond = "") => db.prepare(
+  `INSERT INTO stato (chiave, valore) SELECT ?, ? WHERE 1${cond} ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore`)
+  .bind(k, String(v));
+
+/** Il catalogo pronto per l'app (vista), gli id validi e il segno che il foglio va ricopiato. */
+function passiVista(db, persona, t, ora, cond = "") {
+  const v = vista(t);
+  return [scriviStatoSe(db, "ids:" + persona, JSON.stringify(v.ids), cond), scriviStatoSe(db, "da-copiare", ora, cond),
+          scriviStatoSe(db, "vista:" + persona, v.pezzo, cond)];   // per ultima: il passaggio guarda questa
+}
+
+/** Salva le tab cambiate del catalogo di una persona e ricalcola la sua vista: tutto in un colpo solo. */
+async function salvaCatalogo(db, persona, t, cambiate) {
+  const ora = Date.now(), passi = [conPersona(db, persona, ora)];
+  if (cambiate.includes("Profumi")) {
+    const { schede, possessi, problemi } = dividiProfumi(t.Profumi);
+    if (problemi.length) throw new Error("catalogo non valido: " + problemi.join("; "));
+    passi.push(...scritturaProfumi(db, persona, schede, possessi, ora), scriviStato(db, "colonne-profumi", JSON.stringify(t.Profumi.colonne)));
+  }
+  TABS_PERSONA.filter(n => cambiate.includes(n)).forEach(n => passi.push(scritturaTab(db, persona, n, t[n], ora)));
+  if (cambiate.includes("Note")) passi.push(db.prepare(
+    `INSERT INTO tabelle (tab, colonne, righe, aggiornato) VALUES ('Note', ?, ?, ?)
+     ON CONFLICT(tab) DO UPDATE SET colonne = excluded.colonne, righe = excluded.righe, aggiornato = excluded.aggiornato`)
+    .bind(JSON.stringify(t.Note.colonne), JSON.stringify(t.Note.righe), ora));
+  passi.push(...passiVista(db, persona, t, ora));
+  await db.batch(passi);
+}
+
+/* IL PASSAGGIO (tappa 2): la prima richiesta dopo la pubblicazione trova un database con le tabelle di prima
+   e senza «vista:danilo». Copia tutto nelle tabelle per persona (diario compreso) in un colpo solo; da lì
+   il ponte legge e scrive solo quelle. Ogni scrittura ha la condizione NON_ANCORA: se due richieste
+   partono insieme, la seconda non tocca niente, perché la prima ha già scritto «vista:danilo». */
+const NON_ANCORA = " AND NOT EXISTS (SELECT 1 FROM stato WHERE chiave = 'vista:" + PRIMA_PERSONA.id + "')";
+async function passaggio(db) {
+  const vecchie = await leggiTabs(db);
+  const { schede, possessi, problemi } = dividiProfumi(vecchie.Profumi);
+  if (problemi.length) throw new Error("passaggio alle tabelle per persona fermo, catalogo da sistemare: " + problemi.join("; "));
+  const ora = Date.now(), P = PRIMA_PERSONA.id, c = NON_ANCORA;
+  const nuove = { ...vecchie, Profumi: ricomponiProfumi(vecchie.Profumi.colonne, schede, possessi) };
+  await db.batch([
+    conPersona(db, P, ora, c),
+    ...scritturaProfumi(db, P, schede, possessi, ora, c),
+    db.prepare(`DELETE FROM voci WHERE persona = ?${c}`).bind(P),
     db.prepare(`INSERT INTO voci (persona, t, data, id, nota, voto, occasione, momento, aggiornato)
-      SELECT ?, t, data, id, nota, voto, occasione, momento, aggiornato FROM diario`).bind(P),
-    db.prepare("DELETE FROM tab_persona WHERE persona = ?").bind(P),
-    ...TABS_PERSONA.map(n => db.prepare("INSERT INTO tab_persona (persona, tab, colonne, righe, aggiornato) VALUES (?, ?, ?, ?, ?)")
-      .bind(P, n, JSON.stringify(vecchie[n].colonne), JSON.stringify(vecchie[n].righe), ora)),
-    scriviStato(db, "colonne-profumi", JSON.stringify(vecchie.Profumi.colonne)),
-    scriviStato(db, "migrato", new Date(ora).toISOString())
+      SELECT ?, t, data, id, nota, voto, occasione, momento, aggiornato FROM diario WHERE 1${c}`).bind(P),
+    ...TABS_PERSONA.map(n => scritturaTab(db, P, n, vecchie[n], ora, c)),
+    scriviStatoSe(db, "colonne-profumi", JSON.stringify(vecchie.Profumi.colonne), c),
+    scriviStatoSe(db, "migrato", new Date(ora).toISOString(), c),
+    ...passiVista(db, P, nuove, ora, c)
   ]);
-  return { ok: true, ...base, ...(await confronta(db, vecchie)) };
+}
+
+/* LA VIA DI RITORNO: riscrive le tabelle di prima con quello che c'è nelle nuove (catalogo e diario di
+   Danilo), così il ponte della tappa 1 riparte senza perdere niente. Da lanciare prima di annullare la tappa 2. */
+async function riporta(db) {
+  const P = PRIMA_PERSONA.id, t = await leggiTabsPersona(db, P);
+  await salvaTabs(db, t, TABS);
+  await db.batch([
+    db.prepare("DELETE FROM diario"),
+    db.prepare(`INSERT INTO diario (t, data, id, nota, voto, occasione, momento, aggiornato)
+      SELECT t, data, id, nota, voto, occasione, momento, aggiornato FROM voci WHERE persona = ?`).bind(P)
+  ]);
+  return { ok: true, riportato: true, ...(await confronta(db)) };
 }
 
 // ── LA COPIA NEL FOGLIO ───────────────────────────────────────────────────
@@ -458,10 +534,11 @@ async function copiaNelFoglio(env, sempre) {
   const db = env.DB;
   const daCopiare = await leggiStato(db, "da-copiare");
   if (!sempre && !daCopiare) return { copiata: false };
-  const t = await leggiTabs(db);
+  // il foglio è la copia di Danilo: i dati delle altre persone non ci vanno
+  const P = PRIMA_PERSONA.id, t = await leggiTabsPersona(db, P);
   if (!t.Profumi.righe.length) throw new Error("catalogo vuoto: non copio niente");
   const nomi = new Map(t.Profumi.righe.map(r => [Number(r.id), (r.marchio + " " + r.profumo).trim()]));
-  const voci = (await db.prepare("SELECT * FROM diario ORDER BY t").all()).results.map(v => ({
+  const voci = (await db.prepare("SELECT * FROM voci WHERE persona = ? ORDER BY t").bind(P).all()).results.map(v => ({
     data: v.data, id: String(v.id), t: v.t, nota: v.nota, voto: v.voto ?? "", occasione: v.occasione, momento: v.momento,
     profumo: (nomi.get(v.id) || "") + (v.t.length === 14 ? (v.t.endsWith("1") ? " (layering, sotto)" : " (layering, sopra)") : "")
   }));
@@ -485,16 +562,18 @@ async function rispondi(request, env, ctx) {
   // tutto il resto sono i file del sito, serviti da Cloudflare senza passare di qui
   if (url.pathname !== "/api" && !url.pathname.startsWith("/api/")) return new Response("Non trovato", { status: 404 });
   const db = env.DB;
-  await pronto(env);
+  await pronto(env, url.hostname);
+  // per ora una persona sola: la chiave (e chi legge senza) vuol dire Danilo. Gli account arrivano alla tappa 3.
+  const P = PRIMA_PERSONA.id;
 
   if (request.method === "GET") {
     if (url.searchParams.has("stato")) {
       const [ultima, daCopiare, importato, ids, migrato] = await Promise.all(
-        ["ultima-copia", "da-copiare", "importato", "ids", "migrato"].map(k => leggiStato(db, k)));
+        ["ultima-copia", "da-copiare", "importato", "ids:" + P, "migrato"].map(k => leggiStato(db, k)));
       return json({ originale: "database", profumi: ids ? JSON.parse(ids).length : 0, catalogoDalFoglio: importato,
-                    ultimaCopiaNelFoglio: ultima, copiaInAttesa: !!daCopiare, tabellePerPersona: migrato });
+                    ultimaCopiaNelFoglio: ultima, copiaInAttesa: !!daCopiare, tabellePerPersonaDal: migrato });
     }
-    return testo(await corpo(db, false));
+    return testo(await corpo(db, P, false));
   }
   if (request.method !== "POST") return json({ errore: "metodo non previsto" }, 405);
 
@@ -504,12 +583,15 @@ async function rispondi(request, env, ctx) {
   if (!ct || /x-www-form-urlencoded|text\/plain/.test(ct)) new URLSearchParams(await request.text()).forEach((v, k) => p.set(k, v));
   const azione = p.get("azione");
 
-  if (azione === "leggi") return testo(await corpo(db, chiaveGiusta(env, p)));
-  if (!["diario", "residuo", "modifica", "sincronizza", "importa", "migra", "confronta"].includes(azione)) return json({ errore: "azione sconosciuta: " + azione });
+  if (azione === "leggi") return testo(await corpo(db, P, chiaveGiusta(env, p)));
+  if (!["diario", "residuo", "modifica", "sincronizza", "importa", "confronta", "riporta"].includes(azione)) return json({ errore: "azione sconosciuta: " + azione });
   if (!chiaveGiusta(env, p)) return json(SENZA_CHIAVE);
 
-  if (azione === "migra") return json(await migra(db, p.get("prova") === "1"));
   if (azione === "confronta") return json(await confronta(db));
+  if (azione === "riporta") {
+    if (p.get("conferma") !== "si") return json({ errore: "riporta riscrive le tabelle di prima con quelle per persona: aggiungi conferma=si" });
+    return json(await riporta(db));
+  }
 
   if (azione === "sincronizza") {
     try { return json({ ok: true, ...(await copiaNelFoglio(env, true)) }); }
@@ -523,12 +605,12 @@ async function rispondi(request, env, ctx) {
   if (azione === "modifica") {
     let m;
     try { m = JSON.parse(p.get("dati") || "{}"); } catch (e) { return json({ errore: "dati non validi: serve un JSON {aggiunte, correzioni}" }); }
-    const t = await leggiTabs(db), prova = p.get("prova") === "1";
+    const t = await leggiTabsPersona(db, P), prova = p.get("prova") === "1";
     const esito = applicaModifiche(t, m, prova);
-    if (!prova && esito.cambiate.length) { await salvaTabs(db, t, esito.cambiate); copiaDopo(env, ctx); }
+    if (!prova && esito.cambiate.length) { await salvaCatalogo(db, P, t, esito.cambiate); copiaDopo(env, ctx); }
     return json(esito);
   }
-  const esito = azione === "diario" ? await scriviDiario(db, p) : await segnaResiduo(db, p);
+  const esito = azione === "diario" ? await scriviDiario(db, P, p) : await segnaResiduo(db, P, p);
   if (esito.ok && !esito.gia && !esito.assente) copiaDopo(env, ctx);
   return json(esito);
 }
