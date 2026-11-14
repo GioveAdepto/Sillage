@@ -93,7 +93,7 @@ index.html               la pagina; colori della barra di stato chiaro/scuro
 vite.config.ts           Vite, React e la PWA (manifest, cache per l'uso senza rete)
 public/img/              41 boccette scontornate (webp con trasparenza) e le icone dell'app
 public/img/avvio/        le schermate d'avvio dell'iPhone, chiare e scure (fuori dalla cache del service worker)
-strumenti/scontorna.py   rifà le foto scontornate: python scontorna.py <cartella-originali> <cartella-uscita>
+strumenti/scontorna.py   rifà le foto scontornate (vedi «Le foto delle boccette»)
 strumenti/prima-dopo.mjs confronta la classifica di Consigliami tra l'app di oggi e la nuova (vedi «Prove»)
 strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
 strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
@@ -135,6 +135,32 @@ src/stile/               token.css (tutti i colori, chiaro e scuro), base, colle
   l'iPhone (`prefers-color-scheme`). Nessun interruttore salvato.
 - **Movimento**: chi ha chiesto meno movimento (`prefers-reduced-motion`) non vede la vetrina che si apre,
   cadute, voli, inclinazioni, riflessi, ondeggiamenti né barre che si allungano.
+
+## Le foto delle boccette
+
+Le 41 foto in `public/img/` sono scontornate (webp con trasparenza, ritagliate sulla boccetta, non
+ridimensionate) partendo da quelle col fondo dell'app di prima, in `img/` alla radice del repo, che non si
+toccano. Le rifà `strumenti/scontorna.py` (serve Python 3 con numpy, Pillow e opencv-python):
+
+```bash
+python app/strumenti/scontorna.py img app/public/img                         # tutte
+python app/strumenti/scontorna.py img app/public/img nasomatto-black-afgano  # solo alcune (nome senza .webp)
+```
+
+Due modi:
+- **netto** (quasi tutte): è boccetta ciò che si stacca dal bianco di almeno 20 livelli su 255, con un bordo
+  semitrasparente. Pulito sulle boccette scure o colorate, ma perde vetro chiaro, tappi argento ed etichette
+  bianche che toccano il fondo.
+- **fine** (le foto elencate in `FINI` nello script, con le loro eccezioni): soglia appena sopra il rumore del
+  fondo e contorni ricuciti, poi un pixel di bordo rifilato. Prende il vetro chiaro; non va bene per tutte perché
+  attorno alle boccette scure lascerebbe una riga chiara (disturbi di compressione dell'originale). Dove il vetro
+  tocca il bianco senza nessun contorno (Nasomatto Black Afgano) c'è una **maschera a mano**: un poligono sulle
+  coordinate dell'originale, preso dai bordi del vetro, senza inventare parti.
+
+Rifare tutte le foto lascia identiche quelle in modo netto. Dopo ogni cambio, guardarle a occhio su fondo chiaro
+e scuro (Collezione, Scheda, vista da vicino), in tema chiaro e scuro. Il 2026-11-14 sono state rifatte in modo
+fine Nasomatto Black Afgano, Xerjoff Naxos, Lalique Ombre Noire, Armaf Club de Nuit Sillage, Lattafa Atlas,
+L'Erbolario Ginepro Nero, YSL Muse e Acqua di Giò EDP.
 
 ## Dati
 
