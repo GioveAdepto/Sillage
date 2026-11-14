@@ -11,6 +11,8 @@
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
      POST /api?azione=importa&conferma=si  ricopia il catalogo DAL foglio (solo per rimediare), con la chiave
+     POST /api?azione=migra            rifà le tabelle per persona dalle vecchie (prova=1 per provare), con la chiave
+     POST /api?azione=confronta        le tabelle per persona danno lo stesso di quelle vecchie?, con la chiave
      GET  /api?stato=1                 a che punto è la copia nel foglio
    La chiave arriva nel corpo della richiesta (chiave=...), mai nell'indirizzo.
 
@@ -48,7 +50,21 @@ const SCHEMA = [
      tolta INTEGER NOT NULL DEFAULT 0, inviato INTEGER NOT NULL DEFAULT 1, aggiornato INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS stato (chiave TEXT PRIMARY KEY, valore TEXT)`,
   // dalla versione di prima: le voci tolte aspettavano lì di essere mandate al foglio
-  `DELETE FROM diario WHERE tolta = 1`
+  `DELETE FROM diario WHERE tolta = 1`,
+  /* Le tabelle per persona (account, tappa 1): nascono vuote e le riempie azione=migra. Finché non
+     arriva la tappa 2 il ponte legge e scrive ancora le tabelle qui sopra. Le colonne di possessi non
+     hanno tipo apposta: tengono i valori come arrivano dal catalogo (testo o numero), senza convertirli. */
+  `CREATE TABLE IF NOT EXISTS persone (id TEXT PRIMARY KEY, account TEXT UNIQUE, nome TEXT NOT NULL,
+     ruolo TEXT NOT NULL DEFAULT 'persona', creata INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS schede (id INTEGER PRIMARY KEY, dati TEXT NOT NULL, aggiornato INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS possessi (persona TEXT NOT NULL, scheda INTEGER NOT NULL, posto INTEGER NOT NULL,
+     tipo_possesso, formato_ml, num_flaconi, residuo_pct, note_personali, aggiunto, attivo, nuovo,
+     aggiornato INTEGER NOT NULL, PRIMARY KEY (persona, scheda))`,
+  `CREATE TABLE IF NOT EXISTS voci (persona TEXT NOT NULL, t TEXT NOT NULL, data TEXT NOT NULL, id INTEGER NOT NULL,
+     nota TEXT NOT NULL DEFAULT '', voto INTEGER, occasione TEXT NOT NULL DEFAULT '', momento TEXT NOT NULL DEFAULT '',
+     aggiornato INTEGER NOT NULL, PRIMARY KEY (persona, t))`,
+  `CREATE TABLE IF NOT EXISTS tab_persona (persona TEXT NOT NULL, tab TEXT NOT NULL, colonne TEXT NOT NULL,
+     righe TEXT NOT NULL, aggiornato INTEGER, PRIMARY KEY (persona, tab))`
 ];
 let schemaPronto = false;
 async function schema(env) {
@@ -296,6 +312,135 @@ function applicaModifiche(t, m, soloProva) {
   return { ok: true, aggiunte, colonne, correzioni: scritte, saltate, cambiate: [...cambiate], testo: riassunto + "\n" + esiti.join("\n") };
 }
 
+// ── LE TABELLE PER PERSONA (account, tappa 1) ─────────────────────────────
+/* Il catalogo di oggi è di Danilo. Ogni riga di Profumi si divide nella scheda (i dati del profumo,
+   uguali per tutti) e nel possesso (boccetta o campione, ml, residuo, note personali di chi lo ha).
+   Diario, layering e consigli passano a lui; le note olfattive restano comuni (tab Note).
+   azione=migra rifà le tabelle nuove dalle vecchie, che restano intatte: rilanciarla non fa danni.
+   Poi le rilegge e controlla che diano all'app esattamente quello che le dà oggi il ponte. */
+const PRIMA_PERSONA = { id: "danilo", nome: "Danilo", ruolo: "curatore" };
+const COLONNE_POSSESSO = ["tipo_possesso", "formato_ml", "num_flaconi", "residuo_pct", "note_personali", "aggiunto", "attivo", "nuovo"];
+const TABS_PERSONA = ["Layering", "Consigli", "ConsigliVoci"];
+
+/** Divide le righe di Profumi in schede e possessi; segnala le righe senza un id valido o con un id ripetuto. */
+function dividiProfumi(profumi) {
+  const schede = [], possessi = [], problemi = [], visti = new Set();
+  piene(profumi.righe).forEach((r, posto) => {
+    const id = Number(r.id);
+    if (!Number.isInteger(id) || id <= 0) { problemi.push("riga " + (posto + 1) + ": id non valido «" + breve(r.id) + "»"); return; }
+    if (visti.has(id)) { problemi.push("id " + id + " ripetuto"); return; }
+    visti.add(id);
+    const dati = {}, p = { scheda: id, posto };
+    for (const [c, v] of Object.entries(r)) (COLONNE_POSSESSO.includes(c) ? p : dati)[c] = v;
+    schede.push({ id, dati });
+    possessi.push(p);
+  });
+  return { schede, possessi, problemi };
+}
+
+/** Il contrario: dalle schede e dai possessi di una persona, le righe di Profumi come le ha il catalogo di oggi. */
+function ricomponiProfumi(colonne, schede, possessi) {
+  const perId = new Map(schede.map(s => [Number(s.id), s.dati]));
+  const righe = [...possessi].sort((a, b) => a.posto - b.posto).map(p => {
+    const dati = perId.get(Number(p.scheda)) || {}, r = {};
+    [...colonne, ...Object.keys(dati).filter(c => !colonne.includes(c))].forEach(c => {
+      if (COLONNE_POSSESSO.includes(c)) r[c] = p[c] ?? "";
+      else if (c in dati) r[c] = dati[c];
+    });
+    return r;
+  });
+  return { colonne, righe };
+}
+
+// JSON con le chiavi in ordine: due oggetti uguali danno lo stesso testo anche se le chiavi sono in un altro ordine
+const canonico = v => JSON.stringify(v, (k, x) =>
+  x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map(c => [c, x[c]])) : x);
+
+/** Confronta quello che l'app riceve dalle tabelle vecchie e dalle nuove. */
+function confrontaViste(vecchia, nuova) {
+  const a = JSON.parse("{" + vecchia.pezzo + "}"), b = JSON.parse("{" + nuova.pezzo + "}"), differenze = [];
+  ["note", "layering", "consigli"].forEach(k => { if (canonico(a[k]) !== canonico(b[k])) differenze.push(k + ": diverso"); });
+  if (a.profumi.map(p => p.id).join(",") !== b.profumi.map(p => p.id).join(",")) differenze.push("profumi: elenco o ordine diverso");
+  const perId = new Map(b.profumi.map(p => [p.id, p]));
+  a.profumi.forEach(p => {
+    const q = perId.get(p.id);
+    if (!q) return;
+    const campi = [...new Set([...Object.keys(p), ...Object.keys(q)])].filter(c => canonico(p[c]) !== canonico(q[c]));
+    if (campi.length) differenze.push("profumo " + p.id + ": " + campi.join(", "));
+  });
+  return { identiche: !differenze.length, stessoTesto: vecchia.pezzo === nuova.pezzo, differenze: differenze.slice(0, 20) };
+}
+
+/** Le tab di una persona lette dalle tabelle nuove, nella stessa forma di leggiTabs. */
+async function leggiTabsPersona(db, persona, note) {
+  const [s, p, tp, col] = await db.batch([
+    db.prepare("SELECT id, dati FROM schede"),
+    db.prepare("SELECT * FROM possessi WHERE persona = ? ORDER BY posto").bind(persona),
+    db.prepare("SELECT tab, colonne, righe FROM tab_persona WHERE persona = ?").bind(persona),
+    db.prepare("SELECT valore FROM stato WHERE chiave = 'colonne-profumi'")
+  ]);
+  const colonne = JSON.parse((col.results[0] && col.results[0].valore) || "[]");
+  const t = { Profumi: ricomponiProfumi(colonne, s.results.map(r => ({ id: r.id, dati: JSON.parse(r.dati) })), p.results), Note: note };
+  TABS_PERSONA.forEach(n => { t[n] = { colonne: [], righe: [] }; });
+  tp.results.forEach(r => { t[r.tab] = { colonne: JSON.parse(r.colonne), righe: JSON.parse(r.righe) }; });
+  return t;
+}
+
+/** Rilegge le tabelle nuove e le confronta con le vecchie: catalogo per l'app e diario, voce per voce. */
+async function confronta(db, vecchie) {
+  const migrato = await leggiStato(db, "migrato");
+  if (!migrato) return { errore: "le tabelle nuove sono ancora vuote: prima azione=migra" };
+  vecchie = vecchie || await leggiTabs(db);
+  const P = PRIMA_PERSONA.id;
+  const esito = confrontaViste(vista(vecchie), vista(await leggiTabsPersona(db, P, vecchie.Note)));
+  const COL = "t, data, id, nota, voto, occasione, momento";
+  const d = await db.prepare(`SELECT
+      (SELECT COUNT(*) FROM (SELECT ${COL} FROM diario EXCEPT SELECT ${COL} FROM voci WHERE persona = ?)) AS mancano,
+      (SELECT COUNT(*) FROM (SELECT ${COL} FROM voci WHERE persona = ? EXCEPT SELECT ${COL} FROM diario)) AS inPiu`).bind(P, P).first();
+  if (d.mancano || d.inPiu) {
+    esito.identiche = false;
+    esito.differenze.push("diario: " + d.mancano + " voci mancano nelle tabelle nuove, " + d.inPiu + " ci sono in più");
+  }
+  return { migrato, ...esito };
+}
+
+/** Rifà le tabelle nuove dalle vecchie (prova=1: solo il confronto, senza scrivere). Tutto in un colpo solo. */
+async function migra(db, soloProva) {
+  const vecchie = await leggiTabs(db);
+  const { schede, possessi, problemi } = dividiProfumi(vecchie.Profumi);
+  const base = { persona: PRIMA_PERSONA.id, schede: schede.length, possessi: possessi.length,
+                 voci: await db.prepare("SELECT COUNT(*) AS n FROM diario").first("n") };
+  if (problemi.length) return { errore: "catalogo da sistemare prima di migrare", problemi, ...base };
+  if (soloProva) {
+    const t = { ...vecchie, Profumi: ricomponiProfumi(vecchie.Profumi.colonne, schede, possessi) };
+    return { ok: true, prova: "PROVA A VUOTO, niente è stato scritto", ...base, ...confrontaViste(vista(vecchie), vista(t)) };
+  }
+  const ora = Date.now(), P = PRIMA_PERSONA.id;
+  const daPossessi = possessi.map(p => Object.fromEntries(
+    [["scheda", p.scheda], ["posto", p.posto], ...COLONNE_POSSESSO.map(c => [c, p[c] ?? null])]));
+  await db.batch([
+    db.prepare("INSERT INTO persone (id, nome, ruolo, creata) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO NOTHING")
+      .bind(P, PRIMA_PERSONA.nome, PRIMA_PERSONA.ruolo, ora),
+    db.prepare("DELETE FROM schede"),
+    db.prepare("INSERT INTO schede (id, dati, aggiornato) SELECT json_extract(value, '$.id'), json_extract(value, '$.dati'), ? FROM json_each(?)")
+      .bind(ora, JSON.stringify(schede.map(s => ({ id: s.id, dati: JSON.stringify(s.dati) })))),
+    db.prepare("DELETE FROM possessi WHERE persona = ?").bind(P),
+    db.prepare(`INSERT INTO possessi (persona, scheda, posto, ${COLONNE_POSSESSO.join(", ")}, aggiornato)
+      SELECT ?, json_extract(value, '$.scheda'), json_extract(value, '$.posto'),
+             ${COLONNE_POSSESSO.map(c => `json_extract(value, '$.${c}')`).join(", ")}, ? FROM json_each(?)`)
+      .bind(P, ora, JSON.stringify(daPossessi)),
+    db.prepare("DELETE FROM voci WHERE persona = ?").bind(P),
+    db.prepare(`INSERT INTO voci (persona, t, data, id, nota, voto, occasione, momento, aggiornato)
+      SELECT ?, t, data, id, nota, voto, occasione, momento, aggiornato FROM diario`).bind(P),
+    db.prepare("DELETE FROM tab_persona WHERE persona = ?").bind(P),
+    ...TABS_PERSONA.map(n => db.prepare("INSERT INTO tab_persona (persona, tab, colonne, righe, aggiornato) VALUES (?, ?, ?, ?, ?)")
+      .bind(P, n, JSON.stringify(vecchie[n].colonne), JSON.stringify(vecchie[n].righe), ora)),
+    scriviStato(db, "colonne-profumi", JSON.stringify(vecchie.Profumi.colonne)),
+    scriviStato(db, "migrato", new Date(ora).toISOString())
+  ]);
+  return { ok: true, ...base, ...(await confronta(db, vecchie)) };
+}
+
 // ── LA COPIA NEL FOGLIO ───────────────────────────────────────────────────
 async function alFoglio(env, campi) {
   const r = await fetch(env.FOGLIO_URL, {
@@ -344,10 +489,10 @@ async function rispondi(request, env, ctx) {
 
   if (request.method === "GET") {
     if (url.searchParams.has("stato")) {
-      const [ultima, daCopiare, importato, ids] = await Promise.all(
-        ["ultima-copia", "da-copiare", "importato", "ids"].map(k => leggiStato(db, k)));
+      const [ultima, daCopiare, importato, ids, migrato] = await Promise.all(
+        ["ultima-copia", "da-copiare", "importato", "ids", "migrato"].map(k => leggiStato(db, k)));
       return json({ originale: "database", profumi: ids ? JSON.parse(ids).length : 0, catalogoDalFoglio: importato,
-                    ultimaCopiaNelFoglio: ultima, copiaInAttesa: !!daCopiare });
+                    ultimaCopiaNelFoglio: ultima, copiaInAttesa: !!daCopiare, tabellePerPersona: migrato });
     }
     return testo(await corpo(db, false));
   }
@@ -360,8 +505,11 @@ async function rispondi(request, env, ctx) {
   const azione = p.get("azione");
 
   if (azione === "leggi") return testo(await corpo(db, chiaveGiusta(env, p)));
-  if (!["diario", "residuo", "modifica", "sincronizza", "importa"].includes(azione)) return json({ errore: "azione sconosciuta: " + azione });
+  if (!["diario", "residuo", "modifica", "sincronizza", "importa", "migra", "confronta"].includes(azione)) return json({ errore: "azione sconosciuta: " + azione });
   if (!chiaveGiusta(env, p)) return json(SENZA_CHIAVE);
+
+  if (azione === "migra") return json(await migra(db, p.get("prova") === "1"));
+  if (azione === "confronta") return json(await confronta(db));
 
   if (azione === "sincronizza") {
     try { return json({ ok: true, ...(await copiaNelFoglio(env, true)) }); }
