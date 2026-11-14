@@ -187,12 +187,18 @@ async function importa(env) {
   return { profumi: t.Profumi.righe.length };
 }
 /* Pronto quando c'è la vista di Danilo nelle tabelle per persona. Se no: un database di prima della
-   tappa 2 fa il passaggio, uno vuoto prende il catalogo dal foglio. */
-async function pronto(env) {
+   tappa 2 fa il passaggio, uno vuoto prende il catalogo dal foglio.
+   Le anteprime dei branch su Cloudflare usano lo stesso database: il passaggio lo fa solo il ponte
+   pubblicato (o quello locale delle prove), mai un'anteprima, così nessuna scrittura resta indietro.
+   Il giro ogni 5 minuti (senza indirizzo) gira solo sul ponte pubblicato. */
+const PUO_FARE_IL_PASSAGGIO = /^(sillage\.danilo-moro96\.workers\.dev|127\.0\.0\.1|localhost)$/;
+async function pronto(env, host) {
   await schema(env);
   if (await leggiStato(env.DB, "vista:" + PRIMA_PERSONA.id)) return true;
-  if (await leggiStato(env.DB, "vista")) await passaggio(env.DB);
-  else await importa(env);
+  if (await leggiStato(env.DB, "vista")) {
+    if (host && !PUO_FARE_IL_PASSAGGIO.test(host)) throw new Error("questa è un'anteprima: il passaggio alle tabelle per persona lo fa solo il ponte pubblicato");
+    await passaggio(env.DB);
+  } else await importa(env);
   return true;
 }
 
@@ -556,7 +562,7 @@ async function rispondi(request, env, ctx) {
   // tutto il resto sono i file del sito, serviti da Cloudflare senza passare di qui
   if (url.pathname !== "/api" && !url.pathname.startsWith("/api/")) return new Response("Non trovato", { status: 404 });
   const db = env.DB;
-  await pronto(env);
+  await pronto(env, url.hostname);
   // per ora una persona sola: la chiave (e chi legge senza) vuol dire Danilo. Gli account arrivano alla tappa 3.
   const P = PRIMA_PERSONA.id;
 

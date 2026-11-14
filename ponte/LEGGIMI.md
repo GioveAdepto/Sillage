@@ -50,7 +50,9 @@ Una scheda non si cancella mai (un'altra persona potrebbe averla); i possessi di
 
 **Il passaggio** dalle tabelle di prima (`tabelle` con una riga per tab, `diario`) è fatto da solo, alla
 prima richiesta dopo la pubblicazione della tappa 2: il ponte vede che manca `vista:danilo` e copia tutto,
-diario compreso, in un colpo solo. Se arrivano più richieste insieme, solo la prima scrive. Le tabelle di
+diario compreso, in un colpo solo. Se arrivano più richieste insieme, solo la prima scrive. Lo fa solo il
+ponte pubblicato (o quello locale delle prove): le anteprime dei branch usano lo stesso database, e
+un'anteprima che lo facesse prima dell'unione lascerebbe indietro le scritture arrivate nel frattempo. Le tabelle di
 prima restano com'erano in quel momento: `azione=confronta` (con la chiave) le confronta con le nuove,
 e subito dopo il passaggio deve dire `identiche: true`; poi le differenze sono le scritture nuove.
 
