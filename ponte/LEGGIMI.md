@@ -37,6 +37,27 @@ per richiesta, e così ne bastano poche. Da lì il ponte ricava il JSON per
 l'app con le stesse regole di `apps-script/Codice.gs` e lo tiene pronto.
 Il diario è una tabella a sé, una riga per voce.
 
+### Le tabelle per persona (account, tappa 1)
+
+In preparazione degli account (ognuno con collezione e diario suoi) ci sono già le tabelle nuove,
+**ancora non usate dall'app**: il ponte legge e scrive sempre quelle qui sopra.
+
+| tabella | cosa contiene |
+|---|---|
+| `persone` | chi usa Sillage: per ora solo `danilo` (curatore); `account` sarà l'id dell'account di CheMetto |
+| `schede` | un profumo per riga, uguale per tutti: le colonne di Profumi che descrivono il profumo, in `dati` (JSON) |
+| `possessi` | chi ha quale profumo: `tipo_possesso`, `formato_ml`, `num_flaconi`, `residuo_pct`, `note_personali`, `aggiunto`, `attivo`, `nuovo`, e `posto` (l'ordine delle righe nel catalogo) |
+| `voci` | il diario, con la colonna `persona` |
+| `tab_persona` | Layering, Consigli e ConsigliVoci di ciascuno (la tab Note resta comune, in `tabelle`) |
+
+Le riempie `azione=migra` (con la chiave): rifà le tabelle nuove copiando quelle vecchie a `danilo`,
+tutto in un colpo solo, e lascia le vecchie come sono. Poi le rilegge e confronta: `identiche: true` vuol
+dire che l'app riceverebbe dalle nuove esattamente quello che riceve oggi (profumi, layering, consigli, note)
+e che il diario ha le stesse voci. Con `prova=1` fa solo il confronto, senza scrivere. Rilanciarla non fa
+danni. Finché l'app usa le tabelle vecchie, diario e residuo nuovi arrivano solo lì: `azione=confronta` lo
+mostra (`differenze`), e una nuova `azione=migra` riallinea. Prima della tappa 2 (il ponte che legge dalle
+nuove) si rilancia un'ultima volta.
+
 La copia nel foglio passa dal Web App (`azione=specchio`, con la chiave): il
 ponte manda tutte le tab, lo script le riscrive come testo semplice, con le
 colonne dove sono. Se il foglio non risponde, il ponte riprova ogni 5 minuti;
@@ -55,7 +76,9 @@ una volta al giorno (verso le 3 UTC) la copia si rifà comunque.
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |
 | `POST /api?azione=importa&conferma=si` | ricopia il catalogo **dal** foglio: solo per rimediare, con la chiave |
-| `GET /api?stato=1` | quanti profumi, ultima copia nel foglio, se una copia è in attesa |
+| `POST /api?azione=migra` (`prova=1` per provare) | rifà le tabelle per persona dalle vecchie e le confronta, con la chiave |
+| `POST /api?azione=confronta` | le tabelle per persona danno lo stesso di quelle vecchie?, con la chiave |
+| `GET /api?stato=1` | quanti profumi, ultima copia nel foglio, se una copia è in attesa, quando sono state riempite le tabelle per persona |
 
 La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 
@@ -74,6 +97,9 @@ La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
 
 Il foglio ha sempre tutto, perché ogni modifica gli viene copiata. Prima di
 tornare indietro: `GET /api?stato=1` deve dire `copiaInAttesa: false`.
+
+- **Dalle tabelle per persona** (tappa 1): annullare il commit; le tabelle nuove restano nel database,
+  inutilizzate, e quelle vecchie non sono mai state toccate.
 
 - **Al foglio come originale del catalogo** (diario e residuo restano al
   database): annullare il commit che ha portato questa versione del ponte.
