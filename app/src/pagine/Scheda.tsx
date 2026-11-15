@@ -468,7 +468,7 @@ function Residuo({ p }: { p: Profumo }) {
       const m = String((e as Error).message);
       avvisa(
         m === "chiave"
-          ? "Non salvato: entra con il tuo account (o la chiave) in Altro ▸ Impostazioni"
+          ? "Non salvato: entra con il tuo account in Altro ▸ Impostazioni"
           : /fetch|network|load failed/i.test(m)
             ? "Non salvato: riprova con la rete"
             : "Non salvato: " + m

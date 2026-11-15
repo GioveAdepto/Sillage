@@ -194,7 +194,7 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro), «Se vuoi osare, con…» (la ricetta di layering, con «Lo faccio») e «Lo metto oggi»; quattro alternative coi tre motivi più forti e «Lo metto»; le ore sulla pelle; «Mai indossati, se vuoi riscoprirli»; il pulsante per il meteo di dove sei | fatta (tappe 2 e 3) |
 | `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
 | `#/diario?vista=settimana` | **La settimana**: un suggerimento al giorno da lunedì a domenica, con l'occasione da cambiare e «Lo metto» per oggi; i giorni passati dicono cosa hai messo | fatta (tappa 3) |
-| `#/impostazioni` | **Impostazioni**: il tuo account (entra, collega al diario, esci), la chiave di Sillage, la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3; account dalla tappa 3 degli account) |
+| `#/impostazioni` | **Impostazioni**: il tuo account (entra, registrati, collega al diario, esci), la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3; account dalla tappa 3 degli account) |
 | `#/numeri` | **Numeri**: boccette, campioni, marchi, rating e durata medi, mappa olfattiva (anche coi campioni), stagione e famiglia, occasioni d'uso, accordi più presenti, classifiche per rating e durata, cloni e originali, storico delle aggiunte, il diario (questo mese, le più indossate, da riprendere, per stagione, rotazione del mese), profilo Fragrantica | fatta (tappa 4) |
 | `#/layering?tipo=app&ricetta=4` | **Layering**: le quattro regole, i filtri per tipo, le ricette da aprire (sopra e sotto con le dosi, come si fa, risultato, perché, quando) e «Lo faccio oggi» | fatta (tappa 4) |
 | `#/guida?occ=ufficio` | **Guida**: le sette occasioni; per ognuna le boccette per stagione (quella in corso prima), con moderazione, in ufficio anche le altre (1 spray), e i campioni | fatta (tappa 4) |
@@ -243,13 +243,14 @@ rating. Diario e voti personali non entrano. Boccette e campioni insieme.
   **Le vetrine degli altri** (Altro ▸ Le vetrine, `#/vetrine`, `#/vetrina/<persona>`): solo la collezione, in
   sola lettura, con «Ce l'ho» per chi ne ha uno anche lui. **Uscendo** il telefono scorda la vetrina e il diario
   di chi c'era (`scordaCopie`); prima devono partire le scritture in coda. Il ripiego della copia notturna del
-  repo, senza rete, vale solo per Danilo. La chiave, in Impostazioni, è chiusa sotto «Hai la chiave di Sillage?»
-  per chi non ce l'ha.
-- **La chiave** si inserisce in Altro ▸ Impostazioni e resta solo nel `localStorage` di questo telefono
-  (`sillage-app:chiave`). Viaggia sempre nel corpo della richiesta, mai nell'indirizzo, e non si mostra.
-  Funziona come prima fino alla tappa 5. Senza account né chiave (o se il ponte non li riconosce) il diario
-  non si legge e la pagina lo dice; quello che segni resta in coda sul telefono e parte appena il ponte sa chi
-  sei (i rifiuti «chiave…» e «accesso…» lasciano la voce in coda).
+  repo, senza rete, vale solo per Danilo.
+- **La chiave** (tappa 5): l'app non la chiede più, si entra solo con l'account. Il telefono che ha ancora la
+  chiave di prima (`sillage-app:chiave`) continua a mandarla, nel corpo della richiesta, finché non entra con
+  l'account collegato: da lì, appena la coda del diario è vuota, l'app la toglie da sola (`scordaChiave` in
+  `src/ponte.ts`), e Impostazioni smette di dirlo. La chiave resta solo di servizio (`ponte/LEGGIMI.md`).
+  Senza account (o se il ponte non lo riconosce) il diario non si legge e la pagina lo dice; quello che segni
+  resta in coda sul telefono e parte appena il ponte sa chi sei (i rifiuti «chiave…» e «accesso…» lasciano la
+  voce in coda).
 - **La coda** (`src/diario/coda.ts`, chiave `sillage-app:diario-coda`) è quella dell'app di oggi: ogni voce
   messa, tolta o annotata si vede subito e aspetta lì finché il ponte non la conferma. È salvata prima di
   ogni invio, quindi chiudere l'app con la coda piena non perde niente. Parte a ogni scrittura, all'avvio,
@@ -355,7 +356,7 @@ VITE_PONTE=http://127.0.0.1:8787/api npm run build
 npm run anteprima
 ```
 
-(il secondo dalla radice del repo). In Impostazioni la chiave è `prova`; Impostazioni ▸ I dati dice
+(il secondo dalla radice del repo). La chiave di prova è `prova` (si mette a mano: `localStorage.setItem("sillage-app:chiave", "prova")`, oppure si entra con il Supabase finto); Impostazioni ▸ I dati dice
 «ponte locale di prova». Prima di pubblicare si ricostruisce senza `VITE_PONTE`. Il database locale sta in
 `.wrangler/` (fuori da git).
 

@@ -32,10 +32,11 @@ più vera, correggila subito.
 - **Dati**: l'originale è il **database Cloudflare D1** dietro il ponte `ponte/ponte.js`
   (`https://sillage.danilo-moro96.workers.dev/api`). Il foglio Google `sillage-profumi` è una copia
   riscritta dal ponte; `data/*.json` è la copia notturna; `data/diario.enc` il diario cifrato.
-- **La chiave di Sillage** protegge diario, residuo e modifiche al catalogo. In locale sta in
-  `C:\Projects\Sillage\.dev.vars` (ignorato da git). Mai nel repo, nelle risposte o negli indirizzi.
-- **Gli account** (in corso, a tappe): quelli di CheMetto (Supabase Auth), dati per persona in D1; la chiave
-  resta per Claude e, fino alla tappa 5, per l'app. Dettagli in `ponte/LEGGIMI.md`.
+- **Gli account**: quelli di CheMetto (Supabase Auth), registrazione libera; ognuno ha collezione e diario suoi
+  in D1, degli altri si vede solo la collezione. Dettagli in `ponte/LEGGIMI.md`.
+- **La chiave di Sillage** è ormai solo di servizio (l'app non la chiede più): modifiche al catalogo, copia
+  notturna, `sincronizza`, e per Claude «sei Danilo». In locale sta in `C:\Projects\Sillage\.dev.vars`
+  (ignorato da git). Mai nel repo, nelle risposte o negli indirizzi.
 - **Controlli**: `.github/workflows/prova.yml` costruisce l'app, la confronta con quella di prima (punteggio di
   Consigliami, numeri, filtri, coda del diario) e la percorre in un browser con un ponte finto.
 

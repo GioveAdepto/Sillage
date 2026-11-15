@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Dati, Profumo } from "./tipi";
 import { numeraCatalogo } from "./profumo";
-import { PONTE, credenziali, diario, leggiChiave } from "./ponte";
+import { PONTE, credenziali, diario, leggiChiave, scordaChiave } from "./ponte";
 import { leggiSessione } from "./accesso";
 import type { Voce } from "./diario/coda";
 
@@ -174,7 +174,10 @@ export function DatiProvider({ children }: { children: ReactNode }) {
         if (Array.isArray(g.diario)) {
           diario.impostaConfermate(g.diario);
           setStatoChiave("giusta");
-          void diario.sincronizza(); // riconosciuto: parte quello che aspettava
+          // riconosciuto: parte quello che aspettava; poi, se l'account basta da solo, la vecchia chiave se ne va
+          void diario.sincronizza().then(() => {
+            if (g.chi?.da === "accesso" && chiave && !diario.coda().length) scordaChiave();
+          });
         } else if (chiave || leggiSessione()) {
           diario.segnalaChiave();
           setStatoChiave("sbagliata");
