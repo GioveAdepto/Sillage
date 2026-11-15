@@ -11,7 +11,6 @@ import Layering from "./pagine/Layering";
 import Guida from "./pagine/Guida";
 import Acquisti from "./pagine/Acquisti";
 import Confronta from "./pagine/Confronta";
-import Catalogo from "./pagine/Catalogo";
 import { Vetrine, VetrinaDi } from "./pagine/Vetrine";
 import Segnaposto, { IN_ARRIVO } from "./pagine/Segnaposto";
 
@@ -32,7 +31,6 @@ export const router = createHashRouter([
       { path: "guida", element: <Guida /> },
       { path: "acquisti", element: <Acquisti /> },
       { path: "confronta", element: <Confronta /> },
-      { path: "catalogo", element: <Catalogo /> },
       { path: "vetrine", element: <Vetrine /> },
       { path: "vetrina/:di", element: <VetrinaDi /> },
       { path: "altro", element: <Altro /> },

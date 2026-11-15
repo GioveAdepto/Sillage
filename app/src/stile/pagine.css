@@ -75,36 +75,18 @@
   color: var(--cenere);
 }
 
-/* ── Account, catalogo e vetrine degli altri (gli account, tappa 4) ── */
+/* ── Account e vetrine degli altri (gli account, tappa 4) ── */
 .scelta-account {
   margin: 4px 0 10px;
 }
-.catalogo .cerca {
-  margin: 14px 0 6px;
-}
-.catalogo-lista .catalogo-riga {
-  grid-template-columns: 52px minmax(0, 1fr) auto;
+.vetrina-altro .vetrina-riga {
+  grid-template-columns: 52px minmax(0, 1fr);
   min-height: 64px;
 }
-.catalogo-marca {
+.vetrina-marca {
   font: 400 11.5px/1.2 var(--f-dati);
   letter-spacing: 0.04em;
   color: var(--cenere);
-}
-.ce-lho.btn-filo,
-.ce-scelta .btn-filo {
-  margin: 0;
-  min-height: 38px;
-  padding: 0 14px;
-}
-.ce-scelta {
-  display: flex;
-  gap: 6px;
-}
-.ce-gia {
-  font: italic 400 15px/1.2 var(--f-maison);
-  color: var(--ottone-testo);
-  white-space: nowrap;
 }
 .vetrina-vuota {
   display: grid;

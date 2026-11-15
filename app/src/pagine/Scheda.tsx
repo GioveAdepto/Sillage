@@ -376,22 +376,22 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
           <button type="button" className="btn-filo" onClick={() => void condividiScheda(p)}>
             Condividi la scheda
           </button>
-          <NonCeLho p={p} />
+          <TogliDallaVetrina p={p} />
         </div>
       </div>
     </article>
   );
 }
 
-/** «Non ce l'ho più»: il profumo esce dalla propria vetrina (le voci del diario che lo nominano restano). */
-function NonCeLho({ p }: { p: Profumo }) {
+/** «Togli dalla vetrina»: il profumo esce dalla propria vetrina (le voci del diario che lo nominano restano). */
+function TogliDallaVetrina({ p }: { p: Profumo }) {
   const { chi, riprova } = useDati();
   const avvisa = useAvviso();
   const navigate = useNavigate();
   const [invio, setInvio] = useState(false);
   if (!chi?.persona) return null;
   const togli = async () => {
-    if (!window.confirm(`Togli ${p.name} dalla tua vetrina? Le voci del diario restano. Puoi rimetterlo dal catalogo.`)) return;
+    if (!window.confirm(`Togli ${p.name} dalla tua vetrina? Le voci del diario restano.`)) return;
     setInvio(true);
     try {
       const { corpo } = await scriviAlPonte({ azione: "possesso", op: "togli", id: String(p.id) });
@@ -408,7 +408,7 @@ function NonCeLho({ p }: { p: Profumo }) {
   };
   return (
     <button type="button" className="btn-filo spento" disabled={invio} onClick={togli}>
-      Non ce l'ho più
+      Togli dalla vetrina
     </button>
   );
 }

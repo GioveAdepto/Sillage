@@ -3,12 +3,11 @@ import type { Profumo } from "../tipi";
 import { useDati } from "../dati";
 import { eCampione } from "../profumo";
 import { Mini, useTitolo } from "../componenti/comuni";
-import { CeLho, useDalPonte } from "../componenti/CeLho";
+import { useDalPonte } from "../componenti/dalPonte";
 import { IconaAvanti } from "../componenti/Icone";
 
 /* Le vetrine degli altri (decisione dell'utente: agli altri si mostra solo la collezione). Le vede solo chi è
-   entrato; mai diario, note personali, residuo, ricette o consigli. Da una vetrina, «Ce l'ho» porta un profumo
-   nella propria. */
+   entrato, in sola lettura; mai diario, note personali, residuo, ricette o consigli. */
 
 interface Persona {
   id: string;
@@ -75,20 +74,19 @@ export function VetrinaDi() {
   const boccette = (dati?.profumi ?? []).filter((p) => !eCampione(p)),
     campioni = (dati?.profumi ?? []).filter((p) => eCampione(p));
   const riga = (p: Profumo) => (
-    <li key={p.id} className="cl-riga catalogo-riga">
+    <li key={p.id} className="cl-riga vetrina-riga">
       <Mini p={p} />
       <span className="cl-mezzo">
         <span className="cl-nome">
           {p.name}
           <small>{p.conc}</small>
         </span>
-        <span className="catalogo-marca">{p.brand}</span>
+        <span className="vetrina-marca">{p.brand}</span>
       </span>
-      <CeLho id={p.id} nome={p.name} />
     </li>
   );
   return (
-    <section className="catalogo">
+    <section className="vetrina-altro">
       <p className="incisa">
         <Link className="collegamento" to="/vetrine">
           Le vetrine
@@ -108,8 +106,7 @@ export function VetrinaDi() {
         <>
           <p className="testo-piccolo">
             {boccette.length} {boccette.length === 1 ? "boccetta" : "boccette"}
-            {campioni.length ? ` e ${campioni.length} ${campioni.length === 1 ? "campione" : "campioni"}` : ""}. Se ne hai uno anche tu,
-            tocca «Ce l'ho».
+            {campioni.length ? ` e ${campioni.length} ${campioni.length === 1 ? "campione" : "campioni"}` : ""}.
           </p>
           {boccette.length ? (
             <section className="sez" aria-labelledby="t-boccette">
@@ -117,7 +114,7 @@ export function VetrinaDi() {
                 <h3 id="t-boccette">Boccette</h3>
                 <i className="linea" />
               </div>
-              <ul className="classifica catalogo-lista">{boccette.map(riga)}</ul>
+              <ul className="classifica">{boccette.map(riga)}</ul>
             </section>
           ) : null}
           {campioni.length ? (
@@ -126,7 +123,7 @@ export function VetrinaDi() {
                 <h3 id="t-campioni">Campioni</h3>
                 <i className="linea" />
               </div>
-              <ul className="classifica catalogo-lista">{campioni.map(riga)}</ul>
+              <ul className="classifica">{campioni.map(riga)}</ul>
             </section>
           ) : null}
         </>
