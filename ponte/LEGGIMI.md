@@ -81,7 +81,27 @@ stessa «portineria». I dati di Sillage restano tutti qui, in D1.
   `confronta`, `riporta`: **solo con la chiave**, sono lavori di Claude.
 - Gli errori di chi non è riconosciuto cominciano con «chiave…» o «accesso…»: l'app tiene in coda le voci e
   riprova (per esempio dopo aver rinnovato un token scaduto).
-- Registrarsi, la seconda persona e la sua vetrina vuota arrivano con la tappa 4.
+
+### Le altre persone (tappa 4)
+
+Registrazione libera, come CheMetto (scelta dell'utente).
+
+- **Registrarsi**: `azione=registrati&nome=…` con un accesso buono che non è ancora nessuno → una persona
+  nuova (`persone`, id `p` + 6 caratteri), col nome scelto (al più 30 caratteri) e la vetrina vuota. Una
+  persona per account: rifarlo restituisce la stessa.
+- **Il catalogo comune**: `azione=catalogo` → tutte le schede (id, marca, nome, concentrazione, famiglia,
+  immagine, tre accordi, stagioni, voto), senza dire chi le ha. Serve essere qualcuno (accesso o chiave).
+- **«Ce l'ho» / «Non ce l'ho più»**: `azione=possesso&op=aggiungi&id=…&tipo=full|campione[&ml=…]` aggiunge
+  una scheda ai propri possessi (in fondo all'ordine, `aggiunto` = oggi); `op=togli` la mette `attivo=no` (le
+  voci del diario che la nominano restano leggibili; «Ce l'ho» di nuovo la riaccende). La vista della persona
+  si ricalcola subito.
+- **Le vetrine degli altri** (decisione dell'utente: agli altri si mostra solo la collezione):
+  `azione=vetrine` (chi c'è e quanti profumi ha) e `azione=vetrina&di=<persona>` (i suoi profumi, **senza**
+  note personali e residuo; niente diario, layering né consigli). Le vede solo chi è entrato.
+- Ognuno scrive solo sul suo: diario, residuo e possessi vanno sempre alla persona riconosciuta, mai a
+  un'altra. Il foglio Google, `data/*.json` e `data/diario.enc` restano solo di Danilo; `GET /api` (senza
+  account) resta la vetrina di Danilo, come prima.
+- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (50 controlli).
 
 ## Indirizzi
 
@@ -94,6 +114,10 @@ stessa «portineria». I dati di Sillage restano tutti qui, in D1.
 | `POST /api?azione=diario&op=metti\|togli\|nota&…` | il diario, con la chiave o l'accesso |
 | `POST /api?azione=residuo&id=…&valore=…` | il residuo, con la chiave o l'accesso |
 | `POST /api?azione=collega` (`scollega=si` per togliere) | collega l'account dell'accesso a Danilo, con la chiave |
+| `POST /api?azione=registrati&nome=…` | un account nuovo diventa una persona con la vetrina vuota, con l'accesso |
+| `POST /api?azione=catalogo` | tutte le schede, per «Ce l'ho», con l'accesso o la chiave |
+| `POST /api?azione=possesso&op=aggiungi\|togli&id=…` (`tipo`, `ml`) | «Ce l'ho» e «Non ce l'ho più» sulla propria vetrina |
+| `POST /api?azione=vetrine` · `azione=vetrina&di=…` | chi c'è in Sillage · la sua collezione senza dati privati, per chi è entrato |
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |
 | `POST /api?azione=importa&conferma=si` | ricopia il catalogo **dal** foglio: solo per rimediare, con la chiave |
@@ -123,6 +147,8 @@ tornare indietro: `GET /api?stato=1` deve dire `copiaInAttesa: false`.
   con la chiave (riscrive `tabelle` e `diario` con tutto quello che c'è nelle nuove, poi le confronta:
   deve dire `identiche: true`), poi annullare l'unione della tappa 2. Il ponte di prima riparte senza
   perdere niente; provato in locale.
+- **Tappa 4** (le altre persone): annullare l'unione. Le persone registrate e i loro possessi restano nel
+  database, inutilizzati; Danilo e le copie non cambiano.
 - **Tappa 3** (gli account): annullare l'unione. La chiave ha sempre continuato a funzionare, quindi l'app
   di prima riparte da sola; `persone.account` resta scritto ma nessuno lo usa.
 - **Tappa 1**: annullare il commit; le tabelle nuove restano nel database, inutilizzate.

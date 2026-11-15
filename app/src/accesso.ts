@@ -96,6 +96,29 @@ export async function entra(email: string, password: string): Promise<string | n
   }
 }
 
+/** Crea un account nuovo (lo stesso tipo di CheMetto: vale anche lì). Restituisce un messaggio d'errore, o null
+    se si è già dentro; «conferma» se Supabase chiede prima di confermare l'email. */
+export async function registra(email: string, password: string): Promise<string | null> {
+  email = email.trim().toLowerCase();
+  if (password.length < 8) return "La password deve avere almeno 8 caratteri.";
+  try {
+    const { d } = await chiedi("signup", { email, password });
+    const s = daRisposta(d, email);
+    if (s) {
+      scriviSessione(s);
+      return null;
+    }
+    const m = String(d.error_description || d.msg || d.message || d.error || "");
+    if (/already registered|already exists/i.test(m)) return "Esiste già un account con questa email: entra con quello.";
+    if (/password/i.test(m)) return "Password troppo debole: usa almeno 8 caratteri, meglio con lettere e numeri.";
+    if (/invalid|validate email/i.test(m)) return "Email non valida: controlla di averla scritta bene.";
+    if (!m && (d as { id?: string }).id) return "conferma";
+    return traduci(d);
+  } catch {
+    return "Nessuna connessione: per registrarti serve la rete.";
+  }
+}
+
 /** Esce dall'account su questo telefono. Supabase lo sa se c'è rete; la sessione si toglie comunque. */
 export async function esci() {
   const s = leggiSessione();

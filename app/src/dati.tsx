@@ -48,10 +48,29 @@ interface StatoDati {
 
 const Contesto = createContext<StatoDati | null>(null);
 
+/* Di chi è la copia sul telefono: la persona che il ponte ha riconosciuto l'ultima volta. Una vetrina vuota è una
+   copia buona solo se è di qualcuno (chi è appena entrato); il ripiego della copia notturna del repo vale solo per
+   Danilo, perché è la sua collezione. */
+const PERSONA_COPIA = "sillage-app:persona";
+const personaDellaCopia = () => {
+  try {
+    return localStorage.getItem(PERSONA_COPIA) || "";
+  } catch {
+    return "";
+  }
+};
+/** All'uscita dall'account: via le copie di chi c'era, così il telefono non mostra la sua vetrina a un altro. */
+export function scordaCopie() {
+  try {
+    [CHIAVE_COPIA, PERSONA_COPIA, "sillage-app:diario"].forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* niente da scordare */
+  }
+}
 function leggiCopia(): Dati | null {
   try {
     const d = JSON.parse(localStorage.getItem(CHIAVE_COPIA) ?? "null");
-    return d && Array.isArray(d.profumi) && d.profumi.length ? d : null;
+    return d && Array.isArray(d.profumi) && (d.profumi.length || personaDellaCopia()) ? d : null;
   } catch {
     return null;
   }
@@ -79,7 +98,9 @@ async function leggiDalRepo(): Promise<Dati | null> {
 /** Solo i profumi in collezione (attivo ≠ «no»), con i campi che possono mancare messi a posto. */
 function pulisci(grezzo: unknown): Dati {
   const d = grezzo as Partial<Dati> & Record<string, unknown>;
-  if (!d || !Array.isArray(d.profumi) || !d.profumi.length) throw new Error("il ponte ha risposto senza profumi");
+  // una vetrina vuota va bene solo se è di una persona riconosciuta (chi è appena entrato in Sillage)
+  const diQualcuno = !!(d && (d.chi as Chi | undefined)?.persona);
+  if (!d || !Array.isArray(d.profumi) || (!d.profumi.length && !diQualcuno)) throw new Error("il ponte ha risposto senza profumi");
   const profumi = (d.profumi as Profumo[])
     .filter((p) => p && typeof p.id === "number" && String(p.attivo ?? "si") !== "no")
     .map((p) => ({ ...p, accordi: Array.isArray(p.accordi) ? p.accordi : [], note: p.note ?? "" }));
@@ -144,6 +165,12 @@ export function DatiProvider({ children }: { children: ReactNode }) {
         const d = pulisci(grezzo);
         const g = grezzo as { diario?: Voce[]; diarioChiuso?: boolean; chi?: Chi };
         setChi(g.chi ?? null);
+        try {
+          if (g.chi?.persona) localStorage.setItem(PERSONA_COPIA, g.chi.persona);
+          else localStorage.removeItem(PERSONA_COPIA);
+        } catch {
+          /* niente */
+        }
         if (Array.isArray(g.diario)) {
           diario.impostaConfermate(g.diario);
           setStatoChiave("giusta");
@@ -159,8 +186,10 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       })
       .catch(async (e: unknown) => {
         if (!vivo) return;
-        // avvio a freddo senza rete e senza copia sul telefono: la copia notturna del repo (data/*.json)
-        if (!leggiCopia()) {
+        // avvio a freddo senza rete e senza copia sul telefono: la copia notturna del repo (data/*.json), che è
+        // la collezione di Danilo: non per chi è entrato con un altro account
+        const altri = !!leggiSessione() && !!personaDellaCopia() && personaDellaCopia() !== "danilo";
+        if (!leggiCopia() && !altri) {
           const d = await leggiDalRepo();
           if (d && vivo) {
             setDati(d);

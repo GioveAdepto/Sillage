@@ -4,7 +4,7 @@ import { IconaAvanti } from "../componenti/Icone";
 import { IN_ARRIVO, OrigineDati } from "./Segnaposto";
 
 /* Altro: l'indice delle pagine che non stanno nella barra in basso. */
-const QUI = ["layering", "guida", "acquisti", "confronta", "impostazioni"];
+const QUI = ["layering", "guida", "acquisti", "confronta", "catalogo", "vetrine", "impostazioni"];
 
 export default function Altro() {
   useEffect(() => {

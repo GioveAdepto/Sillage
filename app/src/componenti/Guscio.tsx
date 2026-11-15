@@ -12,7 +12,7 @@ const VOCI: { a: string; nome: string; Icona: ComponentType<{ className?: string
   { a: "/consigliami", nome: "Consigliami", Icona: IconaGoccia, anche: (p) => p === "/consigliami" },
   { a: "/diario", nome: "Diario", Icona: IconaDiario, anche: (p) => p === "/diario" },
   { a: "/numeri", nome: "Numeri", Icona: IconaNumeri, anche: (p) => p === "/numeri" },
-  { a: "/altro", nome: "Altro", Icona: IconaAltro, anche: (p) => p === "/altro" || SOTTO_ALTRO.some((s) => p === "/" + s) }
+  { a: "/altro", nome: "Altro", Icona: IconaAltro, anche: (p) => p === "/altro" || SOTTO_ALTRO.some((s) => p === "/" + s || p.startsWith("/" + s + "/")) }
 ];
 
 export default function Guscio() {
