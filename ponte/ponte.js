@@ -9,6 +9,10 @@
      POST /api?azione=diario&op=...    metti, togli o nota, con la chiave o con l'accesso
      POST /api?azione=residuo&id&valore  quanto resta in una boccetta, con la chiave o con l'accesso
      POST /api?azione=collega          collega l'account (accesso) a Danilo, con la chiave; scollega=si lo toglie
+     POST /api?azione=registrati&nome  un account nuovo diventa una persona, con la vetrina vuota (accesso)
+     POST /api?azione=catalogo         tutte le schede, per «Ce l'ho» (accesso o chiave)
+     POST /api?azione=possesso&op=aggiungi|togli&id[&tipo&ml]  «Ce l'ho» / «Non ce l'ho più» (accesso o chiave)
+     POST /api?azione=vetrine          chi c'è in Sillage; azione=vetrina&di=… la sua collezione, senza privati
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
      POST /api?azione=importa&conferma=si  ricopia il catalogo DAL foglio (solo per rimediare), con la chiave
@@ -187,6 +191,90 @@ async function collega(env, db, p) {
     return { errore: "Danilo è già collegato a un altro account: per cambiarlo aggiungi sostituisci=si" };
   await db.prepare("UPDATE persone SET account = ? WHERE id = ?").bind(a.account, P).run();
   return { ok: true, collegato: true, persona: P, email: a.email };
+}
+
+// ── LE PERSONE (tappa 4) ──────────────────────────────────────────────────
+/* Registrazione libera, come CheMetto: un account buono che non è ancora nessuno diventa una persona nuova,
+   con il nome che sceglie e la vetrina vuota. Una persona per account; rifarlo non ne crea un'altra. */
+const nomePulito = s => String(s || "").replace(/\s+/g, " ").trim().slice(0, 30);
+async function registrati(env, db, p) {
+  const a = await verificaAccesso(env, String(p.get("accesso") || ""));
+  if (!a.account) return { errore: "accesso " + (a.errore || "mancante") + ": rientra nell'account" };
+  const gia = await db.prepare("SELECT id, nome FROM persone WHERE account = ?").bind(a.account).first();
+  if (gia) return { ok: true, gia: true, persona: gia.id, nome: gia.nome };
+  const nome = nomePulito(p.get("nome"));
+  if (!nome) return { errore: "manca il nome con cui comparire in Sillage" };
+  const id = "p" + [...crypto.getRandomValues(new Uint8Array(6))].map(b => (b % 36).toString(36)).join("");
+  const ora = Date.now(), t = await leggiTabsPersona(db, id);   // vuota: nessun possesso, nessuna tab
+  await db.batch([
+    db.prepare("INSERT INTO persone (id, account, nome, ruolo, creata) VALUES (?, ?, ?, 'persona', ?)").bind(id, a.account, nome, ora),
+    ...passiVista(db, id, t, ora)
+  ]);
+  return { ok: true, persona: id, nome };
+}
+
+/* Il catalogo comune: tutte le schede, con quello che serve per sceglierle («Ce l'ho»). Non dice chi le ha. */
+async function catalogo(db) {
+  const colonne = JSON.parse((await leggiStato(db, "colonne-profumi")) || "[]");
+  const schede = (await db.prepare("SELECT id, dati FROM schede ORDER BY id").all()).results
+    .map(r => ({ id: r.id, dati: JSON.parse(r.dati) }));
+  const righe = ricomponiProfumi(colonne, schede, schede.map((s, posto) => ({ scheda: s.id, posto, attivo: "si" }))).righe;
+  const profumi = profumiPerApp(righe).map(x => ({ id: x.id, brand: x.brand, name: x.name, conc: x.conc, famiglia: x.famiglia,
+    colore: x.colore, img: x.img, accordi: (x.accordi || []).slice(0, 3), stagioni: x.stagioni, rating: x.rating }));
+  return { ok: true, profumi };
+}
+
+/* «Ce l'ho» e «Non ce l'ho più» sulla propria collezione. Togliere non cancella: il possesso resta con
+   attivo=no, così le voci del diario che lo nominano restano leggibili, e «Ce l'ho» di nuovo lo riaccende. */
+const oggi = () => new Date().toISOString().slice(0, 10);
+async function possesso(db, persona, p) {
+  const id = Number(p.get("id")), op = p.get("op");
+  if (!Number.isInteger(id) || id <= 0 || !["aggiungi", "togli"].includes(op)) return { errore: "richiesta non valida" };
+  const [scheda, mio] = await db.batch([
+    db.prepare("SELECT id FROM schede WHERE id = ?").bind(id),
+    db.prepare("SELECT attivo FROM possessi WHERE persona = ? AND scheda = ?").bind(persona, id)
+  ]);
+  if (!scheda.results.length) return { errore: "profumo sconosciuto: " + id };
+  const ce = mio.results[0], ora = Date.now();
+  let passo;
+  if (op === "aggiungi") {
+    const tipo = p.get("tipo") === "campione" ? "campione" : "full";
+    const ml = Number(p.get("ml")), formato = ml > 0 && ml <= 1000 ? String(Math.round(ml * 10) / 10) : "";
+    if (ce && String(ce.attivo).toLowerCase() !== "no") return { ok: true, gia: true };
+    passo = ce
+      ? db.prepare("UPDATE possessi SET attivo = 'si', tipo_possesso = ?, formato_ml = ?, aggiornato = ? WHERE persona = ? AND scheda = ?")
+          .bind(tipo, formato, ora, persona, id)
+      : db.prepare(`INSERT INTO possessi (persona, scheda, posto, tipo_possesso, formato_ml, num_flaconi, residuo_pct, note_personali,
+           aggiunto, attivo, nuovo, aggiornato)
+         SELECT ?, ?, COALESCE((SELECT MAX(posto) FROM possessi WHERE persona = ?), -1) + 1, ?, ?, '1', '', '', ?, 'si', '', ?`)
+          .bind(persona, id, persona, tipo, formato, oggi(), ora);
+  } else {
+    if (!ce || String(ce.attivo).toLowerCase() === "no") return { ok: true, assente: true };
+    passo = db.prepare("UPDATE possessi SET attivo = 'no', aggiornato = ? WHERE persona = ? AND scheda = ?").bind(ora, persona, id);
+  }
+  await passo.run();
+  const t = await leggiTabsPersona(db, persona);
+  await db.batch(passiVista(db, persona, t, ora));
+  return { ok: true, [op === "aggiungi" ? "aggiunto" : "tolto"]: true };
+}
+
+/* Le vetrine degli altri (decisione dell'utente: agli altri si mostra solo la collezione). Le vede solo chi è
+   entrato. Mai il diario, le note personali, il residuo, le ricette di layering o i consigli. */
+const PRIVATI = ["notePersonali", "residuoPct"];
+async function vetrine(db) {
+  const r = await db.prepare(`SELECT p.id, p.nome, (SELECT COUNT(*) FROM possessi x WHERE x.persona = p.id AND x.attivo <> 'no') AS profumi
+    FROM persone p ORDER BY p.creata`).all();
+  return { ok: true, persone: r.results };
+}
+async function vetrina(db, di) {
+  const [persona, pezzo] = await Promise.all([
+    db.prepare("SELECT id, nome FROM persone WHERE id = ?").bind(String(di || "")).first(),
+    leggiStato(db, "vista:" + String(di || ""))
+  ]);
+  if (!persona || !pezzo) return { errore: "vetrina sconosciuta" };
+  const v = JSON.parse("{" + pezzo + "}");
+  return { ok: true, di: persona.id, nome: persona.nome, note: v.note, layering: [], consigli: [],
+           profumi: v.profumi.map(x => Object.fromEntries(Object.entries(x).filter(([k]) => !PRIVATI.includes(k)))) };
 }
 
 // ── DALLE RIGHE DEL FOGLIO AL JSON DELL'APP (come Codice.gs) ──────────────
@@ -691,11 +779,16 @@ async function rispondi(request, env, ctx) {
     return testo(await corpo(db, chi.persona || P, !!chi.persona, chi));
   }
   if (azione === "collega") return json(await collega(env, db, p));
-  if (azione === "diario" || azione === "residuo") {
-    // il diario e il residuo sono di chi scrive: l'accesso collegato o, fino alla tappa 5, la chiave
+  if (azione === "registrati") return json(await registrati(env, db, p));
+  if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina"].includes(azione)) {
+    // tutto di chi scrive (o guarda): l'accesso collegato o, fino alla tappa 5, la chiave
     const chi = await chiE(env, db, p);
     if (!chi.persona) return json(senzaPersona(chi));
-    const esito = azione === "diario" ? await scriviDiario(db, chi.persona, p) : await segnaResiduo(db, chi.persona, p);
+    if (azione === "catalogo") return json(await catalogo(db));
+    if (azione === "vetrine") return json(await vetrine(db));
+    if (azione === "vetrina") return json(await vetrina(db, p.get("di")));
+    const esito = azione === "diario" ? await scriviDiario(db, chi.persona, p)
+      : azione === "residuo" ? await segnaResiduo(db, chi.persona, p) : await possesso(db, chi.persona, p);
     if (esito.ok && !esito.gia && !esito.assente) copiaDopo(env, ctx);
     return json(esito);
   }

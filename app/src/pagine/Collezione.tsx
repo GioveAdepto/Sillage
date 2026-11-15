@@ -207,6 +207,28 @@ export default function Collezione() {
     );
   }
 
+  // chi è appena entrato in Sillage: la vetrina vuota, con le due strade per riempirla
+  if (!dati.profumi.length) {
+    return (
+      <section className="attesa vetrina-vuota">
+        <p className="incisa">La tua collezione</p>
+        <h1 className="marchio">Sillage</h1>
+        <div className="filo-ottone" />
+        <p className="testo">La tua vetrina è vuota. Mettici i profumi che hai: boccette e campioni.</p>
+        <Link className="btn-filo pieno" to="/catalogo">
+          Cerca tra i profumi di Sillage
+        </Link>
+        <p className="testo-piccolo">
+          Sono già schedati, con i loro dati: basta toccare «Ce l'ho». Per un profumo che in Sillage non c'è ancora arriverà «Aggiungi
+          profumo».
+        </p>
+        <Link className="collegamento" to="/vetrine">
+          Guarda le vetrine degli altri
+        </Link>
+      </section>
+    );
+  }
+
   const nAttivi = filtri.size + note.size;
   const filtrata = !!(nAttivi || cerca.trim());
   const teca = (p: Profumo, i: number) => (

@@ -99,6 +99,7 @@ strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
 strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
 strumenti/supabase-finto.mjs un Supabase Auth finto, per provare gli account (vedi «Provare gli account»)
 strumenti/prova-accesso.mjs prove degli account sul ponte locale col Supabase finto
+strumenti/prova-persone.mjs prove della seconda persona e dell'isolamento sul ponte locale
 strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
 strumenti/verifica-filtri.mjs confronta filtri, scelte rapide e ordinamenti della Collezione con l'app di oggi
 strumenti/schermate-avvio.py rifà le schermate d'avvio (la vetrina chiusa, chiara e scura)
@@ -125,9 +126,10 @@ src/viste/filtri.ts      filtri, scelte rapide e ordinamenti della Collezione (d
 src/viste/osare.ts       «Se vuoi osare, con…»: la ricetta di layering in Consigliami (da js/consigliami.js)
 src/componenti/          Guscio, Icone, Piedistallo (con la boccetta presa in mano), Apertura (la vetrina che si apre),
                          VersioneNuova, Avvisi, Ruota (degli accordi), Righe (sezioni, classifiche),
-                         Tessera (profumo che porta alla teca), pezzi comuni (Boccetta, Mini, meno movimento)
+                         Tessera (profumo che porta alla teca), pezzi comuni (Boccetta, Mini, meno movimento),
+                         CeLho («Ce l'ho» e le letture dal ponte di catalogo e vetrine)
 src/pagine/              Collezione, Scheda, Consigliami, Diario, Numeri, Layering, Guida, Acquisti, Confronta,
-                         Impostazioni, Altro, Segnaposto (pagina non trovata)
+                         Catalogo, Vetrine (e la vetrina di un altro), Impostazioni, Altro, Segnaposto (pagina non trovata)
 src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, diario,
                          viste, rifiniture (vetrina, luce sul vetro, esame, avviso, cassetto), pagine
 ```
@@ -186,7 +188,9 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/?v=campioni&f=verde,ufficio&n=vetiver&o=rating&q=…` | filtri (`f`), note (`n`), ordine (`o`) e ricerca stanno nell'indirizzo: «indietro» li ritrova, una nuova apertura riparte pulita. Il cassetto (`cassetto=1`) si chiude anche con «indietro», senza perdere le scelte | fatta |
 | `#/?vedi=24` | arrivo da un'altra pagina: vetrina giusta, filtri tolti, si scorre alla teca (chiusa) e si illumina | fatta |
 | `#/profumo/24` | **Scheda**: piedistallo col faretto, voto/durata/sillage, «Lo metto oggi» (con occasione e momento, e il link all'appunto), piramide, accordi con la forza, stagioni (quella di ora in ottone), giorno e sera, uso, note personali, «Su di te» (dagli appunti), racconto, parentele (copia di…), somiglia a, layering, formato e residuo da toccare, link a Fragrantica, «Confronta con…», «Condividi la scheda». La boccetta vola dalla teca al piedistallo (View Transition), ci ondeggia come presa in mano e, toccata, si guarda da vicino | fatta |
-| `#/altro` | **Altro**: indice di Layering, Guida, Acquisti, Confronta, Impostazioni, e da dove arrivano i dati | fatta |
+| `#/altro` | **Altro**: indice di Layering, Guida, Acquisti, Confronta, Il catalogo, Le vetrine, Impostazioni, e da dove arrivano i dati | fatta |
+| `#/catalogo` | **Il catalogo**: tutti i profumi già schedati in Sillage, con la ricerca e «Ce l'ho» (boccetta o campione) | fatta (account, tappa 4) |
+| `#/vetrine`, `#/vetrina/p…` | **Le vetrine**: le altre persone di Sillage e la collezione di ciascuna, in sola lettura, con «Ce l'ho» | fatta (account, tappa 4) |
 | `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro), «Se vuoi osare, con…» (la ricetta di layering, con «Lo faccio») e «Lo metto oggi»; quattro alternative coi tre motivi più forti e «Lo metto»; le ore sulla pelle; «Mai indossati, se vuoi riscoprirli»; il pulsante per il meteo di dove sei | fatta (tappe 2 e 3) |
 | `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
 | `#/diario?vista=settimana` | **La settimana**: un suggerimento al giorno da lunedì a domenica, con l'occasione da cambiare e «Lo metto» per oggi; i giorni passati dicono cosa hai messo | fatta (tappa 3) |
@@ -232,6 +236,15 @@ rating. Diario e voti personali non entrano. Boccette e campioni insieme.
   corpo della richiesta (`accesso=…`), come la chiave. La prima volta Danilo lo collega al suo diario con
   «Collega l'account al mio diario», sul telefono che ha già la chiave (`azione=collega`, `ponte/LEGGIMI.md`);
   da lì diario e residuo funzionano col solo account. Il ponte dice chi ha riconosciuto (`chi`, in `useDati`).
+- **Le altre persone** (tappa 4, registrazione libera come CheMetto): Impostazioni ▸ Il tuo account ▸ Registrati
+  (nome in Sillage, email, password di almeno 8 caratteri), oppure Entra con un account CheMetto e «Crea la mia
+  vetrina». Si arriva alla **vetrina vuota** (Collezione), con «Cerca tra i profumi di Sillage» → `#/catalogo`
+  e «Ce l'ho» (boccetta o campione, `componenti/CeLho.tsx`). «Non ce l'ho più» sta in fondo alla scheda.
+  **Le vetrine degli altri** (Altro ▸ Le vetrine, `#/vetrine`, `#/vetrina/<persona>`): solo la collezione, in
+  sola lettura, con «Ce l'ho» per chi ne ha uno anche lui. **Uscendo** il telefono scorda la vetrina e il diario
+  di chi c'era (`scordaCopie`); prima devono partire le scritture in coda. Il ripiego della copia notturna del
+  repo, senza rete, vale solo per Danilo. La chiave, in Impostazioni, è chiusa sotto «Hai la chiave di Sillage?»
+  per chi non ce l'ha.
 - **La chiave** si inserisce in Altro ▸ Impostazioni e resta solo nel `localStorage` di questo telefono
   (`sillage-app:chiave`). Viaggia sempre nel corpo della richiesta, mai nell'indirizzo, e non si mostra.
   Funziona come prima fino alla tappa 5. Senza account né chiave (o se il ponte non li riconosce) il diario
@@ -358,6 +371,14 @@ il ponte locale con `--var SUPABASE_URL:http://127.0.0.1:8898` e l'app costruita
 locale nuovo): collegamento solo con chiave e accesso insieme, diario e residuo col solo accesso, token scaduti,
 falsi o di un altro progetto rifiutati, catalogo solo con la chiave. Nell'app: Impostazioni ▸ Il tuo account ▸
 Entra, poi «Collega l'account al mio diario» (con la chiave `prova` salvata), poi si può togliere la chiave.
+
+Poi `node strumenti/prova-persone.mjs` (50 controlli, **obbligatoria a ogni cambio di ponte o account**): una
+seconda persona si registra, ha la vetrina vuota, usa il catalogo comune e «Ce l'ho», scrive diario e residuo
+suoi; non legge né tocca niente di Danilo; vede la sua vetrina senza note personali né residuo; non può fare i
+lavori di Claude; la vetrina pubblica di Danilo resta identica. Nell'app: Impostazioni ▸ Registrati (password
+di ogni email nel Supabase finto: `prova1234`), vetrina vuota, «Cerca tra i profumi di Sillage», «Ce l'ho», Altro ▸
+Le vetrine. Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
+devono aprirsi senza errori.
 
 **Prima/dopo di Consigliami** (obbligatorio a ogni modifica del punteggio, regola dell'utente):
 

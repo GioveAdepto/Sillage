@@ -1,5 +1,5 @@
 /* Un Supabase Auth FINTO per le prove degli account (porta 8898): chiavi pubbliche, accesso con password,
-   rinnovo, uscita. Nessuna richiesta al progetto vero. Password valida per ogni email: «prova1234».
+   registrazione, rinnovo, uscita. Nessuna richiesta al progetto vero. Password valida per ogni email: «prova1234».
    Esporta anche firma() per le prove del ponte (token buoni, scaduti, falsi): strumenti/prova-accesso.mjs.
 
    Si lancia dalla cartella app/:   node strumenti/supabase-finto.mjs
@@ -38,7 +38,7 @@ export function firma(email, o = {}) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const rinnovi = new Map();
+  const rinnovi = new Map(), iscritti = new Set();
   const sessione = (email, scade) => {
     const refresh = randomUUID(); rinnovi.set(refresh, email);
     return { access_token: firma(email, { scade }), token_type: "bearer", expires_in: scade, expires_at: Math.floor(Date.now() / 1000) + scade,
@@ -67,6 +67,15 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       if (!email) return manda(400, { error: "invalid_grant", error_description: "Invalid Refresh Token: Refresh Token Not Found" });
       rinnovi.delete(d.refresh_token);
       console.log("rinnovo:", email);
+      return manda(200, sessione(email, SCADE));
+    }
+    if (u.pathname === "/auth/v1/signup") {
+      // come CheMetto, senza conferma dell'email: si è subito dentro. danilo@esempio.it esiste già.
+      const email = String(d.email || "").toLowerCase();
+      if (email === "danilo@esempio.it" || iscritti.has(email)) return manda(422, { code: 422, msg: "User already registered" });
+      if (String(d.password || "").length < 8) return manda(422, { code: 422, msg: "Password should be at least 8 characters." });
+      iscritti.add(email);
+      console.log("registrazione:", email);
       return manda(200, sessione(email, SCADE));
     }
     if (u.pathname === "/auth/v1/logout") return manda(204, {});
