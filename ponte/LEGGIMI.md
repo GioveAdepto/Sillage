@@ -61,6 +61,28 @@ ponte manda tutte le tab, lo script le riscrive come testo semplice, con le
 colonne dove sono. Se il foglio non risponde, il ponte riprova ogni 5 minuti;
 una volta al giorno (verso le 3 UTC) la copia si rifà comunque.
 
+### Gli account (tappa 3)
+
+Si entra con l'account di **CheMetto** (Supabase Auth del progetto `cnjzhksnhkyezocjejyy`, `SUPABASE_URL` in
+`wrangler.jsonc`): email e password, nell'app in Altro ▸ Impostazioni. Non serve usare CheMetto: è solo la
+stessa «portineria». I dati di Sillage restano tutti qui, in D1.
+
+- L'app manda il token dell'account nel corpo della richiesta (`accesso=…`), come la chiave. Il ponte ne
+  controlla la firma con le **chiavi pubbliche** del progetto (`/auth/v1/.well-known/jwks.json`, ES256: nessun
+  segreto da custodire), poi che non sia scaduto e che venga da quel progetto.
+- Il token dice quale account è; a quale persona corrisponde lo dice `persone.account`. Un account non
+  collegato non vede né scrive niente di nessuno (`chi.daCollegare`).
+- **Collegare l'account a Danilo**: `azione=collega` con la chiave **e** l'accesso insieme (dall'app:
+  Impostazioni ▸ «Collega l'account al mio diario», sul telefono che ha già la chiave). Così solo chi ha la
+  chiave può dire «questo account sono io». `scollega=si` (solo la chiave) toglie il collegamento.
+- Chi sei, per ogni richiesta: un accesso buono collegato → quella persona; altrimenti la chiave giusta →
+  Danilo (fino alla tappa 5); niente → nessuno. `azione=leggi` lo dice all'app nel campo `chi`.
+- Diario e residuo: con l'accesso o con la chiave. Catalogo (`modifica`), `sincronizza`, `importa`,
+  `confronta`, `riporta`: **solo con la chiave**, sono lavori di Claude.
+- Gli errori di chi non è riconosciuto cominciano con «chiave…» o «accesso…»: l'app tiene in coda le voci e
+  riprova (per esempio dopo aver rinnovato un token scaduto).
+- Registrarsi, la seconda persona e la sua vetrina vuota arrivano con la tappa 4.
+
 ## Indirizzi
 
 `https://sillage.danilo-moro96.workers.dev/api`
@@ -68,9 +90,10 @@ una volta al giorno (verso le 3 UTC) la copia si rifà comunque.
 | richiesta | cosa fa |
 |---|---|
 | `GET /api` | tutto, senza il diario |
-| `POST /api?azione=leggi` | tutto, diario compreso, con la chiave |
-| `POST /api?azione=diario&op=metti\|togli\|nota&…` | il diario, con la chiave |
-| `POST /api?azione=residuo&id=…&valore=…` | il residuo, con la chiave |
+| `POST /api?azione=leggi` | tutto, diario compreso, con la chiave o l'accesso; `chi` dice chi ha riconosciuto |
+| `POST /api?azione=diario&op=metti\|togli\|nota&…` | il diario, con la chiave o l'accesso |
+| `POST /api?azione=residuo&id=…&valore=…` | il residuo, con la chiave o l'accesso |
+| `POST /api?azione=collega` (`scollega=si` per togliere) | collega l'account dell'accesso a Danilo, con la chiave |
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |
 | `POST /api?azione=importa&conferma=si` | ricopia il catalogo **dal** foglio: solo per rimediare, con la chiave |
@@ -78,7 +101,7 @@ una volta al giorno (verso le 3 UTC) la copia si rifà comunque.
 | `POST /api?azione=riporta&conferma=si` | riscrive le tabelle di prima con quelle per persona (per tornare indietro), con la chiave |
 | `GET /api?stato=1` | quanti profumi, ultima copia nel foglio, se una copia è in attesa, da quando ci sono le tabelle per persona |
 
-La chiave viaggia nel corpo della richiesta (`chiave=…`), mai nell'indirizzo.
+La chiave (`chiave=…`) e l'accesso (`accesso=…`) viaggiano nel corpo della richiesta, mai nell'indirizzo.
 
 ## Messa in opera
 
@@ -100,6 +123,8 @@ tornare indietro: `GET /api?stato=1` deve dire `copiaInAttesa: false`.
   con la chiave (riscrive `tabelle` e `diario` con tutto quello che c'è nelle nuove, poi le confronta:
   deve dire `identiche: true`), poi annullare l'unione della tappa 2. Il ponte di prima riparte senza
   perdere niente; provato in locale.
+- **Tappa 3** (gli account): annullare l'unione. La chiave ha sempre continuato a funzionare, quindi l'app
+  di prima riparte da sola; `persone.account` resta scritto ma nessuno lo usa.
 - **Tappa 1**: annullare il commit; le tabelle nuove restano nel database, inutilizzate.
 
 - **Al foglio come originale del catalogo** (diario e residuo restano al
@@ -115,7 +140,9 @@ npx wrangler@4 dev --test-scheduled --var FOGLIO_URL:http://127.0.0.1:8899/exec 
 ```
 
 con un Web App finto su 8899 che risponde a `grezzo` e `specchio` (nessuna
-scrittura arriva al foglio vero): `node app/strumenti/foglio-finto.mjs`.
+scrittura arriva al foglio vero): `node app/strumenti/foglio-finto.mjs`. Per provare gli account senza
+toccare il progetto Supabase vero: un Supabase finto che dà le sue chiavi pubbliche e i suoi token, e
+`--var SUPABASE_URL:http://127.0.0.1:8898` (vedi `app/LEGGIMI.md`, «Prove»).
 
 `wrangler dev` (come ogni pubblicazione) prima costruisce l'app in `sito/` e la serve alla radice: la prima
 volta installa i pacchetti di `app/`. Attenzione: costruita così l'app parla col ponte **pubblicato**; per farle

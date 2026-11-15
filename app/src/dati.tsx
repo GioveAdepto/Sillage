@@ -1,21 +1,33 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Dati, Profumo } from "./tipi";
 import { numeraCatalogo } from "./profumo";
-import { PONTE, diario, leggiChiave } from "./ponte";
+import { PONTE, credenziali, diario, leggiChiave } from "./ponte";
+import { leggiSessione } from "./accesso";
 import type { Voce } from "./diario/coda";
 
 /* Da dove arrivano i profumi: il ponte verso il database (ponte/ponte.js), con CORS aperto.
-   Con la chiave si chiede tutto, diario compreso (POST azione=leggi, chiave nel corpo); senza, il catalogo
-   (GET). L'ultima risposta buona resta in localStorage: senza rete l'app riparte da lì. Il diario confermato
+   Con la chiave o con l'account si chiede tutto, diario compreso (POST azione=leggi, credenziali nel corpo);
+   senza, il catalogo (GET). L'ultima risposta buona resta in localStorage: senza rete l'app riparte da lì. Il diario confermato
    ha la sua copia (src/diario/coda.ts). */
 export { PONTE };
 const CHIAVE_COPIA = "sillage-app:dati";
 const ATTESA_MAX = 8000; // ms oltre i quali si rinuncia al ponte e si resta sulla copia
 
 export type Origine = "ponte" | "copia" | "repo" | "nessuna";
-/** assente: nessuna chiave sul telefono; giusta: il ponte ha dato il diario; sbagliata: il ponte l'ha rifiutata;
-    da-provare: c'è, ma il ponte non ha ancora risposto */
+/** Chi sei per il database: assente: né chiave né account su questo telefono; giusta: il ponte ti ha riconosciuto
+    e ha dato il diario; sbagliata: il ponte non ti ha riconosciuto; da-provare: c'è qualcosa, il ponte non ha ancora
+    risposto */
 export type StatoChiave = "assente" | "giusta" | "sbagliata" | "da-provare";
+/** Quello che il ponte dice di chi ha riconosciuto (azione=leggi). */
+export interface Chi {
+  persona?: string;
+  nome?: string;
+  da?: "chiave" | "accesso";
+  email?: string;
+  daCollegare?: boolean;
+  accessoNonValido?: string;
+}
+const haCredenziali = () => !!(leggiChiave() || leggiSessione());
 
 interface StatoDati {
   dati: Dati | null;
@@ -27,6 +39,8 @@ interface StatoDati {
   numeri: Map<number, number>;
   perId: Map<number, Profumo>;
   statoChiave: StatoChiave;
+  /** chi ti ha riconosciuto il ponte all'ultima lettura (null: non ancora, o senza rete) */
+  chi: Chi | null;
   riprova: () => void;
   /** cambia un profumo sul telefono (per esempio il residuo appena salvato) */
   aggiornaProfumo: (id: number, campi: Partial<Profumo>) => void;
@@ -84,20 +98,23 @@ export function DatiProvider({ children }: { children: ReactNode }) {
   const [carica, setCarica] = useState(true);
   const [errore, setErrore] = useState<string | null>(null);
   const [giro, setGiro] = useState(0);
-  const [statoChiave, setStatoChiave] = useState<StatoChiave>(() => (leggiChiave() ? "da-provare" : "assente"));
+  const [statoChiave, setStatoChiave] = useState<StatoChiave>(() => (haCredenziali() ? "da-provare" : "assente"));
+  const [chi, setChi] = useState<Chi | null>(null);
 
-  // una chiave nuova (o tolta) in Impostazioni: si rilegge subito
+  // una chiave nuova (o tolta) in Impostazioni, un'entrata o un'uscita dall'account: si rilegge subito
   useEffect(() => {
     const cambia = () => {
-      setStatoChiave(leggiChiave() ? "da-provare" : "assente");
+      setStatoChiave(haCredenziali() ? "da-provare" : "assente");
       setGiro((g) => g + 1);
     };
     // tornata la rete: si rilegge, così il diario e lo stato della chiave tornano veri
     const rete = () => setGiro((g) => g + 1);
     window.addEventListener("sillage-chiave", cambia);
+    window.addEventListener("sillage-accesso", cambia);
     window.addEventListener("online", rete);
     return () => {
       window.removeEventListener("sillage-chiave", cambia);
+      window.removeEventListener("sillage-accesso", cambia);
       window.removeEventListener("online", rete);
     };
   }, []);
@@ -108,12 +125,16 @@ export function DatiProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(() => ctrl.abort(), ATTESA_MAX);
     setCarica(true);
     const chiave = leggiChiave();
-    fetch(
-      PONTE,
-      chiave
-        ? { method: "POST", signal: ctrl.signal, cache: "no-store", body: new URLSearchParams({ azione: "leggi", chiave }) }
-        : { signal: ctrl.signal, cache: "no-store" }
-    )
+    // con chiave o account si chiede tutto, diario compreso (POST, credenziali nel corpo); senza, il catalogo (GET)
+    credenziali()
+      .then((c) =>
+        fetch(
+          PONTE,
+          c.chiave || c.accesso
+            ? { method: "POST", signal: ctrl.signal, cache: "no-store", body: new URLSearchParams({ azione: "leggi", ...c }) }
+            : { signal: ctrl.signal, cache: "no-store" }
+        )
+      )
       .then((r) => {
         if (!r.ok) throw new Error("il ponte ha risposto " + r.status);
         return r.json();
@@ -121,12 +142,13 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       .then((grezzo) => {
         if (!vivo) return;
         const d = pulisci(grezzo);
-        const g = grezzo as { diario?: Voce[]; diarioChiuso?: boolean };
+        const g = grezzo as { diario?: Voce[]; diarioChiuso?: boolean; chi?: Chi };
+        setChi(g.chi ?? null);
         if (Array.isArray(g.diario)) {
           diario.impostaConfermate(g.diario);
           setStatoChiave("giusta");
-          void diario.sincronizza(); // con la chiave giusta parte quello che aspettava
-        } else if (chiave) {
+          void diario.sincronizza(); // riconosciuto: parte quello che aspettava
+        } else if (chiave || leggiSessione()) {
           diario.segnalaChiave();
           setStatoChiave("sbagliata");
         } else setStatoChiave("assente");
@@ -178,10 +200,11 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       numeri: numeraCatalogo(profumi),
       perId: new Map(profumi.map((p) => [p.id, p])),
       statoChiave,
+      chi,
       riprova,
       aggiornaProfumo
     };
-  }, [dati, origine, carica, errore, riprova, statoChiave, aggiornaProfumo]);
+  }, [dati, origine, carica, errore, riprova, statoChiave, chi, aggiornaProfumo]);
 
   return <Contesto.Provider value={valore}>{children}</Contesto.Provider>;
 }

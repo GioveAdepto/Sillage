@@ -5,16 +5,18 @@
 
    Parla come il Web App di Apps Script, così l'app non ha dovuto cambiare:
      GET  /api                         tutto, senza il diario (diarioChiuso: true)
-     POST /api?azione=leggi            tutto, diario compreso, con la chiave
-     POST /api?azione=diario&op=...    metti, togli o nota, con la chiave
-     POST /api?azione=residuo&id&valore  quanto resta in una boccetta, con la chiave
+     POST /api?azione=leggi            tutto, diario compreso, con la chiave o con l'accesso
+     POST /api?azione=diario&op=...    metti, togli o nota, con la chiave o con l'accesso
+     POST /api?azione=residuo&id&valore  quanto resta in una boccetta, con la chiave o con l'accesso
+     POST /api?azione=collega          collega l'account (accesso) a Danilo, con la chiave; scollega=si lo toglie
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
      POST /api?azione=importa&conferma=si  ricopia il catalogo DAL foglio (solo per rimediare), con la chiave
      POST /api?azione=confronta        le tabelle per persona danno lo stesso di quelle di prima?, con la chiave
      POST /api?azione=riporta&conferma=si  riscrive le tabelle di prima con quelle per persona (per tornare indietro), con la chiave
      GET  /api?stato=1                 a che punto è la copia nel foglio
-   La chiave arriva nel corpo della richiesta (chiave=...), mai nell'indirizzo.
+   La chiave (chiave=...) e l'accesso dell'account (accesso=<token>) arrivano nel corpo della richiesta,
+   mai nell'indirizzo.
 
    Dalla tappa 2 degli account i dati stanno nelle tabelle per persona:
    schede (i profumi, uguali per tutti), possessi, voci del diario e tab di
@@ -87,6 +89,104 @@ function chiaveGiusta(env, parametri) {
   let diversi = 0;                       // confronto a tempo costante
   for (let i = 0; i < vera.length; i++) diversi |= vera.charCodeAt(i) ^ data.charCodeAt(i);
   return diversi === 0;
+}
+
+// ── L'ACCESSO CON L'ACCOUNT (tappa 3) ─────────────────────────────────────
+/* Si entra con l'account di CheMetto (Supabase Auth del suo progetto, SUPABASE_URL in wrangler.jsonc):
+   l'app manda nel corpo della richiesta `accesso=<token>`, il ponte ne controlla la firma con le chiavi
+   pubbliche del progetto (ES256, nessun segreto da custodire), la scadenza e il progetto che l'ha dato.
+   Il token dice solo quale account è: a quale persona di Sillage corrisponde lo dice la tabella persone. */
+let chiaviAccesso = null, chiaviPrese = 0, chiaviRichieste = 0;
+async function chiaviPubbliche(env, forza) {
+  const ora = Date.now();
+  if (chiaviAccesso && (!forza || ora - chiaviRichieste < 60000) && ora - chiaviPrese < 3600000) return chiaviAccesso;
+  chiaviRichieste = ora;
+  const r = await fetch(env.SUPABASE_URL + "/auth/v1/.well-known/jwks.json");
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const m = new Map();
+  for (const k of (await r.json()).keys || []) {
+    if (k.kty !== "EC" || k.crv !== "P-256") continue;
+    m.set(k.kid, await crypto.subtle.importKey("jwk", { kty: k.kty, crv: k.crv, x: k.x, y: k.y, ext: true },
+      { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]));
+  }
+  chiaviAccesso = m; chiaviPrese = ora;
+  return m;
+}
+const daBase64url = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const leggiParte = s => JSON.parse(new TextDecoder().decode(daBase64url(s)));
+
+/** { account, email } se il token è buono; { errore } se no ("scaduto", "non valido", "non verificabile ora"). */
+async function verificaAccesso(env, token) {
+  if (!env.SUPABASE_URL) return { errore: "non verificabile ora" };
+  const parti = String(token).split(".");
+  if (parti.length !== 3) return { errore: "non valido" };
+  let testa, dati;
+  try { testa = leggiParte(parti[0]); dati = leggiParte(parti[1]); } catch (e) { return { errore: "non valido" }; }
+  if (testa.alg !== "ES256") return { errore: "non valido" };
+  let chiave;
+  try {
+    chiave = (await chiaviPubbliche(env)).get(testa.kid) || (await chiaviPubbliche(env, true)).get(testa.kid);
+  } catch (e) { return { errore: "non verificabile ora" }; }
+  if (!chiave) return { errore: "non valido" };
+  let firma = false;
+  try {
+    firma = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, chiave, daBase64url(parti[2]),
+      new TextEncoder().encode(parti[0] + "." + parti[1]));
+  } catch (e) { firma = false; }
+  if (!firma) return { errore: "non valido" };
+  const pubblico = [].concat(dati.aud || []);
+  if (dati.iss !== env.SUPABASE_URL + "/auth/v1" || !pubblico.includes("authenticated") || !dati.sub) return { errore: "non valido" };
+  if (!(Number(dati.exp) > Date.now() / 1000)) return { errore: "scaduto" };
+  return { account: String(dati.sub), email: String(dati.email || "") };
+}
+
+/* Chi sta facendo la richiesta:
+   - un accesso buono collegato a una persona → quella persona;
+   - altrimenti la chiave giusta → Danilo (fino alla tappa 5);
+   - un accesso buono ma non ancora collegato, senza chiave → nessuna persona, daCollegare;
+   - niente di buono → nessuna persona, con l'errore da dare all'app. */
+async function chiE(env, db, p) {
+  const token = String(p.get("accesso") || "").trim();
+  const conChiave = chiaveGiusta(env, p);
+  const chi = {};
+  if (token) {
+    const a = await verificaAccesso(env, token);
+    if (a.account) {
+      chi.account = a.account; chi.email = a.email;
+      const persona = await db.prepare("SELECT id, nome FROM persone WHERE account = ?").bind(a.account).first();
+      if (persona) return { ...chi, persona: persona.id, nome: persona.nome, da: "accesso" };
+      chi.daCollegare = true;
+    } else chi.accessoNonValido = a.errore;
+  }
+  if (conChiave) return { ...chi, persona: PRIMA_PERSONA.id, nome: PRIMA_PERSONA.nome, da: "chiave" };
+  return chi;
+}
+// L'errore per chi non è nessuno: l'app tiene in coda le voci rifiutate con «chiave…» o «accesso…»
+function senzaPersona(chi) {
+  if (chi.accessoNonValido) return { errore: "accesso " + chi.accessoNonValido + ": rientra nell'account" };
+  if (chi.daCollegare) return { errore: "accesso non ancora collegato a una persona di Sillage" };
+  return SENZA_CHIAVE;
+}
+
+/* Collega l'account a Danilo: servono insieme la chiave giusta e un accesso buono, così solo chi ha già la
+   chiave può dire «questo account sono io». Con scollega=si (solo la chiave) il collegamento si toglie. */
+async function collega(env, db, p) {
+  const P = PRIMA_PERSONA.id;
+  if (!chiaveGiusta(env, p)) return SENZA_CHIAVE;
+  if (p.get("scollega") === "si") {
+    await db.prepare("UPDATE persone SET account = NULL WHERE id = ?").bind(P).run();
+    return { ok: true, scollegato: true };
+  }
+  const a = await verificaAccesso(env, String(p.get("accesso") || ""));
+  if (!a.account) return { errore: "accesso " + (a.errore || "mancante") + ": rientra nell'account" };
+  const gia = await db.prepare("SELECT id, account FROM persone WHERE account = ? OR id = ?").bind(a.account, P).all();
+  const altra = gia.results.find(r => r.account === a.account && r.id !== P);
+  if (altra) return { errore: "questo account è già di un'altra persona di Sillage" };
+  const io = gia.results.find(r => r.id === P);
+  if (io && io.account && io.account !== a.account && p.get("sostituisci") !== "si")
+    return { errore: "Danilo è già collegato a un altro account: per cambiarlo aggiungi sostituisci=si" };
+  await db.prepare("UPDATE persone SET account = ? WHERE id = ?").bind(a.account, P).run();
+  return { ok: true, collegato: true, persona: P, email: a.email };
 }
 
 // ── DALLE RIGHE DEL FOGLIO AL JSON DELL'APP (come Codice.gs) ──────────────
@@ -204,7 +304,9 @@ async function pronto(env, host) {
 
 // ── LETTURA ───────────────────────────────────────────────────────────────
 const vocePerApp = r => ({ data: r.data, id: r.id, t: r.t, nota: r.nota, voto: r.voto, occasione: r.occasione, momento: r.momento });
-async function corpo(db, persona, conDiario) {
+/* `chi` (solo per azione=leggi) dice all'app chi ha riconosciuto: persona, nome, se dalla chiave o
+   dall'accesso, l'email dell'account, e se l'accesso è da collegare o non valido. */
+async function corpo(db, persona, conDiario, chi) {
   const pezzo = await leggiStato(db, "vista:" + persona);
   if (!pezzo) return null;
   let s = "{" + pezzo;
@@ -212,6 +314,7 @@ async function corpo(db, persona, conDiario) {
     const voci = (await db.prepare("SELECT * FROM voci WHERE persona = ? ORDER BY t").bind(persona).all()).results;
     s += ',"diario":' + JSON.stringify(voci.map(vocePerApp));
   } else s += ',"diarioChiuso":true';
+  if (chi) s += ',"chi":' + JSON.stringify(chi);
   return s + ',"aggiornato":' + JSON.stringify(new Date().toISOString()) + "}";
 }
 
@@ -563,7 +666,7 @@ async function rispondi(request, env, ctx) {
   if (url.pathname !== "/api" && !url.pathname.startsWith("/api/")) return new Response("Non trovato", { status: 404 });
   const db = env.DB;
   await pronto(env, url.hostname);
-  // per ora una persona sola: la chiave (e chi legge senza) vuol dire Danilo. Gli account arrivano alla tappa 3.
+  // chi legge senza chiave né accesso vede la vetrina di Danilo, senza diario, come prima degli account
   const P = PRIMA_PERSONA.id;
 
   if (request.method === "GET") {
@@ -583,8 +686,21 @@ async function rispondi(request, env, ctx) {
   if (!ct || /x-www-form-urlencoded|text\/plain/.test(ct)) new URLSearchParams(await request.text()).forEach((v, k) => p.set(k, v));
   const azione = p.get("azione");
 
-  if (azione === "leggi") return testo(await corpo(db, P, chiaveGiusta(env, p)));
-  if (!["diario", "residuo", "modifica", "sincronizza", "importa", "confronta", "riporta"].includes(azione)) return json({ errore: "azione sconosciuta: " + azione });
+  if (azione === "leggi") {
+    const chi = await chiE(env, db, p);
+    return testo(await corpo(db, chi.persona || P, !!chi.persona, chi));
+  }
+  if (azione === "collega") return json(await collega(env, db, p));
+  if (azione === "diario" || azione === "residuo") {
+    // il diario e il residuo sono di chi scrive: l'accesso collegato o, fino alla tappa 5, la chiave
+    const chi = await chiE(env, db, p);
+    if (!chi.persona) return json(senzaPersona(chi));
+    const esito = azione === "diario" ? await scriviDiario(db, chi.persona, p) : await segnaResiduo(db, chi.persona, p);
+    if (esito.ok && !esito.gia && !esito.assente) copiaDopo(env, ctx);
+    return json(esito);
+  }
+  // il resto (catalogo, copia nel foglio, passaggio) solo con la chiave: sono lavori di Claude, non dell'app
+  if (!["modifica", "sincronizza", "importa", "confronta", "riporta"].includes(azione)) return json({ errore: "azione sconosciuta: " + azione });
   if (!chiaveGiusta(env, p)) return json(SENZA_CHIAVE);
 
   if (azione === "confronta") return json(await confronta(db));
@@ -610,9 +726,6 @@ async function rispondi(request, env, ctx) {
     if (!prova && esito.cambiate.length) { await salvaCatalogo(db, P, t, esito.cambiate); copiaDopo(env, ctx); }
     return json(esito);
   }
-  const esito = azione === "diario" ? await scriviDiario(db, P, p) : await segnaResiduo(db, P, p);
-  if (esito.ok && !esito.gia && !esito.assente) copiaDopo(env, ctx);
-  return json(esito);
 }
 
 export default {

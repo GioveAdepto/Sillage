@@ -97,6 +97,8 @@ strumenti/scontorna.py   rifà le foto scontornate: python scontorna.py <cartell
 strumenti/prima-dopo.mjs confronta la classifica di Consigliami tra l'app di oggi e la nuova (vedi «Prove»)
 strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
 strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
+strumenti/supabase-finto.mjs un Supabase Auth finto, per provare gli account (vedi «Provare gli account»)
+strumenti/prova-accesso.mjs prove degli account sul ponte locale col Supabase finto
 strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
 strumenti/verifica-filtri.mjs confronta filtri, scelte rapide e ordinamenti della Collezione con l'app di oggi
 strumenti/schermate-avvio.py rifà le schermate d'avvio (la vetrina chiusa, chiara e scura)
@@ -111,7 +113,8 @@ src/profumo.ts           le regole portate da js/collezione.js e js/dati.js, com
 src/consiglio.ts         il punteggio di Consigliami, portato da js/consigliami.js (niente React: lo usa anche il prima/dopo)
 src/meteo.ts             Open-Meteo: posizione, scaricamento, finestra delle ore sulla pelle (da js/dati.js)
 src/dati.tsx             lettura dal ponte (con la chiave anche il diario), copia in localStorage, useDati
-src/ponte.ts             l'indirizzo del ponte, la chiave, le scritture, il diario unico dell'app
+src/ponte.ts             l'indirizzo del ponte, la chiave, le credenziali (chiave e accesso), le scritture, il diario unico dell'app
+src/accesso.ts           l'account: entrare, rinnovare e uscire con Supabase Auth (quello di CheMetto), il token per il ponte
 src/diario/coda.ts       il diario e la coda delle scritture (niente React: lo usano anche le prove)
 src/diario/uso.tsx       useDiario, l'invio al ritorno della rete, useSegna
 src/diario/pezzi.tsx     «Lo metto oggi», occasione e momento di una voce, «Su di te»
@@ -161,7 +164,7 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro), «Se vuoi osare, con…» (la ricetta di layering, con «Lo faccio») e «Lo metto oggi»; quattro alternative coi tre motivi più forti e «Lo metto»; le ore sulla pelle; «Mai indossati, se vuoi riscoprirli»; il pulsante per il meteo di dove sei | fatta (tappe 2 e 3) |
 | `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
 | `#/diario?vista=settimana` | **La settimana**: un suggerimento al giorno da lunedì a domenica, con l'occasione da cambiare e «Lo metto» per oggi; i giorni passati dicono cosa hai messo | fatta (tappa 3) |
-| `#/impostazioni` | **Impostazioni**: la chiave di Sillage, la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3) |
+| `#/impostazioni` | **Impostazioni**: il tuo account (entra, collega al diario, esci), la chiave di Sillage, la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3; account dalla tappa 3 degli account) |
 | `#/numeri` | **Numeri**: boccette, campioni, marchi, rating e durata medi, mappa olfattiva (anche coi campioni), stagione e famiglia, occasioni d'uso, accordi più presenti, classifiche per rating e durata, cloni e originali, storico delle aggiunte, il diario (questo mese, le più indossate, da riprendere, per stagione, rotazione del mese), profilo Fragrantica | fatta (tappa 4) |
 | `#/layering?tipo=app&ricetta=4` | **Layering**: le quattro regole, i filtri per tipo, le ricette da aprire (sopra e sotto con le dosi, come si fa, risultato, perché, quando) e «Lo faccio oggi» | fatta (tappa 4) |
 | `#/guida?occ=ufficio` | **Guida**: le sette occasioni; per ognuna le boccette per stagione (quella in corso prima), con moderazione, in ufficio anche le altre (1 spray), e i campioni | fatta (tappa 4) |
@@ -194,12 +197,20 @@ rating. Diario e voti personali non entrano. Boccette e campioni insieme.
 - «Se vuoi osare, con…» (`src/viste/osare.ts`): la ricetta di layering col primo consiglio, la più adatta
   all'occasione e alla stagione; non tocca la classifica e il prima/dopo la confronta con l'app di oggi.
 
-## Diario, chiave e residuo
+## Diario, account, chiave e residuo
 
+- **L'account** (tappa 3): quello di CheMetto, email e password, in Altro ▸ Impostazioni ▸ Il tuo account
+  (`src/accesso.ts`, senza librerie: entrare, rinnovare, uscire con tre richieste a Supabase Auth). La sessione
+  resta nel `localStorage` di questo telefono (`sillage-app:accesso`) finché non si esce: dice chi sei, non
+  dove eri. Il token dura un'ora e si rinnova da solo quando serve; senza rete resta quello che c'è. Viaggia nel
+  corpo della richiesta (`accesso=…`), come la chiave. La prima volta Danilo lo collega al suo diario con
+  «Collega l'account al mio diario», sul telefono che ha già la chiave (`azione=collega`, `ponte/LEGGIMI.md`);
+  da lì diario e residuo funzionano col solo account. Il ponte dice chi ha riconosciuto (`chi`, in `useDati`).
 - **La chiave** si inserisce in Altro ▸ Impostazioni e resta solo nel `localStorage` di questo telefono
   (`sillage-app:chiave`). Viaggia sempre nel corpo della richiesta, mai nell'indirizzo, e non si mostra.
-  Senza chiave (o con quella sbagliata) il diario non si legge e la pagina lo dice; quello che segni resta
-  in coda sul telefono e parte appena la chiave è giusta.
+  Funziona come prima fino alla tappa 5. Senza account né chiave (o se il ponte non li riconosce) il diario
+  non si legge e la pagina lo dice; quello che segni resta in coda sul telefono e parte appena il ponte sa chi
+  sei (i rifiuti «chiave…» e «accesso…» lasciano la voce in coda).
 - **La coda** (`src/diario/coda.ts`, chiave `sillage-app:diario-coda`) è quella dell'app di oggi: ogni voce
   messa, tolta o annotata si vede subito e aspetta lì finché il ponte non la conferma. È salvata prima di
   ogni invio, quindi chiudere l'app con la coda piena non perde niente. Parte a ogni scrittura, all'avvio,
@@ -308,6 +319,19 @@ npm run anteprima
 (il secondo dalla radice del repo). In Impostazioni la chiave è `prova`; Impostazioni ▸ I dati dice
 «ponte locale di prova». Prima di pubblicare si ricostruisce senza `VITE_PONTE`. Il database locale sta in
 `.wrangler/` (fuori da git).
+
+**Provare gli account** (nessuna richiesta al progetto Supabase vero): in più un Supabase finto,
+
+```bash
+cd app
+node strumenti/supabase-finto.mjs                     # porta 8898; password di ogni email: prova1234
+```
+
+il ponte locale con `--var SUPABASE_URL:http://127.0.0.1:8898` e l'app costruita anche con
+`VITE_SUPABASE_URL=http://127.0.0.1:8898`. Poi `node strumenti/prova-accesso.mjs` (31 controlli, su un database
+locale nuovo): collegamento solo con chiave e accesso insieme, diario e residuo col solo accesso, token scaduti,
+falsi o di un altro progetto rifiutati, catalogo solo con la chiave. Nell'app: Impostazioni ▸ Il tuo account ▸
+Entra, poi «Collega l'account al mio diario» (con la chiave `prova` salvata), poi si può togliere la chiave.
 
 **Prima/dopo di Consigliami** (obbligatorio a ogni modifica del punteggio, regola dell'utente):
 

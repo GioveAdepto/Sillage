@@ -23,7 +23,7 @@ export interface Memoria {
   leggi(k: string): string | null;
   scrivi(k: string, v: string): void;
 }
-/** Manda una scrittura al ponte (la chiave la aggiunge chi trasporta). Lancia un errore se la rete manca. */
+/** Manda una scrittura al ponte (chiave e accesso li aggiunge chi trasporta). Lancia un errore se la rete manca. */
 export type Trasporto = (parametri: Record<string, string>) => Promise<{ stato: number; corpo: Record<string, unknown> | null }>;
 
 export const MAX_GIORNO = 2;
@@ -34,7 +34,8 @@ export const oggiISO = (d = new Date()) =>
   d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 export const ruoloStrato = (v: Voce) => (String(v.t).length === 14 ? +String(v.t).slice(-1) : 0);
 export const coppiaDi = (v: Voce) => String(v.t).slice(0, 13);
-const rifiutoChiave = (e: Record<string, unknown> | null) => !!e && /^chiave/.test(String(e.errore || ""));
+// «chiave…» o «accesso…»: il ponte non sa chi sei (ancora); la voce resta in coda e riparte dopo
+const rifiutoChiave = (e: Record<string, unknown> | null) => !!e && /^(chiave|accesso)/.test(String(e.errore || ""));
 
 export type Esito = { ok: true } | { ok: false; avviso: string };
 

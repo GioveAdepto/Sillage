@@ -34,7 +34,10 @@
   "keep_vars": true,
   "vars": {
     // Il Web App del foglio: il ponte ci riscrive la copia del catalogo e del diario.
-    "FOGLIO_URL": "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec"
+    "FOGLIO_URL": "https://script.google.com/macros/s/AKfycbz6i7ZF6FNBboUYZdKjJi1oS_dcbjtEdsCsGyrCxkVKNKIq61j7-H14N8zhDWpOr7w1og/exec",
+    // Gli account: quelli di CheMetto (Supabase Auth). Il ponte ne verifica gli accessi con le chiavi
+    // pubbliche del progetto (ponte/LEGGIMI.md, «Gli account»); nessun segreto.
+    "SUPABASE_URL": "https://cnjzhksnhkyezocjejyy.supabase.co"
   }
   // La chiave di Sillage è un segreto (SILLAGE_CHIAVE), impostato nel pannello di
   // Cloudflare: Workers ▸ sillage ▸ Settings ▸ Variables and Secrets.
