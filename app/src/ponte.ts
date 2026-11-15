@@ -1,4 +1,5 @@
 import { Diario, type Memoria } from "./diario/coda";
+import { tokenAccesso } from "./accesso";
 
 /* Il ponte verso il database (ponte/ponte.js) e la chiave di Sillage.
    Per le prove in locale si costruisce l'app con VITE_PONTE=http://127.0.0.1:8787/api (vedi LEGGIMI):
@@ -26,11 +27,21 @@ export function scriviChiave(k: string) {
   window.dispatchEvent(new Event("sillage-chiave"));
 }
 
-/** Una scrittura al ponte: i parametri nell'indirizzo, la chiave nel corpo (come l'app di oggi). */
+/** Chi sei, per il ponte: la chiave (fino alla tappa 5 degli account) e il token dell'account, se sei entrato.
+    Viaggiano sempre nel corpo della richiesta, mai nell'indirizzo. */
+export async function credenziali(): Promise<Record<string, string>> {
+  const c: Record<string, string> = {};
+  const chiave = leggiChiave(), accesso = await tokenAccesso();
+  if (chiave) c.chiave = chiave;
+  if (accesso) c.accesso = accesso;
+  return c;
+}
+
+/** Una scrittura al ponte: i parametri nell'indirizzo, chiave e accesso nel corpo. */
 export async function scriviAlPonte(parametri: Record<string, string>) {
   const r = await fetch(PONTE + "?" + new URLSearchParams(parametri), {
     method: "POST",
-    body: new URLSearchParams({ chiave: leggiChiave() })
+    body: new URLSearchParams(await credenziali())
   });
   let corpo: Record<string, unknown> | null = null;
   try {
@@ -40,7 +51,8 @@ export async function scriviAlPonte(parametri: Record<string, string>) {
   }
   return { stato: r.status, corpo };
 }
-export const rifiutoChiave = (e: Record<string, unknown> | null) => !!e && /^chiave/.test(String(e.errore || ""));
+/** Il ponte non sa chi sei (chiave o accesso mancante, sbagliato o scaduto): si riprova dopo, niente va perso. */
+export const rifiutoChiave = (e: Record<string, unknown> | null) => !!e && /^(chiave|accesso)/.test(String(e.errore || ""));
 
 const memoria: Memoria = {
   leggi: (k) => {

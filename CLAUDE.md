@@ -34,6 +34,8 @@ più vera, correggila subito.
   riscritta dal ponte; `data/*.json` è la copia notturna; `data/diario.enc` il diario cifrato.
 - **La chiave di Sillage** protegge diario, residuo e modifiche al catalogo. In locale sta in
   `C:\Projects\Sillage\.dev.vars` (ignorato da git). Mai nel repo, nelle risposte o negli indirizzi.
+- **Gli account** (in corso, a tappe): quelli di CheMetto (Supabase Auth), dati per persona in D1; la chiave
+  resta per Claude e, fino alla tappa 5, per l'app. Dettagli in `ponte/LEGGIMI.md`.
 - **Controlli**: `.github/workflows/prova.yml` costruisce l'app, la confronta con quella di prima (punteggio di
   Consigliami, numeri, filtri, coda del diario) e la percorre in un browser con un ponte finto.
 
