@@ -56,14 +56,6 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
     cosa: ["Fino a tre profumi affiancati, scelti dalla Collezione"]
   },
   {
-    percorso: "catalogo",
-    titolo: "Il catalogo",
-    breve: "Tutti i profumi di Sillage: «Ce l'ho»",
-    tappa: "",
-    pronta: true,
-    cosa: ["I profumi già schedati in Sillage, da mettere nella propria vetrina"]
-  },
-  {
     percorso: "vetrine",
     titolo: "Le vetrine",
     breve: "Le collezioni degli altri",
@@ -82,7 +74,7 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
 ];
 
 /** Le pagine che stanno sotto «Altro» nella barra in basso. */
-export const SOTTO_ALTRO = ["layering", "guida", "acquisti", "confronta", "catalogo", "vetrine", "vetrina", "impostazioni", "aggiungi"];
+export const SOTTO_ALTRO = ["layering", "guida", "acquisti", "confronta", "vetrine", "vetrina", "impostazioni", "aggiungi"];
 
 const dataOra = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleString("it-IT", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "non si sa quando";

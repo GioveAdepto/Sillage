@@ -10,8 +10,8 @@
      POST /api?azione=residuo&id&valore  quanto resta in una boccetta, con la chiave o con l'accesso
      POST /api?azione=collega          collega l'account (accesso) a Danilo, con la chiave; scollega=si lo toglie
      POST /api?azione=registrati&nome  un account nuovo diventa una persona, con la vetrina vuota (accesso)
-     POST /api?azione=catalogo         tutte le schede, per «Ce l'ho» (accesso o chiave)
-     POST /api?azione=possesso&op=aggiungi|togli&id[&tipo&ml]  «Ce l'ho» / «Non ce l'ho più» (accesso o chiave)
+     POST /api?azione=catalogo         tutte le schede, per «Aggiungi profumo» (accesso o chiave)
+     POST /api?azione=possesso&op=aggiungi|togli&id[&tipo&ml]  aggiungi una scheda già in Sillage / «Togli dalla vetrina» (accesso o chiave)
      POST /api?azione=vetrine          chi c'è in Sillage; azione=vetrina&di=… la sua collezione, senza privati
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
@@ -213,7 +213,7 @@ async function registrati(env, db, p) {
   return { ok: true, persona: id, nome };
 }
 
-/* Il catalogo comune: tutte le schede, con quello che serve per sceglierle («Ce l'ho»). Non dice chi le ha. */
+/* Il catalogo comune: tutte le schede, con quello che serve per sceglierle («Aggiungi profumo»). Non dice chi le ha. */
 async function catalogo(db) {
   const colonne = JSON.parse((await leggiStato(db, "colonne-profumi")) || "[]");
   const schede = (await db.prepare("SELECT id, dati FROM schede ORDER BY id").all()).results
@@ -224,8 +224,8 @@ async function catalogo(db) {
   return { ok: true, profumi };
 }
 
-/* «Ce l'ho» e «Non ce l'ho più» sulla propria collezione. Togliere non cancella: il possesso resta con
-   attivo=no, così le voci del diario che lo nominano restano leggibili, e «Ce l'ho» di nuovo lo riaccende. */
+/* Aggiungere una scheda già in Sillage («Aggiungi profumo») e «Togli dalla vetrina» sulla propria collezione. Togliere non cancella: il possesso resta con
+   attivo=no, così le voci del diario che lo nominano restano leggibili, e aggiungerlo di nuovo lo riaccende. */
 const oggi = () => new Date().toISOString().slice(0, 10);
 async function possesso(db, persona, p) {
   const id = Number(p.get("id")), op = p.get("op");

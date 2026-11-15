@@ -207,21 +207,16 @@ export default function Collezione() {
     );
   }
 
-  // chi è appena entrato in Sillage: la vetrina vuota, con le due strade per riempirla
+  // chi è appena entrato in Sillage: la vetrina vuota. I profumi si aggiungeranno da Altro ▸ Aggiungi profumo
+  // (decisione dell'utente: un solo modo per aggiungere), che non c'è ancora: niente date promesse.
   if (!dati.profumi.length) {
     return (
       <section className="attesa vetrina-vuota">
         <p className="incisa">La tua collezione</p>
         <h1 className="marchio">Sillage</h1>
         <div className="filo-ottone" />
-        <p className="testo">La tua vetrina è vuota. Mettici i profumi che hai: boccette e campioni.</p>
-        <Link className="btn-filo pieno" to="/catalogo">
-          Cerca tra i profumi di Sillage
-        </Link>
-        <p className="testo-piccolo">
-          Sono già schedati, con i loro dati: basta toccare «Ce l'ho». Per un profumo che in Sillage non c'è ancora arriverà «Aggiungi
-          profumo».
-        </p>
+        <p className="testo">La tua vetrina è vuota.</p>
+        <p className="testo-piccolo">I tuoi profumi, boccette e campioni, si potranno aggiungere da Altro ▸ Aggiungi profumo.</p>
         <Link className="collegamento" to="/vetrine">
           Guarda le vetrine degli altri
         </Link>
