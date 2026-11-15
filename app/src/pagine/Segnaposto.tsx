@@ -74,10 +74,10 @@ export const IN_ARRIVO: PaginaInArrivo[] = [
   {
     percorso: "impostazioni",
     titolo: "Impostazioni",
-    breve: "Account, chiave, posizione per il meteo, dati",
+    breve: "Account, posizione per il meteo, dati",
     tappa: "Tappa 3",
     pronta: true,
-    cosa: ["La chiave di Sillage", "La posizione per il meteo", "Da dove arrivano i dati e la versione dell'app"]
+    cosa: ["Il tuo account", "La posizione per il meteo", "Da dove arrivano i dati e la versione dell'app"]
   }
 ];
 

@@ -76,7 +76,10 @@ stessa «portineria». I dati di Sillage restano tutti qui, in D1.
   Impostazioni ▸ «Collega l'account al mio diario», sul telefono che ha già la chiave). Così solo chi ha la
   chiave può dire «questo account sono io». `scollega=si` (solo la chiave) toglie il collegamento.
 - Chi sei, per ogni richiesta: un accesso buono collegato → quella persona; altrimenti la chiave giusta →
-  Danilo (fino alla tappa 5); niente → nessuno. `azione=leggi` lo dice all'app nel campo `chi`.
+  Danilo; niente → nessuno. Dalla tappa 5 l'app non chiede più la chiave (si entra con l'account e la
+  vecchia chiave sparisce da sola dal telefono collegato): il ponte la accetta ancora perché è la **chiave
+  di servizio** di Claude (`applica.mjs`, `confronta`, `riporta`), della copia notturna (che legge il diario
+  di Danilo per `data/diario.enc`) e di `sincronizza`. `azione=leggi` lo dice all'app nel campo `chi`.
 - Diario e residuo: con l'accesso o con la chiave. Catalogo (`modifica`), `sincronizza`, `importa`,
   `confronta`, `riporta`: **solo con la chiave**, sono lavori di Claude.
 - Gli errori di chi non è riconosciuto cominciano con «chiave…» o «accesso…»: l'app tiene in coda le voci e
@@ -147,6 +150,8 @@ tornare indietro: `GET /api?stato=1` deve dire `copiaInAttesa: false`.
   con la chiave (riscrive `tabelle` e `diario` con tutto quello che c'è nelle nuove, poi le confronta:
   deve dire `identiche: true`), poi annullare l'unione della tappa 2. Il ponte di prima riparte senza
   perdere niente; provato in locale.
+- **Tappa 5** (la chiave fuori dall'app): annullare l'unione. Un telefono a cui l'app ha già tolto la
+  chiave continua a funzionare con l'account; per rimetterla serve l'app di prima della tappa 5.
 - **Tappa 4** (le altre persone): annullare l'unione. Le persone registrate e i loro possessi restano nel
   database, inutilizzati; Danilo e le copie non cambiano.
 - **Tappa 3** (gli account): annullare l'unione. La chiave ha sempre continuato a funzionare, quindi l'app

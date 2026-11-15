@@ -1,8 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { scordaCopie, useDati } from "../dati";
 import { useMeteo } from "../meteo-contesto";
-import { PONTE, leggiChiave, scriviAlPonte, scriviChiave } from "../ponte";
+import { PONTE, leggiChiave, scriviAlPonte } from "../ponte";
 import { entra, esci, leggiSessione, registra } from "../accesso";
 import { useDiario } from "../diario/uso";
 import { useTitolo } from "../componenti/comuni";
@@ -210,27 +210,13 @@ function Account() {
   );
 }
 
-/** La chiave serve solo a chi ce l'ha già (Danilo, fino alla tappa 5): per gli altri sta chiusa in fondo. */
-function SeNascosta({ mostra, children }: { mostra: boolean; children: ReactNode }) {
-  if (mostra) return <>{children}</>;
-  return (
-    <details className="altri chiave-chiusa">
-      <summary>Hai la chiave di Sillage?</summary>
-      {children}
-    </details>
-  );
-}
-
-/* Impostazioni: il tuo account, la chiave di Sillage, la posizione per il meteo, da dove arrivano i dati e la
-   versione. La chiave resta solo nel localStorage di questo telefono e non si mostra mai per intero. */
+/* Impostazioni: il tuo account, la posizione per il meteo, da dove arrivano i dati e la versione. La chiave di
+   Sillage non si inserisce più (tappa 5 degli account): se il telefono ha ancora quella di prima, lo si dice, e se
+   ne va da sola appena l'account collegato basta (src/ponte.ts, scordaChiave). */
 export default function Impostazioni() {
   useTitolo("Impostazioni · Sillage");
-  const { statoChiave } = useDati();
   const { meteo, conPosto, scorda } = useMeteo();
-  const { diario } = useDiario();
-  const [nuova, setNuova] = useState("");
-  const salvata = leggiChiave();
-  const inCoda = diario.coda().length;
+  const vecchiaChiave = !!leggiChiave();
 
   return (
     <section className="impostazioni">
@@ -240,61 +226,12 @@ export default function Impostazioni() {
 
       <Account />
 
-      <SeNascosta mostra={!!salvata}>
-      <section className="sez" aria-labelledby="t-chiave">
-        <div className="sez-testa">
-          <h3 id="t-chiave">La chiave di Sillage</h3>
-          <i className="linea" />
-        </div>
+      {vecchiaChiave ? (
         <p className="testo-piccolo">
-          Protegge il diario, il residuo e il catalogo. Si inserisce una volta e resta solo su questo telefono: viaggia verso il database dentro
-          la richiesta, mai nell'indirizzo.
+          Su questo telefono c'è ancora la chiave di Sillage di prima: serve finché non entri con il tuo account collegato, poi se ne va da
+          sola.
         </p>
-        <p className={"stato-chiave " + statoChiave}>
-          {!salvata
-            ? "Nessuna chiave su questo telefono."
-            : statoChiave === "giusta"
-              ? "Chiave salvata: il diario è collegato."
-              : statoChiave === "sbagliata"
-                ? "La chiave salvata non è quella giusta."
-                : "Chiave salvata: si prova appena il database risponde."}
-          {inCoda ? ` ${inCoda} ${inCoda === 1 ? "scrittura aspetta" : "scritture aspettano"} di partire.` : ""}
-        </p>
-        <form
-          className="chiave-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const k = nuova.trim();
-            if (!k) return;
-            scriviChiave(k);
-            setNuova("");
-          }}
-        >
-          <label className="cerca">
-            <span className="vh">Chiave di Sillage</span>
-            <input
-              type="password"
-              autoComplete="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              placeholder={salvata ? "Incolla una chiave nuova per cambiarla" : "Incolla la chiave"}
-              value={nuova}
-              onChange={(e) => setNuova(e.target.value)}
-            />
-          </label>
-          <div className="chiave-azioni">
-            <button type="submit" className="btn-filo pieno" disabled={!nuova.trim()}>
-              Salva la chiave
-            </button>
-            {salvata ? (
-              <button type="button" className="btn-filo" onClick={() => scriviChiave("")}>
-                Togli la chiave
-              </button>
-            ) : null}
-          </div>
-        </form>
-      </section>
-      </SeNascosta>
+      ) : null}
 
       <section className="sez" aria-labelledby="t-meteo">
         <div className="sez-testa">

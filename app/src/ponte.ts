@@ -6,9 +6,8 @@ import { tokenAccesso } from "./accesso";
    mai scritture di prova sul ponte pubblicato. */
 export const PONTE: string = import.meta.env.VITE_PONTE || "https://sillage.danilo-moro96.workers.dev/api";
 
-/* La chiave protegge diario, residuo e catalogo. Si inserisce in Altro ▸ Impostazioni e resta solo nel
-   localStorage di questo telefono: non è memoria dello stato (l'app non ricorda dove eri, sa solo chi sei).
-   Viaggia sempre nel corpo della richiesta, mai nell'indirizzo. */
+/* La chiave di prima: resta nel localStorage del telefono che l'aveva, e viaggia nel corpo della richiesta, mai
+   nell'indirizzo, finché l'account collegato non la sostituisce (vedi scordaChiave). */
 const CHIAVE = "sillage-app:chiave";
 export function leggiChiave(): string {
   try {
@@ -35,6 +34,18 @@ export async function credenziali(): Promise<Record<string, string>> {
   if (chiave) c.chiave = chiave;
   if (accesso) c.accesso = accesso;
   return c;
+}
+
+/* La chiave esce dall'app (tappa 5 degli account): non si inserisce più. Chi ce l'ha ancora sul telefono
+   (Danilo, dall'app di prima) continua a usarla finché non entra con il suo account collegato; da lì, appena
+   la coda del diario è vuota, l'app la toglie da sola (scordaChiave), senza avvisi. La chiave resta solo come
+   chiave di servizio, fuori dall'app: applica.mjs, la copia notturna, sincronizza. */
+export function scordaChiave() {
+  try {
+    localStorage.removeItem(CHIAVE);
+  } catch {
+    /* niente da scordare */
+  }
 }
 
 /** Una scrittura al ponte: i parametri nell'indirizzo, chiave e accesso nel corpo. */

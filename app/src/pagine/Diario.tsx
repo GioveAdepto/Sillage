@@ -85,7 +85,7 @@ export default function Diario() {
         <div className="diario-chiave">
           {statoChiave === "assente" ? (
             <p>
-              Il diario è tuo: per leggerlo entra con il tuo account (o inserisci la chiave di Sillage) in{" "}
+              Il diario è tuo: per leggerlo entra con il tuo account in{" "}
               <Link className="collegamento" to="/impostazioni">
                 Impostazioni
               </Link>
@@ -93,7 +93,7 @@ export default function Diario() {
             </p>
           ) : statoChiave === "sbagliata" ? (
             <p>
-              Il database non ti ha riconosciuto (account non collegato, accesso scaduto o chiave sbagliata), e il diario non si può
+              Il database non ti ha riconosciuto (accesso scaduto o account senza vetrina), e il diario non si può
               leggere. Guarda in{" "}
               <Link className="collegamento" to="/impostazioni">
                 Impostazioni
