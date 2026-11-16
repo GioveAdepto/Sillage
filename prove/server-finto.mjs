@@ -3,6 +3,7 @@
    ponte/ponte.js, in memoria. Nessuna richiesta esce verso il ponte pubblicato.
    - GET /api: catalogo da data/*.json, diario chiuso;
    - POST /api azione=leggi | diario | residuo: chiave «prova», altrimenti «chiave sconosciuta» come il ponte;
+     azione=leggi dice chi ha riconosciuto (`chi`): con la chiave giusta Danilo, altrimenti nessuno;
    - riscriviPonte: nei .js serviti l'indirizzo del ponte pubblicato diventa questo server (per l'app di prima);
    - cambiaCartella(): la stessa porta passa a servire un'altra cartella (il passaggio tra le due app). */
 import { createServer } from "node:http";
@@ -35,7 +36,13 @@ export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = 
     if (req.method === "GET") return json(res, { ...catalogo(), diarioChiuso: true, aggiornato: new Date().toISOString() });
     const azione = p.get("azione"),
       giusta = p.get("chiave") === "prova";
-    if (azione === "leggi") return json(res, { ...catalogo(), ...(giusta ? { diario: [...stato.diario.values()] } : { diarioChiuso: true }), aggiornato: new Date().toISOString() });
+    if (azione === "leggi")
+      return json(res, {
+        ...catalogo(),
+        ...(giusta ? { diario: [...stato.diario.values()] } : { diarioChiuso: true }),
+        chi: giusta ? { persona: "danilo", nome: "Danilo", da: "chiave" } : {},
+        aggiornato: new Date().toISOString()
+      });
     if (!giusta) return json(res, { errore: "chiave sconosciuta: manca o non e' quella giusta" });
     if (azione === "residuo") {
       stato.residui.push({ id: +p.get("id"), valore: +p.get("valore") });

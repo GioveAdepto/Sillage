@@ -106,7 +106,8 @@ Registrazione libera, come CheMetto (scelta dell'utente).
   note personali e residuo; niente diario, layering né consigli). Le vede solo chi è entrato.
 - Ognuno scrive solo sul suo: diario, residuo e possessi vanno sempre alla persona riconosciuta, mai a
   un'altra. Il foglio Google, `data/*.json` e `data/diario.enc` restano solo di Danilo; `GET /api` (senza
-  account) resta la vetrina di Danilo, come prima.
+  account) resta la vetrina di Danilo, come prima, ma l'app non lo chiama più: chi non è entrato vede solo
+  l'ingresso (`app/LEGGIMI.md`, «L'ingresso»). Lo usano gli strumenti di verifica (`--ponte`).
 - Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (50 controlli).
 
 ## Indirizzi

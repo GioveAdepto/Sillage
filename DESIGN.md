@@ -51,6 +51,7 @@ Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei compone
 | `.tessera`, `.classifica`, `.aste`, `.segmenti` | viste.css | tessere, classifiche, barre di Numeri |
 | `.cassetto`, `.fondale`, `.tolgo` | rifiniture.css | cassetto dei filtri, filtri attivi |
 | `.avviso`, `.aggiornamento` | diario, rifiniture.css | avvisi brevi, «versione nuova» |
+| `.ingresso`, `.ingresso-carta`, `.ingresso-cambio` | rifiniture.css | l'ingresso di chi non è entrato: le ante chiuse e un cartoncino d'avorio con doppio filo d'ottone; il bottone spento resta a filo |
 
 ## Movimento
 
@@ -59,7 +60,8 @@ Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei compone
 - Teca → scheda: View Transition della boccetta (`boccetta-ID`); nella scheda la boccetta ondeggia (`in-mano`),
   toccata si guarda da vicino (`.esame`).
 - Vetrina d'apertura: due ante di travertino che ruotano verso l'esterno (`.apertura`); la schermata d'avvio
-  dell'iPhone è la stessa vetrina chiusa.
+  dell'iPhone è la stessa vetrina chiusa. Per chi non è entrato le ante restano chiuse sotto il cartoncino
+  d'ingresso (`.ingresso`) e si aprono quando entra; con «meno movimento» l'ingresso resta, senza animazione.
 - Luce sul vetro: col mouse la nicchia si inclina (`--rx`, `--ry`) e un riflesso la segue; col dito un riflesso
   passa una volta (`.riflesso.passa`), senza toccare lo scorrimento.
 - **`prefers-reduced-motion`** spegne tutto: animazioni, voli, inclinazioni, riflessi, vetrina.

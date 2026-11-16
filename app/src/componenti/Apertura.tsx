@@ -9,6 +9,10 @@ import { useMenoMovimento } from "./comuni";
    dell'app; con «meno movimento» non c'è. */
 const avvioPagina = performance.now();
 let giaAperta = false;
+/** L'ingresso (chi non è entrato) è già la vetrina chiusa: quando si apre lui, questa non si ripete. */
+export function segnaAperta() {
+  giaAperta = true;
+}
 
 export default function Apertura() {
   const { dati } = useDati();

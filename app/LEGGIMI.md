@@ -125,6 +125,7 @@ src/viste/condividi.ts   l'immagine della scheda da condividere (1080×1350)
 src/viste/filtri.ts      filtri, scelte rapide e ordinamenti della Collezione (da js/collezione.js e js/dati.js)
 src/viste/osare.ts       «Se vuoi osare, con…»: la ricetta di layering in Consigliami (da js/consigliami.js)
 src/componenti/          Guscio, Icone, Piedistallo (con la boccetta presa in mano), Apertura (la vetrina che si apre),
+                         Ingresso (la prima schermata di chi non è entrato) e ModuloAccesso (entra / registrati),
                          VersioneNuova, Avvisi, Ruota (degli accordi), Righe (sezioni, classifiche),
                          Tessera (profumo che porta alla teca), pezzi comuni (Boccetta, Mini, meno movimento),
                          dalPonte (le letture dal ponte delle vetrine degli altri)
@@ -193,6 +194,7 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro), «Se vuoi osare, con…» (la ricetta di layering, con «Lo faccio») e «Lo metto oggi»; quattro alternative coi tre motivi più forti e «Lo metto»; le ore sulla pelle; «Mai indossati, se vuoi riscoprirli»; il pulsante per il meteo di dove sei | fatta (tappe 2 e 3) |
 | `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
 | `#/diario?vista=settimana` | **La settimana**: un suggerimento al giorno da lunedì a domenica, con l'occasione da cambiare e «Lo metto» per oggi; i giorni passati dicono cosa hai messo | fatta (tappa 3) |
+| (qualunque indirizzo, senza account) | **L'ingresso**: la vetrina chiusa con il cartoncino «Entra con il tuo account di CheMetto» (email, password) e «Non hai un account? Registrati»; per chi è entrato ma non ha ancora una vetrina, «Ancora un passo» (il nome in Sillage). Entrando, le ante si aprono sulla Collezione | fatta (accesso iniziale) |
 | `#/impostazioni` | **Impostazioni**: il tuo account (entra, registrati, collega al diario, esci), la posizione per il meteo, da dove arrivano i dati | fatta (tappa 3; account dalla tappa 3 degli account) |
 | `#/numeri` | **Numeri**: boccette, campioni, marchi, rating e durata medi, mappa olfattiva (anche coi campioni), stagione e famiglia, occasioni d'uso, accordi più presenti, classifiche per rating e durata, cloni e originali, storico delle aggiunte, il diario (questo mese, le più indossate, da riprendere, per stagione, rotazione del mese), profilo Fragrantica | fatta (tappa 4) |
 | `#/layering?tipo=app&ricetta=4` | **Layering**: le quattro regole, i filtri per tipo, le ricette da aprire (sopra e sotto con le dosi, come si fa, risultato, perché, quando) e «Lo faccio oggi» | fatta (tappa 4) |
@@ -228,6 +230,19 @@ rating. Diario e voti personali non entrano. Boccette e campioni insieme.
 
 ## Diario, account, chiave e residuo
 
+- **L'ingresso** (16 novembre 2026, scelta dell'utente: «la prima pagina deve essere una pagina di login»):
+  chi apre Sillage senza account (né chiave di prima) vede solo `src/componenti/Ingresso.tsx`, a qualunque
+  indirizzo: la vetrina chiusa dell'apertura, con un cartoncino d'avorio «Entra con il tuo account di CheMetto»
+  e, sotto, «Non hai un account? Registrati». Dietro non c'è niente (né pagine né barra), e l'app **non chiede
+  niente al ponte**: niente `GET /api`, che darebbe la vetrina di Danilo. Prima degli account era così che chi
+  apriva il sito si trovava la collezione di Danilo. Entrando le ante si aprono sulla propria Collezione (`#/`).
+  Senza rete il cartoncino dice «Serve la rete per entrare» e il bottone resta spento. Chi è già entrato apre
+  diretto la sua vetrina, anche senza rete, come prima. L'ingresso copre anche chi è entrato ma il ponte non
+  riconosce (`chi` senza `persona`): un account CheMetto senza vetrina sceglie il nome («Ancora un passo»,
+  `azione=registrati`), un accesso scaduto o una chiave sbagliata rientrano. In quei casi il ponte risponde con la
+  vetrina di Danilo e `src/dati.tsx` la scarta, senza tenerne copia; la copia sul telefono vale solo se è di una
+  persona riconosciuta (`sillage-app:persona`), e il ripiego su `data/*.json` solo per Danilo. Le collezioni di
+  tutti restano visibili, a chi è entrato, da Altro ▸ Le vetrine (scelta dell'utente).
 - **L'account** (tappa 3): quello di CheMetto, email e password, in Altro ▸ Impostazioni ▸ Il tuo account
   (`src/accesso.ts`, senza librerie: entrare, rinnovare, uscire con tre richieste a Supabase Auth). La sessione
   resta nel `localStorage` di questo telefono (`sillage-app:accesso`) finché non si esce: dice chi sei, non
@@ -248,7 +263,7 @@ rating. Diario e voti personali non entrano. Boccette e campioni insieme.
   chiave di prima (`sillage-app:chiave`) continua a mandarla, nel corpo della richiesta, finché non entra con
   l'account collegato: da lì, appena la coda del diario è vuota, l'app la toglie da sola (`scordaChiave` in
   `src/ponte.ts`), e Impostazioni smette di dirlo. La chiave resta solo di servizio (`ponte/LEGGIMI.md`).
-  Senza account (o se il ponte non lo riconosce) il diario non si legge e la pagina lo dice; quello che segni
+  Senza account (o se il ponte non lo riconosce) si vede l'ingresso; quello che è rimasto da segnare
   resta in coda sul telefono e parte appena il ponte sa chi sei (i rifiuti «chiave…» e «accesso…» lasciano la
   voce in coda).
 - **La coda** (`src/diario/coda.ts`, chiave `sillage-app:diario-coda`) è quella dell'app di oggi: ogni voce
@@ -284,7 +299,9 @@ cambiata anche qui.
 ponte e dell'app di prima, la build come la fa Cloudflare, i quattro confronti qui sotto, poi due giri in
 Chromium col ponte finto (`prove/server-finto.mjs`, nessuna richiesta al ponte pubblicato):
 
-- `prove/prova-nuova.mjs`: Collezione con 41 profumi, Scheda, Consigliami, una voce messa senza rete (resta in
+- `prove/prova-nuova.mjs`: l'ingresso senza account (dice CheMetto, offre «Registrati», nessuna vetrina dietro,
+  nessuna richiesta al ponte) e con una chiave che il ponte non riconosce (ancora l'ingresso, nessuna copia); poi, con
+  la chiave di prova, Collezione con 41 profumi, Scheda, Consigliami, una voce messa senza rete (resta in
   coda, si vede, parte una volta sola al ritorno), il Diario, la riapertura senza rete, l'avvio a freddo col
   ponte giù (data/*.json);
 - `prove/prova-passaggio.mjs`: il passaggio dall'app di prima, alla radice e in `/Sillage/` (vedi «Il passaggio»).
