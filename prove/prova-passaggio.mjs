@@ -54,10 +54,11 @@ for (const prefisso of ["/", "/Sillage/"]) {
     await page.waitForSelector("#aggiornamento", { timeout: 10000 }).catch(() => null);
     controlla(await page.$("#aggiornamento"), "l'app di oggi ancora aperta propone «Aggiorna»");
 
-    // 3. si riapre: arriva l'app nuova, senza svuotare niente a mano
+    // 3. si riapre: arriva l'app nuova, senza svuotare niente a mano; la chiave finta il ponte non la riconosce,
+    //    quindi si vede l'ingresso, non la vetrina
     await page.goto(srv.url);
-    await page.waitForSelector(".scaffale .voce", { timeout: 30000 });
-    controlla((await page.textContent(".conta")).includes("41"), "alla riapertura c'è l'app nuova, con 41 profumi");
+    await page.waitForSelector(".ingresso-carta", { timeout: 30000 });
+    controlla(!(await page.$(".scaffale")), "alla riapertura c'è l'app nuova: con una chiave che il ponte non riconosce, l'ingresso");
     await aspetta(2500);
     const s = await page.evaluate(async () => ({
       chiave: localStorage.getItem("sillage-app:chiave"),

@@ -437,6 +437,158 @@
   min-width: 0;
 }
 
+/* L'ingresso (Ingresso.tsx): la vetrina chiusa dell'apertura, con un cartoncino d'avorio dal filo d'ottone per chi
+   non è entrato. Entrando, il cartoncino svanisce e le ante si aprono come all'avvio. */
+.ingresso {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--parete);
+  perspective: 1600px;
+  overflow: hidden;
+  transition: background-color 900ms var(--curva);
+}
+.ingresso::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 3;
+  width: 1px;
+  background: var(--ottone);
+  transition: opacity 400ms var(--curva);
+}
+.ingresso-scorre {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: max(28px, env(safe-area-inset-top)) max(var(--margine), env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom))
+    max(var(--margine), env(safe-area-inset-left));
+  transition:
+    opacity 600ms var(--curva),
+    transform 600ms var(--curva);
+}
+.ingresso-carta {
+  width: min(100%, 372px);
+  padding: 34px 26px 22px;
+  background: var(--avorio);
+  border: 1px solid var(--bordo-carta);
+  box-shadow:
+    inset 0 0 0 7px var(--avorio),
+    inset 0 0 0 8px var(--ottone),
+    0 24px 48px -26px var(--ombra-lunga);
+}
+.ingresso-testa {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+.ingresso-testa .apertura-s {
+  width: 62px;
+  height: 62px;
+  font-size: 34px;
+}
+.ingresso-nome {
+  margin: 4px -0.32em 0 0;
+  font: 500 26px/1 var(--f-maison);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--inchiostro);
+}
+.ingresso-sotto {
+  margin: 0;
+  font: 500 9.5px/1 var(--f-dati);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--seppia);
+}
+.ingresso-filo {
+  display: block;
+  width: 44px;
+  height: 1px;
+  margin: 22px auto 20px;
+  background: var(--ottone);
+}
+.ingresso-invito {
+  margin: 0 0 8px;
+  font: italic 500 23px/1.15 var(--f-maison);
+  color: var(--inchiostro);
+  text-align: center;
+  text-wrap: balance;
+}
+.ingresso-carta .testo-piccolo {
+  margin-bottom: 14px;
+  text-align: center;
+  text-wrap: pretty;
+}
+.ingresso-carta .chiave-form {
+  gap: 6px;
+}
+.ingresso-carta .chiave-azioni {
+  margin-top: 14px;
+}
+.ingresso-carta .chiave-azioni .btn-filo {
+  flex: 1;
+  min-height: 52px;
+}
+/* finché mancano email o password il bottone resta a filo, senza riempirsi */
+.ingresso-carta .btn-filo.pieno:disabled {
+  background: transparent;
+  border-color: var(--filo-3);
+  box-shadow: none;
+  color: var(--cenere);
+  cursor: default;
+}
+.ingresso-cambio {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--filo-2);
+  font: 400 13.5px/1.4 var(--f-dati);
+  color: var(--seppia);
+  text-align: center;
+}
+.ingresso-cambio button {
+  padding: 6px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--ottone);
+  background: none;
+  font: 500 11.5px/1 var(--f-dati);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ottone-testo);
+  cursor: pointer;
+}
+.ingresso-attesa {
+  margin: 0 0 12px;
+  font: italic 500 21px/1.2 var(--f-maison);
+  color: var(--seppia);
+  text-align: center;
+}
+.ingresso.apri {
+  background-color: transparent;
+  pointer-events: none;
+}
+.ingresso.apri::before {
+  opacity: 0;
+}
+.ingresso.apri .sinistra {
+  transform: rotateY(-82deg);
+  opacity: 0;
+}
+.ingresso.apri .destra {
+  transform: rotateY(82deg);
+  opacity: 0;
+}
+.ingresso.apri .ingresso-scorre {
+  opacity: 0;
+  transform: scale(1.03);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .apertura,
   .riflesso,
@@ -445,5 +597,11 @@
   }
   .vetro {
     transform: none !important;
+  }
+  /* l'ingresso resta (è la pagina d'accesso), senza movimento: entrando sparisce e basta */
+  .ingresso,
+  .ingresso *,
+  .ingresso::before {
+    transition: none !important;
   }
 }

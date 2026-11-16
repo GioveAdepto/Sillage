@@ -1,7 +1,9 @@
 /* Prova dell'app (React) in un browser vero, con il ponte finto di prove/server-finto.mjs.
    Prima: cd app && VITE_PONTE=http://127.0.0.1:8800/api npm run build
    Poi, dalla radice del repo: node prove/prova-nuova.mjs
-   Percorre Collezione (41 profumi), Scheda, Consigliami, il Diario con una voce messa senza rete (resta in coda,
+   Prima l'ingresso: senza account si vede solo la pagina d'accesso (con CheMetto e «Registrati»), il ponte non
+   viene chiamato e nessuna vetrina compare; con una chiave che il ponte non riconosce, di nuovo l'ingresso.
+   Poi, con la chiave di prova, percorre Collezione (41 profumi), Scheda, Consigliami, il Diario con una voce messa senza rete (resta in coda,
    parte una volta sola al ritorno), la riapertura senza rete e l'avvio a freddo col ponte giù (data/*.json). */
 import { chromium } from "playwright";
 import { join, dirname } from "node:path";
@@ -28,7 +30,32 @@ try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
   const page = await ctx.newPage();
   seguiErrori(page);
+  // l'ingresso: chi non è entrato non vede nessuna vetrina, e l'app non chiede niente al ponte
+  const alPonte = [];
+  page.on("request", (r) => {
+    if (/\/api(\?|$)/.test(r.url())) alPonte.push(r.method());
+  });
+  await page.goto(srv.url + "#/profumo/24");
+  await page.waitForSelector(".ingresso-carta", { timeout: 30000 });
+  await aspetta(1500);
+  const ingresso = await page.textContent(".ingresso-carta");
+  controlla(/account di CheMetto/.test(ingresso), "senza account: l'ingresso dice di entrare con l'account di CheMetto");
+  controlla(/Registrati/.test(ingresso), "e offre «Registrati»");
+  controlla(!(await page.$(".scaffale, .nome-grande, .timone")), "nessuna vetrina, scheda o barra dietro l'ingresso");
+  controlla(alPonte.length === 0, `senza account l'app non chiede niente al ponte (${alPonte.join(",")})`);
+  await page.click(".ingresso-cambio button");
+  controlla(!!(await page.$('input[autocomplete="nickname"]')), "«Registrati» chiede il nome in Sillage");
+  // una chiave che il ponte non riconosce: il ponte risponde con la vetrina di Danilo, l'app non la mostra
+  await page.evaluate(() => localStorage.setItem("sillage-app:chiave", "sbagliata"));
+  await page.reload();
+  await page.waitForSelector(".ingresso-carta .stato-chiave", { timeout: 15000 });
+  controlla(!(await page.$(".scaffale")), "con una chiave che il ponte non riconosce: ancora l'ingresso, non la vetrina di Danilo");
+  controlla((await page.evaluate(() => localStorage.getItem("sillage-app:dati"))) === null, "e nessuna copia della vetrina sul telefono");
+
+  // con la chiave di prova (Danilo): la sua vetrina
+  await page.evaluate(() => localStorage.setItem("sillage-app:chiave", "prova"));
   await page.goto(srv.url);
+  await page.reload();
   await page.waitForSelector(".scaffale .voce", { timeout: 30000 });
   controlla((await page.textContent(".conta")).includes("41"), "la collezione con 41 profumi");
   controlla((await page.$$(".scaffale .voce")).length === 34, "34 boccette sulle mensole");
@@ -42,8 +69,7 @@ try {
   await page.waitForSelector(".scelta .nome-grande", { timeout: 10000 });
   controlla(true, "Consigliami propone un profumo");
 
-  // il diario: chiave di prova, una voce messa senza rete
-  await page.evaluate(() => localStorage.setItem("sillage-app:chiave", "prova"));
+  // il diario: una voce messa senza rete
   await page.goto(srv.url + "#/profumo/24");
   await page.reload();
   await page.waitForSelector(".indossa", { timeout: 10000 });
@@ -72,8 +98,9 @@ try {
   controlla((await page.$$(".scaffale .voce")).length === 34, "riaperta senza rete, la collezione c'è");
   await ctx.close();
 
-  // avvio a freddo col ponte giù: niente copia sul telefono, ripiego su data/*.json
+  // avvio a freddo col ponte giù: niente copia sul telefono, ripiego su data/*.json (solo per Danilo: c'è la chiave)
   const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  await ctx2.addInitScript(() => localStorage.setItem("sillage-app:chiave", "prova"));
   const p2 = await ctx2.newPage();
   seguiErrori(p2);
   await p2.route("**/api*", (r) => r.abort());

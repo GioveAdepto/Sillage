@@ -1,12 +1,15 @@
 import { Link, Outlet, ScrollRestoration, useLocation } from "react-router";
-import type { ComponentType } from "react";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
 import { IconaAltro, IconaCollezione, IconaDiario, IconaGoccia, IconaNumeri } from "./Icone";
 import { SOTTO_ALTRO } from "../pagine/Segnaposto";
 import { DiarioVivo } from "../diario/uso";
 import VersioneNuova from "./VersioneNuova";
 import Apertura from "./Apertura";
+import Ingresso from "./Ingresso";
+import { useDati } from "../dati";
 
-/* Il guscio: la pagina scelta e, in basso, la barra con le cinque voci (il «timone»). */
+/* Il guscio: la pagina scelta e, in basso, la barra con le cinque voci (il «timone»). Chi non è entrato (o chi il
+   ponte non riconosce) vede solo l'ingresso, e niente dietro; entrando, l'ingresso apre le ante sulla vetrina. */
 const VOCI: { a: string; nome: string; Icona: ComponentType<{ className?: string }>; anche: (p: string) => boolean }[] = [
   { a: "/", nome: "Collezione", Icona: IconaCollezione, anche: (p) => p === "/" || p.startsWith("/profumo/") },
   { a: "/consigliami", nome: "Consigliami", Icona: IconaGoccia, anche: (p) => p === "/consigliami" },
@@ -17,29 +20,40 @@ const VOCI: { a: string; nome: string; Icona: ComponentType<{ className?: string
 
 export default function Guscio() {
   const { pathname } = useLocation();
+  const { entrato, chi } = useDati();
+  const serve = !entrato || (!!chi && !chi.persona);
+  const [ingresso, setIngresso] = useState(serve);
+  useEffect(() => {
+    if (serve) setIngresso(true);
+  }, [serve]);
+  const via = useCallback(() => setIngresso(false), []);
   return (
     <>
-      <a className="salta" href="#contenuto" onClick={(e) => { e.preventDefault(); document.getElementById("contenuto")?.focus(); }}>
-        Vai al contenuto
-      </a>
-      <main id="contenuto" tabIndex={-1} className="foglio">
-        <Outlet />
-      </main>
-      <nav className="timone" aria-label="Sezioni">
-        <ul>
-          {VOCI.map(({ a, nome, Icona, anche }) => (
-            <li key={a}>
-              <Link className="remo" to={a} aria-current={anche(pathname) ? "page" : undefined}>
-                <Icona />
-                {nome}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <DiarioVivo />
+      {serve ? null : (
+        <>
+          <a className="salta" href="#contenuto" onClick={(e) => { e.preventDefault(); document.getElementById("contenuto")?.focus(); }}>
+            Vai al contenuto
+          </a>
+          <main id="contenuto" tabIndex={-1} className="foglio">
+            <Outlet />
+          </main>
+          <nav className="timone" aria-label="Sezioni">
+            <ul>
+              {VOCI.map(({ a, nome, Icona, anche }) => (
+                <li key={a}>
+                  <Link className="remo" to={a} aria-current={anche(pathname) ? "page" : undefined}>
+                    <Icona />
+                    {nome}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <DiarioVivo />
+        </>
+      )}
       <VersioneNuova />
-      <Apertura />
+      {ingresso || serve ? <Ingresso onVia={via} /> : <Apertura />}
       <ScrollRestoration />
     </>
   );

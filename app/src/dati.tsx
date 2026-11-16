@@ -6,9 +6,10 @@ import { leggiSessione } from "./accesso";
 import type { Voce } from "./diario/coda";
 
 /* Da dove arrivano i profumi: il ponte verso il database (ponte/ponte.js), con CORS aperto.
-   Con la chiave o con l'account si chiede tutto, diario compreso (POST azione=leggi, credenziali nel corpo);
-   senza, il catalogo (GET). L'ultima risposta buona resta in localStorage: senza rete l'app riparte da lì. Il diario confermato
-   ha la sua copia (src/diario/coda.ts). */
+   Con l'account (o la chiave di prima) si chiede la propria vetrina, diario compreso (POST azione=leggi,
+   credenziali nel corpo). Senza, non si chiede niente: chi non è entrato vede solo l'ingresso (Ingresso.tsx), mai
+   la vetrina di un altro. L'ultima risposta buona resta in localStorage: senza rete l'app riparte da lì. Il diario
+   confermato ha la sua copia (src/diario/coda.ts). */
 export { PONTE };
 const CHIAVE_COPIA = "sillage-app:dati";
 const ATTESA_MAX = 8000; // ms oltre i quali si rinuncia al ponte e si resta sulla copia
@@ -27,7 +28,7 @@ export interface Chi {
   daCollegare?: boolean;
   accessoNonValido?: string;
 }
-const haCredenziali = () => !!(leggiChiave() || leggiSessione());
+export const haCredenziali = () => !!(leggiChiave() || leggiSessione());
 
 interface StatoDati {
   dati: Dati | null;
@@ -41,6 +42,8 @@ interface StatoDati {
   statoChiave: StatoChiave;
   /** chi ti ha riconosciuto il ponte all'ultima lettura (null: non ancora, o senza rete) */
   chi: Chi | null;
+  /** su questo telefono c'è un account (o la chiave di prima): si apre la vetrina, non l'ingresso */
+  entrato: boolean;
   riprova: () => void;
   /** cambia un profumo sul telefono (per esempio il residuo appena salvato) */
   aggiornaProfumo: (id: number, campi: Partial<Profumo>) => void;
@@ -67,10 +70,12 @@ export function scordaCopie() {
     /* niente da scordare */
   }
 }
+/** La copia sul telefono vale solo se è di qualcuno che il ponte ha riconosciuto (prima degli account il telefono
+    di chi non era entrato teneva la vetrina di Danilo: quella non si mostra più). */
 function leggiCopia(): Dati | null {
   try {
     const d = JSON.parse(localStorage.getItem(CHIAVE_COPIA) ?? "null");
-    return d && Array.isArray(d.profumi) && (d.profumi.length || personaDellaCopia()) ? d : null;
+    return d && Array.isArray(d.profumi) && personaDellaCopia() ? d : null;
   } catch {
     return null;
   }
@@ -114,8 +119,9 @@ function pulisci(grezzo: unknown): Dati {
 }
 
 export function DatiProvider({ children }: { children: ReactNode }) {
-  const [dati, setDati] = useState<Dati | null>(leggiCopia);
-  const [origine, setOrigine] = useState<Origine>(() => (leggiCopia() ? "copia" : "nessuna"));
+  const [dati, setDati] = useState<Dati | null>(() => (haCredenziali() ? leggiCopia() : null));
+  const [origine, setOrigine] = useState<Origine>(() => (haCredenziali() && leggiCopia() ? "copia" : "nessuna"));
+  const [entrato, setEntrato] = useState(haCredenziali);
   const [carica, setCarica] = useState(true);
   const [errore, setErrore] = useState<string | null>(null);
   const [giro, setGiro] = useState(0);
@@ -126,6 +132,8 @@ export function DatiProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const cambia = () => {
       setStatoChiave(haCredenziali() ? "da-provare" : "assente");
+      setEntrato(haCredenziali());
+      setChi(null); // chi era riconosciuto valeva per le credenziali di prima
       setGiro((g) => g + 1);
     };
     // tornata la rete: si rilegge, così il diario e lo stato della chiave tornano veri
@@ -141,30 +149,47 @@ export function DatiProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // nessuno è entrato: niente da chiedere, e niente di chi c'era prima (l'ingresso copre tutto)
+    if (!haCredenziali()) {
+      scordaCopie();
+      setDati(null);
+      setOrigine("nessuna");
+      setChi(null);
+      setErrore(null);
+      setCarica(false);
+      return;
+    }
     const ctrl = new AbortController();
     let vivo = true; // falso quando il componente rinuncia a questa richiesta
     const timer = setTimeout(() => ctrl.abort(), ATTESA_MAX);
     setCarica(true);
     const chiave = leggiChiave();
-    // con chiave o account si chiede tutto, diario compreso (POST, credenziali nel corpo); senza, il catalogo (GET)
+    // con chiave o account si chiede la propria vetrina, diario compreso (POST, credenziali nel corpo)
     credenziali()
-      .then((c) =>
-        fetch(
-          PONTE,
-          c.chiave || c.accesso
-            ? { method: "POST", signal: ctrl.signal, cache: "no-store", body: new URLSearchParams({ azione: "leggi", ...c }) }
-            : { signal: ctrl.signal, cache: "no-store" }
-        )
-      )
+      .then((c) => {
+        if (!c.chiave && !c.accesso) throw new Error("nessun account su questo telefono");
+        return fetch(PONTE, { method: "POST", signal: ctrl.signal, cache: "no-store", body: new URLSearchParams({ azione: "leggi", ...c }) });
+      })
       .then((r) => {
         if (!r.ok) throw new Error("il ponte ha risposto " + r.status);
         return r.json();
       })
       .then((grezzo) => {
         if (!vivo) return;
-        const d = pulisci(grezzo);
         const g = grezzo as { diario?: Voce[]; diarioChiuso?: boolean; chi?: Chi };
         setChi(g.chi ?? null);
+        // il ponte non sa chi sei (account senza vetrina, accesso scaduto, chiave sbagliata): risponde con la vetrina
+        // di Danilo, che qui non si mostra; l'ingresso chiede di rientrare o di scegliere il nome
+        if (!g.chi?.persona) {
+          scordaCopie();
+          diario.segnalaChiave();
+          setStatoChiave("sbagliata");
+          setDati(null);
+          setOrigine("nessuna");
+          setErrore(null);
+          return;
+        }
+        const d = pulisci(grezzo);
         try {
           if (g.chi?.persona) localStorage.setItem(PERSONA_COPIA, g.chi.persona);
           else localStorage.removeItem(PERSONA_COPIA);
@@ -190,9 +215,9 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       .catch(async (e: unknown) => {
         if (!vivo) return;
         // avvio a freddo senza rete e senza copia sul telefono: la copia notturna del repo (data/*.json), che è
-        // la collezione di Danilo: non per chi è entrato con un altro account
-        const altri = !!leggiSessione() && !!personaDellaCopia() && personaDellaCopia() !== "danilo";
-        if (!leggiCopia() && !altri) {
+        // la collezione di Danilo: solo per lui (l'ultima volta il ponte ha riconosciuto Danilo, o c'è la sua chiave)
+        const diDanilo = personaDellaCopia() === "danilo" || !!leggiChiave();
+        if (!leggiCopia() && diDanilo) {
           const d = await leggiDalRepo();
           if (d && vivo) {
             setDati(d);
@@ -233,10 +258,11 @@ export function DatiProvider({ children }: { children: ReactNode }) {
       perId: new Map(profumi.map((p) => [p.id, p])),
       statoChiave,
       chi,
+      entrato,
       riprova,
       aggiornaProfumo
     };
-  }, [dati, origine, carica, errore, riprova, statoChiave, chi, aggiornaProfumo]);
+  }, [dati, origine, carica, errore, riprova, statoChiave, chi, entrato, aggiornaProfumo]);
 
   return <Contesto.Provider value={valore}>{children}</Contesto.Provider>;
 }
