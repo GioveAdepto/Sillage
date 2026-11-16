@@ -3,6 +3,7 @@ import Guscio from "./componenti/Guscio";
 import Collezione from "./pagine/Collezione";
 import Scheda from "./pagine/Scheda";
 import Altro from "./pagine/Altro";
+import Aggiungi from "./pagine/Aggiungi";
 import Consigliami from "./pagine/Consigliami";
 import Diario from "./pagine/Diario";
 import Impostazioni from "./pagine/Impostazioni";
@@ -34,6 +35,7 @@ export const router = createHashRouter([
       { path: "vetrine", element: <Vetrine /> },
       { path: "vetrina/:di", element: <VetrinaDi /> },
       { path: "altro", element: <Altro /> },
+      { path: "aggiungi", element: <Aggiungi /> },
       ...IN_ARRIVO.filter((p) => !p.pronta).map((p) => ({ path: p.percorso, element: <Segnaposto pagina={p} /> })),
       { path: "*", element: <Segnaposto /> }
     ]

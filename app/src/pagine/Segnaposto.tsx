@@ -16,6 +16,14 @@ export interface PaginaInArrivo {
 
 export const IN_ARRIVO: PaginaInArrivo[] = [
   {
+    percorso: "aggiungi",
+    titolo: "Aggiungi profumo",
+    breve: "Dalle schede di Sillage o dalla cartolina di Fragrantica",
+    tappa: "",
+    pronta: true,
+    cosa: ["Un profumo già in Sillage, o uno nuovo dalla cartolina di Fragrantica"]
+  },
+  {
     percorso: "numeri",
     titolo: "Numeri",
     breve: "Statistiche, stagioni, classifiche",

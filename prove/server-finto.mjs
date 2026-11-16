@@ -5,7 +5,9 @@
    - POST /api azione=leggi | diario | residuo: chiave «prova», altrimenti «chiave sconosciuta» come il ponte;
      azione=leggi dice chi ha riconosciuto (`chi`): con la chiave giusta Danilo, altrimenti nessuno;
    - riscriviPonte: nei .js serviti l'indirizzo del ponte pubblicato diventa questo server (per l'app di prima);
-   - cambiaCartella(): la stessa porta passa a servire un'altra cartella (il passaggio tra le due app). */
+   - cambiaCartella(): la stessa porta passa a servire un'altra cartella (il passaggio tra le due app);
+   - «Aggiungi profumo»: azione=catalogo, aggiungi (il profumo nuovo entra nel catalogo in memoria), leggi-cartolina
+     con un modello FINTO (risposte fisse, stato.modello = false: «non disponibile»), GET /api/foto/<id>. */
 import { createServer } from "node:http";
 import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, extname, dirname, normalize } from "node:path";
@@ -21,8 +23,8 @@ const PONTE_PUBBLICATO = "https://sillage.danilo-moro96.workers.dev/api";
 const leggiDati = (n) => JSON.parse(readFileSync(join(REPO, "data", n + ".json"), "utf8"));
 
 export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = false } = {}) {
-  const stato = { cartella, riscriviPonte, diario: new Map(), invii: [], residui: [] };
-  const catalogo = () => ({ profumi: leggiDati("profumi"), note: leggiDati("note"), layering: leggiDati("layering"), consigli: leggiDati("consigli") });
+  const stato = { cartella, riscriviPonte, diario: new Map(), invii: [], residui: [], aggiunte: [], nuovi: [], foto: new Map(), letture: [], modello: true, clienti: new Map() };
+  const catalogo = () => ({ profumi: [...leggiDati("profumi"), ...stato.nuovi], note: leggiDati("note"), layering: leggiDati("layering"), consigli: leggiDati("consigli") });
   const base = `http://127.0.0.1:${porta}`;
   const json = (res, o, s = 200) => {
     res.writeHead(s, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" });
@@ -44,6 +46,42 @@ export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = 
         aggiornato: new Date().toISOString()
       });
     if (!giusta) return json(res, { errore: "chiave sconosciuta: manca o non e' quella giusta" });
+    if (azione === "catalogo")
+      return json(res, { ok: true, profumi: catalogo().profumi.map((x) => ({ id: x.id, brand: x.brand, name: x.name, conc: x.conc, img: x.img, accordi: (x.accordi || []).slice(0, 3) })) });
+    if (azione === "leggi-cartolina") {
+      stato.letture.push(p.get("tipo"));
+      if (!stato.modello) return json(res, { errore: "lettura delle scritte non disponibile", nonDisponibile: true });
+      const dati = p.get("tipo") === "piramide"
+        ? { testa: ["Cipresso"], cuore: ["Vetiver"], fondo: ["Legno di Cashmere", "Muschio"], senza_livello: [] }
+        : { nome: "Profumo di Prova", marchio: "Casa Finta", genere: "unisex", voto: 4.1, voti: 1234, durata_ore: 7, scia: "Forte",
+            accordi: ["Legnoso", "Aromatico", "Terroso", "Muschiato", "Speziato Fresco"], note: ["Vetiver", "Cipresso"] };
+      return json(res, { ok: true, tipo: p.get("tipo"), dati });
+    }
+    if (azione === "aggiungi") {
+      const d = JSON.parse(p.get("dati") || "{}");
+      stato.aggiunte.push(d);
+      if (stato.clienti.has(d.cliente)) return json(res, { ok: true, gia: true, ...stato.clienti.get(d.cliente) });
+      const s = d.scheda || {}, chiave = (a, b, c) => [a, b, c].map((x) => String(x || "").toLowerCase()).join("|");
+      const c = catalogo().profumi.find((x) => chiave(x.brand, x.name, x.conc) === chiave(s.marchio, s.profumo, s.concentrazione));
+      if (c) {
+        stato.clienti.set(d.cliente, { id: c.id, esistente: true });
+        return json(res, { ok: true, id: c.id, esistente: true });
+      }
+      const id = Math.max(...catalogo().profumi.map((x) => x.id)) + 1, n = (k) => (s[k] === "" || s[k] === undefined ? null : Number(s[k]));
+      if (d.foto) stato.foto.set(id, { tipo: d.foto.tipo, byte: Buffer.from(d.foto.dati, "base64") });
+      const stagioni = { inverno: n("inverno"), primavera: n("primavera"), estate: n("estate"), autunno: n("autunno") };
+      stato.nuovi.push({
+        id, brand: s.marchio, name: s.profumo, conc: s.concentrazione, genere: s.genere, famiglia: s.famiglia || "",
+        accordi: s.accordi ? s.accordi.split("|") : [], accordi_forza: s.accordi_forza, noteElenco: s.note ? s.note.split("|") : [],
+        note: s.piramide || "", longevita: n("longevita_h"), sillage: s.sillage, giornoPct: n("giorno_pct"), rating: n("rating"), voti: n("voti"),
+        stagioni: Object.values(stagioni).every((v) => v === null) ? null : stagioni, stagione: s.stagione || "tutto", momento: s.momento || "entrambi",
+        colore: s.colore || "verde", ...Object.fromEntries(["ufficio", "serata", "palestra", "quotidiano", "formale", "informale", "appuntamento", "casa", "festivita"].map((o) => [o, s[o] || "no"])),
+        tipoPossesso: d.possesso?.tipo || "full", formatoMl: d.possesso?.ml || null, notePersonali: d.possesso?.note || "",
+        img: d.foto ? `api/foto/${id}.webp` : "", attivo: "si", nuovo: true, aggiunto: new Date().toISOString().slice(0, 10)
+      });
+      stato.clienti.set(d.cliente, { id, nuovo: true });
+      return json(res, { ok: true, id, nuovo: true });
+    }
     if (azione === "residuo") {
       stato.residui.push({ id: +p.get("id"), valore: +p.get("valore") });
       return json(res, { ok: true });
@@ -72,6 +110,11 @@ export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = 
     let corpo = "";
     for await (const pezzo of req) corpo += pezzo;
     const u = new URL(req.url, base);
+    if (u.pathname.startsWith("/api/foto/")) {
+      const f = stato.foto.get(Number(u.pathname.match(/(\d+)/)[1]));
+      res.writeHead(f ? 200 : 404, { "Content-Type": f ? f.tipo : "text/plain", "Access-Control-Allow-Origin": "*" });
+      return res.end(f ? f.byte : "non trovata");
+    }
     if (u.pathname === "/api") return ponte(req, res, corpo);
     if (prefisso !== "/" && (u.pathname === "/" || u.pathname === prefisso.slice(0, -1))) {
       res.writeHead(302, { Location: prefisso });

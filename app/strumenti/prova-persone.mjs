@@ -3,7 +3,7 @@
    vetrine degli altri senza i dati privati, e soprattutto che una persona non legga né scriva niente di un'altra.
    Mai contro il ponte pubblicato. Su un database locale nuovo (app/LEGGIMI.md, «Provare gli account»). */
 import { firma } from "./supabase-finto.mjs";
-const U = "http://127.0.0.1:8787/api";
+const U = process.env.PONTE_LOCALE || "http://127.0.0.1:8787/api"; // su un'altra porta: PONTE_LOCALE=…
 const post = async (q, campi = {}) => (await fetch(U + "?" + q, { method: "POST", body: new URLSearchParams(campi) })).json();
 let errori = 0;
 const verifica = (cosa, ok, d = "") => { console.log((ok ? "  ok   " : "  NO!  ") + cosa + (ok ? "" : " — " + d)); if (!ok) errori++; };

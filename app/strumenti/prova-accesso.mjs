@@ -4,7 +4,7 @@
    Mai contro il ponte pubblicato. Prima: node strumenti/supabase-finto.mjs e il ponte locale (app/LEGGIMI.md).
    Una volta sola su un database locale nuovo (alla fine ricollega l'account di prova a Danilo). */
 import { firma } from "./supabase-finto.mjs";
-const U = "http://127.0.0.1:8787/api";
+const U = process.env.PONTE_LOCALE || "http://127.0.0.1:8787/api"; // su un'altra porta: PONTE_LOCALE=…
 const post = async (q, campi = {}) => (await fetch(U + "?" + q, { method: "POST", body: new URLSearchParams(campi) })).json();
 let errori = 0;
 const verifica = (cosa, ok, d = "") => { console.log((ok ? "  ok   " : "  NO!  ") + cosa + (ok ? "" : " — " + d)); if (!ok) errori++; };

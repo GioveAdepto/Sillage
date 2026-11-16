@@ -7,6 +7,7 @@ import VersioneNuova from "./VersioneNuova";
 import Apertura from "./Apertura";
 import Ingresso from "./Ingresso";
 import { useDati } from "../dati";
+import AggiunteVive from "./AggiunteVive";
 
 /* Il guscio: la pagina scelta e, in basso, la barra con le cinque voci (il «timone»). Chi non è entrato (o chi il
    ponte non riconosce) vede solo l'ingresso, e niente dietro; entrando, l'ingresso apre le ante sulla vetrina. */
@@ -50,6 +51,7 @@ export default function Guscio() {
             </ul>
           </nav>
           <DiarioVivo />
+          <AggiunteVive />
         </>
       )}
       <VersioneNuova />

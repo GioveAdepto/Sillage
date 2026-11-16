@@ -98,6 +98,12 @@ strumenti/prima-dopo.mjs confronta la classifica di Consigliami tra l'app di ogg
 strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
 strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
 strumenti/supabase-finto.mjs un Supabase Auth finto, per provare gli account (vedi «Provare gli account»)
+strumenti/modello-finto.mjs un modello finto al posto dell'API di Anthropic, per il ponte locale (vedi «Aggiungi profumo»)
+strumenti/tara-cartoline.mjs taratura della misura delle barre sulle cartoline vere (fuori da git) contro il database
+strumenti/cartolina-finta.mjs disegna le cartoline sintetiche delle prove (prove/cartoline/)
+strumenti/prova-cartolina.mjs prova della misura e del ritaglio sulle cartoline sintetiche
+strumenti/prova-aggiungi.mjs prove di «Aggiungi profumo» sul ponte locale col modello finto
+strumenti/cartolina-node.mjs per le prove: legge PNG/JPEG e carica src/cartolina/ in Node
 strumenti/prova-accesso.mjs prove degli account sul ponte locale col Supabase finto
 strumenti/prova-persone.mjs prove della seconda persona e dell'isolamento sul ponte locale
 strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
@@ -119,6 +125,10 @@ src/accesso.ts           l'account: entrare, rinnovare e uscire con Supabase Aut
 src/diario/coda.ts       il diario e la coda delle scritture (niente React: lo usano anche le prove)
 src/diario/uso.tsx       useDiario, l'invio al ritorno della rete, useSegna
 src/diario/pezzi.tsx     «Lo metto oggi», occasione e momento di una voce, «Su di te»
+src/aggiunte.ts          «Aggiungi profumo»: le chiamate al ponte e la coda delle aggiunte senza rete
+src/cartolina/           misura.ts (le barre della cartolina), boccetta.ts (il ritaglio scontornato), immagini.ts
+                         (aprire e rimpicciolire nel telefono), scontorna.ts (una foto propria, @imgly), proposte.ts
+                         (dal modulo alle colonne del catalogo, stagione/momento/colore/occasioni proposti)
 src/meteo-contesto.tsx   il meteo per tutta l'app (useMeteo): Consigliami e il filtro «Adesso»
 src/viste/calcoli.ts     i calcoli di Numeri, mappa olfattiva, Guida, Layering, Acquisti, Confronto (da js/viste.js)
 src/viste/condividi.ts   l'immagine della scheda da condividere (1080×1350)
@@ -189,7 +199,8 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/?v=campioni&f=verde,ufficio&n=vetiver&o=rating&q=…` | filtri (`f`), note (`n`), ordine (`o`) e ricerca stanno nell'indirizzo: «indietro» li ritrova, una nuova apertura riparte pulita. Il cassetto (`cassetto=1`) si chiude anche con «indietro», senza perdere le scelte | fatta |
 | `#/?vedi=24` | arrivo da un'altra pagina: vetrina giusta, filtri tolti, si scorre alla teca (chiusa) e si illumina | fatta |
 | `#/profumo/24` | **Scheda**: piedistallo col faretto, voto/durata/sillage, «Lo metto oggi» (con occasione e momento, e il link all'appunto), piramide, accordi con la forza, stagioni (quella di ora in ottone), giorno e sera, uso, note personali, «Su di te» (dagli appunti), racconto, parentele (copia di…), somiglia a, layering, formato e residuo da toccare, link a Fragrantica, «Confronta con…», «Condividi la scheda». La boccetta vola dalla teca al piedistallo (View Transition), ci ondeggia come presa in mano e, toccata, si guarda da vicino | fatta |
-| `#/altro` | **Altro**: indice di Layering, Guida, Acquisti, Confronta, Le vetrine, Impostazioni, e da dove arrivano i dati | fatta |
+| `#/aggiungi` | **Aggiungi profumo**: cerca per nome tra le schede di Sillage (se c'è: boccetta o campione, ml, note, «Metti in vetrina»); se no, la cartolina di Fragrantica ▸ dati da controllare (in ambra quello che non torna) ▸ foto ▸ piramide facoltativa ▸ Salva. Vedi «Aggiungi profumo» | fatta |
+| `#/altro` | **Altro**: indice di Aggiungi profumo, Layering, Guida, Acquisti, Confronta, Le vetrine, Impostazioni, e da dove arrivano i dati | fatta |
 | `#/vetrine`, `#/vetrina/p…` | **Le vetrine**: le altre persone di Sillage e la collezione di ciascuna, in sola lettura | fatta (account, tappa 4) |
 | `#/consigliami?quando=domani&occ=ufficio` | **Consigliami**: oggi, stasera o domani e l'occasione (nell'indirizzo); ora, aria, cielo e stagione; la prima scelta sul piedistallo con i motivi (I., II.… a favore, «ma» contro), «Se vuoi osare, con…» (la ricetta di layering, con «Lo faccio») e «Lo metto oggi»; quattro alternative coi tre motivi più forti e «Lo metto»; le ore sulla pelle; «Mai indossati, se vuoi riscoprirli»; il pulsante per il meteo di dove sei | fatta (tappe 2 e 3) |
 | `#/diario?mese=2026-11&giorno=2026-11-12` | **Diario**: il mese con le boccette nei giorni, il giorno scelto (aggiungi un profumo o un layering, togli, occasione e momento, appunto con voto), la cronologia | fatta (tappa 3) |
@@ -208,6 +219,45 @@ regola dell'utente): aprirla resta una scelta. «Indietro» riporta alla pagina 
 
 «Collezione» in alto nella scheda: se si arriva dalla vetrina torna indietro (filtri e punto ritrovati); se la
 scheda è stata aperta da un link porta alla vetrina con `?vedi=`.
+
+## Aggiungi profumo
+
+Altro ▸ Aggiungi profumo (anche dalla vetrina vuota). Scelte dell'utente (2026-11-14/16): un solo modo per
+aggiungere; il profumo va nella vetrina di chi lo aggiunge e la scheda nell'anagrafica comune, subito; i dati dalla
+**cartolina** di Fragrantica (app Fragrantica ▸ scheda ▸ Condividi ▸ salva l'immagine). Disegno approvato
+dall'utente il 2026-11-16 (tela «Aggiungi profumo · anteprima»).
+
+1. **Cerca**: le schede di tutti (`azione=catalogo`). Se il profumo c'è già: «Già nella tua vetrina», oppure
+   «Prendi» ▸ boccetta o campione, ml, note ▸ «Metti in vetrina» (nessuna lettura). Se no: «Profumo nuovo».
+2. **La cartolina** scelta dal rullino: **le barre le misura il telefono** (`src/cartolina/misura.ts`, su canvas,
+   niente IA): accordi con la forza, stagioni riportate a 100, giorno/notte. Ritaglia anche la boccetta e le toglie lo
+   sfondo (`boccetta.ts`). **Le scritte** (nome, marchio, genere, voto, voti, durata, scia, nomi di accordi e note) le
+   legge Claude Haiku attraverso il ponte (`azione=leggi-cartolina`, JPEG da 1200 px); senza la chiave del modello nel
+   Worker, o senza rete, la pagina lo dice e si scrive a mano. «Non ho la cartolina» porta ai campi vuoti.
+3. **Dati da controllare**, tutti modificabili. In ambra: la concentrazione (non è nella cartolina), le stagioni che
+   non fanno 100, il voto fuori da 1-5, accordi misurati e nomi letti in numero diverso, e i dubbi della misura (una
+   stagione sotto il 10%: la cartolina la disegna sempre al minimo, «potrebbe essere meno»). Proposti e da cambiare:
+   occasioni (dai 3 profumi più simili della propria vetrina, per accordi; se è vuota, regole semplici), carattere
+   (Fresco/Aromatico/Caldo = colore blu/verde/rosso), e in silenzio stagione (`ai` se autunno+inverno ≥ 60, `pe` se
+   primavera+estate ≥ 60) e momento (giorno ≥ 64, sera ≤ 44): tarate sui 41 profumi.
+4. **Foto**: di partenza quella ritagliata dalla cartolina; «Una tua foto» la scontorna nel telefono con
+   `@imgly/background-removal` (come CheMetto), che si scarica **solo al primo uso** (~44 MB dal server di img.ly; il
+   pezzo di codice `assets/scontorno-*.js` è fuori dalla cache dell'installazione). Va al ponte come webp (PNG dove
+   Safari non sa fare webp) alto al più 600 px; la serve `GET /api/foto/<id>` e la tiene il service worker.
+5. **Piramide** facoltativa da una schermata, letta dallo stesso modello; le note si tolgono e si aggiungono a mano.
+6. **Salva**: `azione=aggiungi` (ponte/LEGGIMI.md). **Senza rete** va nella coda `sillage-app:aggiunte-coda` (con la
+   foto), la Collezione lo dice («aspetta la rete») e parte da sola al ritorno della rete, all'avvio o tornando
+   all'app; il codice `cliente` evita i doppioni.
+
+Un profumo senza stagioni (scritto a mano) **Consigliami lo salta** (`haStagioni` in `consiglio.ts`; per Danilo
+cambia niente: prima/dopo 224 casi, 0 differenze); Numeri, filtri e scheda reggono i campi vuoti; senza foto la
+boccetta è una sagoma di pietra (`.senza-foto`). Niente campo «stato» (rifiutato).
+
+**La misura, tarata** sulle 38 cartoline di Danilo (`C:\Projects\Sillage\SchedeProfumiFragrantica`, fuori da git)
+contro il database: `node strumenti/tara-cartoline.mjs [cartella] [--dettagli]`. Il 2026-11-16: accordi 189 su 190
+entro un punto (uno a 2), giorno/notte entro 2, stagioni quasi tutte entro 2-3 (dove il database viene da un'altra
+fonte, come La Yuqawam, la cartolina dice altro; sotto il 10% vedi sopra). Le barre si cercano davvero (anche
+quelle chiarissime, per il passo fisso), e la cartolina da 1200 px è quella da 1092 ingrandita.
 
 ## Consigliami e il meteo
 
@@ -296,14 +346,16 @@ cambiata anche qui.
 ## Prove
 
 `npm run build` controlla i tipi e costruisce. `.github/workflows/prova.yml`, a ogni push: la sintassi del
-ponte e dell'app di prima, la build come la fa Cloudflare, i quattro confronti qui sotto, poi due giri in
-Chromium col ponte finto (`prove/server-finto.mjs`, nessuna richiesta al ponte pubblicato):
+ponte e dell'app di prima, la build come la fa Cloudflare, i quattro confronti qui sotto e la misura delle
+cartoline sintetiche, poi tre giri in Chromium col ponte finto (`prove/server-finto.mjs`, nessuna richiesta al
+ponte pubblicato né ad Anthropic):
 
 - `prove/prova-nuova.mjs`: l'ingresso senza account (dice CheMetto, offre «Registrati», nessuna vetrina dietro,
   nessuna richiesta al ponte) e con una chiave che il ponte non riconosce (ancora l'ingresso, nessuna copia); poi, con
   la chiave di prova, Collezione con 41 profumi, Scheda, Consigliami, una voce messa senza rete (resta in
   coda, si vede, parte una volta sola al ritorno), il Diario, la riapertura senza rete, l'avvio a freddo col
   ponte giù (data/*.json);
+- `prove/prova-aggiunta.mjs`: Aggiungi profumo (vedi sotto);
 - `prove/prova-passaggio.mjs`: il passaggio dall'app di prima, alla radice e in `/Sillage/` (vedi «Il passaggio»).
 
 In locale, dalla radice del repo (serve Playwright: `npm install --no-save playwright@1` e
@@ -395,9 +447,19 @@ seconda persona si registra, ha la vetrina vuota, legge il catalogo comune e agg
 suoi; non legge né tocca niente di Danilo; vede la sua vetrina senza note personali né residuo; non può fare i
 lavori di Claude; la vetrina pubblica di Danilo resta identica. Nell'app: Impostazioni ▸ Registrati (password
 di ogni email nel Supabase finto: `prova1234`), vetrina vuota, Altro ▸ Le vetrine, «Togli dalla vetrina».
-(Per riempire la vetrina della persona di prova, finché non c'è «Aggiungi profumo»: `azione=possesso&op=aggiungi`
-sul ponte locale.) Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
+(Per riempire la vetrina della persona di prova: Altro ▸ Aggiungi profumo.) Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
 devono aprirsi senza errori.
+
+**Aggiungi profumo**: `node strumenti/prova-cartolina.mjs` (71 controlli sulla misura e sul ritaglio, cartoline
+sintetiche disegnate da `strumenti/cartolina-finta.mjs`: nessuna immagine di Fragrantica nel repo) e
+`node prove/prova-aggiunta.mjs` dalla radice (nel browser, col ponte finto e il suo modello finto: ricerca, cartolina,
+ambra, foto, piramide, Salva, il profumo nuovo in Collezione, Scheda, Numeri e Consigliami, senza modello, senza rete
+in coda e un invio solo). Sul ponte locale: il modello finto `node strumenti/modello-finto.mjs` (porta 8897), il
+ponte con in più `--var ANTHROPIC_API_KEY:finta --var ANTHROPIC_URL:http://127.0.0.1:8897/v1/messages`, poi
+`node strumenti/prova-aggiungi.mjs` (24 controlli: lettura e limite al giorno, scheda comune + vetrina propria e non
+degli altri, id dal ponte, foto servita, reinvio senza doppioni, scheda già esistente per nome o per link). Se sulla
+8787 gira già un altro ponte locale: `--port 8788` e `PONTE_LOCALE=http://127.0.0.1:8788/api` davanti alle prove
+(vale anche per `prova-accesso` e `prova-persone`). Mai chiamate vere ad Anthropic nelle prove.
 
 **Prima/dopo di Consigliami** (obbligatorio a ogni modifica del punteggio, regola dell'utente):
 

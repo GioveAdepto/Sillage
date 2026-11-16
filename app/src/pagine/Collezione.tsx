@@ -7,6 +7,7 @@ import { ETICHETTE_FILTRO, FILTRI_VALIDI, GRUPPI_FILTRO, ORDINAMENTI, ORDINE_DI_
 import { Boccetta, Mini, useMenoMovimento, useTitolo } from "../componenti/comuni";
 import { useAvviso } from "../componenti/Avvisi";
 import { IconaCerca, IconaX } from "../componenti/Icone";
+import { InAttesa } from "../componenti/AggiunteVive";
 import { useMeteo } from "../meteo-contesto";
 
 /* La collezione: due vetrine (boccette e campioni), la ricerca, le scelte rapide, il cassetto dei filtri con gli
@@ -207,8 +208,8 @@ export default function Collezione() {
     );
   }
 
-  // chi è appena entrato in Sillage: la vetrina vuota. I profumi si aggiungeranno da Altro ▸ Aggiungi profumo
-  // (decisione dell'utente: un solo modo per aggiungere), che non c'è ancora: niente date promesse.
+  // chi è appena entrato in Sillage: la vetrina vuota. I profumi si aggiungono da Altro ▸ Aggiungi profumo
+  // (decisione dell'utente: un solo modo per aggiungere).
   if (!dati.profumi.length) {
     return (
       <section className="attesa vetrina-vuota">
@@ -216,7 +217,11 @@ export default function Collezione() {
         <h1 className="marchio">Sillage</h1>
         <div className="filo-ottone" />
         <p className="testo">La tua vetrina è vuota.</p>
-        <p className="testo-piccolo">I tuoi profumi, boccette e campioni, si potranno aggiungere da Altro ▸ Aggiungi profumo.</p>
+        <InAttesa />
+        <p className="testo-piccolo">I tuoi profumi, boccette e campioni, si aggiungono da Altro ▸ Aggiungi profumo.</p>
+        <Link className="collegamento" to="/aggiungi">
+          Aggiungi il primo profumo
+        </Link>
         <Link className="collegamento" to="/vetrine">
           Guarda le vetrine degli altri
         </Link>
@@ -251,6 +256,7 @@ export default function Collezione() {
           </p>
         </div>
         <div className="filo-ottone" />
+        <InAttesa />
 
         <div className="vetrine" role="group" aria-label="Vetrina">
           {(["boccette", "campioni"] as Vetrina[]).map((v) => (

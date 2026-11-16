@@ -13,6 +13,9 @@
      POST /api?azione=catalogo         tutte le schede, per «Aggiungi profumo» (accesso o chiave)
      POST /api?azione=possesso&op=aggiungi|togli&id[&tipo&ml]  aggiungi una scheda già in Sillage / «Togli dalla vetrina» (accesso o chiave)
      POST /api?azione=vetrine          chi c'è in Sillage; azione=vetrina&di=… la sua collezione, senza privati
+     POST /api?azione=aggiungi         un profumo nuovo (dati=JSON): scheda comune + nella propria vetrina (accesso o chiave)
+     POST /api?azione=leggi-cartolina  le scritte della cartolina o della piramide, lette da Claude Haiku (accesso o chiave)
+     GET  /api/foto/<id>.webp          la foto di un profumo aggiunto dall'app
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
      POST /api?azione=importa&conferma=si  ricopia il catalogo DAL foglio (solo per rimediare), con la chiave
@@ -74,7 +77,9 @@ const SCHEMA = [
      nota TEXT NOT NULL DEFAULT '', voto INTEGER, occasione TEXT NOT NULL DEFAULT '', momento TEXT NOT NULL DEFAULT '',
      aggiornato INTEGER NOT NULL, PRIMARY KEY (persona, t))`,
   `CREATE TABLE IF NOT EXISTS tab_persona (persona TEXT NOT NULL, tab TEXT NOT NULL, colonne TEXT NOT NULL,
-     righe TEXT NOT NULL, aggiornato INTEGER, PRIMARY KEY (persona, tab))`
+     righe TEXT NOT NULL, aggiornato INTEGER, PRIMARY KEY (persona, tab))`,
+  // «Aggiungi profumo»: le foto dei profumi nuovi (base64), servite da GET /api/foto/<id>. Le 41 di prima restano in img/.
+  `CREATE TABLE IF NOT EXISTS foto (scheda INTEGER PRIMARY KEY, tipo TEXT NOT NULL, dati TEXT NOT NULL, aggiornato INTEGER NOT NULL)`
 ];
 let schemaPronto = false;
 async function schema(env) {
@@ -277,6 +282,167 @@ async function vetrina(db, di) {
            profumi: v.profumi.map(x => Object.fromEntries(Object.entries(x).filter(([k]) => !PRIVATI.includes(k)))) };
 }
 
+// ── AGGIUNGI PROFUMO ──────────────────────────────────────────────────────
+/* Un profumo nuovo dall'app: la scheda va nell'anagrafica comune (subito, per tutti) e il possesso nella vetrina
+   di chi lo aggiunge, mai in quella degli altri. Se la scheda c'è già (stesso link Fragrantica, o stesso marchio,
+   nome e concentrazione) si usa quella. L'id nuovo lo dà il ponte. `cliente` (un codice fatto dall'app) rende
+   sicuro il reinvio dalla coda: la stessa aggiunta arrivata due volte dà lo stesso id. */
+const FOTO_TIPI = { "image/webp": "webp", "image/png": "png", "image/jpeg": "jpg" };
+const normale = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+// il numero in fondo al link di Fragrantica (…/Encre-Noire-1834.html) è il profumo, qualunque sia la lingua del sito
+const numeroFragrantica = s => { const m = String(s || "").match(/fragrantica\.[a-z.]+\/[^?#]*?-(\d+)\.html/i); return m ? m[1] : ""; };
+
+async function aggiungi(db, persona, p) {
+  let d;
+  try { d = JSON.parse(p.get("dati") || "{}"); } catch (e) { return { errore: "dati non validi" }; }
+  const cliente = String(d.cliente || "").replace(/[^A-Za-z0-9-]/g, "").slice(0, 40);
+  if (cliente) {
+    const fatto = await leggiStato(db, "aggiunta:" + cliente);
+    if (fatto) return { ok: true, gia: true, ...JSON.parse(fatto) };
+  }
+  const colonne = JSON.parse((await leggiStato(db, "colonne-profumi")) || "[]");
+  const ammesse = colonne.filter(c => c !== "id" && c !== "img" && !COLONNE_POSSESSO.includes(c));
+  const scheda = {};
+  for (const [k, v] of Object.entries(d.scheda || {}))
+    if (ammesse.includes(k) && v !== null && v !== undefined) scheda[k] = String(v).trim().slice(0, 3000);
+  if (!scheda.marchio || !scheda.profumo) return { errore: "servono almeno marchio e nome del profumo" };
+  const pos = d.possesso || {};
+  const tipo = pos.tipo === "campione" ? "campione" : "full";
+  const ml = Number(pos.ml), formato = ml > 0 && ml <= 1000 ? String(Math.round(ml * 10) / 10) : "";
+  const note = String(pos.note || "").replace(/\s+/g, " ").trim().slice(0, 300);
+
+  // c'è già? stesso profumo su Fragrantica, o stessi marchio, nome e concentrazione
+  const tutte = (await db.prepare("SELECT id, dati FROM schede").all()).results.map(r => ({ id: r.id, dati: JSON.parse(r.dati) }));
+  const num = numeroFragrantica(scheda.fragrantica);
+  const chiave = s => normale(s.marchio) + "|" + normale(s.profumo) + "|" + normale(s.concentrazione);
+  const gemella = tutte.find(s => (num && numeroFragrantica(s.dati.fragrantica) === num) || chiave(s.dati) === chiave(scheda));
+  const ora = Date.now();
+  if (gemella) {
+    const esito = await possesso(db, persona, new URLSearchParams({ id: String(gemella.id), op: "aggiungi", tipo, ...(formato ? { ml: formato } : {}) }));
+    if (esito.errore) return esito;
+    if (note && !esito.gia) {
+      await db.prepare("UPDATE possessi SET note_personali = ? WHERE persona = ? AND scheda = ?").bind(note, persona, gemella.id).run();
+      await db.batch(passiVista(db, persona, await leggiTabsPersona(db, persona), ora));
+    }
+    const r = { id: gemella.id, esistente: true };
+    if (cliente) await scriviStato(db, "aggiunta:" + cliente, JSON.stringify(r)).run();
+    return { ok: true, ...r, giaInVetrina: !!esito.gia };
+  }
+
+  // la foto, se c'è: base64 di un'immagine piccola (la fa il telefono, ~600 px)
+  let foto = null;
+  if (d.foto && d.foto.dati) {
+    const ext = FOTO_TIPI[d.foto.tipo];
+    const b64 = String(d.foto.dati).replace(/^data:[^,]*,/, "");
+    if (!ext || !/^[A-Za-z0-9+/=]+$/.test(b64)) return { errore: "foto non valida" };
+    if (b64.length > 1400000) return { errore: "foto troppo grande" };
+    foto = { tipo: d.foto.tipo, ext, b64 };
+  }
+  // l'id nuovo: il più alto più uno (se due aggiunte arrivano insieme, la seconda prende il successivo)
+  let id = 0;
+  for (let prova = 0; prova < 5 && !id; prova++) {
+    const max = await db.prepare("SELECT COALESCE(MAX(id), 0) AS m FROM schede").first("m");
+    const nuovo = Number(max) + 1 + prova;
+    const dati = { ...Object.fromEntries(colonne.filter(c => !COLONNE_POSSESSO.includes(c)).map(c => [c, ""])), ...scheda, id: String(nuovo) };
+    if (foto) dati.img = "api/foto/" + nuovo + "." + foto.ext + "?v=" + ora;
+    const r = await db.prepare("INSERT INTO schede (id, dati, aggiornato) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING")
+      .bind(nuovo, JSON.stringify(dati), ora).run();
+    if (r.meta && r.meta.changes === 0) continue;
+    id = nuovo;
+  }
+  if (!id) return { errore: "non riesco a dare un numero al profumo: riprova" };
+  const passi = [
+    db.prepare(`INSERT INTO possessi (persona, scheda, posto, tipo_possesso, formato_ml, num_flaconi, residuo_pct, note_personali,
+         aggiunto, attivo, nuovo, aggiornato)
+       SELECT ?, ?, COALESCE((SELECT MAX(posto) FROM possessi WHERE persona = ?), -1) + 1, ?, ?, '1', '', ?, ?, 'si', 'si', ?`)
+      .bind(persona, id, persona, tipo, formato, note, oggi(), ora)
+  ];
+  if (foto) passi.push(db.prepare("INSERT INTO foto (scheda, tipo, dati, aggiornato) VALUES (?, ?, ?, ?) ON CONFLICT(scheda) DO UPDATE SET tipo = excluded.tipo, dati = excluded.dati, aggiornato = excluded.aggiornato")
+    .bind(id, foto.tipo, foto.b64, ora));
+  if (cliente) passi.push(scriviStato(db, "aggiunta:" + cliente, JSON.stringify({ id, nuovo: true })));
+  await db.batch(passi);
+  await db.batch(passiVista(db, persona, await leggiTabsPersona(db, persona), ora));
+  return { ok: true, id, nuovo: true };
+}
+
+/** GET /api/foto/<id>.<ext>: la foto di un profumo aggiunto dall'app. */
+async function servFoto(db, percorso) {
+  const m = percorso.match(/^\/api\/foto\/(\d+)(\.[a-z]+)?$/);
+  if (!m) return new Response("Non trovato", { status: 404 });
+  const f = await db.prepare("SELECT tipo, dati FROM foto WHERE scheda = ?").bind(Number(m[1])).first();
+  if (!f) return new Response("Non trovato", { status: 404, headers: { "Access-Control-Allow-Origin": "*" } });
+  const byte = Uint8Array.from(atob(f.dati), c => c.charCodeAt(0));
+  return new Response(byte, { headers: { "Content-Type": f.tipo, "Cache-Control": "public, max-age=31536000, immutable",
+    "Access-Control-Allow-Origin": "*" } });
+}
+
+/* LA LETTURA DELLE SCRITTE: la cartolina di Fragrantica (o la schermata della piramide) va a Claude Haiku, che
+   risponde in JSON. Le barre no: quelle le misura il telefono. Serve la chiave ANTHROPIC_API_KEY (un segreto del
+   Worker, la mette Danilo); senza, la pagina lascia scrivere a mano. Un limite di letture al giorno per persona. */
+const MODELLO = "claude-haiku-5-5";
+const LETTURE_AL_GIORNO = 20;
+const SCHEMI = {
+  cartolina: {
+    type: "object", additionalProperties: false,
+    required: ["nome", "marchio", "genere", "voto", "voti", "durata_ore", "scia", "accordi", "note"],
+    properties: {
+      nome: { type: "string" }, marchio: { type: "string" },
+      genere: { type: "string", enum: ["uomo", "donna", "unisex", ""] },
+      voto: { type: "number" }, voti: { type: "integer" }, durata_ore: { type: "number" },
+      scia: { type: "string" }, accordi: { type: "array", items: { type: "string" } },
+      note: { type: "array", items: { type: "string" } }
+    }
+  },
+  piramide: {
+    type: "object", additionalProperties: false, required: ["testa", "cuore", "fondo", "senza_livello"],
+    properties: Object.fromEntries(["testa", "cuore", "fondo", "senza_livello"].map(k => [k, { type: "array", items: { type: "string" } }]))
+  }
+};
+const ISTRUZIONI = {
+  cartolina: "È la «cartolina» di condivisione di un profumo dell'app Fragrantica (in italiano). Trascrivi esattamente " +
+    "quello che c'è scritto: nome del profumo (il titolo grande), marchio (sotto il titolo), genere («da uomo» → uomo, " +
+    "«da donna» → donna, «unisex» → unisex), voto (il numero accanto alle stelle, con il punto), voti (il numero tra " +
+    "parentesi), durata in ore (il numero accanto a «Longevità»), scia (la parola accanto a «Scia», così com'è), gli " +
+    "accordi principali dall'alto in basso, le note nel riquadro «note» da sinistra a destra e dall'alto in basso. " +
+    "Se una cosa non si legge: stringa vuota, 0 o elenco vuoto. Non inventare nulla.",
+  piramide: "È una schermata della piramide olfattiva di un profumo su Fragrantica (in italiano o in inglese). Trascrivi " +
+    "le note di testa, di cuore e di fondo, in italiano e con l'iniziale maiuscola, nell'ordine in cui compaiono. Se le " +
+    "note non sono divise in livelli mettile in «senza_livello». Non inventare nulla."
+};
+
+async function leggiCartolina(env, db, persona, p) {
+  if (!env.ANTHROPIC_API_KEY) return { errore: "lettura delle scritte non disponibile", nonDisponibile: true };
+  const tipo = p.get("tipo") === "piramide" ? "piramide" : "cartolina";
+  const media = ["image/jpeg", "image/png", "image/webp"].includes(p.get("media")) ? p.get("media") : "image/jpeg";
+  const immagine = String(p.get("immagine") || "").replace(/^data:[^,]*,/, "");
+  if (!immagine || immagine.length > 5000000 || !/^[A-Za-z0-9+/=]+$/.test(immagine)) return { errore: "immagine mancante o troppo grande" };
+  const k = "letture:" + persona + ":" + oggi();
+  const fatte = Number(await leggiStato(db, k)) || 0;
+  if (fatte >= LETTURE_AL_GIORNO) return { errore: "oggi hai già fatto " + LETTURE_AL_GIORNO + " letture: riprova domani o scrivi a mano", limite: true };
+  await scriviStato(db, k, fatte + 1).run();
+  let r;
+  try {
+    r = await fetch(env.ANTHROPIC_URL || "https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2026-10-21" },
+      body: JSON.stringify({
+        model: MODELLO, max_tokens: 2000,
+        output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMI[tipo] } },
+        messages: [{ role: "user", content: [
+          { type: "image", source: { type: "base64", media_type: media, data: immagine } },
+          { type: "text", text: ISTRUZIONI[tipo] }
+        ] }]
+      })
+    });
+  } catch (e) { return { errore: "il modello non risponde: " + e.message }; }
+  const risposta = await r.json().catch(() => null);
+  if (!r.ok || !risposta) return { errore: "il modello ha risposto " + r.status + ((risposta && risposta.error && ": " + risposta.error.message) || "") };
+  if (risposta.stop_reason === "refusal") return { errore: "il modello non ha voluto leggere questa immagine" };
+  const t = (risposta.content || []).find(b => b.type === "text");
+  try { return { ok: true, tipo, dati: JSON.parse(t.text), rimaste: LETTURE_AL_GIORNO - fatte - 1 }; }
+  catch (e) { return { errore: "il modello ha risposto in un modo che non capisco" }; }
+}
+
 // ── DALLE RIGHE DEL FOGLIO AL JSON DELL'APP (come Codice.gs) ──────────────
 const RINOMINA = {
   marchio: "brand", profumo: "name", concentrazione: "conc", longevita_h: "longevita", piramide: "note",
@@ -313,6 +479,8 @@ function profumiPerApp(righe) {
     }
     p.stagioni = { inverno: numero(r.inverno), primavera: numero(r.primavera), estate: numero(r.estate), autunno: numero(r.autunno) };
     ["inverno", "primavera", "estate", "autunno"].forEach(s => delete p[s]);
+    // un profumo aggiunto senza i voti di stagione: niente stagioni (Consigliami lo salta finché mancano)
+    if (Object.values(p.stagioni).every(v => v === null)) p.stagioni = null;
     if (!p.note && p.noteElenco && p.noteElenco.length) p.note = p.noteElenco.join(" · ");
     p.nuovo = String(r.nuovo).toLowerCase() === "si";
     if (!p.nuovo) delete p.nuovo;
@@ -758,6 +926,7 @@ async function rispondi(request, env, ctx) {
   const P = PRIMA_PERSONA.id;
 
   if (request.method === "GET") {
+    if (url.pathname.startsWith("/api/foto/")) return servFoto(db, url.pathname);
     if (url.searchParams.has("stato")) {
       const [ultima, daCopiare, importato, ids, migrato] = await Promise.all(
         ["ultima-copia", "da-copiare", "importato", "ids:" + P, "migrato"].map(k => leggiStato(db, k)));
@@ -780,13 +949,19 @@ async function rispondi(request, env, ctx) {
   }
   if (azione === "collega") return json(await collega(env, db, p));
   if (azione === "registrati") return json(await registrati(env, db, p));
-  if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina"].includes(azione)) {
+  if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina", "aggiungi", "leggi-cartolina"].includes(azione)) {
     // tutto di chi scrive (o guarda): l'accesso collegato o, fino alla tappa 5, la chiave
     const chi = await chiE(env, db, p);
     if (!chi.persona) return json(senzaPersona(chi));
     if (azione === "catalogo") return json(await catalogo(db));
     if (azione === "vetrine") return json(await vetrine(db));
     if (azione === "vetrina") return json(await vetrina(db, p.get("di")));
+    if (azione === "leggi-cartolina") return json(await leggiCartolina(env, db, chi.persona, p));
+    if (azione === "aggiungi") {
+      const esito = await aggiungi(db, chi.persona, p);
+      if (esito.ok && !esito.gia) copiaDopo(env, ctx);
+      return json(esito);
+    }
     const esito = azione === "diario" ? await scriviDiario(db, chi.persona, p)
       : azione === "residuo" ? await segnaResiduo(db, chi.persona, p) : await possesso(db, chi.persona, p);
     if (esito.ok && !esito.gia && !esito.assente) copiaDopo(env, ctx);
