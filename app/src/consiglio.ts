@@ -196,12 +196,18 @@ export interface Opzioni {
   maiIndossato?: (id: number) => boolean;
 }
 
+/** Ha i voti di stagione di Fragrantica? (Un profumo appena aggiunto a mano può non averli.) */
+export const haStagioni = (p: Profumo) =>
+  !!p.stagioni && STAGIONI.reduce((a, k) => a + (Number(p.stagioni![k]) || 0), 0) > 0;
+
 /** Tutti i profumi adatti all'occasione, in ordine: il primo è la scelta. */
 export function candidati(profumi: Profumo[], occ: Occasione, quando: Quando | Date, opz: Opzioni = {}): Candidato[] {
   const meteo = opz.meteo ?? null;
   const da = inizioPer(quando, occ),
     mo = adesso(da, meteo).momento;
   return profumi
+    // un profumo aggiunto senza i voti di stagione (cartolina non letta) aspetta: senza, il punteggio non ha senso
+    .filter(haStagioni)
     .filter((p) => occ === "ufficio" || p[occ] === "si" || p[occ] === "si-mod")
     .map((p) => {
       const f = finestraPer(p, da, quando, meteo),

@@ -1,5 +1,6 @@
-# A ogni push costruisce l'app (app/, React) e la prova: i tipi, i quattro confronti con l'app di prima e
-# un giro in un browser vero (Chromium) con un ponte finto, compreso il passaggio dall'app di prima.
+# A ogni push costruisce l'app (app/, React) e la prova: i tipi, i quattro confronti con l'app di prima, la misura
+# delle cartoline sintetiche e i giri in un browser vero (Chromium) con un ponte finto: l'app, «Aggiungi profumo»
+# (modello finto, nessuna chiamata ad Anthropic) e il passaggio dall'app di prima.
 # Se qualcosa si rompe, GitHub lo segnala sul commit con una X rossa. Nessuna richiesta va al ponte pubblicato.
 name: Prova del sito
 
@@ -38,6 +39,7 @@ jobs:
           node strumenti/verifica-viste.mjs
           node strumenti/verifica-filtri.mjs
           node strumenti/prova-coda.mjs
+          node strumenti/prova-cartolina.mjs
       - name: Costruisce l'app col ponte finto
         working-directory: app
         run: npm run build
@@ -45,5 +47,7 @@ jobs:
           VITE_PONTE: http://127.0.0.1:8800/api
       - name: Apre l'app e la percorre
         run: node prove/prova-nuova.mjs
+      - name: Aggiungi profumo (cartolina sintetica, ponte e modello finti)
+        run: node prove/prova-aggiunta.mjs
       - name: Passaggio dall'app di prima (alla radice e in /Sillage/)
         run: node prove/prova-passaggio.mjs

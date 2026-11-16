@@ -57,6 +57,7 @@ export async function condividiScheda(p: Profumo) {
   // la boccetta, con la sua ombra
   if (p.img) {
     const im = new Image();
+    im.crossOrigin = "anonymous"; // le foto dei profumi aggiunti arrivano dal ponte
     im.src = immagine(p);
     try {
       await im.decode();

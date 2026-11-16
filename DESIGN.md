@@ -51,6 +51,8 @@ Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei compone
 | `.tessera`, `.classifica`, `.aste`, `.segmenti` | viste.css | tessere, classifiche, barre di Numeri |
 | `.cassetto`, `.fondale`, `.tolgo` | rifiniture.css | cassetto dei filtri, filtri attivi |
 | `.avviso`, `.aggiornamento` | diario, rifiniture.css | avvisi brevi, «versione nuova» |
+| `.aggiungi`, `.ag-*` | aggiungi.css | Aggiungi profumo: `.ag-passi` (cinque passi, filo d'ottone su quelli fatti, d'inchiostro su quello di ora), `.ag-rullino` (riquadro tratteggiato d'ottone per scegliere un'immagine), `.ag-campo` (etichetta incisa e riga sotto; `.dubbio` = riga **ambra** + `.ag-perche`), `.ag-righe` (le righe misurate con il valore modificabile), `.ag-scena` (piedistallo semplice), `.ag-opzione` (due scelte affiancate), `.ag-nota` (pillola da togliere), `.ag-avviso`, `.ag-in-attesa` (puntino d'ottone che pulsa: aspetta la rete) |
+| `.senza-foto` | aggiungi.css | un profumo senza foto: la sagoma di una boccetta di pietra |
 
 ## Movimento
 
@@ -66,6 +68,7 @@ Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei compone
 
 ## Misure, punti di rottura, iPhone
 
+- Quello che non torna (da controllare) è **ambra** (`--ambra`), quello che va bene **bosco** (`--bosco`).
 - Margini 20px (`--margine`); barra in basso 64px + area sicura.
 - 600px: le mensole passano da 2 colonne a quante ne stanno (min 184px). 960px: Scheda, Consigliami, Diario e
   Numeri su due colonne.

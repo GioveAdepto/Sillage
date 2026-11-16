@@ -226,8 +226,14 @@ export const similiA = (p: Profumo, tutti: Profumo[], quanti = 3) =>
 export const voto = (r: number) => r.toFixed(1).replace(".", ",");
 /** 24.246 e anche 5.763: in italiano il browser lascia i numeri di quattro cifre senza punto. */
 export const migliaia = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-/** Le foto stanno in public/img con lo stesso nome dell'app di oggi («img/…webp»). */
-export const immagine = (p: Profumo) => (p.img ? import.meta.env.BASE_URL + p.img.replace(/^\.?\//, "") : "");
+/** Le foto stanno in public/img con lo stesso nome dell'app di oggi («img/…webp»); quelle dei profumi aggiunti
+    dall'app le serve il ponte («api/foto/…»), che sta sempre all'indirizzo del ponte, anche da GitHub Pages. */
+export const immagine = (p: Profumo) => {
+  if (!p.img) return "";
+  if (/^https?:/.test(p.img)) return p.img;
+  if (p.img.startsWith("api/")) return (import.meta.env.VITE_PONTE || "https://sillage.danilo-moro96.workers.dev/api").replace(/\/api$/, "") + "/" + p.img;
+  return import.meta.env.BASE_URL + p.img.replace(/^\.?\//, "");
+};
 /** La stessa foto con l'indirizzo completo: serve dentro il CSS (maschere), che risolverebbe un indirizzo
     relativo dalla cartella dei fogli di stile invece che dalla pagina. */
 export const immagineAssoluta = (p: Profumo) => (p.img ? new URL(immagine(p), document.baseURI).href : "");

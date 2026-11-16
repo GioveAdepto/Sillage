@@ -38,6 +38,7 @@ persona**. Per ora c'è una persona sola, `danilo`: la chiave, e chi legge senza
 | `persone` | chi usa Sillage: per ora solo `danilo` (curatore); `account` sarà l'id dell'account di CheMetto |
 | `schede` | un profumo per riga, uguale per tutti: le colonne di Profumi che descrivono il profumo, in `dati` (JSON) |
 | `possessi` | chi ha quale profumo: `tipo_possesso`, `formato_ml`, `num_flaconi`, `residuo_pct`, `note_personali`, `aggiunto`, `attivo`, `nuovo`, e `posto` (l'ordine delle righe nel catalogo) |
+| `foto` | le foto dei profumi aggiunti dall'app (una riga per scheda: tipo e immagine in base64), servite da `GET /api/foto/<id>` |
 | `voci` | il diario, con la colonna `persona` |
 | `tab_persona` | Layering, Consigli e ConsigliVoci di ciascuno (la tab Note resta comune, in `tabelle`) |
 | `stato` | `vista:<persona>` (il catalogo pronto per l'app), `ids:<persona>`, `colonne-profumi` (l'ordine delle colonne del foglio), la copia nel foglio |
@@ -94,13 +95,12 @@ Registrazione libera, come CheMetto (scelta dell'utente).
   persona per account: rifarlo restituisce la stessa.
 - **Il catalogo comune**: `azione=catalogo` → tutte le schede (id, marca, nome, concentrazione, famiglia,
   immagine, tre accordi, stagioni, voto), senza dire chi le ha. Serve essere qualcuno (accesso o chiave).
-  Nell'app non lo usa ancora niente: servirà ad «Aggiungi profumo» per trovare un profumo già schedato.
+  Lo usa «Aggiungi profumo» per cercare per nome un profumo già schedato.
 - **Aggiungere una scheda già in Sillage / «Togli dalla vetrina»**: `azione=possesso&op=aggiungi&id=…&tipo=full|campione[&ml=…]` aggiunge
   una scheda ai propri possessi (in fondo all'ordine, `aggiunto` = oggi); `op=togli` la mette `attivo=no` (le
-  voci del diario che la nominano restano leggibili; aggiungerla di nuovo la riaccende). Nell'app oggi c'è solo
-  «Togli dalla vetrina» (in fondo alla scheda); l'aggiunta arriverà con «Aggiungi profumo», l'unico modo per
-  aggiungere (scelta dell'utente: «Ce l'ho» e la pagina del catalogo sono stati tolti). La vista della persona
-  si ricalcola subito.
+  voci del diario che la nominano restano leggibili; aggiungerla di nuovo la riaccende). Nell'app «Togli dalla
+  vetrina» sta in fondo alla scheda; per aggiungere l'app usa `azione=aggiungi` (sotto), che per una scheda già in
+  Sillage fa lo stesso. La vista della persona si ricalcola subito.
 - **Le vetrine degli altri** (decisione dell'utente: agli altri si mostra solo la collezione):
   `azione=vetrine` (chi c'è e quanti profumi ha) e `azione=vetrina&di=<persona>` (i suoi profumi, **senza**
   note personali e residuo; niente diario, layering né consigli). Le vede solo chi è entrato.
@@ -108,6 +108,40 @@ Registrazione libera, come CheMetto (scelta dell'utente).
   un'altra. Il foglio Google, `data/*.json` e `data/diario.enc` restano solo di Danilo; `GET /api` (senza
   account) resta la vetrina di Danilo, come prima.
 - Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (50 controlli).
+
+### Aggiungi profumo
+
+Scelte dell'utente: chi aggiunge un profumo lo mette **nella sua vetrina** e la scheda va **subito nell'anagrafica
+comune** (senza approvazione); mai nella vetrina degli altri.
+
+- **`azione=aggiungi`** (accesso o chiave), `dati` = JSON `{cliente, scheda, possesso, foto}`:
+  - `scheda`: colonne del foglio (`marchio`, `profumo`, `concentrazione`, `accordi` «a|b», `accordi_forza`,
+    `inverno`…`autunno`, `giorno_pct`, `rating`, `voti`, `longevita_h`, `sillage`, `piramide`, le occasioni «si/no»,
+    `stagione`, `momento`, `colore`, `fragrantica`…). Passano solo le colonne che il catalogo ha (non `id`, `img` e
+    quelle del possesso); servono almeno marchio e nome. Le vuote restano vuote: un profumo senza stagioni ha
+    `stagioni: null` nell'app e Consigliami lo salta.
+  - **se la scheda c'è già** (stesso numero di profumo nel link Fragrantica, in qualunque lingua del sito, oppure
+    stessi marchio, nome e concentrazione) non se ne fa un'altra: si aggiunge il possesso a quella (come
+    `azione=possesso`), con le note. Risponde `{ok, id, esistente: true, giaInVetrina}`.
+  - **se è nuova**: l'id lo dà il ponte (il più alto + 1, riprova se due aggiunte arrivano insieme); il possesso va
+    in fondo alla vetrina di chi aggiunge con `aggiunto` = oggi e `nuovo` = si. Risponde `{ok, id, nuovo: true}`.
+  - `possesso`: `{tipo: "full"|"campione", ml, note}`.
+  - `foto` (facoltativa): `{tipo: "image/webp"|"image/png"|"image/jpeg", dati: base64}`, al più ~1 MB; va nella
+    tabella **`foto`** (una riga per scheda, base64) e la colonna `img` diventa `api/foto/<id>.<ext>?v=<ora>`.
+    Le 41 foto di prima restano in `app/public/img/`.
+  - `cliente`: un codice fatto dall'app; la stessa aggiunta arrivata due volte (la coda senza rete che ritenta)
+    risponde `{ok, gia: true, id}` con lo stesso id (`stato.aggiunta:<cliente>`).
+- **`GET /api/foto/<id>.<ext>`**: la foto, con `Cache-Control: immutable` e CORS aperto (la usa anche l'app su
+  GitHub Pages, che chiede la foto all'indirizzo del ponte).
+- **`azione=leggi-cartolina`** (accesso o chiave), `tipo=cartolina|piramide`, `media`, `immagine` (base64, nel corpo):
+  manda l'immagine a **Claude Haiku 5.5** (`claude-haiku-5-5`, effort basso, risposta in JSON con uno schema) e
+  restituisce le scritte: per la cartolina nome, marchio, genere, voto, voti, durata, scia, nomi degli accordi e
+  note; per la piramide testa, cuore, fondo. **Le barre no**: quelle le misura il telefono
+  (`app/src/cartolina/misura.ts`). Al più **20 letture al giorno per persona** (`stato.letture:<persona>:<data>`).
+  Serve il segreto **`ANTHROPIC_API_KEY`** nel Worker (sotto, «Messa in opera»); senza, risponde
+  `{nonDisponibile: true}` e l'app lascia scrivere a mano. Per le prove `ANTHROPIC_URL` porta a un modello finto.
+  Costo: una cartolina ~1.600 token in entrata, meno di un decimo di centesimo.
+- Prova: `app/strumenti/prova-aggiungi.mjs` sul ponte locale col modello finto (sotto, «Provarlo in locale»).
 
 ## Indirizzi
 
@@ -123,6 +157,9 @@ Registrazione libera, come CheMetto (scelta dell'utente).
 | `POST /api?azione=registrati&nome=…` | un account nuovo diventa una persona con la vetrina vuota, con l'accesso |
 | `POST /api?azione=catalogo` | tutte le schede (per «Aggiungi profumo»), con l'accesso o la chiave |
 | `POST /api?azione=possesso&op=aggiungi\|togli&id=…` (`tipo`, `ml`) | aggiunge una scheda già in Sillage o la toglie («Togli dalla vetrina») dalla propria vetrina |
+| `POST /api?azione=aggiungi` (`dati` = JSON) | un profumo: scheda comune (nuova o già in Sillage) + nella propria vetrina |
+| `POST /api?azione=leggi-cartolina` (`tipo`, `media`, `immagine`) | le scritte della cartolina o della piramide, lette da Claude Haiku |
+| `GET /api/foto/<id>.<ext>` | la foto di un profumo aggiunto dall'app |
 | `POST /api?azione=vetrine` · `azione=vetrina&di=…` | chi c'è in Sillage · la sua collezione senza dati privati, per chi è entrato |
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |
@@ -141,6 +178,9 @@ La chiave (`chiave=…`) e l'accesso (`accesso=…`) viaggiano nel corpo della r
 - La chiave di Sillage sta nel Worker come **Secret**: Cloudflare ▸ Workers ▸
   sillage ▸ Settings ▸ **Variables and Secrets** (il riquadro in cima, *non*
   quello dentro Builds) ▸ Add ▸ tipo *Secret*, nome `SILLAGE_CHIAVE`.
+- La chiave dell'API di Anthropic (per leggere le scritte delle cartoline) è un altro **Secret**, nello stesso
+  posto, nome `ANTHROPIC_API_KEY`. La crea Danilo su console.anthropic.com ▸ API Keys; mai nel repo né nei
+  messaggi. Senza, «Aggiungi profumo» funziona lo stesso, scrivendo a mano nome e numeri.
 - Ogni unione su `main` ripubblica il ponte da sola, insieme all'app (`sito/`, costruita da `wrangler.jsonc`). Dopo, un controllo:
   `azione=sincronizza` con la chiave deve rispondere `ok`.
 
@@ -177,6 +217,12 @@ con un Web App finto su 8899 che risponde a `grezzo` e `specchio` (nessuna
 scrittura arriva al foglio vero): `node app/strumenti/foglio-finto.mjs`. Per provare gli account senza
 toccare il progetto Supabase vero: un Supabase finto che dà le sue chiavi pubbliche e i suoi token, e
 `--var SUPABASE_URL:http://127.0.0.1:8898` (vedi `app/LEGGIMI.md`, «Prove»).
+
+**Aggiungi profumo** in locale, senza chiamate vere ad Anthropic: un modello finto su 8897
+(`node app/strumenti/modello-finto.mjs`) e in più `--var ANTHROPIC_API_KEY:finta --var
+ANTHROPIC_URL:http://127.0.0.1:8897/v1/messages`; poi `node app/strumenti/prova-aggiungi.mjs` (con
+`PONTE_LOCALE=http://127.0.0.1:8788/api` davanti se il ponte locale gira su un'altra porta, con `--port 8788`).
+Meglio su un database locale a parte: `--persist-to <cartella temporanea>`.
 
 `wrangler dev` (come ogni pubblicazione) prima costruisce l'app in `sito/` e la serve alla radice: la prima
 volta installa i pacchetti di `app/`. Attenzione: costruita così l'app parla col ponte **pubblicato**; per farle

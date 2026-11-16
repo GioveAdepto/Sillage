@@ -33,7 +33,8 @@ export default defineConfig({
         // il passaggio dall'app di oggi: prende il posto del suo service worker e ne cancella la cache
         importScripts: ["pulizia-sw.js"],
         // le schermate d'avvio le legge solo l'iPhone quando apre l'app: non servono nella cache
-        globIgnores: ["**/img/avvio/**"],
+        // lo scontorno delle foto («Aggiungi profumo» ▸ Una tua foto) si scarica solo al primo uso, mai all'installazione
+        globIgnores: ["**/img/avvio/**", "**/scontorno-*.js"],
         navigateFallback: "index.html",
         runtimeCaching: [
           {
@@ -41,10 +42,25 @@ export default defineConfig({
             urlPattern: ({ url }) => url.pathname.endsWith("/api"),
             handler: "NetworkFirst",
             options: { cacheName: "sillage-dati", networkTimeoutSeconds: 6 }
+          },
+          {
+            // le foto dei profumi aggiunti dall'app (servite dal ponte): non cambiano mai, si tengono per l'uso senza rete
+            urlPattern: ({ url }) => url.pathname.includes("/api/foto/"),
+            handler: "CacheFirst",
+            options: { cacheName: "sillage-foto", expiration: { maxEntries: 300 }, cacheableResponse: { statuses: [0, 200] } }
           }
         ]
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // il pezzo dello scontorno (con onnxruntime) col suo nome, per lasciarlo fuori dalla cache: si scarica solo
+        // quando serve (l'import dinamico lo tiene già a parte; qui cambia solo il nome del file)
+        chunkFileNames: (c) => (c.moduleIds.some((id) => /@imgly|onnxruntime/.test(id)) ? "assets/scontorno-[hash].js" : "assets/[name]-[hash].js")
+      }
+    }
+  },
   server: { port: 5173, host: "127.0.0.1" }
 });

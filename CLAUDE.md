@@ -34,6 +34,9 @@ più vera, correggila subito.
   riscritta dal ponte; `data/*.json` è la copia notturna; `data/diario.enc` il diario cifrato.
 - **Gli account**: quelli di CheMetto (Supabase Auth), registrazione libera; ognuno ha collezione e diario suoi
   in D1, degli altri si vede solo la collezione. Dettagli in `ponte/LEGGIMI.md`.
+- **Aggiungi profumo** (Altro): si aggiunge solo da lì. Scheda nell'anagrafica comune + profumo nella vetrina di chi
+  aggiunge; barre misurate nel telefono dalla cartolina di Fragrantica, scritte lette da Claude Haiku via ponte
+  (Secret `ANTHROPIC_API_KEY` nel Worker, lo mette l'utente). Dettagli in `app/LEGGIMI.md` e `ponte/LEGGIMI.md`.
 - **La chiave di Sillage** è ormai solo di servizio (l'app non la chiede più): modifiche al catalogo, copia
   notturna, `sincronizza`, e per Claude «sei Danilo». In locale sta in `C:\Projects\Sillage\.dev.vars`
   (ignorato da git). Mai nel repo, nelle risposte o negli indirizzi.

@@ -5,6 +5,7 @@ import { SOTTO_ALTRO } from "../pagine/Segnaposto";
 import { DiarioVivo } from "../diario/uso";
 import VersioneNuova from "./VersioneNuova";
 import Apertura from "./Apertura";
+import AggiunteVive from "./AggiunteVive";
 
 /* Il guscio: la pagina scelta e, in basso, la barra con le cinque voci (il «timone»). */
 const VOCI: { a: string; nome: string; Icona: ComponentType<{ className?: string }>; anche: (p: string) => boolean }[] = [
@@ -38,6 +39,7 @@ export default function Guscio() {
         </ul>
       </nav>
       <DiarioVivo />
+      <AggiunteVive />
       <VersioneNuova />
       <Apertura />
       <ScrollRestoration />
