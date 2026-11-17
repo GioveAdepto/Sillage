@@ -18,7 +18,7 @@ prove/                prove in un browser vero: l'app (prova-nuova), il passaggi
 index.html, js/, css/, img/, sw.js, manifest.webmanifest
                       l'app di prima (statica, senza build): non è più pubblicata su Cloudflare; resta nel
                       repo come riferimento dei confronti (app/strumenti/) e per tornare indietro
-                      (vedi app/LEGGIMI.md, «Il passaggio»)
+                      (vedi app/STORIA.md)
 ```
 
 ## Da dove arrivano i dati
