@@ -85,5 +85,6 @@ export async function noteDellaSchermata(img: Immagine, noti: readonly string[],
   }
   const riconosci = await lettore(avanza);
   avanza?.("Leggo la schermata");
-  return capisciPiramide(await riconosci(preparaSchermata(img), "sparso"), noti);
+  const pronta = preparaSchermata(img);
+  return capisciPiramide(await riconosci(pronta, "sparso"), noti, pronta.icone);
 }

@@ -26,3 +26,5 @@ app/public/data/
 
 # pacchetti delle prove (playwright), installati senza salvarli
 node_modules/
+# generato da tsc -b
+*.tsbuildinfo
