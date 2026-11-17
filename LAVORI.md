@@ -26,10 +26,19 @@ Ultimo aggiornamento: 17 novembre 2026.
 - **Guida con schermate per «Aggiungi profumo»**: spiegare passo per passo, con immagini, come recuperare la
   cartolina dall'app Fragrantica (scheda del profumo ▸ Condividi ▸ salva l'immagine), come fare la schermata della
   piramide e quali dati servono. Le schermate vere dall'iPhone vanno chieste all'utente.
+  Proposta del 17/11 (anteprima «Sillage · guida e scheda pubblica»): la guida dentro i passi Cartolina e Piramide,
+  con miniature e un foglio coi passi in grande; immagini nell'app (anche senza rete). **Aspetta**: l'ok dell'utente e
+  le sue schermate (scheda nell'app Fragrantica, dopo Condividi, foglio con «Salva immagine», la piramide), in
+  `C:\Projects\Sillage\SchedeProfumiFragrantica\guida`.
 - **Dal profumo consigliato in CheMetto a Sillage**: chi vede il profumo consigliato per l'outfit deve poter
   arrivare a Sillage per saperne di più, sia l'utente stesso sia le persone esterne che lo vedono (per esempio nella
-  Bacheca). Prima chiedere all'utente che esperienza vuole, soprattutto per chi non ha un account di Sillage: oggi
-  senza account si vede solo la pagina d'ingresso.
+  Bacheca). Scelte dell'utente del 17/11: **chi non ha Sillage** vede una scheda pubblica del profumo (solo i dati
+  comuni del catalogo, mai vetrine, note personali, residuo o diario) con l'invito a entrare; **chi ha Sillage** apre
+  la sua scheda se il profumo è suo, se no la scheda pubblica con «Mettilo nella mia vetrina»; il link sta **ovunque
+  in CheMetto compaia il profumo** (Bacheca, Oggi, proposte, foglio dei consigli). Serve: indirizzo pubblico
+  `#/p/<id>`, una lettura senza account della sola scheda nel ponte, in CheMetto il link e una migrazione per tenere
+  l'id del profumo nella Bacheca. Sull'iPhone il link si apre in Safari, non nell'app installata. **Aspetta** l'ok
+  dell'utente sull'anteprima, poi il sì per toccare il repo di CheMetto.
 
 ## Da decidere
 
