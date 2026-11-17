@@ -10,8 +10,10 @@ Questo file si carica a ogni sessione: resta corto. I dettagli stanno qui, da ap
 
 | argomento | file |
 |---|---|
+| **a che punto siamo**: fatto, da provare, decisioni aperte | `LAVORI.md` |
 | struttura dei file, provarla in locale, pubblicazione | `README.md` |
-| l'app: avvio, pagine, regole portate, prove, passaggio dall'app di prima e ritorno | `app/LEGGIMI.md` |
+| l'app: avvio, pagine, regole portate, prove | `app/LEGGIMI.md` |
+| storia del passaggio dall'app di prima, inventario, ritorno | `app/STORIA.md` (solo se serve) |
 | stile Boutique (chiaro e scuro): colori, caratteri, componenti, movimento | `DESIGN.md` |
 | database, ponte, indirizzi `/api`, come applicare modifiche, tornare indietro | `ponte/LEGGIMI.md` |
 | foglio Google, Apps Script, chiave, diario cifrato (storia e via di ritorno) | `apps-script/LEGGIMI.md` |
@@ -34,9 +36,12 @@ più vera, correggila subito.
   riscritta dal ponte; `data/*.json` è la copia notturna; `data/diario.enc` il diario cifrato.
 - **Gli account**: quelli di CheMetto (Supabase Auth), registrazione libera; ognuno ha collezione e diario suoi
   in D1, degli altri si vede solo la collezione. Dettagli in `ponte/LEGGIMI.md`.
-- **CheMetto**: accanto all'outfit del giorno il profumo consigliato, dal ponte (`azione=consiglio`, stesso punteggio di
-  Consigliami; l'outfit conta solo a pari merito); sceglierlo scrive «Oggi ho messo» nel diario. Chi non ha Sillage non
-  vede niente. Dettagli in `ponte/LEGGIMI.md`.
+- **L'ingresso**: chi apre Sillage senza account vede solo la vetrina chiusa con «Entra con il tuo account di
+  CheMetto» (e «Registrati»), nessuna collezione. Dettagli in `app/LEGGIMI.md`.
+- **CheMetto**: per ogni proposta della pagina Oggi un profumo consigliato dal ponte (`azione=consiglio`, campo
+  `perOutfit`; stesso punteggio di Consigliami, l'outfit conta solo a pari merito); sceglierlo scrive «Oggi ho messo»
+  nel diario di Sillage, e «Oggi ho messo» segnato in Sillage arriva nella Bacheca di CheMetto. Chi non ha Sillage o
+  non ha profumi non vede niente. Dettagli in `ponte/LEGGIMI.md`.
 - **Aggiungi profumo** (Altro): si aggiunge solo da lì. Scheda nell'anagrafica comune + profumo nella vetrina di chi
   aggiunge; dalla cartolina di Fragrantica il telefono misura le barre e legge le scritte (Tesseract, gratis,
   scaricato al primo uso; niente AI a pagamento: scelta dell'utente). Dettagli in `app/LEGGIMI.md` e `ponte/LEGGIMI.md`.
@@ -66,6 +71,13 @@ Diario e residuo li scrive solo l'app. Il codice Apps Script lo aggiorna solo l'
 - Le rifiniture (vetrina di apertura, boccetta che vola sul piedistallo e si guarda da vicino, View
   Transitions, tilt) non si rompono.
 - Le prove non scrivono mai nel database vero: ponte locale o finto (`app/LEGGIMI.md`, «Prove»).
+
+## Come si lavora
+
+Una sola chat di coordinamento: pianifica, apre sotto-sessioni per i pezzi indipendenti, controlla i risultati,
+chiede le decisioni all'utente e tiene aggiornato `LAVORI.md`. I brief delle sotto-sessioni sono brevi e rimandano
+ai `.md` invece di ripetere il contesto. Per le scelte che toccano come l'utente usa l'app: prima chiedere che
+esperienza vuole, poi proporre. Le prove dal telefono le fa l'utente: segnalale in `LAVORI.md` finché non le conferma.
 
 ## Git
 
