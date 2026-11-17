@@ -119,6 +119,16 @@ verifica("consiglio a Danilo: tre profumi per l'ufficio, la sua vetrina, le foto
 const senzaColori = await post("azione=consiglio", { ...C, ...D }), grigi = await post("azione=consiglio", { ...C, ...D, colori: "#8a8b8d" });
 verifica("con un outfit neutro il consiglio è lo stesso di senza outfit",
   senzaColori.consigli.map((x) => x.id).join() === grigi.consigli.map((x) => x.id).join(), J([senzaColori.consigli, grigi.consigli].map((l) => l.map((x) => x.id))));
+{
+  // le proposte di Oggi: un campo outfit per proposta, nell'ordine (il corpo è un modulo con il campo ripetuto)
+  const corpo = new URLSearchParams({ ...C, ...D });
+  for (const o of ["", "#5e4232,#6a1f2d,#3a2a23", "#f4f4f2,#9cc3e6"]) corpo.append("outfit", o);
+  r = await (await fetch(U + "?azione=consiglio", { method: "POST", body: corpo })).json();
+  const tre = (r.consigli || []).map((x) => x.id);
+  verifica("consiglio con tre proposte: un profumo per proposta, sempre tra i 3, il primo per quella neutra",
+    r.perOutfit?.length === 3 && r.perOutfit.every((x) => tre.includes(x.id)) && r.perOutfit[0].id === tre[0], J(r.perOutfit));
+  verifica("senza proposte: perOutfit vuoto", (await post("azione=consiglio", { ...C, ...D })).perOutfit?.length === 0);
+}
 r = await post("azione=consiglio", { ...C, ...L });
 verifica("consiglio a lei: solo tra i suoi profumi", r.ok === true && r.vetrina.map((x) => x.id).sort().join() === "24,3" &&
   r.consigli.every((x) => [3, 24].includes(x.id)), J(r));

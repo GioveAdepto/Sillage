@@ -8,6 +8,7 @@
    2. L'OUTFIT NON RIBALTA: con outfit di colori diversi un profumo passa davanti a un altro solo se i due
       punteggi di Sillage distano meno di SOGLIA; nessun profumo sparisce o si aggiunge.
    3. Le situazioni di CheMetto, l'ora del telefono (fuso) e i toni dei colori.
+   4. Il profumo di ogni proposta (campo outfit): sempre uno dei 3 consigli, il primo per le proposte neutre.
    Esce con codice 1 se qualcosa non torna. */
 process.env.TZ = "UTC"; // come il Worker di Cloudflare (ponte/outfit.ts, «L'ORA»)
 import { readFileSync, mkdtempSync, writeFileSync } from "node:fs";
@@ -154,6 +155,34 @@ for (const [hex, t] of Object.entries(TONI)) ok(`tono di ${hex}: ${t}`, M.tonoDi
 ok("solo grigi: outfit neutro", M.richiestaOutfit(GRIGI) === null);
 const vuoto = M.consiglioPerOutfit([], { situazione: "lavoro", fuso: 60 }, null, ORA);
 ok("nessun profumo: nessun consiglio, nessun errore", vuoto.consigli.length === 0 && vuoto.classifica.length === 0);
+
+// ── 4. il profumo di ogni proposta: sempre uno dei 3 di Sillage, i colori scelgono per ultimi ──
+let proposte = 0, diversi = 0;
+for (const data of DATE) for (const ora of ORE) {
+  ORA = new VeraData(`${data}T${pad(ora)}:00:00Z`).getTime();
+  const [b, u, pd] = BASE[data.slice(5, 7)];
+  const meteo = meteoFinto(ORA, b, u, pd);
+  for (const [occ] of M.OCCASIONI) {
+    const outfit = Array.from({ length: 6 }, (_, i) => i === 0 ? [] : i === 1 ? GRIGI :
+      Array.from({ length: 3 + Math.floor(caso() * 3) }, () => PALETTE[Math.floor(caso() * PALETTE.length)]));
+    const r = { occasione: occ, momento: ora >= 19 ? "sera" : "giorno", quando: "oggi", fuso: 0 };
+    const senza = M.consiglioPerOutfit(profumi, r, meteo, ORA);
+    const con = M.consiglioPerOutfit(profumi, { ...r, outfit }, meteo, ORA);
+    const tre = senza.consigli.map((c) => c.id);
+    if (senza.perOutfit.length !== 0) no(`${data} ${occ}: perOutfit senza proposte`);
+    if (con.consigli.map((c) => c.id).join() !== tre.join()) no(`${data} ${occ}: le proposte cambiano i 3 consigli`);
+    if (con.perOutfit.length !== outfit.length) no(`${data} ${occ}: perOutfit non ha una voce per proposta`);
+    con.perOutfit.forEach((x, i) => {
+      proposte++;
+      if (!tre.includes(x.id)) no(`${data} ${occ}: proposta ${i} con un profumo fuori dai 3`, String(x.id));
+      if (i < 2 && (x.id !== tre[0] || x.abbinamento)) no(`${data} ${occ}: proposta neutra ${i} senza il primo di Sillage`, JSON.stringify(x));
+      if (x.id !== tre[0]) diversi++;
+    });
+  }
+}
+console.log(`4. ${proposte} proposte: profumo sempre tra i 3 di Sillage, diverso dal primo ${diversi} volte`);
+const nessunProfumo = M.consiglioPerOutfit([], { situazione: "lavoro", fuso: 60, outfit: [["#1c1c1c"]] }, null, ORA);
+ok("nessun profumo: nessuna proposta con profumo", nessunProfumo.perOutfit.length === 0);
 
 console.log(errori ? `ERRORI: ${errori}` : "prova del profumo per l'outfit: tutto ok");
 process.exitCode = errori ? 1 : 0;

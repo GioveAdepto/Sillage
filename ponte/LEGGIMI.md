@@ -108,7 +108,7 @@ Registrazione libera, come CheMetto (scelta dell'utente).
   un'altra. Il foglio Google, `data/*.json` e `data/diario.enc` restano solo di Danilo; `GET /api` (senza
   account) resta la vetrina di Danilo, come prima, ma l'app non lo chiama più: chi non è entrato vede solo
   l'ingresso (`app/LEGGIMI.md`, «L'ingresso»). Lo usano gli strumenti di verifica (`--ponte`).
-- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (68 controlli).
+- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (70 controlli).
 
 ### Aggiungi profumo
 
@@ -148,7 +148,7 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
 - **`azione=consiglio`** con l'accesso dell'account (lo stesso di CheMetto). Campi: `situazione` (quella di «Dove
   vai?» di CheMetto: `lavoro`, `aperitivo`…; oppure `occasione` e `momento` di Sillage), `quando` (`oggi`|`domani`),
   `fuso` (minuti da UTC del telefono), `lat` e `lon` (facoltativi, per il meteo), `colori` (i colori dei capi,
-  `#rrggbb` separati da virgole).
+  `#rrggbb` separati da virgole), `outfit` (ripetuto: i colori di ogni proposta di Oggi, nell'ordine delle carte).
 - Chi non è una persona di Sillage riceve **`{nessuno: true, motivo}`**, non un errore. `motivo`: `non-in-sillage`
   (token buono, account solo di CheMetto: l'unico da ricordare per il giorno), `senza-accesso`, `accesso-scaduto`
   (da rinnovare e riprovare), `accesso-non-valido`, `accesso-non-verificabile` (chiavi di Supabase irraggiungibili un
@@ -156,6 +156,11 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
 - Risponde `{ok, occasione, momento, data, meteo, consigli, vetrina, oggiHoMesso}`: i primi tre consigli (id, marca,
   nome, foto con l'indirizzo intero, `pro`, `contro`, `abbinamento` = la frase sull'outfit o null, `punteggio`), tutta la
   vetrina della persona (per «Un altro») e l'ultima voce di oggi del suo diario. Solo i dati di chi chiede.
+- **Il profumo di ogni proposta** (richiesta dell'utente: il profumo come accessorio di ogni proposta di Oggi, prima di
+  scegliere l'outfit): per ogni campo `outfit`, `perOutfit` = `[{id, abbinamento}]` nello stesso ordine. L'`id` è sempre
+  uno dei 3 `consigli`: «le prime 3 alternative valide per giornata/occasione e poi proprio come ultima cosa, outfit».
+  Il primo di Sillage cede il posto solo a uno dei tre che si abbina chiaramente meglio ai colori della proposta;
+  una proposta neutra (grigi, nessun colore) ha sempre il primo. Senza campi `outfit`, `perOutfit: []`.
 - **Il punteggio** è `candidati` di `app/src/consiglio.ts`, lo stesso di Consigliami (`ponte/outfit.ts`, impacchettato da
   Cloudflare). Le situazioni di CheMetto diventano occasioni di Sillage (`DA_CHEMETTO`: lavoro → ufficio, elegante →
   formale, ristorante e appuntamento → appuntamento, sport e trekking → palestra, il resto → quotidiano); di sera

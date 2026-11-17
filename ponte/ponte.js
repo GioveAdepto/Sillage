@@ -874,7 +874,9 @@ async function consiglioOutfit(env, db, p, url) {
   const richiesta = {
     situazione: p.get("situazione"), occasione: p.get("occasione"), momento: p.get("momento"),
     quando: p.get("quando") === "domani" ? "domani" : "oggi", fuso,
-    colori: String(p.get("colori") || "").split(",").map(c => c.trim()).filter(Boolean).slice(0, 12)
+    colori: String(p.get("colori") || "").split(",").map(c => c.trim()).filter(Boolean).slice(0, 12),
+    // le proposte di Oggi (campo ripetuto): per ognuna il suo profumo tra i 3 consigli
+    outfit: p.getAll("outfit").slice(0, 12).map(o => String(o).split(",").map(c => c.trim()).filter(Boolean).slice(0, 12))
   };
   const meteo = profumi.length ? await meteoPer(numero("lat"), numero("lon")) : null;
   const esito = consiglioPerOutfit(profumi, richiesta, meteo);
@@ -884,6 +886,7 @@ async function consiglioOutfit(env, db, p, url) {
   return {
     ok: true, occasione: esito.occasione, momento: esito.momento, data: esito.oggi, meteo: !!meteo,
     consigli: esito.consigli.map(c => ({ ...vocePerCheMetto(perId.get(c.id), base), ...c })),
+    perOutfit: esito.perOutfit,
     vetrina: profumi.map(x => vocePerCheMetto(x, base)),
     oggiHoMesso: voce && perId.has(voce.id) ? { ...vocePerCheMetto(perId.get(voce.id), base), t: voce.t } : null
   };
@@ -942,7 +945,7 @@ async function rispondi(request, env, ctx) {
   // i parametri arrivano sia nell'indirizzo sia nel corpo, come per il Web App
   const p = new URLSearchParams(url.search);
   const ct = request.headers.get("Content-Type") || "";
-  if (!ct || /x-www-form-urlencoded|text\/plain/.test(ct)) new URLSearchParams(await request.text()).forEach((v, k) => p.set(k, v));
+  if (!ct || /x-www-form-urlencoded|text\/plain/.test(ct)) new URLSearchParams(await request.text()).forEach((v, k) => (k === "outfit" ? p.append(k, v) : p.set(k, v)));
   const azione = p.get("azione");
 
   if (azione === "leggi") {
