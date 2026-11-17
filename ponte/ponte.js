@@ -6,7 +6,8 @@
    Parla come il Web App di Apps Script, così l'app non ha dovuto cambiare:
      GET  /api                         tutto, senza il diario (diarioChiuso: true)
      POST /api?azione=leggi            tutto, diario compreso, con la chiave o con l'accesso
-     POST /api?azione=diario&op=...    metti, togli o nota, con la chiave o con l'accesso
+     POST /api?azione=diario&op=...    metti, togli o nota, con la chiave o con l'accesso (con l'accesso e senza
+                                       da=chemetto, il profumo del giorno va anche nella Bacheca di CheMetto)
      POST /api?azione=residuo&id&valore  quanto resta in una boccetta, con la chiave o con l'accesso
      POST /api?azione=collega          collega l'account (accesso) a Danilo, con la chiave; scollega=si lo toglie
      POST /api?azione=registrati&nome  un account nuovo diventa una persona, con la vetrina vuota (accesso)
@@ -880,6 +881,32 @@ async function consiglioOutfit(env, db, p, url) {
   };
 }
 
+/* Il profumo del giorno nella Bacheca di CheMetto (tabella profumi_del_giorno di CheMetto, funzioni segna_profumo e
+   togli_profumo). Dopo una scrittura del diario fatta dall'app di Sillage con l'account: l'ultima voce di quel giorno,
+   o nessuna. Col token della persona (le funzioni guardano auth.uid()) e la chiave pubblica di CheMetto. Solo per
+   oggi, ieri e domani (UTC); mai un requisito di Sillage: in waitUntil, gli errori finiscono nel registro. */
+async function copiaInCheMetto(env, db, persona, data, token, base) {
+  if (!env.SUPABASE_URL || !env.CHEMETTO_CHIAVE_PUBBLICA || !token) return;
+  const giorni = [-1, 0, 1].map(g => new Date(Date.now() + g * 864e5).toISOString().slice(0, 10));
+  if (!giorni.includes(data)) return;
+  const voce = await db.prepare("SELECT id FROM voci WHERE persona = ? AND data = ? ORDER BY t DESC LIMIT 1").bind(persona, data).first();
+  let rpc = "togli_profumo", corpo = { p_giorno: data };
+  if (voce) {
+    const pezzo = await leggiStato(db, "vista:" + persona);
+    const x = pezzo && (JSON.parse("{" + pezzo + "}").profumi || []).find(q => q && q.id === voce.id);
+    if (!x) return;
+    const v = vocePerCheMetto(x, base);
+    rpc = "segna_profumo";
+    corpo = { p_giorno: data, p_marca: v.marca, p_nome: v.nome, p_img: v.img && v.img.startsWith("https://") ? v.img : null };
+  }
+  const r = await fetch(env.SUPABASE_URL + "/rest/v1/rpc/" + rpc, {
+    method: "POST",
+    headers: { apikey: env.CHEMETTO_CHIAVE_PUBBLICA, Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify(corpo)
+  });
+  if (!r.ok) console.log("CheMetto " + rpc + ": HTTP " + r.status + " " + (await r.text()).slice(0, 200));
+}
+
 // ── L'INGRESSO ────────────────────────────────────────────────────────────
 async function rispondi(request, env, ctx) {
   const url = new URL(request.url);
@@ -932,6 +959,11 @@ async function rispondi(request, env, ctx) {
     const esito = azione === "diario" ? await scriviDiario(db, chi.persona, p)
       : azione === "residuo" ? await segnaResiduo(db, chi.persona, p) : await possesso(db, chi.persona, p);
     if (esito.ok && !esito.gia && !esito.assente) copiaDopo(env, ctx);
+    // «Oggi ho messo» segnato nell'app di Sillage arriva anche nella Bacheca di CheMetto (quelle di CheMetto le copia CheMetto)
+    if (azione === "diario" && esito.ok && !esito.gia && !esito.assente && ["metti", "togli"].includes(p.get("op"))
+        && chi.da === "accesso" && p.get("da") !== "chemetto")
+      ctx.waitUntil(copiaInCheMetto(env, db, chi.persona, String(p.get("data")), String(p.get("accesso")), url.origin + "/")
+        .catch(e => console.log("copia in CheMetto non riuscita:", e.message)));
     return json(esito);
   }
   // il resto (catalogo, copia nel foglio, passaggio) solo con la chiave: sono lavori di Claude, non dell'app

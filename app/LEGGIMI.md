@@ -469,12 +469,14 @@ locale nuovo): collegamento solo con chiave e accesso insieme, diario e residuo 
 falsi o di un altro progetto rifiutati, catalogo solo con la chiave. Nell'app: Impostazioni ▸ Il tuo account ▸
 Entra, poi «Collega l'account al mio diario» (con la chiave `prova` salvata), poi si può togliere la chiave.
 
-Poi `node strumenti/prova-persone.mjs` (60 controlli, **obbligatoria a ogni cambio di ponte o account**): una
+Poi `node strumenti/prova-persone.mjs` (67 controlli, **obbligatoria a ogni cambio di ponte o account**): una
 seconda persona si registra, ha la vetrina vuota, legge il catalogo comune e aggiunge e toglie schede dal ponte, scrive diario e residuo
 suoi; non legge né tocca niente di Danilo; vede la sua vetrina senza note personali né residuo; non può fare i
 lavori di Claude; la vetrina pubblica di Danilo resta identica. In più il profumo per CheMetto (`azione=consiglio`):
 chi non è in Sillage (o ha un accesso falso) riceve `nessuno` senza errore, chi non ha profumi nessun consiglio,
-ognuno solo i suoi profumi e il suo «Oggi ho messo». Nell'app: Impostazioni ▸ Registrati (password
+ognuno solo i suoi profumi e il suo «Oggi ho messo»; un «Oggi ho messo» segnato nell'app di Sillage va nella
+Bacheca di CheMetto (il Supabase finto registra `segna_profumo` e `togli_profumo`; ponte locale con
+`--var CHEMETTO_CHIAVE_PUBBLICA:finta`), quelli di CheMetto (`da=chemetto`), della chiave o di giorni lontani no. Nell'app: Impostazioni ▸ Registrati (password
 di ogni email nel Supabase finto: `prova1234`), vetrina vuota, Altro ▸ Le vetrine, «Togli dalla vetrina».
 (Per riempire la vetrina della persona di prova: Altro ▸ Aggiungi profumo.) Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
 devono aprirsi senza errori.

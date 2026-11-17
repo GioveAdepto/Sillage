@@ -2,7 +2,7 @@
    Supabase FINTO (8898): registrazione, vetrina vuota, catalogo comune, possesso (per «Aggiungi profumo»), diario e residuo propri,
    vetrine degli altri senza i dati privati, e soprattutto che una persona non legga né scriva niente di un'altra.
    Mai contro il ponte pubblicato. Su un database locale nuovo (app/LEGGIMI.md, «Provare gli account»). */
-import { firma } from "./supabase-finto.mjs";
+import { firma, accountDi } from "./supabase-finto.mjs";
 const U = process.env.PONTE_LOCALE || "http://127.0.0.1:8787/api"; // su un'altra porta: PONTE_LOCALE=…
 const post = async (q, campi = {}) => (await fetch(U + "?" + q, { method: "POST", body: new URLSearchParams(campi) })).json();
 let errori = 0;
@@ -121,11 +121,48 @@ r = await post("azione=consiglio", { ...C, ...L });
 verifica("consiglio a lei: solo tra i suoi profumi", r.ok === true && r.vetrina.map((x) => x.id).sort().join() === "24,3" &&
   r.consigli.every((x) => [3, 24].includes(x.id)), J(r));
 const oggiLocale = new Date(Date.now() + 60 * 6e4).toISOString().slice(0, 10), tLei = String(Date.now());
-verifica("lei sceglie il 3 da CheMetto (azione=diario)", (await post(`azione=diario&op=metti&id=3&data=${oggiLocale}&t=${tLei}&occasione=ufficio&momento=giorno`, L)).ok === true);
+verifica("lei sceglie il 3 da CheMetto (azione=diario)", (await post(`azione=diario&op=metti&id=3&data=${oggiLocale}&t=${tLei}&occasione=ufficio&momento=giorno&da=chemetto`, L)).ok === true);
 r = await post("azione=consiglio", { ...C, ...L });
 verifica("e il consiglio dice «Oggi ho messo» il 3", r.oggiHoMesso?.id === 3 && r.oggiHoMesso.t === tLei, J(r.oggiHoMesso));
 r = await post("azione=consiglio", { ...C, ...D });
 verifica("Danilo non vede la scelta di lei", r.oggiHoMesso?.t !== tLei, J(r.oggiHoMesso));
+
+// «Oggi ho messo» segnato nell'app di Sillage va anche nella Bacheca di CheMetto (segna_profumo / togli_profumo)
+const SB = "http://127.0.0.1:8898/prove/chiamate";
+const chiamate = async (attese) => { // il ponte le fa dopo aver risposto: si aspetta un poco
+  let l = [];
+  for (let i = 0; i < 20 && l.length < attese; i++) { await new Promise((ok) => setTimeout(ok, 150)); l = l.concat(await (await fetch(SB)).json()); }
+  if (!attese) { await new Promise((ok) => setTimeout(ok, 1500)); l = l.concat(await (await fetch(SB)).json()); }
+  return l;
+};
+await chiamate(0); // via quelle rimaste dalle prove di prima
+let ch = await chiamate(0);
+verifica("la scelta fatta da CheMetto (da=chemetto) non torna a CheMetto", ch.length === 0, J(ch));
+const tSil = String(Date.now() + 1);
+verifica("lei segna il 24 dall'app di Sillage", (await post(`azione=diario&op=metti&id=24&data=${oggiLocale}&t=${tSil}`, L)).ok === true);
+ch = await chiamate(1);
+const contoLei = accountDi("lei@esempio.it");
+verifica("e il ponte lo copia in CheMetto, col token di lei", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].account === contoLei &&
+  ch[0].p_giorno === oggiLocale && ch[0].p_nome === suo24.name && ch[0].p_marca === suo24.brand && ch[0].apikey, J(ch));
+verifica("la foto solo con https (in locale niente)", ch[0]?.p_img === null, J(ch[0]));
+verifica("lei toglie il 24 dall'app di Sillage", (await post(`azione=diario&op=togli&id=24&data=${oggiLocale}&t=${tSil}`, L)).tolta === true);
+ch = await chiamate(1);
+verifica("in CheMetto torna l'ultima voce rimasta (il 3 scelto da CheMetto)", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].p_nome === danPrima.profumi.find((x) => x.id === 3).name, J(ch));
+verifica("lei toglie anche il 3 (da CheMetto)", (await post(`azione=diario&op=togli&id=3&data=${oggiLocale}&t=${tLei}&da=chemetto`, L)).tolta === true);
+ch = await chiamate(0);
+verifica("…e il ponte non chiama CheMetto", ch.length === 0, J(ch));
+const tAltro = String(Date.now() + 2);
+await post(`azione=diario&op=metti&id=3&data=${oggiLocale}&t=${tAltro}`, L);
+await chiamate(1);
+await post(`azione=diario&op=togli&id=3&data=${oggiLocale}&t=${tAltro}`, L);
+ch = await chiamate(1);
+verifica("tolta l'ultima voce del giorno dall'app di Sillage: togli_profumo", ch.length === 1 && ch[0].rpc === "togli_profumo" && ch[0].p_giorno === oggiLocale, J(ch));
+await post("azione=diario&op=metti&id=3&data=2026-01-10&t=1768000000000", L);
+ch = await chiamate(0);
+verifica("una voce di un giorno lontano non va in CheMetto", ch.length === 0, J(ch));
+await post(`azione=diario&op=metti&id=24&data=${oggiLocale}&t=${String(Date.now() + 3)}`, { chiave: "prova" });
+ch = await chiamate(0);
+verifica("con la chiave di servizio (senza account) niente CheMetto", ch.length === 0, J(ch));
 
 // Danilo e le copie non sono cambiati
 const pubblicoDopo = JSON.stringify({ ...(await (await fetch(U)).json()), aggiornato: 0 });
