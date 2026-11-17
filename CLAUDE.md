@@ -34,6 +34,9 @@ più vera, correggila subito.
   riscritta dal ponte; `data/*.json` è la copia notturna; `data/diario.enc` il diario cifrato.
 - **Gli account**: quelli di CheMetto (Supabase Auth), registrazione libera; ognuno ha collezione e diario suoi
   in D1, degli altri si vede solo la collezione. Dettagli in `ponte/LEGGIMI.md`.
+- **CheMetto**: accanto all'outfit del giorno il profumo consigliato, dal ponte (`azione=consiglio`, stesso punteggio di
+  Consigliami; l'outfit conta solo a pari merito); sceglierlo scrive «Oggi ho messo» nel diario. Chi non ha Sillage non
+  vede niente. Dettagli in `ponte/LEGGIMI.md`.
 - **Aggiungi profumo** (Altro): si aggiunge solo da lì. Scheda nell'anagrafica comune + profumo nella vetrina di chi
   aggiunge; dalla cartolina di Fragrantica il telefono misura le barre e legge le scritte (Tesseract, gratis,
   scaricato al primo uso; niente AI a pagamento: scelta dell'utente). Dettagli in `app/LEGGIMI.md` e `ponte/LEGGIMI.md`.

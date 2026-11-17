@@ -6,6 +6,7 @@ import { finestraMeteo, piove, type Finestra, type Meteo } from "./meteo";
    Le regole (scelte dell'utente): prima la stagione, poi l'occasione, poi giorno o sera. Il diario e i voti
    personali non entrano nel punteggio; a parità decide il rating di Fragrantica. L'ufficio non esclude: dosa.
    Boccette e campioni insieme. Ogni modifica si verifica con strumenti/prima-dopo.mjs.
+   Lo usa anche il ponte per CheMetto (ponte/outfit.ts, prova: strumenti/prova-outfit.mjs).
    Niente React qui dentro: lo script del prima/dopo lo carica in Node. */
 
 export type Occasione = "ufficio" | "quotidiano" | "appuntamento" | "formale" | "casa" | "festivita" | "palestra";
