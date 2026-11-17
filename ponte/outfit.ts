@@ -6,6 +6,11 @@
    chiaramente meglio (almeno SCARTO in più). Senza colori la classifica è identica a quella di Sillage:
    lo controlla app/strumenti/prova-outfit.mjs.
 
+   IL PROFUMO DI OGNI PROPOSTA (richiesta dell'utente: il profumo come accessorio di ogni proposta di Oggi in
+   CheMetto). «Preleva le prime 3 alternative valide per giornata/occasione e poi proprio come ultima cosa, outfit»:
+   per ogni proposta si sceglie tra i 3 consigli di Sillage quello che si abbina meglio ai suoi colori, ma il primo
+   cede il posto solo a chi si abbina chiaramente meglio (almeno SCARTO in più). Proposta neutra = il primo.
+
    L'ORA. Il Worker di Cloudflare vive in UTC, Consigliami legge l'ora con getHours(). Il ponte quindi
    «sposta» l'orologio: un istante la cui ora UTC è l'ora del telefono (fuso in minuti, mandato da CheMetto).
    Il meteo di Open-Meteo arriva già nell'ora del posto («2026-11-17T08:00»), che il Worker legge come UTC:
@@ -48,6 +53,8 @@ export interface Richiesta {
   fuso?: number;
   /** i colori dei capi dell'outfit, «#rrggbb» */
   colori?: string[];
+  /** le proposte di Oggi in CheMetto, ognuna con i colori dei suoi capi: per ognuna il suo profumo tra i 3 */
+  outfit?: string[][];
 }
 
 /** L'ora del telefono, come istante «spostato» (vedi sopra). */
@@ -182,7 +189,22 @@ export function consiglioPerOutfit(profumi: Profumo[], r: Richiesta, meteo: Mete
     abbinamento: tono && abb !== null && abb >= 0.7 ? `Si sposa con ${FRASE_TONO[tono]} dell'outfit` : null,
     punteggio: Math.round(c.s * 100) / 100
   }));
-  return { occasione: cx.occ, momento: cx.mo, oggi: cx.oggi, consigli, classifica: ordinata.map((x) => x.c.p.id) };
+  const tre = ordinata.slice(0, QUANTI).map((x) => x.c.p);
+  return {
+    occasione: cx.occ, momento: cx.mo, oggi: cx.oggi, consigli, classifica: ordinata.map((x) => x.c.p.id),
+    perOutfit: tre.length ? (r.outfit || []).map((colori) => profumoPerProposta(tre, colori)) : []
+  };
+}
+
+/** Il profumo di una proposta: uno dei 3 consigli (in ordine di Sillage), scelto per ultimo dai suoi colori. */
+export function profumoPerProposta(tre: Profumo[], colori: string[] | null | undefined) {
+  const ri = richiestaOutfit(colori);
+  if (!ri) return { id: tre[0].id, abbinamento: null as string | null };
+  const abb = tre.map((p) => abbinamento(p, ri.o));
+  let k = 0;
+  abb.forEach((a, i) => { if (a > abb[k]) k = i; });
+  if (abb[k] - abb[0] < SCARTO) k = 0;
+  return { id: tre[k].id, abbinamento: abb[k] >= 0.7 ? `Si sposa con ${FRASE_TONO[ri.tono]} dell'outfit` : null };
 }
 
 /** Il meteo per il consiglio: Open-Meteo, come Consigliami, ma con un tempo massimo; senza, vale il calendario. */
