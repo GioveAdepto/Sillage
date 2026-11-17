@@ -108,7 +108,7 @@ Registrazione libera, come CheMetto (scelta dell'utente).
   un'altra. Il foglio Google, `data/*.json` e `data/diario.enc` restano solo di Danilo; `GET /api` (senza
   account) resta la vetrina di Danilo, come prima, ma l'app non lo chiama più: chi non è entrato vede solo
   l'ingresso (`app/LEGGIMI.md`, «L'ingresso»). Lo usano gli strumenti di verifica (`--ponte`).
-- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (60 controlli).
+- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (67 controlli).
 
 ### Aggiungi profumo
 
@@ -164,7 +164,16 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
   gruppo di profumi a meno di 0,25 punti dal primo del gruppo passa avanti chi si abbina chiaramente meglio; oltre,
   mai. Senza colori la classifica è quella di Consigliami: lo controlla `app/strumenti/prova-outfit.mjs`.
 - **«Oggi ho messo»**: CheMetto lo scrive con `azione=diario&op=metti` (accesso, `data` di oggi, `t`, `occasione` e
-  `momento` della risposta); cambiare idea = `op=togli` di quella voce e una nuova. Il resto del diario resta privato.
+  `momento` della risposta) e `da=chemetto`; cambiare idea = `op=togli` di quella voce e una nuova. Il resto del
+  diario resta privato.
+- **«Oggi ho messo» dall'app di Sillage** (richiesta dell'utente: deve arrivare nella Bacheca di CheMetto senza
+  riaprire CheMetto): dopo ogni `azione=diario` `op=metti|togli` fatta **con l'account** e **senza** `da=chemetto`, il
+  ponte prende l'ultima voce di quel giorno e chiama in CheMetto `rpc/segna_profumo` (`p_giorno`, `p_marca`, `p_nome`,
+  `p_img` solo se `https://`) oppure `rpc/togli_profumo` (`p_giorno`) se non ne resta nessuna. Col token della persona e
+  la chiave pubblica di CheMetto (`CHEMETTO_CHIAVE_PUBBLICA` in `wrangler.jsonc`, la stessa di `app/src/accesso.ts`);
+  solo per ieri, oggi e domani (UTC); dopo aver risposto (`waitUntil`), e un errore finisce solo nel registro del
+  Worker: CheMetto non è mai un requisito di Sillage. Le funzioni stanno nella migrazione 066 di CheMetto: finché
+  non c'è, le chiamate rispondono errore, ed è normale. Con la sola chiave di servizio non si chiama niente.
 - L'ora: il Worker vive in UTC, quindi il ponte «sposta» l'orologio all'ora del telefono (commento in `outfit.ts`).
 
 ## Indirizzi

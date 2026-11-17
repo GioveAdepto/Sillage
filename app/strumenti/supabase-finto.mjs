@@ -1,6 +1,7 @@
 /* Un Supabase Auth FINTO per le prove degli account (porta 8898): chiavi pubbliche, accesso con password,
    registrazione, rinnovo, uscita. Nessuna richiesta al progetto vero. Password valida per ogni email: «prova1234».
    Esporta anche firma() per le prove del ponte (token buoni, scaduti, falsi): strumenti/prova-accesso.mjs.
+   Risponde anche a segna_profumo e togli_profumo di CheMetto e le tiene da parte per le prove (/prove/chiamate).
 
    Si lancia dalla cartella app/:   node strumenti/supabase-finto.mjs
    poi il ponte locale con  --var SUPABASE_URL:http://127.0.0.1:8898  e l'app costruita con
@@ -38,7 +39,7 @@ export function firma(email, o = {}) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const rinnovi = new Map(), iscritti = new Set();
+  const rinnovi = new Map(), iscritti = new Set(), chiamate = [];
   const sessione = (email, scade) => {
     const refresh = randomUUID(); rinnovi.set(refresh, email);
     return { access_token: firma(email, { scade }), token_type: "bearer", expires_in: scade, expires_at: Math.floor(Date.now() / 1000) + scade,
@@ -55,6 +56,8 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       const { x, y, crv, kty } = K.buona;
       return manda(200, { keys: [{ alg: "ES256", crv, kty, x, y, kid: "finta-1", use: "sig", key_ops: ["verify"], ext: true }] });
     }
+    // per le prove: le chiamate a segna_profumo / togli_profumo arrivate dal ponte (e le cancella)
+    if (u.pathname === "/prove/chiamate") { const l = [...chiamate]; chiamate.length = 0; return manda(200, l); }
     if (!req.headers.apikey) return manda(401, { message: "No API key found in request" });
     const d = corpo ? JSON.parse(corpo) : {};
     if (u.pathname === "/auth/v1/token" && u.searchParams.get("grant_type") === "password") {
@@ -79,6 +82,17 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       return manda(200, sessione(email, SCADE));
     }
     if (u.pathname === "/auth/v1/logout") return manda(204, {});
+    // le funzioni di CheMetto per il profumo del giorno (migrazione 066): vogliono il token della persona
+    const rpc = /^\/rest\/v1\/rpc\/(segna_profumo|togli_profumo)$/.exec(u.pathname);
+    if (rpc) {
+      const token = String(req.headers.authorization || "").replace(/^Bearer /, "");
+      let account = null;
+      try { account = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).sub; } catch {}
+      if (!account) return manda(401, { message: "JWT non valido" });
+      chiamate.push({ rpc: rpc[1], account, apikey: req.headers.apikey, ...d });
+      console.log(rpc[1] + ":", JSON.stringify(d));
+      return manda(200, null);
+    }
     manda(404, { message: "non previsto" });
   }).listen(8898, "127.0.0.1", () => console.log("Supabase finto su " + BASE));
 }
