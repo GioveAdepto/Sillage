@@ -21,6 +21,16 @@ Ultimo aggiornamento: 17 novembre 2026.
   arriva nel diario di Sillage. Con un account senza profumi o senza Sillage non deve vedersi niente di rotto o vuoto.
 - **Sillage ▸ Altro ▸ Aggiungi profumo**: la piramide letta da una schermata di Fragrantica esce giusta.
 
+## Da fare (chiesti dall'utente il 17/11)
+
+- **Guida con schermate per «Aggiungi profumo»**: spiegare passo per passo, con immagini, come recuperare la
+  cartolina dall'app Fragrantica (scheda del profumo ▸ Condividi ▸ salva l'immagine), come fare la schermata della
+  piramide e quali dati servono. Le schermate vere dall'iPhone vanno chieste all'utente.
+- **Dal profumo consigliato in CheMetto a Sillage**: chi vede il profumo consigliato per l'outfit deve poter
+  arrivare a Sillage per saperne di più, sia l'utente stesso sia le persone esterne che lo vedono (per esempio nella
+  Bacheca). Prima chiedere all'utente che esperienza vuole, soprattutto per chi non ha un account di Sillage: oggi
+  senza account si vede solo la pagina d'ingresso.
+
 ## Da decidere
 
 - Sul branch `riscrittura-react` c'è un commit mai unito (`efa3472`): toglie il service worker rimasto
