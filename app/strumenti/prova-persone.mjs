@@ -100,11 +100,13 @@ verifica("aggiungerlo di nuovo lo riaccende", (await post("azione=possesso&op=ag
 // Il profumo per l'outfit di CheMetto (azione=consiglio): chi non è in Sillage non riceve errori, solo «nessuno»
 const C = { situazione: "lavoro", fuso: "60" };
 r = await post("azione=consiglio", C);
-verifica("consiglio senza accesso: nessuno, senza errore", r.nessuno === true && !r.errore, J(r));
+verifica("consiglio senza accesso: nessuno, senza errore", r.nessuno === true && r.motivo === "senza-accesso" && !r.errore, J(r));
 r = await post("azione=consiglio", { ...C, accesso: firma("solo-chemetto@esempio.it") });
-verifica("consiglio a un account di CheMetto che non è in Sillage: nessuno, senza errore", r.nessuno === true && !r.errore, J(r));
+verifica("consiglio a un account di CheMetto che non è in Sillage: nessuno, «non-in-sillage», senza errore", r.nessuno === true && r.motivo === "non-in-sillage" && !r.errore, J(r));
 r = await post("azione=consiglio", { ...C, accesso: "non.un.token" });
-verifica("consiglio con un accesso falso: nessuno, senza errore", r.nessuno === true && !r.errore, J(r));
+verifica("consiglio con un accesso falso: nessuno, senza errore", r.nessuno === true && r.motivo === "accesso-non-valido" && !r.errore, J(r));
+r = await post("azione=consiglio", { ...C, accesso: firma("danilo@esempio.it", { scade: -60 }) });
+verifica("consiglio a Danilo col token scaduto: nessuno «accesso-scaduto» (da non ricordare)", r.nessuno === true && r.motivo === "accesso-scaduto", J(r));
 const vuota = firma("vuota@esempio.it");
 await post("azione=registrati", { accesso: vuota, nome: "Vuota" });
 r = await post("azione=consiglio", { ...C, accesso: vuota });
