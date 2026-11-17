@@ -107,6 +107,7 @@ strumenti/prova-aggiungi.mjs prove di «Aggiungi profumo» sul ponte locale
 strumenti/cartolina-node.mjs per le prove: legge PNG/JPEG, carica src/cartolina/ in Node e il lettore Tesseract per la taratura
 strumenti/prova-accesso.mjs prove degli account sul ponte locale col Supabase finto
 strumenti/prova-persone.mjs prove della seconda persona e dell'isolamento sul ponte locale
+strumenti/prova-outfit.mjs prova del profumo per l'outfit di CheMetto (ponte/outfit.ts): con outfit neutro = Consigliami
 strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
 strumenti/verifica-filtri.mjs confronta filtri, scelte rapide e ordinamenti della Collezione con l'app di oggi
 strumenti/schermate-avvio.py rifà le schermate d'avvio (la vetrina chiusa, chiara e scura)
@@ -468,10 +469,12 @@ locale nuovo): collegamento solo con chiave e accesso insieme, diario e residuo 
 falsi o di un altro progetto rifiutati, catalogo solo con la chiave. Nell'app: Impostazioni ▸ Il tuo account ▸
 Entra, poi «Collega l'account al mio diario» (con la chiave `prova` salvata), poi si può togliere la chiave.
 
-Poi `node strumenti/prova-persone.mjs` (50 controlli, **obbligatoria a ogni cambio di ponte o account**): una
+Poi `node strumenti/prova-persone.mjs` (60 controlli, **obbligatoria a ogni cambio di ponte o account**): una
 seconda persona si registra, ha la vetrina vuota, legge il catalogo comune e aggiunge e toglie schede dal ponte, scrive diario e residuo
 suoi; non legge né tocca niente di Danilo; vede la sua vetrina senza note personali né residuo; non può fare i
-lavori di Claude; la vetrina pubblica di Danilo resta identica. Nell'app: Impostazioni ▸ Registrati (password
+lavori di Claude; la vetrina pubblica di Danilo resta identica. In più il profumo per CheMetto (`azione=consiglio`):
+chi non è in Sillage (o ha un accesso falso) riceve `nessuno` senza errore, chi non ha profumi nessun consiglio,
+ognuno solo i suoi profumi e il suo «Oggi ho messo». Nell'app: Impostazioni ▸ Registrati (password
 di ogni email nel Supabase finto: `prova1234`), vetrina vuota, Altro ▸ Le vetrine, «Togli dalla vetrina».
 (Per riempire la vetrina della persona di prova: Altro ▸ Aggiungi profumo.) Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
 devono aprirsi senza errori.
@@ -500,6 +503,11 @@ Carica `js/dati.js`, `js/collezione.js` e `js/consigliami.js` dell'app di oggi i
 in primavera e autunno, tramonti veri per la stagione) confronta ordine, punteggio e motivi di ogni profumo
 in 224 casi: 4 date × mattina e sera × 7 occasioni × oggi/domani × con e senza meteo, e con loro la ricetta
 «Se vuoi osare, con…» proposta col primo consiglio (presente in 189 casi). Esce con errore se trova differenze. Unica differenza voluta: il voto nei motivi con la virgola («★ 4,3»).
+
+**Il profumo per l'outfit di CheMetto** usa lo stesso `src/consiglio.ts` dal ponte (`ponte/outfit.ts`): una
+modifica al punteggio cambia anche quello. `node strumenti/prova-outfit.mjs` (gira anche su GitHub) controlla che
+con un outfit neutro la classifica sia identica a Consigliami (1656 casi, tutte le situazioni di CheMetto), che i
+colori dell'outfit spostino un profumo solo a pari merito (meno di 0,25 punti) e le ore col fuso del telefono.
 
 ## Inventario: l'app di oggi e la nuova
 

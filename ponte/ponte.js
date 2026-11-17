@@ -14,6 +14,7 @@
      POST /api?azione=possesso&op=aggiungi|togli&id[&tipo&ml]  aggiungi una scheda già in Sillage / «Togli dalla vetrina» (accesso o chiave)
      POST /api?azione=vetrine          chi c'è in Sillage; azione=vetrina&di=… la sua collezione, senza privati
      POST /api?azione=aggiungi         un profumo nuovo (dati=JSON): scheda comune + nella propria vetrina (accesso o chiave)
+     POST /api?azione=consiglio        il profumo per l'outfit di CheMetto, col consiglio di Consigliami (accesso)
      GET  /api/foto/<id>.webp          la foto di un profumo aggiunto dall'app
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
@@ -36,6 +37,9 @@
    Le tabelle nascono da sole alla prima richiesta; la prima volta il
    catalogo viene copiato dal foglio, e un database di prima della tappa 2 fa
    da solo il passaggio: nessun passo a mano. */
+
+// Il consiglio per CheMetto usa lo stesso codice di Consigliami (app/src/consiglio.ts): Cloudflare lo impacchetta
+import { consiglioPerOutfit, meteoPer, vocePerCheMetto } from "./outfit.ts";
 
 const OCCASIONI = ["ufficio", "quotidiano", "appuntamento", "formale", "casa", "festivita", "palestra"];
 const RESIDUI = [100, 90, 75, 50, 25, 10, 0];
@@ -845,6 +849,37 @@ async function copiaNelFoglio(env, sempre) {
 }
 const copiaDopo = (env, ctx) => ctx.waitUntil(copiaNelFoglio(env).catch(e => console.log("copia nel foglio rimandata:", e.message)));
 
+// ── CHEMETTO: IL PROFUMO PER L'OUTFIT ───────────────────────────────────
+/* CheMetto chiede, col token di chi la usa, il profumo per l'outfit del giorno (ponte/outfit.ts). Chi non è in
+   Sillage riceve { nessuno: true } e CheMetto non mostra niente: non è un errore. Risponde solo a chi chiede,
+   sui suoi profumi; «Oggi ho messo» è l'ultima voce di oggi del suo diario. Scrivere la scelta è azione=diario. */
+async function consiglioOutfit(env, db, p, url) {
+  const chi = await chiE(env, db, p);
+  if (!chi.persona) return { nessuno: true };
+  const pezzo = await leggiStato(db, "vista:" + chi.persona);
+  const tutti = pezzo ? (JSON.parse("{" + pezzo + "}").profumi || []) : [];
+  const profumi = tutti.filter(x => x && typeof x.id === "number" && String(x.attivo ?? "si") !== "no")
+    .map(x => ({ ...x, accordi: Array.isArray(x.accordi) ? x.accordi : [], note: x.note ?? "" }));
+  const numero = k => (p.get(k) === null || p.get(k) === "" ? NaN : Number(p.get(k)));
+  const fuso = Math.max(-840, Math.min(840, Math.round(numero("fuso")) || 0));
+  const richiesta = {
+    situazione: p.get("situazione"), occasione: p.get("occasione"), momento: p.get("momento"),
+    quando: p.get("quando") === "domani" ? "domani" : "oggi", fuso,
+    colori: String(p.get("colori") || "").split(",").map(c => c.trim()).filter(Boolean).slice(0, 12)
+  };
+  const meteo = profumi.length ? await meteoPer(numero("lat"), numero("lon")) : null;
+  const esito = consiglioPerOutfit(profumi, richiesta, meteo);
+  const base = url.origin + "/", perId = new Map(tutti.map(x => [x.id, x]));
+  const voce = await db.prepare("SELECT id, t FROM voci WHERE persona = ? AND data = ? ORDER BY t DESC LIMIT 1")
+    .bind(chi.persona, esito.oggi).first();
+  return {
+    ok: true, occasione: esito.occasione, momento: esito.momento, data: esito.oggi, meteo: !!meteo,
+    consigli: esito.consigli.map(c => ({ ...vocePerCheMetto(perId.get(c.id), base), ...c })),
+    vetrina: profumi.map(x => vocePerCheMetto(x, base)),
+    oggiHoMesso: voce && perId.has(voce.id) ? { ...vocePerCheMetto(perId.get(voce.id), base), t: voce.t } : null
+  };
+}
+
 // ── L'INGRESSO ────────────────────────────────────────────────────────────
 async function rispondi(request, env, ctx) {
   const url = new URL(request.url);
@@ -879,6 +914,7 @@ async function rispondi(request, env, ctx) {
     const chi = await chiE(env, db, p);
     return testo(await corpo(db, chi.persona || P, !!chi.persona, chi));
   }
+  if (azione === "consiglio") return json(await consiglioOutfit(env, db, p, url));
   if (azione === "collega") return json(await collega(env, db, p));
   if (azione === "registrati") return json(await registrati(env, db, p));
   if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina", "aggiungi"].includes(azione)) {

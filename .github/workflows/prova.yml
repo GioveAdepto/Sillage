@@ -40,6 +40,7 @@ jobs:
           node strumenti/verifica-filtri.mjs
           node strumenti/prova-coda.mjs
           node strumenti/prova-cartolina.mjs
+          node strumenti/prova-outfit.mjs
       - name: Costruisce l'app col ponte finto
         working-directory: app
         run: npm run build

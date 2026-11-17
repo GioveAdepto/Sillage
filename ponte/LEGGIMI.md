@@ -108,7 +108,7 @@ Registrazione libera, come CheMetto (scelta dell'utente).
   un'altra. Il foglio Google, `data/*.json` e `data/diario.enc` restano solo di Danilo; `GET /api` (senza
   account) resta la vetrina di Danilo, come prima, ma l'app non lo chiama più: chi non è entrato vede solo
   l'ingresso (`app/LEGGIMI.md`, «L'ingresso»). Lo usano gli strumenti di verifica (`--ponte`).
-- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (50 controlli).
+- Prova di isolamento obbligatoria a ogni cambio: `app/strumenti/prova-persone.mjs` (60 controlli).
 
 ### Aggiungi profumo
 
@@ -139,6 +139,34 @@ comune** (senza approvazione); mai nella vetrina degli altri.
   mandava a Claude Haiku): niente AI a pagamento e niente segreto `ANTHROPIC_API_KEY`.
 - Prova: `app/strumenti/prova-aggiungi.mjs` sul ponte locale (sotto, «Provarlo in locale»).
 
+### CheMetto: il profumo per l'outfit
+
+Scelte dell'utente: in CheMetto, accanto all'outfit del giorno, il profumo consigliato da Sillage; sceglierlo lo scrive
+nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sillage**: chi non c'è non vede niente.
+**Comanda il punteggio di Sillage**; l'outfit conta solo a pari merito.
+
+- **`azione=consiglio`** con l'accesso dell'account (lo stesso di CheMetto). Campi: `situazione` (quella di «Dove
+  vai?» di CheMetto: `lavoro`, `aperitivo`…; oppure `occasione` e `momento` di Sillage), `quando` (`oggi`|`domani`),
+  `fuso` (minuti da UTC del telefono), `lat` e `lon` (facoltativi, per il meteo), `colori` (i colori dei capi,
+  `#rrggbb` separati da virgole).
+- Chi non è una persona di Sillage (niente accesso, accesso falso, account solo di CheMetto) riceve
+  **`{nessuno: true}`**, non un errore. Chi non ha profumi riceve `consigli: []`.
+- Risponde `{ok, occasione, momento, data, meteo, consigli, vetrina, oggiHoMesso}`: i primi tre consigli (id, marca,
+  nome, foto con l'indirizzo intero, `pro`, `contro`, `abbinamento` = la frase sull'outfit o null, `punteggio`), tutta la
+  vetrina della persona (per «Un altro») e l'ultima voce di oggi del suo diario. Solo i dati di chi chiede.
+- **Il punteggio** è `candidati` di `app/src/consiglio.ts`, lo stesso di Consigliami (`ponte/outfit.ts`, impacchettato da
+  Cloudflare). Le situazioni di CheMetto diventano occasioni di Sillage (`DA_CHEMETTO`: lavoro → ufficio, elegante →
+  formale, ristorante e appuntamento → appuntamento, sport e trekking → palestra, il resto → quotidiano); di sera
+  si parte dalle 19, domani all'ora dell'occasione, come in Consigliami. Il meteo lo prende il ponte da Open-Meteo
+  (al più 1,5 secondi, se no vale il calendario).
+- **L'abbinamento**: i colori dei capi diventano toni (scuri e caldi, scuri, chiari e caldi, pastello, chiari,
+  verdi, blu, caldi; i grigi di mezzo non contano) e i toni gli accordi che vanno d'accordo (`AFFINI`). Dentro un
+  gruppo di profumi a meno di 0,25 punti dal primo del gruppo passa avanti chi si abbina chiaramente meglio; oltre,
+  mai. Senza colori la classifica è quella di Consigliami: lo controlla `app/strumenti/prova-outfit.mjs`.
+- **«Oggi ho messo»**: CheMetto lo scrive con `azione=diario&op=metti` (accesso, `data` di oggi, `t`, `occasione` e
+  `momento` della risposta); cambiare idea = `op=togli` di quella voce e una nuova. Il resto del diario resta privato.
+- L'ora: il Worker vive in UTC, quindi il ponte «sposta» l'orologio all'ora del telefono (commento in `outfit.ts`).
+
 ## Indirizzi
 
 `https://sillage.danilo-moro96.workers.dev/api`
@@ -155,6 +183,7 @@ comune** (senza approvazione); mai nella vetrina degli altri.
 | `POST /api?azione=possesso&op=aggiungi\|togli&id=…` (`tipo`, `ml`) | aggiunge una scheda già in Sillage o la toglie («Togli dalla vetrina») dalla propria vetrina |
 | `POST /api?azione=aggiungi` (`dati` = JSON) | un profumo: scheda comune (nuova o già in Sillage) + nella propria vetrina |
 | `GET /api/foto/<id>.<ext>` | la foto di un profumo aggiunto dall'app |
+| `POST /api?azione=consiglio` (`situazione`, `quando`, `fuso`, `lat`, `lon`, `colori`) | il profumo per l'outfit di CheMetto e «Oggi ho messo», con l'accesso; `nessuno` per chi non è in Sillage |
 | `POST /api?azione=vetrine` · `azione=vetrina&di=…` | chi c'è in Sillage · la sua collezione senza dati privati, per chi è entrato |
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |

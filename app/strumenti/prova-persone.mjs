@@ -97,6 +97,36 @@ r = await post("azione=leggi", L);
 verifica("il 24 sparisce dalla sua vetrina, la sua voce di diario resta", r.profumi.map((x) => x.id).join(",") === "3" && r.diario.length === 1, J(r.profumi.map((x) => x.id)));
 verifica("aggiungerlo di nuovo lo riaccende", (await post("azione=possesso&op=aggiungi&id=24&tipo=campione", L)).aggiunto === true);
 
+// Il profumo per l'outfit di CheMetto (azione=consiglio): chi non è in Sillage non riceve errori, solo «nessuno»
+const C = { situazione: "lavoro", fuso: "60" };
+r = await post("azione=consiglio", C);
+verifica("consiglio senza accesso: nessuno, senza errore", r.nessuno === true && !r.errore, J(r));
+r = await post("azione=consiglio", { ...C, accesso: firma("solo-chemetto@esempio.it") });
+verifica("consiglio a un account di CheMetto che non è in Sillage: nessuno, senza errore", r.nessuno === true && !r.errore, J(r));
+r = await post("azione=consiglio", { ...C, accesso: "non.un.token" });
+verifica("consiglio con un accesso falso: nessuno, senza errore", r.nessuno === true && !r.errore, J(r));
+const vuota = firma("vuota@esempio.it");
+await post("azione=registrati", { accesso: vuota, nome: "Vuota" });
+r = await post("azione=consiglio", { ...C, accesso: vuota });
+verifica("consiglio a chi è in Sillage senza profumi: nessun consiglio, nessun errore",
+  r.ok === true && r.consigli.length === 0 && r.vetrina.length === 0 && r.oggiHoMesso === null, J(r));
+r = await post("azione=consiglio", { ...C, ...D, colori: "#1c1c1c,#5e4232" });
+verifica("consiglio a Danilo: tre profumi per l'ufficio, la sua vetrina, le foto con l'indirizzo intero",
+  r.ok === true && r.occasione === "ufficio" && r.consigli.length === 3 && r.vetrina.length === 41 &&
+  r.consigli.every((x) => /^https?:\/\//.test(x.img) && x.nome && Array.isArray(x.pro)), J(r));
+const senzaColori = await post("azione=consiglio", { ...C, ...D }), grigi = await post("azione=consiglio", { ...C, ...D, colori: "#8a8b8d" });
+verifica("con un outfit neutro il consiglio è lo stesso di senza outfit",
+  senzaColori.consigli.map((x) => x.id).join() === grigi.consigli.map((x) => x.id).join(), J([senzaColori.consigli, grigi.consigli].map((l) => l.map((x) => x.id))));
+r = await post("azione=consiglio", { ...C, ...L });
+verifica("consiglio a lei: solo tra i suoi profumi", r.ok === true && r.vetrina.map((x) => x.id).sort().join() === "24,3" &&
+  r.consigli.every((x) => [3, 24].includes(x.id)), J(r));
+const oggiLocale = new Date(Date.now() + 60 * 6e4).toISOString().slice(0, 10), tLei = String(Date.now());
+verifica("lei sceglie il 3 da CheMetto (azione=diario)", (await post(`azione=diario&op=metti&id=3&data=${oggiLocale}&t=${tLei}&occasione=ufficio&momento=giorno`, L)).ok === true);
+r = await post("azione=consiglio", { ...C, ...L });
+verifica("e il consiglio dice «Oggi ho messo» il 3", r.oggiHoMesso?.id === 3 && r.oggiHoMesso.t === tLei, J(r.oggiHoMesso));
+r = await post("azione=consiglio", { ...C, ...D });
+verifica("Danilo non vede la scelta di lei", r.oggiHoMesso?.t !== tLei, J(r.oggiHoMesso));
+
 // Danilo e le copie non sono cambiati
 const pubblicoDopo = JSON.stringify({ ...(await (await fetch(U)).json()), aggiornato: 0 });
 verifica("la vetrina pubblica (di Danilo) è identica a prima", pubblicoDopo === pubblicoPrima);
