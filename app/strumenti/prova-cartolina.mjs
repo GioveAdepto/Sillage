@@ -75,7 +75,20 @@ const pir = capisciPiramide(parole([
   [["Note", 100, 650, 180, 680], ["di", 190, 650, 220, 680], ["fondo", 230, 650, 320, 680]],
   [["Fava", 50, 800, 120, 830], ["Tonka", 130, 800, 220, 830], ["Muschio", 400, 800, 520, 830]]
 ]), ["Bergamotto"]);
-verifica("la piramide da una schermata", JSON.stringify(pir) === JSON.stringify({ testa: ["Bergamotto", "Limone"], cuore: ["Fiore d'Arancio"], fondo: ["Fava Tonka", "Muschio"] }), JSON.stringify(pir));
+// come la schermata del sito in italiano (Danilo, 2026-11-17): «Note di apertura / centrali / di base», nomi vicini
+// sulla stessa riga divisi dalle icone sopra
+const pir2 = capisciPiramide(parole([
+  [["NOTE", 620, 60, 680, 76], ["DI", 696, 60, 716, 76], ["APERTURA", 730, 60, 853, 76]],
+  [["Lampone", 680, 262, 797, 290]],
+  [["NOTE", 644, 344, 705, 362], ["CENTRALI", 717, 344, 830, 362]],
+  [["Betulla", 550, 579, 635, 602], ["Ambra", 716, 579, 801, 602], ["Benzoino", 846, 580, 964, 602, 29]],
+  [["NOTE", 656, 662, 716, 680], ["DI", 730, 662, 750, 680], ["BASE", 764, 662, 819, 680]],
+  [["Muschio", 720, 880, 826, 902], ["Muschio", 850, 876, 957, 913], ["Vegetale", 970, 876, 1082, 913], ["Patchouli", 1100, 880, 1216, 902]]
+]), [], [{ x: 736, y0: 112, y1: 240 }, { x: 592, y0: 400, y1: 560 }, { x: 760, y0: 432, y1: 560 }, { x: 904, y0: 440, y1: 560 },
+  { x: 772, y0: 744, y1: 864 }, { x: 960, y0: 752, y1: 864 }, { x: 1156, y0: 752, y1: 864 }]);
+verifica("la piramide del sito: apertura / centrali / di base, nomi divisi dalle icone",
+  JSON.stringify(pir2) === JSON.stringify({ testa: ["Lampone"], cuore: ["Betulla", "Ambra", "Benzoino"], fondo: ["Muschio", "Muschio Vegetale", "Patchouli"] }), JSON.stringify(pir2));
+verifica("la piramide da una schermata",JSON.stringify(pir) === JSON.stringify({ testa: ["Bergamotto", "Limone"], cuore: ["Fiore d'Arancio"], fondo: ["Fava Tonka", "Muschio"] }), JSON.stringify(pir));
 
 console.log(`${controlli} controlli sulla misura e sulle scritte delle cartoline sintetiche, ${errori} falliti.`);
 if (errori) process.exit(1);

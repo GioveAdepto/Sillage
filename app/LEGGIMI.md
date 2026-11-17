@@ -100,6 +100,7 @@ strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (ved
 strumenti/supabase-finto.mjs un Supabase Auth finto, per provare gli account (vedi «Provare gli account»)
 strumenti/tara-cartoline.mjs taratura della misura delle barre sulle cartoline vere (fuori da git) contro il database
 strumenti/tara-scritte.mjs taratura della lettura delle scritte (Tesseract vero, in Node) sulle stesse cartoline
+strumenti/tara-piramide.mjs prova della lettura della piramide su schermate vere (fuori da git)
 strumenti/cartolina-finta.mjs disegna le cartoline sintetiche delle prove (prove/cartoline/)
 strumenti/prova-cartolina.mjs prova della misura, del ritaglio e di come si capiscono le scritte (cartoline sintetiche)
 strumenti/prova-aggiungi.mjs prove di «Aggiungi profumo» sul ponte locale
@@ -254,9 +255,15 @@ dall'utente il 2026-11-16 (tela «Aggiungi profumo · anteprima»).
    `@imgly/background-removal` (come CheMetto), che si scarica **solo al primo uso** (~44 MB dal server di img.ly; il
    pezzo di codice `assets/scontorno-*.js` è fuori dalla cache dell'installazione). Va al ponte come webp (PNG dove
    Safari non sa fare webp) alto al più 600 px; la serve `GET /api/foto/<id>` e la tiene il service worker.
-5. **Piramide** facoltativa da una schermata, letta dallo stesso lettore (`capisciPiramide`: i titoli «Note di testa /
-   cuore / fondo» o Top / Middle / Base dicono il livello; anche in tema scuro); le note si tolgono e si aggiungono a
-   mano. Da tarare su schermate vere.
+5. **Piramide** facoltativa da una schermata, letta dallo stesso lettore. Prima `preparaSchermata` porta lo sfondo
+   a bianco (anche in tema scuro) e **cancella le icone delle note** (macchie più alte di una riga di testo: se no il
+   lettore ci vede lettere); poi `capisciPiramide`: i titoli dicono il livello («Note di apertura / centrali / di
+   base» come sul sito in italiano, o «testa / cuore / fondo», Top / Middle / Base), le righe dei titoli non sono note,
+   e sulla stessa riga **ogni parola va con l'icona più vicina sopra di lei** (il nome sta centrato sotto la sua), così
+   «Muschio Vegetale» e «Patchouli» restano due note anche se vicine; un nome lungo su due righe si riunisce. Le note
+   si tolgono e si aggiungono a mano. Provata il 2026-11-17 sulla schermata di Danilo (tema scuro; anche invertita e
+   rimpicciolita): 12 note su 12 al loro livello. Per provarne altre: `node strumenti/tara-piramide.mjs <schermata o
+   cartella>` (le schermate restano fuori da git).
 6. **Salva**: `azione=aggiungi` (ponte/LEGGIMI.md). **Senza rete** va nella coda `sillage-app:aggiunte-coda` (con la
    foto), la Collezione lo dice («aspetta la rete») e parte da sola al ritorno della rete, all'avvio o tornando
    all'app; il codice `cliente` evita i doppioni.
@@ -469,7 +476,7 @@ di ogni email nel Supabase finto: `prova1234`), vetrina vuota, Altro ▸ Le vetr
 (Per riempire la vetrina della persona di prova: Altro ▸ Aggiungi profumo.) Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
 devono aprirsi senza errori.
 
-**Aggiungi profumo**: `node strumenti/prova-cartolina.mjs` (82 controlli sulla misura, sul ritaglio e su come si
+**Aggiungi profumo**: `node strumenti/prova-cartolina.mjs` (83 controlli sulla misura, sul ritaglio e su come si
 capiscono le scritte lette; cartoline sintetiche disegnate da `strumenti/cartolina-finta.mjs`: nessuna immagine di
 Fragrantica nel repo) e `node prove/prova-aggiunta.mjs` dalla radice (nel browser, col ponte finto e l'app costruita
 con **`VITE_LETTORE=finto`**, che risponde scritte fisse senza scaricare niente: ricerca, cartolina, ambra, foto,

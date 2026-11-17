@@ -419,73 +419,198 @@ export async function leggiCartolina(img: Immagine, misura: Misura, riconosci: R
 
 // ── la piramide da una schermata ──
 
-/** Una schermata pronta per il lettore: in grigi, sfondo bianco (anche se la schermata è in tema scuro). */
-export function preparaSchermata(img: Immagine): Immagine {
-  let somma = 0,
-    n = 0;
-  for (let i = 0; i < img.data.length; i += 4 * 97) {
-    somma += 0.299 * img.data[i] + 0.587 * img.data[i + 1] + 0.114 * img.data[i + 2];
-    n++;
+/** Una schermata pronta per il lettore: in grigi, sfondo bianco pieno (anche in tema scuro), e senza le icone delle
+    note. Le icone sono immagini molto più alte delle scritte: dove una colonna di pixel esce dallo sfondo per un
+    tratto lungo, è un'icona, e la si cancella (con un po' di margine), così il lettore non ci vede lettere. */
+export function preparaSchermata(img: Immagine): Immagine & { icone: Icona[] } {
+  const W = img.width,
+    H = img.height,
+    d = img.data;
+  const lum = new Float32Array(W * H),
+    tinta = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    const r = d[i * 4],
+      g = d[i * 4 + 1],
+      b = d[i * 4 + 2];
+    lum[i] = 0.299 * r + 0.587 * g + 0.114 * b;
+    tinta[i] = Math.max(r, g, b) - Math.min(r, g, b);
   }
-  const scura = somma / Math.max(1, n) < 110;
-  const lato = Math.max(img.width, img.height);
-  const scala = lato < 1400 ? 2 : 1;
-  return ritaglio(img, 0, 0, img.width, img.height, scala, scura
-    ? (x, y) => {
-        const i = (y * img.width + x) * 4;
-        return 0.299 * img.data[i] + 0.587 * img.data[i + 1] + 0.114 * img.data[i + 2]; // il testo chiaro è l'inchiostro
-      }
-    : undefined);
+  // lo sfondo: la luminosità più comune
+  const conta = new Uint32Array(256);
+  for (let i = 0; i < lum.length; i += 7) conta[Math.round(lum[i])]++;
+  let fondo = 0;
+  for (let v = 1; v < 256; v++) if (conta[v] > conta[fondo]) fondo = v;
+  const fuori = (i: number) => Math.abs(lum[i] - fondo) > 28 || tinta[i] > 50;
+  // le icone: tratti verticali fuori dallo sfondo più lunghi di una riga di testo
+  const lungo = Math.max(24, Math.round(Math.min(W, 1600) * 0.045));
+  /* le macchie: una griglia di quadretti (pieni se un quinto dei pixel esce dallo sfondo), unita in pezzi collegati.
+     Un pezzo più alto di una riga di testo è un'icona; le parole sono pezzi bassi, staccati dall'icona sopra. */
+  const c = Math.max(2, Math.round(lungo / 8));
+  const gw = Math.ceil(W / c),
+    gh = Math.ceil(H / c);
+  const pieno = new Uint8Array(gw * gh);
+  for (let gy = 0; gy < gh; gy++)
+    for (let gx = 0; gx < gw; gx++) {
+      let n = 0,
+        tot = 0;
+      for (let y = gy * c; y < Math.min(H, gy * c + c); y++)
+        for (let x = gx * c; x < Math.min(W, gx * c + c); x++) {
+          tot++;
+          if (fuori(y * W + x)) n++;
+        }
+      pieno[gy * gw + gx] = n >= tot * 0.2 ? 1 : 0;
+    }
+  const pezzo = new Int32Array(gw * gh).fill(-1);
+  const riquadri: { x0: number; x1: number; y0: number; y1: number }[] = [];
+  for (let s = 0; s < gw * gh; s++) {
+    if (!pieno[s] || pezzo[s] >= 0) continue;
+    const r = { x0: Infinity, x1: -1, y0: Infinity, y1: -1 };
+    const pila = [s];
+    pezzo[s] = riquadri.length;
+    while (pila.length) {
+      const q = pila.pop()!;
+      const qx = q % gw,
+        qy = (q - qx) / gw;
+      r.x0 = Math.min(r.x0, qx);
+      r.x1 = Math.max(r.x1, qx);
+      r.y0 = Math.min(r.y0, qy);
+      r.y1 = Math.max(r.y1, qy);
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = qx + dx,
+            ny = qy + dy;
+          if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
+          const t = ny * gw + nx;
+          if (pieno[t] && pezzo[t] < 0) {
+            pezzo[t] = riquadri.length;
+            pila.push(t);
+          }
+        }
+    }
+    riquadri.push({ x0: r.x0 * c, x1: (r.x1 + 1) * c, y0: r.y0 * c, y1: (r.y1 + 1) * c });
+  }
+  const icone0 = riquadri.filter((r) => r.y1 - r.y0 >= lungo && r.x1 - r.x0 >= lungo * 0.5 && r.x1 - r.x0 < W * 0.5);
+  // via le icone, con un po' di margine (i bordi arrotondati e l'ombra)
+  const m = Math.max(2, Math.round(lungo / 10));
+  const via = new Uint8Array(W * H);
+  for (const r of icone0)
+    for (let y = Math.max(0, r.y0 - m); y < Math.min(H, r.y1 + m); y++) via.fill(1, y * W + Math.max(0, r.x0 - m), y * W + Math.min(W, r.x1 + m));
+  const scala = Math.max(W, H) < 1400 ? 2 : 1;
+  const pronta = ritaglio(img, 0, 0, W, H, scala, (x, y) => {
+    const i = y * W + x;
+    if (via[i]) return 0;
+    // il testo si stacca dallo sfondo (più chiaro in tema scuro, più scuro in tema chiaro)
+    return Math.max(0, Math.min(255, (Math.abs(lum[i] - fondo) - 20) * 2.2));
+  });
+  // le icone nelle coordinate dell'immagine pronta (ingrandita, col margine bianco di ritaglio)
+  const M = 8 * scala;
+  const icone = icone0.map((r) => ({ x: ((r.x0 + r.x1) / 2) * scala + M, y0: r.y0 * scala + M, y1: r.y1 * scala + M }));
+  return { ...pronta, icone };
 }
 
+/** Un'icona di una nota: il centro e l'altezza (per mettere ogni nome sotto la sua). */
+export interface Icona {
+  x: number;
+  y0: number;
+  y1: number;
+}
+
+/** I titoli dei livelli: «Note di testa / cuore / fondo», «Note di apertura / centrali / di base», Top / Middle / Base. */
 const TITOLI: [keyof Note, RegExp][] = [
-  ["testa", /^(testa|top|head)$/i],
-  ["cuore", /^(cuore|middle|heart)$/i],
+  ["testa", /^(testa|apertura|top|head)$/i],
+  ["cuore", /^(cuore|centrali|centrale|middle|heart)$/i],
   ["fondo", /^(fondo|base)$/i]
 ];
-const NON_NOTE = /^(note|notes|di|piramide|olfattiva|pyramid|perfume|fragrance|vota|voti|mostra|tutte|accordi|principali)$/i;
+const NON_NOTE = /^(note|notes|di|de|of|piramide|olfattiva|pyramid|perfume|fragrance|vota|voti|mostra|tutte|accordi|principali)$/i;
 
-/** Le note di una schermata della piramide: i titoli «Note di testa / cuore / fondo» (o Top / Middle / Base) dicono
-    il livello; sotto, i nomi delle note (sotto le icone, a volte su due righe). Senza titoli, tutte nel cuore. */
-export function capisciPiramide(l: Letto, noti: readonly string[] = []): Note {
+/** Le note di una schermata della piramide: i titoli dicono il livello; sotto, i nomi delle note (sotto le icone,
+    più d'uno sulla stessa riga, a volte su due righe). Senza titoli, tutte nel cuore. */
+export function capisciPiramide(l: Letto, noti: readonly string[] = [], icone: readonly Icona[] = []): Note {
   const ps = l.parole
     .map((p) => ({ ...p, testo: p.testo.trim().replace(/[.,;:]+$/, "") }))
-    .filter((p) => p.conf >= 45 && /^[A-Za-zÀ-ÿ'’()-]{2,}$/.test(p.testo));
+    .filter(
+      (p) =>
+        // le icone sono già cancellate: una parola pulita con l'iniziale maiuscola si tiene anche se il lettore è incerto
+        (p.conf >= 40 || (p.conf >= 20 && /^[A-ZÀ-Ý][a-zà-ÿ'’]{3,}$/.test(p.testo))) &&
+        (/^[A-Za-zÀ-ÿ'’-]{3,}$/.test(p.testo) || /^(di|de|da|la|le|al|of|du)$/i.test(p.testo) || /^d['’][A-Za-zÀ-ÿ]+$/.test(p.testo))
+    );
   const hs = ps.map((p) => p.y1 - p.y0).sort((a, b) => a - b);
   const h = hs[Math.floor(hs.length / 2)] || 20;
-  // i titoli, dall'alto
-  const titoli = ps
-    .map((p) => ({ p, livello: TITOLI.find(([, re]) => re.test(p.testo))?.[0] }))
-    .filter((t): t is { p: Parola; livello: keyof Note } => !!t.livello)
-    .sort((a, b) => a.p.y0 - b.p.y0);
-  const suUnTitolo = (p: Parola) => titoli.some((t) => Math.abs((t.p.y0 + t.p.y1) / 2 - (p.y0 + p.y1) / 2) < h * 0.6);
-  // le parole in righe, le righe in etichette (uno spazio largo separa due note sulla stessa riga)
-  const parole = ps.filter((p) => !suUnTitolo(p) && p.y1 - p.y0 < h * 1.8).sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0);
+  // le parole in righe (stessa altezza), ogni riga da sinistra a destra
+  const righe: { y0: number; y1: number; parole: typeof ps }[] = [];
+  for (const p of [...ps].sort((a, b) => a.y0 - b.y0)) {
+    if (p.y1 - p.y0 > h * 1.8 || p.y1 - p.y0 < h * 0.45) continue; // un pezzo d'icona
+    const c = (p.y0 + p.y1) / 2;
+    const r = righe.find((r) => c > r.y0 && c < r.y1);
+    if (r) {
+      r.parole.push(p);
+      r.y0 = Math.min(r.y0, p.y0);
+      r.y1 = Math.max(r.y1, p.y1);
+    } else righe.push({ y0: p.y0, y1: p.y1, parole: [p] });
+  }
+  righe.sort((a, b) => a.y0 - b.y0);
+  // i titoli: le righe con «note» e un nome di livello
+  const titoli: { y: number; livello: keyof Note }[] = [];
+  const nomi: typeof righe = [];
+  for (const r of righe) {
+    r.parole.sort((a, b) => a.x0 - b.x0);
+    const livello = r.parole.map((p) => TITOLI.find(([, re]) => re.test(p.testo))?.[0]).find(Boolean);
+    if (livello && r.parole.length <= 4) titoli.push({ y: r.y0, livello });
+    else nomi.push(r);
+  }
+  /* lo spazio che separa due note sulla stessa riga: gli spazi fra le parole di un nome sono corti e simili, quelli
+     fra due note più lunghi. Dal più corto in su, la soglia sta al primo salto netto (×1,3) fra uno spazio e il
+     successivo; se non c'è, tre quarti dell'altezza di una riga. Le righe dei titoli (lettere spaziate) non contano. */
+  const spazi = nomi
+    .flatMap((r) => r.parole.map((p, i, v) => (i ? p.x0 - v[i - 1].x1 : -1)))
+    .filter((g) => g > h * 0.15 && g < h * 3)
+    .sort((a, b) => a - b);
+  let soglia = h * 0.75;
+  for (let i = 1; i < spazi.length; i++) {
+    const t = (spazi[i] + spazi[i - 1]) / 2;
+    if (spazi[i] / spazi[i - 1] >= 1.3 && t > h * 0.3 && t < h * 1.1) {
+      soglia = t;
+      break;
+    }
+  }
   const etichette: { x0: number; x1: number; y0: number; y1: number; testo: string }[] = [];
-  for (const p of parole) {
-    const accanto = etichette.find((e) => Math.abs(e.y0 - p.y0) < h * 0.5 && p.x0 - e.x1 < h * 0.8 && p.x0 >= e.x0);
-    if (accanto) {
-      accanto.testo += " " + p.testo;
-      accanto.x1 = p.x1;
-      accanto.y1 = Math.max(accanto.y1, p.y1);
-      continue;
+  for (const r of nomi) {
+    /* sulla stessa riga, quale parola va con quale nota: se sopra la riga ci sono le icone, ogni parola va con l'icona
+       più vicina (il nome sta centrato sotto la sua); se no, uno spazio largo separa due note */
+    const sopra = icone.filter((i) => r.y0 - i.y1 > -h * 0.5 && r.y0 - i.y1 < h * 3);
+    const diChi = (p: Parola) =>
+      sopra.length ? sopra.reduce((m, i, k) => (Math.abs(i.x - (p.x0 + p.x1) / 2) < Math.abs(sopra[m].x - (p.x0 + p.x1) / 2) ? k : m), 0) : -1;
+    let e: (typeof etichette)[number] | null = null;
+    let di = -2;
+    for (const p of r.parole) {
+      const k = diChi(p);
+      if (e && (sopra.length ? k === di : p.x0 - e.x1 < soglia)) {
+        e.testo += " " + p.testo;
+        e.x1 = p.x1;
+        e.y1 = Math.max(e.y1, p.y1);
+      } else {
+        e = { x0: p.x0, x1: p.x1, y0: r.y0, y1: r.y1, testo: p.testo };
+        etichette.push(e);
+      }
+      di = k;
     }
-    // la seconda riga di un nome lungo: subito sotto, centrata sulla stessa colonna
-    const sopra = etichette.find((e) => p.y0 - e.y1 >= -2 && p.y0 - e.y1 < h * 0.7 && Math.abs((p.x0 + p.x1) / 2 - (e.x0 + e.x1) / 2) < Math.max(e.x1 - e.x0, p.x1 - p.x0) * 0.6);
-    if (sopra) {
-      sopra.testo += " " + p.testo;
-      sopra.y1 = p.y1;
-      sopra.x0 = Math.min(sopra.x0, p.x0);
-      sopra.x1 = Math.max(sopra.x1, p.x1);
-      continue;
-    }
-    etichette.push({ x0: p.x0, x1: p.x1, y0: p.y0, y1: p.y1, testo: p.testo });
+  }
+  // la seconda riga di un nome lungo: subito sotto, centrata sulla stessa colonna
+  const unite: typeof etichette = [];
+  for (const e of etichette) {
+    const sopra = unite.find(
+      (u) => e.y0 - u.y1 >= -2 && e.y0 - u.y1 < h * 0.7 && Math.abs((e.x0 + e.x1) / 2 - (u.x0 + u.x1) / 2) < Math.max(u.x1 - u.x0, e.x1 - e.x0) * 0.6
+    );
+    if (sopra && !titoli.some((t) => t.y > sopra.y0 && t.y < e.y0)) {
+      sopra.testo += " " + e.testo;
+      sopra.y1 = e.y1;
+    } else unite.push({ ...e });
   }
   const out: Note = { testa: [], cuore: [], fondo: [] };
-  for (const e of etichette.sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0)) {
-    const testo = e.testo.replace(/\s*\([^)]*\)?/g, "").replace(/’/g, "'").trim();
+  for (const e of unite.sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0)) {
+    const testo = e.testo.replace(/’/g, "'").trim();
     if (testo.length < 3 || testo.split(" ").every((w) => NON_NOTE.test(w))) continue;
-    const livello = [...titoli].reverse().find((t) => t.p.y0 < e.y0)?.livello ?? (titoli.length ? null : "cuore");
+    const livello = [...titoli].reverse().find((t) => t.y < e.y0)?.livello ?? (titoli.length ? null : "cuore");
     if (!livello) continue; // sopra il primo titolo: non è la piramide
     const nota = piuVicina(testo, noti) ?? testo;
     if (!out[livello].includes(nota)) out[livello].push(nota);

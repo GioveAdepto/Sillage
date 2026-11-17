@@ -46,7 +46,7 @@ export async function lettoreNode(cache) {
   let modo = "";
   const riconosci = async (img, m) => {
     if (m !== modo) {
-      await w.setParameters({ tessedit_pageseg_mode: m === "riga" ? "7" : "6", tessedit_char_whitelist: m === "numeri" ? "0123456789.,()" : "" });
+      await w.setParameters({ tessedit_pageseg_mode: m === "riga" ? "7" : m === "sparso" ? "11" : "6", tessedit_char_whitelist: m === "numeri" ? "0123456789.,()" : "" });
       modo = m;
     }
     const { data } = await w.recognize(comePng(img), {}, { text: true, blocks: true });
