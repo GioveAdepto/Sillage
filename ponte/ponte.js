@@ -14,7 +14,6 @@
      POST /api?azione=possesso&op=aggiungi|togli&id[&tipo&ml]  aggiungi una scheda già in Sillage / «Togli dalla vetrina» (accesso o chiave)
      POST /api?azione=vetrine          chi c'è in Sillage; azione=vetrina&di=… la sua collezione, senza privati
      POST /api?azione=aggiungi         un profumo nuovo (dati=JSON): scheda comune + nella propria vetrina (accesso o chiave)
-     POST /api?azione=leggi-cartolina  le scritte della cartolina o della piramide, lette da Claude Haiku (accesso o chiave)
      GET  /api/foto/<id>.webp          la foto di un profumo aggiunto dall'app
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
@@ -374,73 +373,6 @@ async function servFoto(db, percorso) {
   const byte = Uint8Array.from(atob(f.dati), c => c.charCodeAt(0));
   return new Response(byte, { headers: { "Content-Type": f.tipo, "Cache-Control": "public, max-age=31536000, immutable",
     "Access-Control-Allow-Origin": "*" } });
-}
-
-/* LA LETTURA DELLE SCRITTE: la cartolina di Fragrantica (o la schermata della piramide) va a Claude Haiku, che
-   risponde in JSON. Le barre no: quelle le misura il telefono. Serve la chiave ANTHROPIC_API_KEY (un segreto del
-   Worker, la mette Danilo); senza, la pagina lascia scrivere a mano. Un limite di letture al giorno per persona. */
-const MODELLO = "claude-haiku-5-5";
-const LETTURE_AL_GIORNO = 20;
-const SCHEMI = {
-  cartolina: {
-    type: "object", additionalProperties: false,
-    required: ["nome", "marchio", "genere", "voto", "voti", "durata_ore", "scia", "accordi", "note"],
-    properties: {
-      nome: { type: "string" }, marchio: { type: "string" },
-      genere: { type: "string", enum: ["uomo", "donna", "unisex", ""] },
-      voto: { type: "number" }, voti: { type: "integer" }, durata_ore: { type: "number" },
-      scia: { type: "string" }, accordi: { type: "array", items: { type: "string" } },
-      note: { type: "array", items: { type: "string" } }
-    }
-  },
-  piramide: {
-    type: "object", additionalProperties: false, required: ["testa", "cuore", "fondo", "senza_livello"],
-    properties: Object.fromEntries(["testa", "cuore", "fondo", "senza_livello"].map(k => [k, { type: "array", items: { type: "string" } }]))
-  }
-};
-const ISTRUZIONI = {
-  cartolina: "È la «cartolina» di condivisione di un profumo dell'app Fragrantica (in italiano). Trascrivi esattamente " +
-    "quello che c'è scritto: nome del profumo (il titolo grande), marchio (sotto il titolo), genere («da uomo» → uomo, " +
-    "«da donna» → donna, «unisex» → unisex), voto (il numero accanto alle stelle, con il punto), voti (il numero tra " +
-    "parentesi), durata in ore (il numero accanto a «Longevità»), scia (la parola accanto a «Scia», così com'è), gli " +
-    "accordi principali dall'alto in basso, le note nel riquadro «note» da sinistra a destra e dall'alto in basso. " +
-    "Se una cosa non si legge: stringa vuota, 0 o elenco vuoto. Non inventare nulla.",
-  piramide: "È una schermata della piramide olfattiva di un profumo su Fragrantica (in italiano o in inglese). Trascrivi " +
-    "le note di testa, di cuore e di fondo, in italiano e con l'iniziale maiuscola, nell'ordine in cui compaiono. Se le " +
-    "note non sono divise in livelli mettile in «senza_livello». Non inventare nulla."
-};
-
-async function leggiCartolina(env, db, persona, p) {
-  if (!env.ANTHROPIC_API_KEY) return { errore: "lettura delle scritte non disponibile", nonDisponibile: true };
-  const tipo = p.get("tipo") === "piramide" ? "piramide" : "cartolina";
-  const media = ["image/jpeg", "image/png", "image/webp"].includes(p.get("media")) ? p.get("media") : "image/jpeg";
-  const immagine = String(p.get("immagine") || "").replace(/^data:[^,]*,/, "");
-  if (!immagine || immagine.length > 5000000 || !/^[A-Za-z0-9+/=]+$/.test(immagine)) return { errore: "immagine mancante o troppo grande" };
-  const k = "letture:" + persona + ":" + oggi();
-  const fatte = Number(await leggiStato(db, k)) || 0;
-  if (fatte >= LETTURE_AL_GIORNO) return { errore: "oggi hai già fatto " + LETTURE_AL_GIORNO + " letture: riprova domani o scrivi a mano", limite: true };
-  await scriviStato(db, k, fatte + 1).run();
-  let r;
-  try {
-    r = await fetch(env.ANTHROPIC_URL || "https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2026-10-21" },
-      body: JSON.stringify({
-        model: MODELLO, max_tokens: 2000,
-        output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMI[tipo] } },
-        messages: [{ role: "user", content: [
-          { type: "image", source: { type: "base64", media_type: media, data: immagine } },
-          { type: "text", text: ISTRUZIONI[tipo] }
-        ] }]
-      })
-    });
-  } catch (e) { return { errore: "il modello non risponde: " + e.message }; }
-  const risposta = await r.json().catch(() => null);
-  if (!r.ok || !risposta) return { errore: "il modello ha risposto " + r.status + ((risposta && risposta.error && ": " + risposta.error.message) || "") };
-  if (risposta.stop_reason === "refusal") return { errore: "il modello non ha voluto leggere questa immagine" };
-  const t = (risposta.content || []).find(b => b.type === "text");
-  try { return { ok: true, tipo, dati: JSON.parse(t.text), rimaste: LETTURE_AL_GIORNO - fatte - 1 }; }
-  catch (e) { return { errore: "il modello ha risposto in un modo che non capisco" }; }
 }
 
 // ── DALLE RIGHE DEL FOGLIO AL JSON DELL'APP (come Codice.gs) ──────────────
@@ -949,14 +881,13 @@ async function rispondi(request, env, ctx) {
   }
   if (azione === "collega") return json(await collega(env, db, p));
   if (azione === "registrati") return json(await registrati(env, db, p));
-  if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina", "aggiungi", "leggi-cartolina"].includes(azione)) {
+  if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina", "aggiungi"].includes(azione)) {
     // tutto di chi scrive (o guarda): l'accesso collegato o, fino alla tappa 5, la chiave
     const chi = await chiE(env, db, p);
     if (!chi.persona) return json(senzaPersona(chi));
     if (azione === "catalogo") return json(await catalogo(db));
     if (azione === "vetrine") return json(await vetrine(db));
     if (azione === "vetrina") return json(await vetrina(db, p.get("di")));
-    if (azione === "leggi-cartolina") return json(await leggiCartolina(env, db, chi.persona, p));
     if (azione === "aggiungi") {
       const esito = await aggiungi(db, chi.persona, p);
       if (esito.ok && !esito.gia) copiaDopo(env, ctx);

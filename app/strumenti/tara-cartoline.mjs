@@ -10,7 +10,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { leggiImmagine, carica } from "./cartolina-node.mjs";
+import { leggiImmagine, carica, trovaProfumo } from "./cartolina-node.mjs";
 
 const QUI = dirname(fileURLToPath(import.meta.url));
 const REPO = join(QUI, "..", "..");
@@ -19,28 +19,7 @@ const dettagli = process.argv.includes("--dettagli");
 const { misuraCartolina } = await carica();
 const profumi = JSON.parse(readFileSync(join(REPO, "data", "profumi.json"), "utf8"));
 
-const norm = (s) => String(s).normalize("NFD").replace(/[^A-Za-z0-9]/g, "").toLowerCase();
-const CONC = [[/eaudeparfum|edp/, "EDP"], [/eaudetoilette|edt/, "EDT"], [/parfum$/, "Parfum"]];
-/** Il profumo del database che corrisponde al nome del file (Marchio_NomeProfumo). */
-// i nomi dei file che non contengono il nome del database (scelti a mano, una volta)
-const A_MANO = {
-  "AlHaramain_OudGoldEdition.png": 27, "Armaf_ClubDeNuitIntense.png": 17, "DolceGabbana_TheOneEauDeParfum.png": 12,
-  "FrenchAvenue_AzzureOud.png": 38, "Gucci_GuiltyEauDeParfum.png": 19, "Lalique_OmbreNoir.png": 32,
-  "Rasasi_HawasLaYuqawam.png": 23, "RueBroca_TheoremeEauDeParfum.png": 7
-};
-function trova(file) {
-  if (A_MANO[file]) return profumi.find((p) => p.id === A_MANO[file]);
-  const [marca, ...resto] = file.replace(/\.[a-z]+$/i, "").split("_");
-  const m = norm(marca), n = norm(resto.join(""));
-  const candidati = profumi
-    .filter((p) => m.startsWith(norm(p.brand).slice(0, 5)) || norm(p.brand).startsWith(m.slice(0, 5)))
-    .filter((p) => n.startsWith(norm(p.name)) || n.includes(norm(p.name)))
-    .sort((a, b) => norm(b.name).length - norm(a.name).length);
-  if (candidati.length <= 1) return candidati[0];
-  const lunghi = candidati.filter((p) => norm(p.name).length === norm(candidati[0].name).length);
-  const conc = CONC.find(([re]) => re.test(n.slice(norm(lunghi[0].name).length)));
-  return (conc && lunghi.find((p) => p.conc === conc[1])) || lunghi[0];
-}
+const trova = (file) => trovaProfumo(file, profumi);
 
 let peggiore = 0, confronti = 0, fuori = 0;
 const righe = [];

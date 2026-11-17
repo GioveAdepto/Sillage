@@ -1,5 +1,5 @@
-/* Le immagini nel telefono, per «Aggiungi profumo»: aprire la foto scelta dal rullino, rimpicciolirla per il
-   modello che legge le scritte, e preparare la foto della boccetta (webp, ~600 px, base64) per il ponte. */
+/* Le immagini nel telefono, per «Aggiungi profumo»: aprire la foto scelta dal rullino e preparare la foto della
+   boccetta (webp, ~600 px, base64) per il ponte. */
 import type { Immagine } from "./misura";
 
 /** I pixel di un'immagine scelta dal rullino (PNG, JPEG, HEIC dove Safari lo apre). */
@@ -40,12 +40,6 @@ export async function base64(b: Blob): Promise<string> {
   let s = "";
   for (let i = 0; i < byte.length; i += 0x8000) s += String.fromCharCode(...byte.subarray(i, i + 0x8000));
   return btoa(s);
-}
-
-/** Per il modello: un JPEG di al più 1200 px, abbastanza per leggere le scritte piccole, leggero da spedire. */
-export async function perIlModello(img: Immagine) {
-  const b = await aBlob(suCanvas(img, 1200), "image/jpeg", 0.88);
-  return { media: "image/jpeg", dati: await base64(b) };
 }
 
 /** La foto della boccetta per il ponte: webp (o PNG dove il telefono non sa fare webp), alta al più 600 px. */

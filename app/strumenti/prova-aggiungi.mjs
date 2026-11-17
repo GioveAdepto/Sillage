@@ -1,8 +1,8 @@
-/* Prove di «Aggiungi profumo» sul ponte LOCALE (127.0.0.1:8787, chiave «prova») con il Supabase FINTO (8898) e il
-   modello FINTO (8897): mai contro il ponte pubblicato, mai chiamate vere ad Anthropic, mai profumi finti nel
-   database vero. Su un database locale (app/LEGGIMI.md, «Provare Aggiungi profumo»).
+/* Prove di «Aggiungi profumo» sul ponte LOCALE (127.0.0.1:8787, chiave «prova») con il Supabase FINTO (8898): mai
+   contro il ponte pubblicato, mai profumi finti nel database vero. Su un database locale (app/LEGGIMI.md, «Provare
+   Aggiungi profumo»). Le scritte della cartolina le legge il telefono: il ponte non legge più immagini.
 
-   - leggi-cartolina: solo con l'accesso; modello, immagine e schema giusti; il limite di letture al giorno;
+   - leggi-cartolina non c'è più (nessuna AI a pagamento dietro il ponte);
    - aggiungi: la scheda nell'anagrafica comune e il profumo nella vetrina di chi aggiunge, non degli altri; l'id
      nuovo dal ponte; la foto servita da /api/foto; il reinvio dalla coda dà lo stesso id; la scheda che c'è già
      (stesso nome, o stesso link Fragrantica) si riusa; senza marchio o nome: no. */
@@ -15,7 +15,7 @@ const verifica = (cosa, ok, d = "") => { console.log((ok ? "  ok   " : "  NO!  "
 const J = (o) => JSON.stringify(o).slice(0, 300);
 const ora = Date.now().toString(36);
 const D = { accesso: firma("danilo@esempio.it") }, L = { accesso: firma("aggiunge-" + ora + "@esempio.it") };
-// un PNG 1×1 (la foto) e un'immagine qualunque per il modello finto
+// un PNG 1×1 (la foto)
 const PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 let r = await post("azione=collega", { chiave: "prova", ...D });
@@ -23,16 +23,9 @@ verifica("Danilo collegato", r.ok === true || /già/.test(r.errore || ""), J(r))
 r = await post("azione=registrati", { ...L, nome: "Prova " + ora });
 verifica("una persona nuova si registra", r.ok === true, J(r));
 
-// ── la lettura delle scritte ──
-verifica("leggere senza accesso: no", /^chiave/.test((await post("azione=leggi-cartolina", { immagine: PNG })).errore || ""));
+// ── il ponte non legge immagini ──
 r = await post("azione=leggi-cartolina", { ...L, tipo: "cartolina", media: "image/png", immagine: PNG });
-verifica("la cartolina letta dal modello (finto)", r.ok === true && r.dati?.nome === "Profumo di Prova" && r.dati.accordi.length === 5, J(r));
-r = await post("azione=leggi-cartolina", { ...L, tipo: "piramide", media: "image/png", immagine: PNG });
-verifica("la piramide letta dal modello (finto)", r.ok === true && r.dati?.fondo?.length === 2, J(r));
-verifica("immagine mancante: no", /immagine/.test((await post("azione=leggi-cartolina", { ...L })).errore || ""));
-let ultimo;
-for (let i = 0; i < 20; i++) ultimo = await post("azione=leggi-cartolina", { ...L, tipo: "cartolina", media: "image/png", immagine: PNG });
-verifica("oltre le letture del giorno: no", ultimo.limite === true, J(ultimo));
+verifica("leggi-cartolina non c'è più", r.ok !== true && !!r.errore, J(r));
 
 // ── aggiungi ──
 const catPrima = await post("azione=catalogo", L);

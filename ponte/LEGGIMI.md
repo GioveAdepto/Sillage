@@ -134,15 +134,10 @@ comune** (senza approvazione); mai nella vetrina degli altri.
     risponde `{ok, gia: true, id}` con lo stesso id (`stato.aggiunta:<cliente>`).
 - **`GET /api/foto/<id>.<ext>`**: la foto, con `Cache-Control: immutable` e CORS aperto (la usa anche l'app su
   GitHub Pages, che chiede la foto all'indirizzo del ponte).
-- **`azione=leggi-cartolina`** (accesso o chiave), `tipo=cartolina|piramide`, `media`, `immagine` (base64, nel corpo):
-  manda l'immagine a **Claude Haiku 5.5** (`claude-haiku-5-5`, effort basso, risposta in JSON con uno schema) e
-  restituisce le scritte: per la cartolina nome, marchio, genere, voto, voti, durata, scia, nomi degli accordi e
-  note; per la piramide testa, cuore, fondo. **Le barre no**: quelle le misura il telefono
-  (`app/src/cartolina/misura.ts`). Al più **20 letture al giorno per persona** (`stato.letture:<persona>:<data>`).
-  Serve il segreto **`ANTHROPIC_API_KEY`** nel Worker (sotto, «Messa in opera»); senza, risponde
-  `{nonDisponibile: true}` e l'app lascia scrivere a mano. Per le prove `ANTHROPIC_URL` porta a un modello finto.
-  Costo: una cartolina ~1.600 token in entrata, meno di un decimo di centesimo.
-- Prova: `app/strumenti/prova-aggiungi.mjs` sul ponte locale col modello finto (sotto, «Provarlo in locale»).
+- **Le scritte della cartolina e della piramide il ponte non le legge**: le legge il telefono, gratis, con Tesseract
+  (`app/src/cartolina/lettore.ts`, `app/LEGGIMI.md`). Il 2026-11-17 è stata tolta `azione=leggi-cartolina` (che le
+  mandava a Claude Haiku): niente AI a pagamento e niente segreto `ANTHROPIC_API_KEY`.
+- Prova: `app/strumenti/prova-aggiungi.mjs` sul ponte locale (sotto, «Provarlo in locale»).
 
 ## Indirizzi
 
@@ -159,7 +154,6 @@ comune** (senza approvazione); mai nella vetrina degli altri.
 | `POST /api?azione=catalogo` | tutte le schede (per «Aggiungi profumo»), con l'accesso o la chiave |
 | `POST /api?azione=possesso&op=aggiungi\|togli&id=…` (`tipo`, `ml`) | aggiunge una scheda già in Sillage o la toglie («Togli dalla vetrina») dalla propria vetrina |
 | `POST /api?azione=aggiungi` (`dati` = JSON) | un profumo: scheda comune (nuova o già in Sillage) + nella propria vetrina |
-| `POST /api?azione=leggi-cartolina` (`tipo`, `media`, `immagine`) | le scritte della cartolina o della piramide, lette da Claude Haiku |
 | `GET /api/foto/<id>.<ext>` | la foto di un profumo aggiunto dall'app |
 | `POST /api?azione=vetrine` · `azione=vetrina&di=…` | chi c'è in Sillage · la sua collezione senza dati privati, per chi è entrato |
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
@@ -179,9 +173,6 @@ La chiave (`chiave=…`) e l'accesso (`accesso=…`) viaggiano nel corpo della r
 - La chiave di Sillage sta nel Worker come **Secret**: Cloudflare ▸ Workers ▸
   sillage ▸ Settings ▸ **Variables and Secrets** (il riquadro in cima, *non*
   quello dentro Builds) ▸ Add ▸ tipo *Secret*, nome `SILLAGE_CHIAVE`.
-- La chiave dell'API di Anthropic (per leggere le scritte delle cartoline) è un altro **Secret**, nello stesso
-  posto, nome `ANTHROPIC_API_KEY`. La crea Danilo su console.anthropic.com ▸ API Keys; mai nel repo né nei
-  messaggi. Senza, «Aggiungi profumo» funziona lo stesso, scrivendo a mano nome e numeri.
 - Ogni unione su `main` ripubblica il ponte da sola, insieme all'app (`sito/`, costruita da `wrangler.jsonc`). Dopo, un controllo:
   `azione=sincronizza` con la chiave deve rispondere `ok`.
 
@@ -219,9 +210,7 @@ scrittura arriva al foglio vero): `node app/strumenti/foglio-finto.mjs`. Per pro
 toccare il progetto Supabase vero: un Supabase finto che dà le sue chiavi pubbliche e i suoi token, e
 `--var SUPABASE_URL:http://127.0.0.1:8898` (vedi `app/LEGGIMI.md`, «Prove»).
 
-**Aggiungi profumo** in locale, senza chiamate vere ad Anthropic: un modello finto su 8897
-(`node app/strumenti/modello-finto.mjs`) e in più `--var ANTHROPIC_API_KEY:finta --var
-ANTHROPIC_URL:http://127.0.0.1:8897/v1/messages`; poi `node app/strumenti/prova-aggiungi.mjs` (con
+**Aggiungi profumo** in locale: `node app/strumenti/prova-aggiungi.mjs` (con
 `PONTE_LOCALE=http://127.0.0.1:8788/api` davanti se il ponte locale gira su un'altra porta, con `--port 8788`).
 Meglio su un database locale a parte: `--persist-to <cartella temporanea>`.
 

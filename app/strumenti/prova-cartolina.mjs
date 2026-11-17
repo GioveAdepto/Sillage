@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { carica, leggiImmagine } from "./cartolina-node.mjs";
 import { disegna, ESEMPI } from "./cartolina-finta.mjs";
 
-const { misuraCartolina, ritagliaBoccetta, aCento } = await carica();
+const { misuraCartolina, ritagliaBoccetta, aCento, capisciTestata, capisciVoto, capisciProfilo, capisciAccordo, capisciNote, capisciPiramide } = await carica();
 const DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "prove", "cartoline");
 let errori = 0, controlli = 0;
 const verifica = (cosa, ok, d = "") => {
@@ -42,5 +42,40 @@ const vuota = { width: 600, height: 400, data: new Uint8ClampedArray(600 * 400 *
 const mv = misuraCartolina(vuota);
 verifica("un'immagine che non è una cartolina: lo dice", mv.dubbi.length > 0 && mv.accordi.length === 0, JSON.stringify(mv.dubbi));
 
-console.log(`${controlli} controlli sulla misura delle cartoline sintetiche, ${errori} falliti.`);
+// ── come si capisce il testo letto (il lettore vero si tara a parte: strumenti/tara-scritte.mjs) ──
+const parole = (righe) => ({ testo: righe.map((r) => r.map((p) => p[0]).join(" ")).join("\n"), parole: righe.flatMap((r) => r.map(([testo, x0, y0, x1, y1, conf = 95]) => ({ testo, x0, y0, x1, y1, conf }))) });
+const t = capisciTestata([{ testo: "Gentleman Eau de Parfum Reserve", alta: 70 }, { testo: "Privée", alta: 68 }, { testo: "Givenchy", alta: 30 }, { testo: "da uomo", alta: 25 }], ["Givenchy"]);
+verifica("titolo su due righe, «Eau de Parfum» tolto: EDP", t.nome === "Gentleman Reserve Privée" && t.conc === "EDP" && t.marchio === "Givenchy" && t.genere === "uomo", JSON.stringify(t));
+const t2 = capisciTestata([{ testo: "Prada L'Homme Intense", alta: 70 }, { testo: "Prada", alta: 30 }, { testo: "da uomo", alta: 25 }]);
+verifica("il marchio davanti al nome si toglie", t2.nome === "L'Homme Intense" && t2.conc === "", JSON.stringify(t2));
+const t3 = capisciTestata([{ testo: "Island", alta: 70 }, { testo: "Khadlaj Perfumes", alta: 30 }, { testo: "unisex", alta: 25 }], ["Khadlaj", "Lattafa"]);
+verifica("«Khadlaj Perfumes» come nel catalogo: Khadlaj", t3.marchio === "Khadlaj" && t3.genere === "unisex", JSON.stringify(t3));
+const t4 = capisciTestata([{ testo: "Absolutely", alta: 70 }, { testo: "Emporio Armani", alta: 30 }], ["Giorgio Armani"]);
+verifica("un marchio solo simile non si corregge", t4.marchio === "Emporio Armani", t4.marchio);
+verifica("voto", capisciVoto({ testo: "4.3 *k ks", parole: [] }).voto === 4.3);
+verifica("voti fra parentesi", capisciVoto({ testo: "4.3 ★★★\n(10143)", parole: [] }).voti === 10143);
+const pr = capisciProfilo({ testo: "profilo olfattivo\nX 7 h Longevità == Moderata Scia", parole: [] });
+verifica("durata e scia (al maschile, come nel catalogo)", pr.durata === 7 && pr.scia === "Moderato", JSON.stringify(pr));
+verifica("accordo letto quasi giusto: corretto", capisciAccordo({ testo: "| Speziat0 Fresco |", parole: [] }) === "Speziato Fresco");
+verifica("accordo sconosciuto: resta com'è", capisciAccordo({ testo: "Zuccheroso", parole: [] }) === "Zuccheroso");
+const note = capisciNote(parole([
+  [["note", 30, 38, 90, 64]],
+  [["Cedro", 47, 274, 140, 306], ["Bacche", 266, 274, 380, 306], ["di", 416, 275, 450, 306], ["Note", 485, 275, 560, 306]],
+  [["Ginepro", 265, 324, 390, 363], ["Minerali", 485, 324, 600, 355, 50]],
+  [["Legno", 48, 562, 140, 607], ["Frutto", 265, 566, 370, 597], ["Legno", 485, 566, 560, 597], ["di", 570, 566, 600, 597]],
+  [["Legnose", 48, 615, 170, 655], ["Agar...", 485, 615, 590, 650, 34]]
+]), 690, ["Legno di Agar"]);
+verifica("le note: tre colonne, nomi a capo, troncati completati", note.join("|") === "Cedro|Bacche di Ginepro|Note Minerali|Legno Legnose|Frutto|Legno di Agar", note.join("|"));
+const pir = capisciPiramide(parole([
+  [["Piramide", 100, 10, 300, 50], ["olfattiva", 320, 10, 500, 50]],
+  [["Note", 100, 100, 180, 130], ["di", 190, 100, 220, 130], ["testa", 230, 100, 320, 130]],
+  [["Bergamotto", 50, 250, 220, 280], ["Limone", 400, 250, 520, 280]],
+  [["Note", 100, 350, 180, 380], ["di", 190, 350, 220, 380], ["cuore", 230, 350, 320, 380]],
+  [["Fiore", 50, 500, 140, 530], ["d'Arancio", 30, 540, 170, 570]],
+  [["Note", 100, 650, 180, 680], ["di", 190, 650, 220, 680], ["fondo", 230, 650, 320, 680]],
+  [["Fava", 50, 800, 120, 830], ["Tonka", 130, 800, 220, 830], ["Muschio", 400, 800, 520, 830]]
+]), ["Bergamotto"]);
+verifica("la piramide da una schermata", JSON.stringify(pir) === JSON.stringify({ testa: ["Bergamotto", "Limone"], cuore: ["Fiore d'Arancio"], fondo: ["Fava Tonka", "Muschio"] }), JSON.stringify(pir));
+
+console.log(`${controlli} controlli sulla misura e sulle scritte delle cartoline sintetiche, ${errori} falliti.`);
 if (errori) process.exit(1);
