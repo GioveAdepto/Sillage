@@ -854,9 +854,17 @@ const copiaDopo = (env, ctx) => ctx.waitUntil(copiaNelFoglio(env).catch(e => con
 /* CheMetto chiede, col token di chi la usa, il profumo per l'outfit del giorno (ponte/outfit.ts). Chi non è in
    Sillage riceve { nessuno: true } e CheMetto non mostra niente: non è un errore. Risponde solo a chi chiede,
    sui suoi profumi; «Oggi ho messo» è l'ultima voce di oggi del suo diario. Scrivere la scelta è azione=diario. */
+/* Perché «nessuno»: solo "non-in-sillage" (token buono, account non collegato a una persona) vuol dire davvero che
+   non è in Sillage, e CheMetto può ricordarlo per il giorno; gli altri sono di passaggio (token scaduto da rinnovare,
+   chiavi di Supabase irraggiungibili un istante…) e non vanno ricordati. */
+function motivoNessuno(chi) {
+  if (chi.daCollegare) return "non-in-sillage";
+  if (chi.accessoNonValido) return "accesso-" + String(chi.accessoNonValido).replace(/ ora$/, "").replace(/\s+/g, "-");
+  return "senza-accesso";
+}
 async function consiglioOutfit(env, db, p, url) {
   const chi = await chiE(env, db, p);
-  if (!chi.persona) return { nessuno: true };
+  if (!chi.persona) return { nessuno: true, motivo: motivoNessuno(chi) };
   const pezzo = await leggiStato(db, "vista:" + chi.persona);
   const tutti = pezzo ? (JSON.parse("{" + pezzo + "}").profumi || []) : [];
   const profumi = tutti.filter(x => x && typeof x.id === "number" && String(x.attivo ?? "si") !== "no")
