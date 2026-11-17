@@ -35,8 +35,8 @@ più vera, correggila subito.
 - **Gli account**: quelli di CheMetto (Supabase Auth), registrazione libera; ognuno ha collezione e diario suoi
   in D1, degli altri si vede solo la collezione. Dettagli in `ponte/LEGGIMI.md`.
 - **Aggiungi profumo** (Altro): si aggiunge solo da lì. Scheda nell'anagrafica comune + profumo nella vetrina di chi
-  aggiunge; barre misurate nel telefono dalla cartolina di Fragrantica, scritte lette da Claude Haiku via ponte
-  (Secret `ANTHROPIC_API_KEY` nel Worker, lo mette l'utente). Dettagli in `app/LEGGIMI.md` e `ponte/LEGGIMI.md`.
+  aggiunge; dalla cartolina di Fragrantica il telefono misura le barre e legge le scritte (Tesseract, gratis,
+  scaricato al primo uso; niente AI a pagamento: scelta dell'utente). Dettagli in `app/LEGGIMI.md` e `ponte/LEGGIMI.md`.
 - **La chiave di Sillage** è ormai solo di servizio (l'app non la chiede più): modifiche al catalogo, copia
   notturna, `sincronizza`, e per Claude «sei Danilo». In locale sta in `C:\Projects\Sillage\.dev.vars`
   (ignorato da git). Mai nel repo, nelle risposte o negli indirizzi.

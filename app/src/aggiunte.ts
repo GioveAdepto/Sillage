@@ -45,22 +45,6 @@ export async function catalogoComune(): Promise<SchedaComune[]> {
   return (c.profumi as SchedaComune[]) ?? [];
 }
 
-export interface Letta {
-  ok?: boolean;
-  errore?: string;
-  nonDisponibile?: boolean;
-  limite?: boolean;
-  dati?: Record<string, unknown>;
-}
-/** Le scritte della cartolina (o della piramide), lette da Claude Haiku attraverso il ponte. */
-export async function leggiScritte(tipo: "cartolina" | "piramide", immagine: { media: string; dati: string }): Promise<Letta> {
-  try {
-    return (await alPonte("leggi-cartolina", { tipo, media: immagine.media, immagine: immagine.dati })) as Letta;
-  } catch {
-    return { errore: "senza rete" };
-  }
-}
-
 // ── la coda ──
 const CODA = "sillage-app:aggiunte-coda";
 const ascoltatori = new Set<() => void>();

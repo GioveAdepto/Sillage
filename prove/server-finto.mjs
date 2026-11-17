@@ -6,8 +6,8 @@
      azione=leggi dice chi ha riconosciuto (`chi`): con la chiave giusta Danilo, altrimenti nessuno;
    - riscriviPonte: nei .js serviti l'indirizzo del ponte pubblicato diventa questo server (per l'app di prima);
    - cambiaCartella(): la stessa porta passa a servire un'altra cartella (il passaggio tra le due app);
-   - «Aggiungi profumo»: azione=catalogo, aggiungi (il profumo nuovo entra nel catalogo in memoria), leggi-cartolina
-     con un modello FINTO (risposte fisse, stato.modello = false: «non disponibile»), GET /api/foto/<id>. */
+   - «Aggiungi profumo»: azione=catalogo, aggiungi (il profumo nuovo entra nel catalogo in memoria), GET /api/foto/<id>.
+     Le scritte della cartolina le legge il telefono: nelle prove l'app è costruita col lettore finto (VITE_LETTORE=finto). */
 import { createServer } from "node:http";
 import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, extname, dirname, normalize } from "node:path";
@@ -23,7 +23,7 @@ const PONTE_PUBBLICATO = "https://sillage.danilo-moro96.workers.dev/api";
 const leggiDati = (n) => JSON.parse(readFileSync(join(REPO, "data", n + ".json"), "utf8"));
 
 export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = false } = {}) {
-  const stato = { cartella, riscriviPonte, diario: new Map(), invii: [], residui: [], aggiunte: [], nuovi: [], foto: new Map(), letture: [], modello: true, clienti: new Map() };
+  const stato = { cartella, riscriviPonte, diario: new Map(), invii: [], residui: [], aggiunte: [], nuovi: [], foto: new Map(), clienti: new Map() };
   const catalogo = () => ({ profumi: [...leggiDati("profumi"), ...stato.nuovi], note: leggiDati("note"), layering: leggiDati("layering"), consigli: leggiDati("consigli") });
   const base = `http://127.0.0.1:${porta}`;
   const json = (res, o, s = 200) => {
@@ -48,15 +48,6 @@ export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = 
     if (!giusta) return json(res, { errore: "chiave sconosciuta: manca o non e' quella giusta" });
     if (azione === "catalogo")
       return json(res, { ok: true, profumi: catalogo().profumi.map((x) => ({ id: x.id, brand: x.brand, name: x.name, conc: x.conc, img: x.img, accordi: (x.accordi || []).slice(0, 3) })) });
-    if (azione === "leggi-cartolina") {
-      stato.letture.push(p.get("tipo"));
-      if (!stato.modello) return json(res, { errore: "lettura delle scritte non disponibile", nonDisponibile: true });
-      const dati = p.get("tipo") === "piramide"
-        ? { testa: ["Cipresso"], cuore: ["Vetiver"], fondo: ["Legno di Cashmere", "Muschio"], senza_livello: [] }
-        : { nome: "Profumo di Prova", marchio: "Casa Finta", genere: "unisex", voto: 4.1, voti: 1234, durata_ore: 7, scia: "Forte",
-            accordi: ["Legnoso", "Aromatico", "Terroso", "Muschiato", "Speziato Fresco"], note: ["Vetiver", "Cipresso"] };
-      return json(res, { ok: true, tipo: p.get("tipo"), dati });
-    }
     if (azione === "aggiungi") {
       const d = JSON.parse(p.get("dati") || "{}");
       stato.aggiunte.push(d);

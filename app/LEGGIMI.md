@@ -98,12 +98,12 @@ strumenti/prima-dopo.mjs confronta la classifica di Consigliami tra l'app di ogg
 strumenti/prova-coda.mjs prove della coda del diario (vedi «Prove»)
 strumenti/foglio-finto.mjs un Web App del foglio finto, per il ponte locale (vedi «Provarla col ponte locale»)
 strumenti/supabase-finto.mjs un Supabase Auth finto, per provare gli account (vedi «Provare gli account»)
-strumenti/modello-finto.mjs un modello finto al posto dell'API di Anthropic, per il ponte locale (vedi «Aggiungi profumo»)
 strumenti/tara-cartoline.mjs taratura della misura delle barre sulle cartoline vere (fuori da git) contro il database
+strumenti/tara-scritte.mjs taratura della lettura delle scritte (Tesseract vero, in Node) sulle stesse cartoline
 strumenti/cartolina-finta.mjs disegna le cartoline sintetiche delle prove (prove/cartoline/)
-strumenti/prova-cartolina.mjs prova della misura e del ritaglio sulle cartoline sintetiche
-strumenti/prova-aggiungi.mjs prove di «Aggiungi profumo» sul ponte locale col modello finto
-strumenti/cartolina-node.mjs per le prove: legge PNG/JPEG e carica src/cartolina/ in Node
+strumenti/prova-cartolina.mjs prova della misura, del ritaglio e di come si capiscono le scritte (cartoline sintetiche)
+strumenti/prova-aggiungi.mjs prove di «Aggiungi profumo» sul ponte locale
+strumenti/cartolina-node.mjs per le prove: legge PNG/JPEG, carica src/cartolina/ in Node e il lettore Tesseract per la taratura
 strumenti/prova-accesso.mjs prove degli account sul ponte locale col Supabase finto
 strumenti/prova-persone.mjs prove della seconda persona e dell'isolamento sul ponte locale
 strumenti/verifica-viste.mjs confronta Numeri, Guida, Layering, Acquisti, Confronto e somiglianze con l'app di oggi
@@ -128,7 +128,9 @@ src/diario/pezzi.tsx     «Lo metto oggi», occasione e momento di una voce, «S
 src/aggiunte.ts          «Aggiungi profumo»: le chiamate al ponte e la coda delle aggiunte senza rete
 src/cartolina/           misura.ts (le barre della cartolina), boccetta.ts (il ritaglio scontornato), immagini.ts
                          (aprire e rimpicciolire nel telefono), scontorna.ts (una foto propria, @imgly), proposte.ts
-                         (dal modulo alle colonne del catalogo, stagione/momento/colore/occasioni proposti)
+                         (dal modulo alle colonne del catalogo, stagione/momento/colore/occasioni proposti),
+                         scritte.ts (le zone da leggere e come capire il testo letto), lettore.ts (Tesseract,
+                         scaricato al primo uso; finto con VITE_LETTORE=finto)
 src/meteo-contesto.tsx   il meteo per tutta l'app (useMeteo): Consigliami e il filtro «Adesso»
 src/viste/calcoli.ts     i calcoli di Numeri, mappa olfattiva, Guida, Layering, Acquisti, Confronto (da js/viste.js)
 src/viste/condividi.ts   l'immagine della scheda da condividere (1080×1350)
@@ -232,8 +234,16 @@ dall'utente il 2026-11-16 (tela «Aggiungi profumo · anteprima»).
 2. **La cartolina** scelta dal rullino: **le barre le misura il telefono** (`src/cartolina/misura.ts`, su canvas,
    niente IA): accordi con la forza, stagioni riportate a 100, giorno/notte. Ritaglia anche la boccetta e le toglie lo
    sfondo (`boccetta.ts`). **Le scritte** (nome, marchio, genere, voto, voti, durata, scia, nomi di accordi e note) le
-   legge Claude Haiku attraverso il ponte (`azione=leggi-cartolina`, JPEG da 1200 px); senza la chiave del modello nel
-   Worker, o senza rete, la pagina lo dice e si scrive a mano. «Non ho la cartolina» porta ai campi vuoti.
+   legge **anche loro il telefono**, gratis: un lettore di testo, Tesseract (`tesseract.js`, `src/cartolina/lettore.ts`),
+   su zone ritagliate e ripulite (`scritte.ts`: ancorate alla prima barra degli accordi, perché la cartolina scende
+   quando il nome va a capo; la testata riga per riga; dentro le barre conta come scritta solo ciò che si stacca dal
+   colore della barra; il voto senza le stelle gialle). Poi si corregge con le parole note: accordi di Fragrantica e
+   del catalogo, note e marchi del catalogo («Khadlaj Perfumes» ▸ «Khadlaj»; un marchio solo simile non si tocca), scia
+   al maschile come nel catalogo; dal titolo si tolgono il marchio e la concentrazione («Eros Eau de Parfum» ▸ «Eros»,
+   EDP). Il lettore **si scarica solo al primo uso** (da cdn.jsdelivr.net: il programma ~3 MB e l'italiano ~3 MB;
+   il pezzo `assets/lettore-*.js` è fuori dalla cache dell'installazione, il service worker tiene i file scaricati
+   in `sillage-lettore`): dopo legge anche senza rete. Se non riesce (al primo uso senza rete) la pagina lo dice, si
+   scrive a mano e c'è «Riprova». Nessuna AI a pagamento, nessuna chiave. «Non ho la cartolina» porta ai campi vuoti.
 3. **Dati da controllare**, tutti modificabili. In ambra: la concentrazione (non è nella cartolina), le stagioni che
    non fanno 100, il voto fuori da 1-5, accordi misurati e nomi letti in numero diverso, e i dubbi della misura (una
    stagione sotto il 10%: la cartolina la disegna sempre al minimo, «potrebbe essere meno»). Proposti e da cambiare:
@@ -244,7 +254,9 @@ dall'utente il 2026-11-16 (tela «Aggiungi profumo · anteprima»).
    `@imgly/background-removal` (come CheMetto), che si scarica **solo al primo uso** (~44 MB dal server di img.ly; il
    pezzo di codice `assets/scontorno-*.js` è fuori dalla cache dell'installazione). Va al ponte come webp (PNG dove
    Safari non sa fare webp) alto al più 600 px; la serve `GET /api/foto/<id>` e la tiene il service worker.
-5. **Piramide** facoltativa da una schermata, letta dallo stesso modello; le note si tolgono e si aggiungono a mano.
+5. **Piramide** facoltativa da una schermata, letta dallo stesso lettore (`capisciPiramide`: i titoli «Note di testa /
+   cuore / fondo» o Top / Middle / Base dicono il livello; anche in tema scuro); le note si tolgono e si aggiungono a
+   mano. Da tarare su schermate vere.
 6. **Salva**: `azione=aggiungi` (ponte/LEGGIMI.md). **Senza rete** va nella coda `sillage-app:aggiunte-coda` (con la
    foto), la Collezione lo dice («aspetta la rete») e parte da sola al ritorno della rete, all'avvio o tornando
    all'app; il codice `cliente` evita i doppioni.
@@ -258,6 +270,13 @@ contro il database: `node strumenti/tara-cartoline.mjs [cartella] [--dettagli]`.
 entro un punto (uno a 2), giorno/notte entro 2, stagioni quasi tutte entro 2-3 (dove il database viene da un'altra
 fonte, come La Yuqawam, la cartolina dice altro; sotto il 10% vedi sopra). Le barre si cercano davvero (anche
 quelle chiarissime, per il passo fisso), e la cartolina da 1200 px è quella da 1092 ingrandita.
+
+**La lettura delle scritte, tarata** sulle stesse 38 cartoline col lettore vero: `node strumenti/tara-scritte.mjs`
+(la prima volta scarica l'italiano). Il 2026-11-17: genere, voto, durata, scia e concentrazione 38 su 38, accordi
+189 su 190, note del catalogo ritrovate 220 su 225, marchio 34 e nome 32 su 38; quasi tutti gli scarti sono
+differenze vere fra cartolina e catalogo (voti più recenti nel catalogo, «Al Haramain Perfumes», la cartolina di
+Kilian per il clone di DoDo's), i veri errori sono lettere scambiate in un titolo («NJ 1861» per «XJ 1861»). In un
+browser vero: la prima lettura ~3 s (col download), le altre ~2 s.
 
 ## Consigliami e il meteo
 
@@ -363,7 +382,7 @@ In locale, dalla radice del repo (serve Playwright: `npm install --no-save playw
 
 ```bash
 cd app
-VITE_PONTE=http://127.0.0.1:8800/api npm run build
+VITE_PONTE=http://127.0.0.1:8800/api VITE_LETTORE=finto npm run build
 cd ..
 node prove/prova-nuova.mjs
 node prove/prova-passaggio.mjs
@@ -450,16 +469,16 @@ di ogni email nel Supabase finto: `prova1234`), vetrina vuota, Altro ▸ Le vetr
 (Per riempire la vetrina della persona di prova: Altro ▸ Aggiungi profumo.) Le pagine con la vetrina vuota (Consigliami, Diario, Numeri, Guida, Layering, Acquisti, Confronta)
 devono aprirsi senza errori.
 
-**Aggiungi profumo**: `node strumenti/prova-cartolina.mjs` (71 controlli sulla misura e sul ritaglio, cartoline
-sintetiche disegnate da `strumenti/cartolina-finta.mjs`: nessuna immagine di Fragrantica nel repo) e
-`node prove/prova-aggiunta.mjs` dalla radice (nel browser, col ponte finto e il suo modello finto: ricerca, cartolina,
-ambra, foto, piramide, Salva, il profumo nuovo in Collezione, Scheda, Numeri e Consigliami, senza modello, senza rete
-in coda e un invio solo). Sul ponte locale: il modello finto `node strumenti/modello-finto.mjs` (porta 8897), il
-ponte con in più `--var ANTHROPIC_API_KEY:finta --var ANTHROPIC_URL:http://127.0.0.1:8897/v1/messages`, poi
-`node strumenti/prova-aggiungi.mjs` (24 controlli: lettura e limite al giorno, scheda comune + vetrina propria e non
-degli altri, id dal ponte, foto servita, reinvio senza doppioni, scheda già esistente per nome o per link). Se sulla
-8787 gira già un altro ponte locale: `--port 8788` e `PONTE_LOCALE=http://127.0.0.1:8788/api` davanti alle prove
-(vale anche per `prova-accesso` e `prova-persone`). Mai chiamate vere ad Anthropic nelle prove.
+**Aggiungi profumo**: `node strumenti/prova-cartolina.mjs` (82 controlli sulla misura, sul ritaglio e su come si
+capiscono le scritte lette; cartoline sintetiche disegnate da `strumenti/cartolina-finta.mjs`: nessuna immagine di
+Fragrantica nel repo) e `node prove/prova-aggiunta.mjs` dalla radice (nel browser, col ponte finto e l'app costruita
+con **`VITE_LETTORE=finto`**, che risponde scritte fisse senza scaricare niente: ricerca, cartolina, ambra, foto,
+piramide, Salva, il profumo nuovo in Collezione, Scheda, Numeri e Consigliami, il lettore che non riesce e «Riprova»,
+senza rete in coda e un invio solo). Sul ponte locale: `node strumenti/prova-aggiungi.mjs` (scheda comune + vetrina
+propria e non degli altri, id dal ponte, foto servita, reinvio senza doppioni, scheda già esistente per nome o per
+link, `leggi-cartolina` che non c'è più). Se sulla 8787 gira già un altro ponte locale: `--port 8788` e
+`PONTE_LOCALE=http://127.0.0.1:8788/api` davanti alle prove (vale anche per `prova-accesso` e `prova-persone`).
+Il lettore vero si prova solo a mano: `tara-scritte.mjs`, o una build senza `VITE_LETTORE` (sempre col ponte finto).
 
 **Prima/dopo di Consigliami** (obbligatorio a ogni modifica del punteggio, regola dell'utente):
 

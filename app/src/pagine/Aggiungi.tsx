@@ -5,22 +5,24 @@ import { immagine } from "../profumo";
 import type { Profumo } from "../tipi";
 import { useTitolo } from "../componenti/comuni";
 import { IconaAvanti, IconaCerca, IconaIndietro, IconaSi, IconaX } from "../componenti/Icone";
-import { catalogoComune, leggiScritte, manda, nuovoCliente, type Aggiunta, type SchedaComune } from "../aggiunte";
+import { catalogoComune, manda, nuovoCliente, type Aggiunta, type SchedaComune } from "../aggiunte";
 import { misuraCartolina, type Misura } from "../cartolina/misura";
 import { ritagliaBoccetta } from "../cartolina/boccetta";
-import { apri, fotoPerIlPonte, perIlModello } from "../cartolina/immagini";
+import { apri, fotoPerIlPonte } from "../cartolina/immagini";
+import { noteDellaSchermata, scritteDellaCartolina } from "../cartolina/lettore";
+import type { Immagine } from "../cartolina/misura";
 import {
   CONCENTRAZIONI, NOMI_OCC, OCCASIONI, STAG, coloreDa, dubbi, moduloVuoto, occasioniDa, scheda, type Colore, type Modulo
 } from "../cartolina/proposte";
 
 /* Altro ▸ Aggiungi profumo. Si cerca per nome tra le schede già in Sillage (se c'è, la si prende con i suoi dati e
    si sceglie solo la propria boccetta); se no, la «cartolina» di Fragrantica: le barre le misura il telefono, le
-   scritte le legge Claude Haiku attraverso il ponte. Poi la foto, la piramide facoltativa, e Salva: la scheda va
+   scritte le legge un lettore di testo nel telefono (Tesseract, gratis, scaricato al primo uso). Poi la foto, la piramide facoltativa, e Salva: la scheda va
    nell'anagrafica comune, il profumo nella vetrina di chi lo aggiunge. Senza rete va in coda.
    Nessuna memoria tra un'apertura e l'altra: si riparte sempre dalla ricerca. */
 
 type Passo = "cerca" | "presente" | "cartolina" | "dati" | "foto" | "piramide" | "salva" | "fatto";
-type Lettura = "niente" | "in-corso" | "letta" | "non-disponibile" | "senza-rete" | "errore";
+type Lettura = "niente" | "in-corso" | "letta" | "senza-rete" | "errore";
 interface Foto {
   tipo: string;
   dati: string;
@@ -55,7 +57,8 @@ export default function Aggiungi() {
   const [possesso, setPossesso] = useState<{ tipo: "full" | "campione"; ml: string; note: string }>({ tipo: "full", ml: "", note: "" });
   const [esito, setEsito] = useState<{ id?: number; inCoda?: boolean; errore?: string; nome: string } | null>(null);
   const [salvo, setSalvo] = useState(false);
-  const immagineModello = useRef<{ media: string; dati: string } | null>(null);
+  const [avanza, setAvanza] = useState("");
+  const cartolina = useRef<{ img: Immagine; misura: Misura } | null>(null);
   const cliente = useRef(nuovoCliente());
 
   // a ogni passo si torna in cima
@@ -65,34 +68,46 @@ export default function Aggiungi() {
 
   const cambia = (campi: Partial<Modulo>) => setM((x) => ({ ...x, ...campi }));
 
-  /** Le scritte lette dal modello vanno nei campi; le barre restano quelle misurate. */
+  /** Le parole che il catalogo conosce già: correggono una lettura quasi giusta. */
+  const noti = () => {
+    const ps = dati?.profumi ?? [];
+    return {
+      accordi: [...new Set(ps.flatMap((p) => p.accordi ?? []))],
+      note: [...new Set(ps.flatMap((p) => p.noteElenco ?? []))],
+      marchi: [...new Set(ps.map((p) => p.brand).filter(Boolean))]
+    };
+  };
+
+  /** Le scritte lette nel telefono vanno nei campi; le barre restano quelle misurate. */
   async function leggiLeScritte() {
-    if (!immagineModello.current) return;
+    const c = cartolina.current;
+    if (!c) return;
     setLettura("in-corso");
-    const r = await leggiScritte("cartolina", immagineModello.current);
-    if (r.nonDisponibile) return setLettura("non-disponibile");
-    if (!r.ok || !r.dati) {
-      setErroreLettura(r.errore || "");
-      return setLettura(r.errore === "senza rete" ? "senza-rete" : "errore");
+    setAvanza("");
+    let d;
+    try {
+      d = await scritteDellaCartolina(c.img, c.misura, noti(), (cosa, q) => setAvanza(q !== undefined && q < 1 ? `${cosa}: ${Math.round(q * 100)}%` : cosa));
+    } catch (e) {
+      setErroreLettura((e as Error).message);
+      return setLettura(navigator.onLine === false ? "senza-rete" : "errore");
     }
-    const d = r.dati as { nome: string; marchio: string; genere: string; voto: number; voti: number; durata_ore: number; scia: string; accordi: string[]; note: string[] };
     setM((x) => {
-      const accordi = x.accordi.map((a, i) => ({ ...a, nome: d.accordi?.[i] ?? a.nome }));
-      // il modello ha letto più nomi delle barre misurate: si aggiungono le righe, la forza la mette chi aggiunge
-      for (let i = accordi.length; i < (d.accordi?.length ?? 0); i++) accordi.push({ nome: d.accordi[i], forza: "" });
-      const nomi = accordi.map((a) => a.nome);
+      // un nome di accordo letto riempie la riga; se non si legge resta vuoto (lo scrive chi aggiunge)
+      const accordi = x.accordi.map((a, i) => ({ ...a, nome: d.accordi[i] || a.nome }));
+      const nomi = accordi.map((a) => a.nome).filter(Boolean);
       const colore = coloreDa(nomi);
       return {
         ...x,
         nome: d.nome || x.nome,
         marchio: d.marchio || x.marchio,
+        conc: x.conc || d.conc,
         genere: d.genere || x.genere,
         voto: d.voto ? String(d.voto).replace(".", ",") : x.voto,
         voti: d.voti ? String(d.voti) : x.voti,
-        durata: d.durata_ore ? String(d.durata_ore) : x.durata,
+        durata: d.durata ? String(d.durata) : x.durata,
         scia: d.scia || x.scia,
         accordi,
-        note: d.note?.length ? d.note : x.note,
+        note: d.note.length ? d.note : x.note,
         colore,
         occasioni: occasioniDa(nomi, colore, dati?.profumi ?? [])
       };
@@ -121,7 +136,7 @@ export default function Aggiungi() {
       setFotoCartolina(f);
       setFoto(f);
     }
-    immagineModello.current = await perIlModello(img);
+    cartolina.current = { img, misura: mi };
     setPasso("dati");
     void leggiLeScritte();
   }
@@ -209,7 +224,7 @@ export default function Aggiungi() {
           />
           <IconaFoto />
           <b>Scegli la cartolina</b>
-          <span>Le barre le misura il telefono. Nome e numeri li legge l'AI (serve la rete).</span>
+          <span>Il telefono misura le barre e legge le scritte. Gratis; la prima volta scarica il lettore (circa 6 MB).</span>
         </label>
         <button className="link-piano" type="button" onClick={() => (setLettura("niente"), setPasso("dati"))}>
           Non ho la cartolina: scrivo io i dati
@@ -230,10 +245,10 @@ export default function Aggiungi() {
           <div className="ag-cartolina">
             <img src={cartolinaUrl} alt="La cartolina scelta" />
             <div>
-              <b>{lettura === "in-corso" ? "Leggo le scritte…" : "Cartolina letta"}</b>
+              <b>{lettura === "in-corso" ? (avanza || "Leggo le scritte") + "…" : "Cartolina letta"}</b>
               <span>
                 Barre misurate nel telefono
-                {lettura === "letta" ? ", scritte lette dall'AI." : "."}
+                {lettura === "letta" ? ", scritte lette nel telefono." : "."}
               </span>
               <StatoLettura lettura={lettura} errore={erroreLettura} riprova={leggiLeScritte} />
             </div>
@@ -400,7 +415,7 @@ export default function Aggiungi() {
         <Indietro a={() => setPasso("foto")}>Foto</Indietro>
         <Passi qui="piramide" />
         <h1 className="ag-titolo">La piramide</h1>
-        <Piramide m={m} cambia={cambia} />
+        <Piramide m={m} cambia={cambia} noti={[...new Set((dati?.profumi ?? []).flatMap((p) => p.noteElenco ?? []))]} />
         <button className="btn-filo pieno largo" type="button" onClick={() => setPasso("salva")}>
           Avanti
         </button>
@@ -653,20 +668,19 @@ function SceltaFoto({
   );
 }
 
-function Piramide({ m, cambia }: { m: Modulo; cambia: (c: Partial<Modulo>) => void }) {
+function Piramide({ m, cambia, noti }: { m: Modulo; cambia: (c: Partial<Modulo>) => void; noti: string[] }) {
   const [stato, setStato] = useState<"" | "leggo" | string>("");
   const [nuova, setNuova] = useState<{ livello: keyof Modulo["piramide"]; testo: string } | null>(null);
   async function schermata(file: File) {
     setStato("leggo");
-    const r = await leggiScritte("piramide", await perIlModello(await apri(file)));
-    if (r.ok && r.dati) {
-      const d = r.dati as { testa: string[]; cuore: string[]; fondo: string[]; senza_livello: string[] };
-      cambia({ piramide: { testa: d.testa ?? [], cuore: [...(d.cuore ?? []), ...(d.senza_livello ?? [])], fondo: d.fondo ?? [] } });
+    try {
+      const d = await noteDellaSchermata(await apri(file), noti);
+      if (!d.testa.length && !d.cuore.length && !d.fondo.length) return setStato("Non trovo note in questa schermata: scrivile tu, o prova con un'altra.");
+      cambia({ piramide: d });
       setStato("");
-    } else
-      setStato(
-        r.nonDisponibile ? "La lettura delle schermate non è ancora attiva: scrivi tu le note." : r.errore === "senza rete" ? "Senza rete non posso leggerla: scrivi tu le note o riprova dopo." : "Non sono riuscito a leggerla: " + (r.errore || "")
-      );
+    } catch {
+      setStato(navigator.onLine === false ? "La prima volta il lettore si scarica: serve la rete. Scrivi tu le note o riprova dopo." : "Non sono riuscito a leggerla: scrivi tu le note.");
+    }
   }
   const togli = (l: keyof Modulo["piramide"], i: number) => cambia({ piramide: { ...m.piramide, [l]: m.piramide[l].filter((_, j) => j !== i) } });
   return (
@@ -788,11 +802,10 @@ function Scena({ src, alt, piccola = false }: { src: string; alt: string; piccol
 
 function StatoLettura({ lettura, errore, riprova }: { lettura: Lettura; errore: string; riprova: () => void }) {
   if (lettura === "letta") return <span className="ag-ok">Scritte lette: controllale qui sotto.</span>;
-  if (lettura === "non-disponibile") return <span className="ag-ambra">La lettura delle scritte non è ancora attiva: nome e numeri scrivili tu.</span>;
   if (lettura === "senza-rete")
     return (
       <span className="ag-ambra">
-        Senza rete: scrivi tu nome e numeri, o{" "}
+        La prima volta il lettore si scarica: serve la rete. Scrivi tu nome e numeri, o{" "}
         <button type="button" className="ag-riprova" onClick={riprova}>
           riprova a leggere
         </button>

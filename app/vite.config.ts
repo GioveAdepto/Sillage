@@ -33,8 +33,9 @@ export default defineConfig({
         // il passaggio dall'app di oggi: prende il posto del suo service worker e ne cancella la cache
         importScripts: ["pulizia-sw.js"],
         // le schermate d'avvio le legge solo l'iPhone quando apre l'app: non servono nella cache
-        // lo scontorno delle foto («Aggiungi profumo» ▸ Una tua foto) si scarica solo al primo uso, mai all'installazione
-        globIgnores: ["**/img/avvio/**", "**/scontorno-*.js"],
+        // lo scontorno delle foto («Aggiungi profumo» ▸ Una tua foto) e il lettore delle scritte (▸ la cartolina) si
+        // scaricano solo al primo uso, mai all'installazione
+        globIgnores: ["**/img/avvio/**", "**/scontorno-*.js", "**/lettore-*.js"],
         navigateFallback: "index.html",
         runtimeCaching: [
           {
@@ -48,6 +49,13 @@ export default defineConfig({
             urlPattern: ({ url }) => url.pathname.includes("/api/foto/"),
             handler: "CacheFirst",
             options: { cacheName: "sillage-foto", expiration: { maxEntries: 300 }, cacheableResponse: { statuses: [0, 200] } }
+          },
+          {
+            // il lettore delle scritte (Tesseract: programma e italiano, da jsdelivr) scaricato al primo uso: si tiene,
+            // così la volta dopo legge anche senza rete
+            urlPattern: ({ url }) => url.hostname === "cdn.jsdelivr.net" && /^\/npm\/(tesseract\.js|tesseract\.js-core|@tesseract\.js-data)[@/]/.test(url.pathname),
+            handler: "CacheFirst",
+            options: { cacheName: "sillage-lettore", expiration: { maxEntries: 20 }, cacheableResponse: { statuses: [0, 200] } }
           }
         ]
       }
@@ -56,9 +64,14 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // il pezzo dello scontorno (con onnxruntime) col suo nome, per lasciarlo fuori dalla cache: si scarica solo
-        // quando serve (l'import dinamico lo tiene già a parte; qui cambia solo il nome del file)
-        chunkFileNames: (c) => (c.moduleIds.some((id) => /@imgly|onnxruntime/.test(id)) ? "assets/scontorno-[hash].js" : "assets/[name]-[hash].js")
+        // i pezzi dello scontorno (con onnxruntime) e del lettore (Tesseract) col loro nome, per lasciarli fuori dalla
+        // cache: si scaricano solo quando servono (l'import dinamico li tiene già a parte; qui cambia solo il nome)
+        chunkFileNames: (c) =>
+          c.moduleIds.some((id) => /@imgly|onnxruntime/.test(id))
+            ? "assets/scontorno-[hash].js"
+            : c.moduleIds.some((id) => /tesseract/.test(id))
+              ? "assets/lettore-[hash].js"
+              : "assets/[name]-[hash].js"
       }
     }
   },
