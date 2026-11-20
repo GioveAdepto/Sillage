@@ -6,6 +6,7 @@
      azione=leggi dice chi ha riconosciuto (`chi`): con la chiave giusta Danilo, altrimenti nessuno;
    - riscriviPonte: nei .js serviti l'indirizzo del ponte pubblicato diventa questo server (per l'app di prima);
    - cambiaCartella(): la stessa porta passa a servire un'altra cartella (il passaggio tra le due app);
+   - azione=scheda: la scheda pubblica di un profumo, senza credenziali e senza i dati di chi lo ha;
    - «Aggiungi profumo»: azione=catalogo, aggiungi (il profumo nuovo entra nel catalogo in memoria), GET /api/foto/<id>.
      Le scritte della cartolina le legge il telefono: nelle prove l'app è costruita col lettore finto (VITE_LETTORE=finto). */
 import { createServer } from "node:http";
@@ -45,6 +46,13 @@ export function avvia({ porta = 8800, cartella, prefisso = "/", riscriviPonte = 
         chi: giusta ? { persona: "danilo", nome: "Danilo", da: "chiave" } : {},
         aggiornato: new Date().toISOString()
       });
+    // la scheda pubblica (#/p/24, il link da CheMetto): senza credenziali, solo i dati comuni, come il ponte
+    if (azione === "scheda") {
+      const x = catalogo().profumi.find((q) => q.id === Number(p.get("id")));
+      if (!x) return json(res, { errore: "profumo sconosciuto: " + p.get("id") });
+      const privati = ["notePersonali", "residuoPct", "tipoPossesso", "formatoMl", "numFlaconi", "aggiunto", "attivo", "nuovo"];
+      return json(res, { ok: true, profumo: Object.fromEntries(Object.entries(x).filter(([k]) => !privati.includes(k))) });
+    }
     if (!giusta) return json(res, { errore: "chiave sconosciuta: manca o non e' quella giusta" });
     if (azione === "catalogo")
       return json(res, { ok: true, profumi: catalogo().profumi.map((x) => ({ id: x.id, brand: x.brand, name: x.name, conc: x.conc, img: x.img, accordi: (x.accordi || []).slice(0, 3) })) });

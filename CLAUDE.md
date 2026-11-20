@@ -37,7 +37,8 @@ più vera, correggila subito.
 - **Gli account**: quelli di CheMetto (Supabase Auth), registrazione libera; ognuno ha collezione e diario suoi
   in D1, degli altri si vede solo la collezione. Dettagli in `ponte/LEGGIMI.md`.
 - **L'ingresso**: chi apre Sillage senza account vede solo la vetrina chiusa con «Entra con il tuo account di
-  CheMetto» (e «Registrati»), nessuna collezione. Dettagli in `app/LEGGIMI.md`.
+  CheMetto» (e «Registrati»), nessuna collezione. Unica eccezione la **scheda pubblica** `#/p/<id>` (il link da
+  CheMetto): i dati comuni di un profumo, mai di chi è. Dettagli in `app/LEGGIMI.md`.
 - **CheMetto**: per ogni proposta della pagina Oggi un profumo consigliato dal ponte (`azione=consiglio`, campo
   `perOutfit`; stesso punteggio di Consigliami, l'outfit conta solo a pari merito); sceglierlo scrive «Oggi ho messo»
   nel diario di Sillage, e «Oggi ho messo» segnato in Sillage arriva nella Bacheca di CheMetto. Chi non ha Sillage o

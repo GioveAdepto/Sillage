@@ -85,6 +85,16 @@ verifica("vetrina di nessuno", /sconosciuta/.test((await post("azione=vetrina&di
 verifica("le vetrine senza essere entrati: no", /^chiave/.test((await post("azione=vetrine")).errore || ""));
 verifica("il catalogo senza essere entrati: no", /^chiave/.test((await post("azione=catalogo")).errore || ""));
 
+// La scheda pubblica (il link da CheMetto, #/p/…): senza essere entrati, solo i dati comuni di un profumo
+const suoi = (await post("azione=leggi", L)).profumi;
+for (const x of [danPrima.profumi[0], suoi[0]]) {
+  r = await post("azione=scheda", { id: String(x.id) });
+  verifica("scheda pubblica di " + x.name + ": c'è, senza entrare", r.ok === true && r.profumo?.id === x.id && r.profumo.name === x.name, J(r).slice(0, 150));
+  verifica("…senza dati di chi lo ha", !["notePersonali", "residuoPct", "tipoPossesso", "formatoMl", "numFlaconi", "aggiunto", "attivo", "nuovo"].some((k) => k in (r.profumo || {})), Object.keys(r.profumo || {}).join(","));
+}
+verifica("scheda pubblica di un numero che non c'è", /sconosciuto/.test((await post("azione=scheda", { id: "99999" })).errore || ""));
+verifica("scheda pubblica senza numero", /non valida/.test((await post("azione=scheda")).errore || ""));
+
 // Quello che resta solo di Claude (con la chiave)
 for (const a of ["modifica", "sincronizza", "importa&conferma=si", "confronta", "riporta&conferma=si"])
   verifica("lei non può: " + a.split("&")[0], /^chiave/.test((await post("azione=" + a, { ...L, dati: "{}" })).errore || ""));

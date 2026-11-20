@@ -45,6 +45,26 @@ try {
   controlla(alPonte.length === 0, `senza account l'app non chiede niente al ponte (${alPonte.join(",")})`);
   await page.click(".ingresso-cambio button");
   controlla(!!(await page.$('input[autocomplete="nickname"]')), "«Registrati» chiede il nome in Sillage");
+
+  // la scheda pubblica (il link da CheMetto, #/p/…): senza account il profumo si vede, solo coi dati comuni
+  const chiesto = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/api") && r.method() === "POST") chiesto.push(r.postData() || "");
+  });
+  await page.goto(srv.url + "#/p/15");
+  await page.waitForSelector(".scheda-pubblica .nome-grande", { timeout: 15000 });
+  controlla((await page.textContent(".nome-grande")) === "Eros", "senza account il link da CheMetto apre la scheda pubblica di Eros");
+  controlla(!/fondo ambroxan-vanigliato/.test(await page.textContent("main")), "senza le note personali di chi lo ha");
+  controlla(!(await page.$(".timone, .scaffale, .livello, .indossa")), "senza barra, vetrina, residuo né «Lo metto oggi»");
+  controlla(chiesto.length > 0 && chiesto.every((c) => !/chiave|accesso/.test(c)), "la scheda si chiede al ponte senza credenziali");
+  await page.click(".pubblica-invito .btn-filo");
+  await page.waitForSelector(".ingresso-carta", { timeout: 10000 });
+  controlla(/Torna alla scheda/.test(await page.textContent(".ingresso-carta")), "«Entra» porta all'ingresso, con il ritorno alla scheda");
+  await page.goto(srv.url + "#/p/9999");
+  await page.waitForSelector(".scheda-pubblica .titolo-pagina", { timeout: 15000 });
+  await page.waitForFunction(() => /Scheda non aperta/.test(document.querySelector(".titolo-pagina")?.textContent || ""), null, { timeout: 15000 });
+  controlla(/non c'è un profumo/.test(await page.textContent("main")), "un numero che non c'è lo dice");
+  await page.goto(srv.url + "#/profumo/24");
   // una chiave che il ponte non riconosce: il ponte risponde con la vetrina di Danilo, l'app non la mostra
   await page.evaluate(() => localStorage.setItem("sillage-app:chiave", "sbagliata"));
   await page.reload();
@@ -64,6 +84,11 @@ try {
   await page.click("#teca-24");
   await page.waitForSelector(".nome-grande", { timeout: 10000 });
   controlla((await page.textContent(".nome-grande")) === "Encre Noire", "la scheda di Encre Noire");
+  // il link da CheMetto per chi ha il profumo: la sua scheda, completa
+  await page.goto(srv.url + "#/p/15");
+  await page.waitForURL((u) => u.hash === "#/profumo/15", { timeout: 15000 });
+  await page.waitForSelector(".nome-grande", { timeout: 10000 });
+  controlla((await page.textContent(".nome-grande")) === "Eros" && !!(await page.$(".indossa")), "entrato, il link da CheMetto apre la propria scheda di Eros");
 
   await page.goto(srv.url + "#/consigliami?occ=ufficio");
   await page.waitForSelector(".scelta .nome-grande", { timeout: 10000 });

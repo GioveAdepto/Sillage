@@ -87,7 +87,7 @@ function Torna({ id }: { id: number | null }) {
   );
 }
 
-function Sezione({ titolo, scala, children }: { titolo: string; scala?: string; children: ReactNode }) {
+export function Sezione({ titolo, scala, children }: { titolo: string; scala?: string; children: ReactNode }) {
   const idT = "t-" + titolo.toLowerCase().replace(/[^a-z]+/g, "-");
   return (
     <section className="sez" aria-labelledby={idT}>
@@ -106,16 +106,11 @@ const larghezza = (v: number) => ({ "--w": Math.max(0, Math.min(100, v)) + "%" }
 function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: Profumo[]; numeri: Map<number, number> }) {
   const loc = useLocation();
   const volo = !!(loc.state as Provenienza)?.volo;
-  const ora = adesso();
-  const pir = piramide(p);
-  const acc = accordiConForza(p);
-  const conForza = acc.some((a) => a.forza > 0);
   const orig = originaleDi(p, tutti);
   const copie = copieDi(p, tutti);
   const simili = similiA(p, tutti);
   const residuo = livelloResiduo(p);
   const campione = eCampione(p);
-  const giorno = p.giornoPct != null && Number.isFinite(+p.giornoPct) ? Math.round(+p.giornoPct) : null;
 
   return (
     <article className={"scheda " + p.colore}>
@@ -128,164 +123,12 @@ function SchedaAperta({ p, n, tutti, numeri }: { p: Profumo; n: number; tutti: P
           </span>
         </div>
 
-        <Piedistallo p={p} inVolo={volo} nomeVolo={"boccetta-" + p.id} inMano />
-
-        <div className="titolo">
-          <p className="marca">{p.brand}</p>
-          <h1 className="nome-grande">{p.name}</h1>
-          <p className="sotto">
-            {concPerEsteso(p.conc)} · {p.famiglia}
-            {p.genere ? ` · ${p.genere}` : ""}
-          </p>
-          {eNovita(p) || p.dupe || campione ? (
-            <p className="targhe">
-              {eNovita(p) ? <span className="targa">Nuovo · dal {dataAggiunta(p)}</span> : null}
-              {campione ? <span className="targa">Campione in prova</span> : null}
-              {p.dupe ? <span className="targa">Copia di {p.dupe.split(" (")[0]}</span> : null}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="misure">
-          <div>
-            <span className="k">Voto</span>
-            <span className="v">
-              {p.rating ? voto(p.rating) : "—"}
-              <small> /5</small>
-            </span>
-            <span className="s">{p.voti ? `${migliaia(p.voti)} voti` : "su Fragrantica"}</span>
-          </div>
-          <div>
-            <span className="k">Durata</span>
-            <span className="v">
-              {p.longevita ?? "—"}
-              <small> ore</small>
-            </span>
-            <span className="s">longevità</span>
-          </div>
-          <div>
-            <span className="k">Sillage</span>
-            <span className="v">{p.sillage || "—"}</span>
-            <span className="s">scia</span>
-          </div>
-        </div>
+        <Testata p={p} volo={volo} privato />
         <LoMetto p={p} />
       </div>
 
       <div className="scheda-dati">
-        {pir.length ? (
-          <Sezione titolo="Piramide">
-            <dl className="piramide">
-              {pir.map((r, i) =>
-                r.livello ? (
-                  <div key={i} className="piano">
-                    <dt>{r.livello}</dt>
-                    <dd>{r.note}</dd>
-                  </div>
-                ) : (
-                  <div key={i} className="piano senza-livello">
-                    <dd>{r.note}</dd>
-                  </div>
-                )
-              )}
-            </dl>
-          </Sezione>
-        ) : null}
-
-        {acc.length ? (
-          <Sezione titolo="Accordi" scala={conForza ? "forza su 100" : undefined}>
-            {conForza ? (
-              <>
-                <div className="scala-num" aria-hidden="true">
-                  <i />
-                  <span>
-                    <b>0</b>
-                    <b>25</b>
-                    <b>50</b>
-                    <b>75</b>
-                    <b>100</b>
-                  </span>
-                  <i />
-                </div>
-                <ul className="righe">
-                  {acc.map((a) => (
-                    <li key={a.nome}>
-                      <span className="n">{a.nome}</span>
-                      <span className="traccia" role="img" aria-label={`${a.nome} ${a.forza}`}>
-                        <i style={larghezza(a.forza)} />
-                      </span>
-                      <span className="v">{a.forza || "—"}</span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p className="semplice">{acc.map((a) => a.nome).join(" · ")}</p>
-            )}
-          </Sezione>
-        ) : null}
-
-        <Sezione titolo="Stagioni" scala={p.stagioni ? "% dei voti" : undefined}>
-          {p.stagioni ? (
-            <ul className="righe">
-              {STAGIONI.map((s) => {
-                const v = Math.round(Number(p.stagioni![s]) || 0);
-                const attuale = s === ora.nome;
-                return (
-                  <li key={s} className={attuale ? "attuale" : undefined}>
-                    <span className="n">
-                      {NOMI_STAGIONE[s]}
-                      {attuale ? <em>ora</em> : null}
-                    </span>
-                    <span
-                      className="traccia"
-                      role="img"
-                      aria-label={`${NOMI_STAGIONE[s]} ${v} per cento${attuale ? ", stagione attuale" : ""}`}
-                    >
-                      <i style={larghezza(v)} />
-                    </span>
-                    <span className="v">{v}%</span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="semplice">{stagLbl(p.stagione)}</p>
-          )}
-        </Sezione>
-
-        <Sezione titolo="Giorno e sera">
-          {giorno != null ? (
-            <>
-              <div className="asta" role="img" aria-label={`Giorno ${giorno} per cento, sera ${100 - giorno} per cento`}>
-                <i style={{ width: giorno + "%" }} />
-                <i style={{ width: 100 - giorno + "%" }} />
-              </div>
-              <div className="asta-leg">
-                <span>Giorno {giorno}%</span>
-                <span>Sera {100 - giorno}%</span>
-              </div>
-            </>
-          ) : (
-            <p className="semplice">{momLbl(p.momento)}</p>
-          )}
-        </Sezione>
-
-        <Sezione titolo="Uso">
-          <ul className="usi">
-            {USI.map(({ campo, etichetta }) => {
-              const v = valoreUso(p[campo] as never);
-              return (
-                <li key={campo} className={v}>
-                  {v === "si" ? <IconaSi /> : v === "misura" ? <IconaMezzo /> : <IconaNo />}
-                  {etichetta}
-                  {v === "misura" ? <span className="con-misura">con misura</span> : null}
-                  {v === "no" ? <span className="vh">: no</span> : null}
-                </li>
-              );
-            })}
-          </ul>
-        </Sezione>
+        <DatiComuni p={p} />
 
         {p.notePersonali ? (
           <Sezione titolo="Note personali">
@@ -523,5 +366,183 @@ function RicetteDi({ p }: { p: Profumo }) {
         ))}
       </ul>
     </Sezione>
+  );
+}
+
+/** In cima alla scheda: la boccetta sul piedistallo, marca, nome e le tre misure. `privato`: anche le targhe di chi
+    ha il profumo (nuovo, campione); la scheda pubblica (#/p/…) non le mostra. */
+export function Testata({ p, volo = false, privato = false }: { p: Profumo; volo?: boolean; privato?: boolean }) {
+  const campione = privato && eCampione(p);
+  const nuovo = privato && eNovita(p);
+  return (
+    <>
+    <Piedistallo p={p} inVolo={volo} nomeVolo={"boccetta-" + p.id} inMano />
+
+    <div className="titolo">
+      <p className="marca">{p.brand}</p>
+      <h1 className="nome-grande">{p.name}</h1>
+      <p className="sotto">
+        {concPerEsteso(p.conc)} · {p.famiglia}
+        {p.genere ? ` · ${p.genere}` : ""}
+      </p>
+      {nuovo || p.dupe || campione ? (
+        <p className="targhe">
+          {nuovo ? <span className="targa">Nuovo · dal {dataAggiunta(p)}</span> : null}
+          {campione ? <span className="targa">Campione in prova</span> : null}
+          {p.dupe ? <span className="targa">Copia di {p.dupe.split(" (")[0]}</span> : null}
+        </p>
+      ) : null}
+    </div>
+
+    <div className="misure">
+      <div>
+        <span className="k">Voto</span>
+        <span className="v">
+          {p.rating ? voto(p.rating) : "—"}
+          <small> /5</small>
+        </span>
+        <span className="s">{p.voti ? `${migliaia(p.voti)} voti` : "su Fragrantica"}</span>
+      </div>
+      <div>
+        <span className="k">Durata</span>
+        <span className="v">
+          {p.longevita ?? "—"}
+          <small> ore</small>
+        </span>
+        <span className="s">longevità</span>
+      </div>
+      <div>
+        <span className="k">Sillage</span>
+        <span className="v">{p.sillage || "—"}</span>
+        <span className="s">scia</span>
+      </div>
+    </div>
+    </>
+  );
+}
+
+/** I dati comuni a tutti, come li dà Fragrantica: piramide, accordi, stagioni, giorno e sera, uso. */
+export function DatiComuni({ p }: { p: Profumo }) {
+  const ora = adesso();
+  const pir = piramide(p);
+  const acc = accordiConForza(p);
+  const conForza = acc.some((a) => a.forza > 0);
+  const giorno = p.giornoPct != null && Number.isFinite(+p.giornoPct) ? Math.round(+p.giornoPct) : null;
+  return (
+    <>
+    {pir.length ? (
+      <Sezione titolo="Piramide">
+        <dl className="piramide">
+          {pir.map((r, i) =>
+            r.livello ? (
+              <div key={i} className="piano">
+                <dt>{r.livello}</dt>
+                <dd>{r.note}</dd>
+              </div>
+            ) : (
+              <div key={i} className="piano senza-livello">
+                <dd>{r.note}</dd>
+              </div>
+            )
+          )}
+        </dl>
+      </Sezione>
+    ) : null}
+
+    {acc.length ? (
+      <Sezione titolo="Accordi" scala={conForza ? "forza su 100" : undefined}>
+        {conForza ? (
+          <>
+            <div className="scala-num" aria-hidden="true">
+              <i />
+              <span>
+                <b>0</b>
+                <b>25</b>
+                <b>50</b>
+                <b>75</b>
+                <b>100</b>
+              </span>
+              <i />
+            </div>
+            <ul className="righe">
+              {acc.map((a) => (
+                <li key={a.nome}>
+                  <span className="n">{a.nome}</span>
+                  <span className="traccia" role="img" aria-label={`${a.nome} ${a.forza}`}>
+                    <i style={larghezza(a.forza)} />
+                  </span>
+                  <span className="v">{a.forza || "—"}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p className="semplice">{acc.map((a) => a.nome).join(" · ")}</p>
+        )}
+      </Sezione>
+    ) : null}
+
+    <Sezione titolo="Stagioni" scala={p.stagioni ? "% dei voti" : undefined}>
+      {p.stagioni ? (
+        <ul className="righe">
+          {STAGIONI.map((s) => {
+            const v = Math.round(Number(p.stagioni![s]) || 0);
+            const attuale = s === ora.nome;
+            return (
+              <li key={s} className={attuale ? "attuale" : undefined}>
+                <span className="n">
+                  {NOMI_STAGIONE[s]}
+                  {attuale ? <em>ora</em> : null}
+                </span>
+                <span
+                  className="traccia"
+                  role="img"
+                  aria-label={`${NOMI_STAGIONE[s]} ${v} per cento${attuale ? ", stagione attuale" : ""}`}
+                >
+                  <i style={larghezza(v)} />
+                </span>
+                <span className="v">{v}%</span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="semplice">{stagLbl(p.stagione)}</p>
+      )}
+    </Sezione>
+
+    <Sezione titolo="Giorno e sera">
+      {giorno != null ? (
+        <>
+          <div className="asta" role="img" aria-label={`Giorno ${giorno} per cento, sera ${100 - giorno} per cento`}>
+            <i style={{ width: giorno + "%" }} />
+            <i style={{ width: 100 - giorno + "%" }} />
+          </div>
+          <div className="asta-leg">
+            <span>Giorno {giorno}%</span>
+            <span>Sera {100 - giorno}%</span>
+          </div>
+        </>
+      ) : (
+        <p className="semplice">{momLbl(p.momento)}</p>
+      )}
+    </Sezione>
+
+    <Sezione titolo="Uso">
+      <ul className="usi">
+        {USI.map(({ campo, etichetta }) => {
+          const v = valoreUso(p[campo] as never);
+          return (
+            <li key={campo} className={v}>
+              {v === "si" ? <IconaSi /> : v === "misura" ? <IconaMezzo /> : <IconaNo />}
+              {etichetta}
+              {v === "misura" ? <span className="con-misura">con misura</span> : null}
+              {v === "no" ? <span className="vh">: no</span> : null}
+            </li>
+          );
+        })}
+      </ul>
+    </Sezione>
+    </>
   );
 }

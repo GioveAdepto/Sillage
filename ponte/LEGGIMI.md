@@ -139,6 +139,15 @@ comune** (senza approvazione); mai nella vetrina degli altri.
   mandava a Claude Haiku): niente AI a pagamento e niente segreto `ANTHROPIC_API_KEY`.
 - Prova: `app/strumenti/prova-aggiungi.mjs` sul ponte locale (sotto, «Provarlo in locale»).
 
+### La scheda pubblica (il link da CheMetto)
+
+Scelta dell'utente (17/11): chi vede in CheMetto il profumo di qualcuno (Bacheca, Oggi, i consigli) può aprirlo in Sillage,
+anche senza account. **`azione=scheda&id=…`**, senza credenziali: la scheda di quel profumo dall'anagrafica comune
+(`schede`), nella stessa forma dei profumi di `leggi`, **senza** le colonne del possesso (tipo, formato, flaconi, residuo,
+note personali, aggiunto, attivo, nuovo): non dice chi lo ha. Un numero che non c'è: `{errore: "profumo sconosciuto: …"}`;
+uno non valido: `{errore: "richiesta non valida"}`. La usa la pagina `#/p/<id>` dell'app (`app/LEGGIMI.md`). Prova:
+`app/strumenti/prova-persone.mjs`.
+
 ### CheMetto: il profumo per l'outfit
 
 Scelte dell'utente: in CheMetto, accanto all'outfit del giorno, il profumo consigliato da Sillage; sceglierlo lo scrive
@@ -200,6 +209,7 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
 | `POST /api?azione=aggiungi` (`dati` = JSON) | un profumo: scheda comune (nuova o già in Sillage) + nella propria vetrina |
 | `GET /api/foto/<id>.<ext>` | la foto di un profumo aggiunto dall'app |
 | `POST /api?azione=consiglio` (`situazione`, `quando`, `fuso`, `lat`, `lon`, `colori`) | il profumo per l'outfit di CheMetto e «Oggi ho messo», con l'accesso; `nessuno` per chi non è in Sillage |
+| `POST /api?azione=scheda&id=…` | la scheda pubblica di un profumo, **senza account** (il link da CheMetto): solo i dati comuni |
 | `POST /api?azione=vetrine` · `azione=vetrina&di=…` | chi c'è in Sillage · la sua collezione senza dati privati, per chi è entrato |
 | `POST /api?azione=modifica` (`dati` = `{aggiunte, correzioni}`, `prova=1` per provare) | il catalogo, con la chiave |
 | `POST /api?azione=sincronizza` | riscrive subito la copia nel foglio, con la chiave |

@@ -16,6 +16,7 @@
      POST /api?azione=vetrine          chi c'è in Sillage; azione=vetrina&di=… la sua collezione, senza privati
      POST /api?azione=aggiungi         un profumo nuovo (dati=JSON): scheda comune + nella propria vetrina (accesso o chiave)
      POST /api?azione=consiglio        il profumo per l'outfit di CheMetto, col consiglio di Consigliami (accesso)
+     POST /api?azione=scheda&id        la scheda pubblica di un profumo, senza account: solo i dati comuni (link da CheMetto)
      GET  /api/foto/<id>.webp          la foto di un profumo aggiunto dall'app
      POST /api?azione=modifica         aggiunte e correzioni al catalogo (dati=JSON), con la chiave
      POST /api?azione=sincronizza      riscrive subito la copia nel foglio, con la chiave
@@ -231,6 +232,21 @@ async function catalogo(db) {
   const profumi = profumiPerApp(righe).map(x => ({ id: x.id, brand: x.brand, name: x.name, conc: x.conc, famiglia: x.famiglia,
     colore: x.colore, img: x.img, accordi: (x.accordi || []).slice(0, 3), stagioni: x.stagioni, rating: x.rating }));
   return { ok: true, profumi };
+}
+
+/* La scheda pubblica di un profumo (il link da CheMetto, anche per chi non ha un account): solo i dati comuni
+   dell'anagrafica, come il catalogo. Mai chi lo ha, note personali, residuo, diario, layering o consigli. */
+async function schedaPubblica(db, id) {
+  id = Number(id);
+  if (!Number.isInteger(id) || id <= 0) return { errore: "richiesta non valida" };
+  const [r, col] = await Promise.all([db.prepare("SELECT id, dati FROM schede WHERE id = ?").bind(id).first(),
+    leggiStato(db, "colonne-profumi")]);
+  if (!r) return { errore: "profumo sconosciuto: " + id };
+  const dati = Object.fromEntries(Object.entries(JSON.parse(r.dati)).filter(([c]) => !COLONNE_POSSESSO.includes(c)));
+  const righe = ricomponiProfumi(JSON.parse(col || "[]"), [{ id, dati }], [{ scheda: id, posto: 0, attivo: "si" }]).righe;
+  const x = profumiPerApp(righe)[0];
+  ["tipoPossesso", "formatoMl", "numFlaconi", "aggiunto", "attivo", "nuovo", ...PRIVATI].forEach(k => delete x[k]);
+  return { ok: true, profumo: x };
 }
 
 /* Aggiungere una scheda già in Sillage («Aggiungi profumo») e «Togli dalla vetrina» sulla propria collezione. Togliere non cancella: il possesso resta con
@@ -953,6 +969,7 @@ async function rispondi(request, env, ctx) {
     return testo(await corpo(db, chi.persona || P, !!chi.persona, chi));
   }
   if (azione === "consiglio") return json(await consiglioOutfit(env, db, p, url));
+  if (azione === "scheda") return json(await schedaPubblica(db, p.get("id")));
   if (azione === "collega") return json(await collega(env, db, p));
   if (azione === "registrati") return json(await registrati(env, db, p));
   if (["diario", "residuo", "possesso", "catalogo", "vetrine", "vetrina", "aggiungi"].includes(azione)) {
