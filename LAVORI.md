@@ -14,39 +14,23 @@ Ultimo aggiornamento: 20 novembre 2026.
 | 16/11 | Pagina d'ingresso: senza account si vede solo «Entra con il tuo account di CheMetto» | `61d2c0b` |
 | 17/11 | Aggiungi profumo, con la cartolina di Fragrantica letta nel telefono (gratis) e la piramide da schermata | `10f47d9`, `ff6f178`, `6a328a4` |
 | 17/11 | CheMetto: un profumo per ogni proposta di Oggi; «Oggi ho messo» nei due sensi | `8efee8f`, `d8c03dd`, `03b8618`, `02dac98` |
+| 20/11 | Scheda pubblica `#/p/<id>` (il link da CheMetto, anche senza account), guida a passi in «Aggiungi profumo» (per ora senza schermate), il ponte manda a CheMetto il numero del profumo; in CheMetto (migrazione 070 e codice) il profumo si apre in Sillage da Bacheca, proposte col partner, «Chiedi un parere» e dalla «i» del foglio dei profumi | branch `guida-e-scheda-pubblica`; CheMetto `fdc20a1` e `profumo-in-sillage` |
 
 ## Da provare dall'iPhone (l'utente)
 
 - **CheMetto ▸ Oggi**: con il proprio account compare un profumo per ogni proposta; scegliendolo, «Oggi ho messo»
   arriva nel diario di Sillage. Con un account senza profumi o senza Sillage non deve vedersi niente di rotto o vuoto.
 - **Sillage ▸ Altro ▸ Aggiungi profumo**: la piramide letta da una schermata di Fragrantica esce giusta.
+- **Da CheMetto a Sillage** (20/11): nella Bacheca, sotto un outfit condiviso da oggi in poi, «Sillage ›» apre la
+  scheda del profumo in Safari; senza accesso a Sillage in Safari si vede la scheda pubblica con «Entra», con l'accesso
+  la propria scheda. Anche la «i» nel foglio dei profumi di Oggi. I profumi già in Bacheca prima restano senza link.
 
 ## Da fare (chiesti dall'utente il 17/11)
 
-- **Guida con schermate per «Aggiungi profumo»**: spiegare passo per passo, con immagini, come recuperare la
-  cartolina dall'app Fragrantica (scheda del profumo ▸ Condividi ▸ salva l'immagine), come fare la schermata della
-  piramide e quali dati servono. Le schermate vere dall'iPhone vanno chieste all'utente.
-  Disegno approvato dall'utente il 17/11 (anteprima «Sillage · guida e scheda pubblica»). **Costruita** sul branch
-  `guida-e-scheda-pubblica` (20/11): la guida dentro i passi Cartolina e Piramide, con miniature e il cassetto coi passi
-  in grande; per ora senza immagini (solo testo). **Aspetta le schermate dell'utente** (scheda nell'app Fragrantica,
-  dopo Condividi, foglio con «Salva immagine», la piramide), in `C:\Projects\Sillage\SchedeProfumiFragrantica\guida`:
-  poi vanno rimpicciolite in `app/public/img/guida/` e messe nei passi (`img`).
-- **Dal profumo consigliato in CheMetto a Sillage**: chi vede il profumo consigliato per l'outfit deve poter
-  arrivare a Sillage per saperne di più, sia l'utente stesso sia le persone esterne che lo vedono (per esempio nella
-  Bacheca). Scelte dell'utente del 17/11: **chi non ha Sillage** vede una scheda pubblica del profumo (solo i dati
-  comuni del catalogo, mai vetrine, note personali, residuo o diario) con l'invito a entrare; **chi ha Sillage** apre
-  la sua scheda se il profumo è suo, se no la scheda pubblica con «Mettilo nella mia vetrina»; il link sta **ovunque
-  in CheMetto compaia il profumo** (Bacheca, Oggi, proposte, foglio dei consigli). Serve: indirizzo pubblico
-  `#/p/<id>`, una lettura senza account della sola scheda nel ponte, in CheMetto il link e una migrazione per tenere
-  l'id del profumo nella Bacheca. Sull'iPhone il link si apre in Safari, non nell'app installata. Disegno approvato
-  il 17/11. **Parte di Sillage costruita** sul branch `guida-e-scheda-pubblica` (20/11): `#/p/<id>` e `azione=scheda`,
-  prove passate (browser col ponte finto, ponte locale, `prova-persone`). Da unire su `main` col via libera dell'utente.
-  **Parte di CheMetto** (sì dell'utente il 20/11): branch `profumo-in-sillage` di CheMetto, migrazione 069 (il numero
-  del profumo in Sillage nel profumo del giorno), riga della Bacheca che porta a `#/p/<id>`, «i» accanto a ogni profumo
-  nel foglio dei consigli; il ponte manda `p_id` a `segna_profumo`. Prove passate (Vitest, e2e del profumo,
-  `prova-persone`). **Ordine di pubblicazione**: 1) migrazione 069 su `main` di CheMetto; 2) unione di questo branch
-  su `main` di Sillage; 3) il codice di CheMetto. Aspetta l'ok dell'utente sull'anteprima. I profumi segnati prima
-  restano senza link. Le proposte col partner (068, altra sessione di CheMetto) avranno il link quando arrivano.
+- **Le schermate della guida di «Aggiungi profumo»**: la guida è pubblicata (20/11), per ora solo testo. **Aspetta le
+  schermate dell'utente** (scheda nell'app Fragrantica, dopo Condividi, foglio con «Salva immagine», la piramide), in
+  `C:\Projects\Sillage\SchedeProfumiFragrantica\guida`: poi vanno rimpicciolite in `app/public/img/guida/` e messe nei
+  passi (`img` in `PASSI_CARTOLINA` / `PASSI_PIRAMIDE` di `Aggiungi.tsx`).
 
 ## In corso in altre sessioni
 

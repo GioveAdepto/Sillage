@@ -167,7 +167,7 @@ const contoLei = accountDi("lei@esempio.it");
 verifica("e il ponte lo copia in CheMetto, col token di lei", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].account === contoLei &&
   ch[0].p_giorno === oggiLocale && ch[0].p_nome === suo24.name && ch[0].p_marca === suo24.brand && ch[0].apikey, J(ch));
 verifica("la foto solo con https (in locale niente)", ch[0]?.p_img === null, J(ch[0]));
-verifica("col numero in Sillage, per il link dalla Bacheca (069 di CheMetto)", ch[0]?.p_id === 24, J(ch[0]));
+verifica("col numero in Sillage, per il link dalla Bacheca (070 di CheMetto)", ch[0]?.p_id === 24, J(ch[0]));
 verifica("lei toglie il 24 dall'app di Sillage", (await post(`azione=diario&op=togli&id=24&data=${oggiLocale}&t=${tSil}`, L)).tolta === true);
 ch = await chiamate(1);
 verifica("in CheMetto torna l'ultima voce rimasta (il 3 scelto da CheMetto)", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].p_nome === danPrima.profumi.find((x) => x.id === 3).name && ch[0].p_id === 3, J(ch));
