@@ -570,3 +570,43 @@
   width: 100%;
   margin-top: 32px;
 }
+
+/* La scheda pubblica (#/p/24, il link da CheMetto): la stessa scheda, con i soli dati comuni. Senza account non c'è
+   la barra in basso: il foglio scende meno; in alto il nome dell'app al posto di «Collezione». */
+.foglio.pubblica {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+}
+.pubblica-marchio {
+  font: italic 500 22px/1 var(--f-maison);
+  letter-spacing: 0.02em;
+  color: var(--inchiostro);
+}
+.pubblica-cosa {
+  font: 500 10px/1.2 var(--f-dati);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ottone-testo);
+  text-align: right;
+}
+.pubblica-invito {
+  display: grid;
+  gap: 10px;
+  margin: 34px 0 0;
+  padding: 22px 20px 18px;
+  border: 1px solid var(--bordo-carta);
+  background: var(--avorio);
+  text-align: center;
+}
+.pubblica-invito h2 {
+  margin: 0;
+  font: 500 26px/1.1 var(--f-maison);
+  color: var(--inchiostro);
+}
+.pubblica-invito p {
+  margin: 0;
+  font: 400 14px/1.45 var(--f-dati);
+  color: var(--seppia);
+}
+.pubblica-invito .ingresso-cambio {
+  margin-top: 4px;
+}

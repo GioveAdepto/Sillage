@@ -94,9 +94,9 @@ src/viste/osare.ts       «Se vuoi osare, con…»: la ricetta di layering in Co
 src/componenti/          Guscio, Icone, Piedistallo (con la boccetta presa in mano), Apertura (la vetrina che si apre),
                          Ingresso (la prima schermata di chi non è entrato) e ModuloAccesso (entra / registrati),
                          VersioneNuova, Avvisi, Ruota (degli accordi), Righe (sezioni, classifiche),
-                         Tessera (profumo che porta alla teca), pezzi comuni (Boccetta, Mini, meno movimento),
+                         Tessera (profumo che porta alla teca), GuidaPassi (la guida con le schermate di Aggiungi profumo), pezzi comuni (Boccetta, Mini, meno movimento),
                          dalPonte (le letture dal ponte delle vetrine degli altri)
-src/pagine/              Collezione, Scheda, Consigliami, Diario, Numeri, Layering, Guida, Acquisti, Confronta,
+src/pagine/              Collezione, Scheda (con Testata e DatiComuni, usati anche dalla scheda pubblica), SchedaPubblica, Consigliami, Diario, Numeri, Layering, Guida, Acquisti, Confronta,
                          Vetrine (e la vetrina di un altro), Impostazioni, Altro, Segnaposto (pagina non trovata)
 src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, diario,
                          viste, rifiniture (vetrina, luce sul vetro, esame, avviso, cassetto), pagine
@@ -156,6 +156,7 @@ Barra in basso con cinque voci: Collezione, Consigliami, Diario, Numeri, Altro.
 | `#/?v=campioni&f=verde,ufficio&n=vetiver&o=rating&q=…` | filtri (`f`), note (`n`), ordine (`o`) e ricerca stanno nell'indirizzo: «indietro» li ritrova, una nuova apertura riparte pulita. Il cassetto (`cassetto=1`) si chiude anche con «indietro», senza perdere le scelte | fatta |
 | `#/?vedi=24` | arrivo da un'altra pagina: vetrina giusta, filtri tolti, si scorre alla teca (chiusa) e si illumina | fatta |
 | `#/profumo/24` | **Scheda**: piedistallo col faretto, voto/durata/sillage, «Lo metto oggi» (con occasione e momento, e il link all'appunto), piramide, accordi con la forza, stagioni (quella di ora in ottone), giorno e sera, uso, note personali, «Su di te» (dagli appunti), racconto, parentele (copia di…), somiglia a, layering, formato e residuo da toccare, link a Fragrantica, «Confronta con…», «Condividi la scheda». La boccetta vola dalla teca al piedistallo (View Transition), ci ondeggia come presa in mano e, toccata, si guarda da vicino | fatta |
+| `#/p/24` | **Scheda pubblica** (il link da CheMetto): si apre **anche senza account**, da sola, senza barra né vetrina dietro. Solo i dati comuni (`azione=scheda` del ponte, senza credenziali): foto, voto, durata, scia, piramide, accordi, stagioni, giorno e sera, uso, racconto, link a Fragrantica; mai di chi è, note personali, residuo o diario. Senza account in fondo «Vuoi la tua vetrina?» con «Entra» e «Registrati»: portano all'ingresso («Torna alla scheda del profumo»), e dopo l'accesso si torna qui. Chi è entrato e ha il profumo va dritto alla sua scheda (`#/profumo/24`); chi non ce l'ha vede questa con «Mettilo nella mia vetrina» (`#/aggiungi?id=24`, che apre subito quel profumo). Sull'iPhone il link da CheMetto si apre in Safari, che non ha l'accesso dell'app installata: la prima volta si entra anche lì | fatta (17-20/11) |
 | `#/aggiungi` | **Aggiungi profumo**: cerca per nome tra le schede di Sillage (se c'è: boccetta o campione, ml, note, «Metti in vetrina»); se no, la cartolina di Fragrantica ▸ dati da controllare (in ambra quello che non torna) ▸ foto ▸ piramide facoltativa ▸ Salva. Vedi «Aggiungi profumo» | fatta |
 | `#/altro` | **Altro**: indice di Aggiungi profumo, Layering, Guida, Acquisti, Confronta, Le vetrine, Impostazioni, e da dove arrivano i dati | fatta |
 | `#/vetrine`, `#/vetrina/p…` | **Le vetrine**: le altre persone di Sillage e la collezione di ciascuna, in sola lettura | fatta (account, tappa 4) |
@@ -186,6 +187,14 @@ dall'utente il 2026-11-16 (tela «Aggiungi profumo · anteprima»).
 
 1. **Cerca**: le schede di tutti (`azione=catalogo`). Se il profumo c'è già: «Già nella tua vetrina», oppure
    «Prendi» ▸ boccetta o campione, ml, note ▸ «Metti in vetrina» (nessuna lettura). Se no: «Profumo nuovo».
+   **La guida** (richiesta dell'utente del 17/11, `src/componenti/GuidaPassi.tsx`): i passi stanno dentro i passi
+   Cartolina (apri il profumo nell'app Fragrantica ▸ Condividi ▸ Salva immagine ▸ sceglila dal rullino) e Piramide
+   (scorri alla piramide ▸ le tre righe intere ▸ tasto laterale e volume su), ognuno con la sua schermata in piccolo;
+   toccandola si apre il cassetto con le schermate grandi, una alla volta, da scorrere col dito o con Avanti. Le
+   schermate sono quelle dell'iPhone di Danilo, rimpicciolite e col cerchio d'ottone sul tasto, in `public/img/guida/`
+   (nella cache: la guida si vede anche senza rete); un passo senza `img` in `PASSI_CARTOLINA` / `PASSI_PIRAMIDE`
+   (`Aggiungi.tsx`) resta solo testo. Sotto la cartolina, in tre righe, cosa legge Sillage, cosa scegli tu dopo e cosa
+   è facoltativo.
 2. **La cartolina** scelta dal rullino: **le barre le misura il telefono** (`src/cartolina/misura.ts`, su canvas,
    niente IA): accordi con la forza, stagioni riportate a 100, giorno/notte. Ritaglia anche la boccetta e le toglie lo
    sfondo (`boccetta.ts`). **Le scritte** (nome, marchio, genere, voto, voti, durata, scia, nomi di accordi e note) le
@@ -331,8 +340,9 @@ cartoline sintetiche, poi tre giri in Chromium col ponte finto (`prove/server-fi
 ponte pubblicato né ad Anthropic):
 
 - `prove/prova-nuova.mjs`: l'ingresso senza account (dice CheMetto, offre «Registrati», nessuna vetrina dietro,
-  nessuna richiesta al ponte) e con una chiave che il ponte non riconosce (ancora l'ingresso, nessuna copia); poi, con
-  la chiave di prova, Collezione con 41 profumi, Scheda, Consigliami, una voce messa senza rete (resta in
+  nessuna richiesta al ponte), la scheda pubblica senza account (solo dati comuni, senza credenziali, «Entra» con il
+  ritorno, un numero che non c'è), con una chiave che il ponte non riconosce (ancora l'ingresso, nessuna copia); poi, con
+  la chiave di prova, Collezione con 41 profumi, Scheda, il link da CheMetto che porta alla propria scheda, Consigliami, una voce messa senza rete (resta in
   coda, si vede, parte una volta sola al ritorno), il Diario, la riapertura senza rete, l'avvio a freddo col
   ponte giù (data/*.json);
 - `prove/prova-aggiunta.mjs`: Aggiungi profumo (vedi sotto);
@@ -427,7 +437,8 @@ seconda persona si registra, ha la vetrina vuota, legge il catalogo comune e agg
 suoi; non legge né tocca niente di Danilo; vede la sua vetrina senza note personali né residuo; non può fare i
 lavori di Claude; la vetrina pubblica di Danilo resta identica. In più il profumo per CheMetto (`azione=consiglio`):
 chi non è in Sillage (o ha un accesso falso) riceve `nessuno` senza errore, chi non ha profumi nessun consiglio,
-ognuno solo i suoi profumi e il suo «Oggi ho messo»; un «Oggi ho messo» segnato nell'app di Sillage va nella
+ognuno solo i suoi profumi e il suo «Oggi ho messo»; la scheda pubblica (`azione=scheda`) senza entrare, di un
+profumo di Danilo e di uno di lei, senza i dati di chi lo ha; un «Oggi ho messo» segnato nell'app di Sillage va nella
 Bacheca di CheMetto (il Supabase finto registra `segna_profumo` e `togli_profumo`; ponte locale con
 `--var CHEMETTO_CHIAVE_PUBBLICA:finta`), quelli di CheMetto (`da=chemetto`), della chiave o di giorni lontani no. Nell'app: Impostazioni ▸ Registrati (password
 di ogni email nel Supabase finto: `prova1234`), vetrina vuota, Altro ▸ Le vetrine, «Togli dalla vetrina».

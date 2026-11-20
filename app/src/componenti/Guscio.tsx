@@ -8,11 +8,12 @@ import Apertura from "./Apertura";
 import Ingresso from "./Ingresso";
 import { useDati } from "../dati";
 import AggiunteVive from "./AggiunteVive";
+import SchedaPubblica from "../pagine/SchedaPubblica";
 
 /* Il guscio: la pagina scelta e, in basso, la barra con le cinque voci (il «timone»). Chi non è entrato (o chi il
    ponte non riconosce) vede solo l'ingresso, e niente dietro; entrando, l'ingresso apre le ante sulla vetrina. */
 const VOCI: { a: string; nome: string; Icona: ComponentType<{ className?: string }>; anche: (p: string) => boolean }[] = [
-  { a: "/", nome: "Collezione", Icona: IconaCollezione, anche: (p) => p === "/" || p.startsWith("/profumo/") },
+  { a: "/", nome: "Collezione", Icona: IconaCollezione, anche: (p) => p === "/" || p.startsWith("/profumo/") || p.startsWith("/p/") },
   { a: "/consigliami", nome: "Consigliami", Icona: IconaGoccia, anche: (p) => p === "/consigliami" },
   { a: "/diario", nome: "Diario", Icona: IconaDiario, anche: (p) => p === "/diario" },
   { a: "/numeri", nome: "Numeri", Icona: IconaNumeri, anche: (p) => p === "/numeri" },
@@ -28,6 +29,22 @@ export default function Guscio() {
     if (serve) setIngresso(true);
   }, [serve]);
   const via = useCallback(() => setIngresso(false), []);
+  /* La scheda pubblica (#/p/24, il link da CheMetto) si vede anche senza account, da sola: niente barra né vetrina
+     dietro. «Entra» porta all'ingresso, che dopo l'accesso torna qui (e da qui alla propria scheda, se il profumo è suo). */
+  const pubblica = /^\/p\/[^/]+$/.test(pathname);
+  const [entra, setEntra] = useState<"entra" | "registrati" | null>(null);
+  // un altro indirizzo (un altro link da CheMetto): di nuovo la scheda, non l'ingresso
+  useEffect(() => setEntra(null), [pathname]);
+  if (serve && pubblica && !entra)
+    return (
+      <>
+        <main id="contenuto" tabIndex={-1} className="foglio pubblica">
+          <SchedaPubblica onEntra={setEntra} />
+        </main>
+        <VersioneNuova />
+        <ScrollRestoration />
+      </>
+    );
   return (
     <>
       {serve ? null : (
@@ -55,7 +72,11 @@ export default function Guscio() {
         </>
       )}
       <VersioneNuova />
-      {ingresso || serve ? <Ingresso onVia={via} /> : <Apertura />}
+      {ingresso || serve ? (
+        <Ingresso onVia={via} dopo={pubblica ? pathname : "/"} modoIniziale={entra ?? "entra"} torna={pubblica && entra ? () => setEntra(null) : undefined} />
+      ) : (
+        <Apertura />
+      )}
       <ScrollRestoration />
     </>
   );

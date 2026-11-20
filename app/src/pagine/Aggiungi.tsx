@@ -1,9 +1,10 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useDati } from "../dati";
 import { immagine } from "../profumo";
 import type { Profumo } from "../tipi";
 import { useTitolo } from "../componenti/comuni";
+import GuidaPassi, { type Passo as PassoGuida } from "../componenti/GuidaPassi";
 import { IconaAvanti, IconaCerca, IconaIndietro, IconaSi, IconaX } from "../componenti/Icone";
 import { catalogoComune, manda, nuovoCliente, type Aggiunta, type SchedaComune } from "../aggiunte";
 import { misuraCartolina, type Misura } from "../cartolina/misura";
@@ -41,6 +42,66 @@ const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCa
 const comeProfumo = (s: SchedaComune) => ({ id: s.id, brand: s.brand, name: s.name, img: s.img }) as Profumo;
 const NOMI_COLORE: Record<Colore, string> = { blu: "Fresco", verde: "Aromatico", rosso: "Caldo" };
 
+/* La guida, passo per passo. Le schermate (img) sono quelle dell'iPhone di Danilo, in public/img/guida/: un passo
+   senza img resta solo testo. */
+const PASSI_CARTOLINA: PassoGuida[] = [
+  {
+    testo: (
+      <>
+        Nell'app <b>Fragrantica</b> apri il profumo.
+      </>
+    ),
+    didascalia: "Apri il profumo nell'app Fragrantica."
+  },
+  {
+    testo: (
+      <>
+        Tocca <b>Condividi</b>.
+      </>
+    ),
+    didascalia: "Tocca Condividi: compare la cartolina."
+  },
+  {
+    testo: (
+      <>
+        Tocca <b>Salva immagine</b>.
+      </>
+    ),
+    didascalia: "Tocca Salva immagine: la cartolina va nel rullino."
+  },
+  {
+    testo: (
+      <>
+        Torna qui e <b>sceglila dal rullino</b>.
+      </>
+    )
+  }
+];
+const PASSI_PIRAMIDE: PassoGuida[] = [
+  {
+    testo: (
+      <>
+        Nella scheda di Fragrantica scorri fino alla <b>piramide</b>.
+      </>
+    ),
+    didascalia: "Così: le note di testa, cuore e fondo, intere."
+  },
+  {
+    testo: (
+      <>
+        Si vedono intere le tre righe: <b>testa, cuore, fondo</b>.
+      </>
+    )
+  },
+  {
+    testo: (
+      <>
+        Premi insieme <b>tasto laterale e volume su</b>.
+      </>
+    )
+  }
+];
+
 export default function Aggiungi() {
   useTitolo("Aggiungi profumo · Sillage");
   const { perId, dati, riprova } = useDati();
@@ -60,6 +121,28 @@ export default function Aggiungi() {
   const [avanza, setAvanza] = useState("");
   const cartolina = useRef<{ img: Immagine; misura: Misura } | null>(null);
   const cliente = useRef(nuovoCliente());
+
+  /* Da una scheda pubblica (#/p/24 ▸ «Mettilo nella mia vetrina»): #/aggiungi?id=24 apre subito quel profumo, come
+     se lo si fosse trovato cercando. */
+  const [cerca] = useSearchParams();
+  const daId = Number(cerca.get("id"));
+  useEffect(() => {
+    if (!Number.isInteger(daId) || daId <= 0) return;
+    let vivo = true;
+    catalogoComune()
+      .then((schede) => {
+        const s = schede.find((x) => x.id === daId);
+        if (vivo && s && !perId.has(daId)) {
+          setScelta(s);
+          setPasso("presente");
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      vivo = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daId]);
 
   // a ogni passo si torna in cima
   useEffect(() => {
@@ -195,23 +278,7 @@ export default function Aggiungi() {
         <Passi qui="cartolina" />
         <h1 className="ag-titolo">Profumo nuovo</h1>
         <p className="testo ag-testo">Sillage legge tutto dalla cartolina che fa l'app di Fragrantica.</p>
-        <ol className="ag-guida">
-          <li>
-            <span>
-              Nell'app <b>Fragrantica</b> apri il profumo.
-            </span>
-          </li>
-          <li>
-            <span>
-              Tocca <b>Condividi</b> e salva l'immagine.
-            </span>
-          </li>
-          <li>
-            <span>
-              Torna qui e <b>sceglila dal rullino</b>.
-            </span>
-          </li>
-        </ol>
+        <GuidaPassi passi={PASSI_CARTOLINA} titolo="Come si salva la cartolina" />
         <label className="ag-rullino">
           <input
             type="file"
@@ -229,6 +296,20 @@ export default function Aggiungi() {
         <button className="link-piano" type="button" onClick={() => (setLettura("niente"), setPasso("dati"))}>
           Non ho la cartolina: scrivo io i dati
         </button>
+        <dl className="ag-serve">
+          <div>
+            <dt>Dalla cartolina</dt>
+            <dd>nome, marchio, voto, durata, scia, accordi, stagioni, giorno e sera, la boccetta</dd>
+          </div>
+          <div>
+            <dt>Lo scegli tu dopo</dt>
+            <dd>concentrazione (EDT, EDP…), boccetta o campione, ml</dd>
+          </div>
+          <div>
+            <dt>Facoltativi</dt>
+            <dd>la piramide (da una schermata) e una tua foto</dd>
+          </div>
+        </dl>
       </section>
     );
 
@@ -685,7 +766,9 @@ function Piramide({ m, cambia, noti }: { m: Modulo; cambia: (c: Partial<Modulo>)
   const togli = (l: keyof Modulo["piramide"], i: number) => cambia({ piramide: { ...m.piramide, [l]: m.piramide[l].filter((_, j) => j !== i) } });
   return (
     <>
-      <p className="testo ag-testo">Facoltativa. Su Fragrantica fai una schermata della parte con le note di testa, cuore e fondo.</p>
+      <p className="testo ag-testo">Facoltativa. Sillage legge le note da una schermata di Fragrantica.</p>
+      <GuidaPassi passi={PASSI_PIRAMIDE} titolo="La schermata della piramide" />
+      <p className="nota-piccola">Va bene chiara o scura. Le note che non entrano nella schermata le aggiungi a mano.</p>
       <label className="btn-filo largo">
         <input
           type="file"

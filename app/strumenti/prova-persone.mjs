@@ -85,6 +85,16 @@ verifica("vetrina di nessuno", /sconosciuta/.test((await post("azione=vetrina&di
 verifica("le vetrine senza essere entrati: no", /^chiave/.test((await post("azione=vetrine")).errore || ""));
 verifica("il catalogo senza essere entrati: no", /^chiave/.test((await post("azione=catalogo")).errore || ""));
 
+// La scheda pubblica (il link da CheMetto, #/p/…): senza essere entrati, solo i dati comuni di un profumo
+const suoi = (await post("azione=leggi", L)).profumi;
+for (const x of [danPrima.profumi[0], suoi[0]]) {
+  r = await post("azione=scheda", { id: String(x.id) });
+  verifica("scheda pubblica di " + x.name + ": c'è, senza entrare", r.ok === true && r.profumo?.id === x.id && r.profumo.name === x.name, J(r).slice(0, 150));
+  verifica("…senza dati di chi lo ha", !["notePersonali", "residuoPct", "tipoPossesso", "formatoMl", "numFlaconi", "aggiunto", "attivo", "nuovo"].some((k) => k in (r.profumo || {})), Object.keys(r.profumo || {}).join(","));
+}
+verifica("scheda pubblica di un numero che non c'è", /sconosciuto/.test((await post("azione=scheda", { id: "99999" })).errore || ""));
+verifica("scheda pubblica senza numero", /non valida/.test((await post("azione=scheda")).errore || ""));
+
 // Quello che resta solo di Claude (con la chiave)
 for (const a of ["modifica", "sincronizza", "importa&conferma=si", "confronta", "riporta&conferma=si"])
   verifica("lei non può: " + a.split("&")[0], /^chiave/.test((await post("azione=" + a, { ...L, dati: "{}" })).errore || ""));
@@ -157,9 +167,10 @@ const contoLei = accountDi("lei@esempio.it");
 verifica("e il ponte lo copia in CheMetto, col token di lei", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].account === contoLei &&
   ch[0].p_giorno === oggiLocale && ch[0].p_nome === suo24.name && ch[0].p_marca === suo24.brand && ch[0].apikey, J(ch));
 verifica("la foto solo con https (in locale niente)", ch[0]?.p_img === null, J(ch[0]));
+verifica("col numero in Sillage, per il link dalla Bacheca (070 di CheMetto)", ch[0]?.p_id === 24, J(ch[0]));
 verifica("lei toglie il 24 dall'app di Sillage", (await post(`azione=diario&op=togli&id=24&data=${oggiLocale}&t=${tSil}`, L)).tolta === true);
 ch = await chiamate(1);
-verifica("in CheMetto torna l'ultima voce rimasta (il 3 scelto da CheMetto)", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].p_nome === danPrima.profumi.find((x) => x.id === 3).name, J(ch));
+verifica("in CheMetto torna l'ultima voce rimasta (il 3 scelto da CheMetto)", ch.length === 1 && ch[0].rpc === "segna_profumo" && ch[0].p_nome === danPrima.profumi.find((x) => x.id === 3).name && ch[0].p_id === 3, J(ch));
 verifica("lei toglie anche il 3 (da CheMetto)", (await post(`azione=diario&op=togli&id=3&data=${oggiLocale}&t=${tLei}&da=chemetto`, L)).tolta === true);
 ch = await chiamate(0);
 verifica("…e il ponte non chiama CheMetto", ch.length === 0, J(ch));

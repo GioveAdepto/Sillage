@@ -13,11 +13,23 @@ import { useMenoMovimento, useTitolo } from "./comuni";
 
    Copre anche chi è entrato ma il ponte non riconosce: un account nuovo senza vetrina (sceglie il nome) o un
    accesso che non vale più (rientra). Senza rete si può solo aspettare: per entrare serve la rete. */
-export default function Ingresso({ onVia }: { onVia: () => void }) {
+export default function Ingresso({
+  onVia,
+  dopo = "/",
+  modoIniziale = "entra",
+  torna
+}: {
+  onVia: () => void;
+  /** dove andare una volta dentro: la vetrina, o la scheda pubblica da cui si è venuti (#/p/…) */
+  dopo?: string;
+  modoIniziale?: "entra" | "registrati";
+  /** dalla scheda pubblica: «Torna alla scheda del profumo» */
+  torna?: () => void;
+}) {
   const { entrato, chi, statoChiave, carica, errore } = useDati();
   const riduci = useMenoMovimento();
   const navigate = useNavigate();
-  const [modo, setModo] = useState<"entra" | "registrati">("entra");
+  const [modo, setModo] = useState<"entra" | "registrati">(modoIniziale);
   const [rete, setRete] = useState(() => navigator.onLine !== false);
   const [apri, setApri] = useState(false);
   const [nome, setNome] = useState("");
@@ -44,9 +56,9 @@ export default function Ingresso({ onVia }: { onVia: () => void }) {
 
   useEffect(() => {
     if (!pronto || apri) return;
-    navigate("/", { replace: true });
+    navigate(dopo, { replace: true });
     setApri(true);
-  }, [pronto, apri, navigate]);
+  }, [pronto, apri, navigate, dopo]);
   // le ante si aprono (1200ms), poi l'ingresso se ne va
   useEffect(() => {
     if (!apri) return;
@@ -156,6 +168,13 @@ export default function Ingresso({ onVia }: { onVia: () => void }) {
           </header>
           <i className="ingresso-filo" aria-hidden="true" />
           {corpo}
+          {torna && !entrato ? (
+            <p className="ingresso-cambio">
+              <button type="button" onClick={torna}>
+                Torna alla scheda del profumo
+              </button>
+            </p>
+          ) : null}
         </section>
       </div>
     </div>

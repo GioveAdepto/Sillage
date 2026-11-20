@@ -4,6 +4,7 @@ import Collezione from "./pagine/Collezione";
 import Scheda from "./pagine/Scheda";
 import Altro from "./pagine/Altro";
 import Aggiungi from "./pagine/Aggiungi";
+import SchedaPubblica from "./pagine/SchedaPubblica";
 import Consigliami from "./pagine/Consigliami";
 import Diario from "./pagine/Diario";
 import Impostazioni from "./pagine/Impostazioni";
@@ -24,6 +25,7 @@ export const router = createHashRouter([
     children: [
       { index: true, element: <Collezione /> },
       { path: "profumo/:id", element: <Scheda /> },
+      { path: "p/:id", element: <SchedaPubblica /> },
       { path: "consigliami", element: <Consigliami /> },
       { path: "diario", element: <Diario /> },
       { path: "impostazioni", element: <Impostazioni /> },
