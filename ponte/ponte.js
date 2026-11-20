@@ -924,7 +924,8 @@ async function copiaInCheMetto(env, db, persona, data, token, base) {
     if (!x) return;
     const v = vocePerCheMetto(x, base);
     rpc = "segna_profumo";
-    corpo = { p_giorno: data, p_marca: v.marca, p_nome: v.nome, p_img: v.img && v.img.startsWith("https://") ? v.img : null };
+    // p_id: il numero in Sillage, per il link dalla Bacheca alla scheda pubblica (migrazione 069 di CheMetto)
+    corpo = { p_giorno: data, p_marca: v.marca, p_nome: v.nome, p_img: v.img && v.img.startsWith("https://") ? v.img : null, p_id: x.id };
   }
   const r = await fetch(env.SUPABASE_URL + "/rest/v1/rpc/" + rpc, {
     method: "POST",

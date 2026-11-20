@@ -41,7 +41,12 @@ Ultimo aggiornamento: 20 novembre 2026.
   l'id del profumo nella Bacheca. Sull'iPhone il link si apre in Safari, non nell'app installata. Disegno approvato
   il 17/11. **Parte di Sillage costruita** sul branch `guida-e-scheda-pubblica` (20/11): `#/p/<id>` e `azione=scheda`,
   prove passate (browser col ponte finto, ponte locale, `prova-persone`). Da unire su `main` col via libera dell'utente.
-  **Parte di CheMetto**: aspetta il sì dell'utente per toccare quel repo.
+  **Parte di CheMetto** (sì dell'utente il 20/11): branch `profumo-in-sillage` di CheMetto, migrazione 069 (il numero
+  del profumo in Sillage nel profumo del giorno), riga della Bacheca che porta a `#/p/<id>`, «i» accanto a ogni profumo
+  nel foglio dei consigli; il ponte manda `p_id` a `segna_profumo`. Prove passate (Vitest, e2e del profumo,
+  `prova-persone`). **Ordine di pubblicazione**: 1) migrazione 069 su `main` di CheMetto; 2) unione di questo branch
+  su `main` di Sillage; 3) il codice di CheMetto. Aspetta l'ok dell'utente sull'anteprima. I profumi segnati prima
+  restano senza link. Le proposte col partner (068, altra sessione di CheMetto) avranno il link quando arrivano.
 
 ## In corso in altre sessioni
 

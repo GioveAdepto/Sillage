@@ -185,7 +185,8 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
 - **«Oggi ho messo» dall'app di Sillage** (richiesta dell'utente: deve arrivare nella Bacheca di CheMetto senza
   riaprire CheMetto): dopo ogni `azione=diario` `op=metti|togli` fatta **con l'account** e **senza** `da=chemetto`, il
   ponte prende l'ultima voce di quel giorno e chiama in CheMetto `rpc/segna_profumo` (`p_giorno`, `p_marca`, `p_nome`,
-  `p_img` solo se `https://`) oppure `rpc/togli_profumo` (`p_giorno`) se non ne resta nessuna. Col token della persona e
+  `p_img` solo se `https://`, e `p_id`, il numero in Sillage: dalla migrazione 069 di CheMetto la riga del profumo nella
+  Bacheca porta alla scheda pubblica `#/p/<id>`; la 069 va pubblicata **prima** di questo ponte) oppure `rpc/togli_profumo` (`p_giorno`) se non ne resta nessuna. Col token della persona e
   la chiave pubblica di CheMetto (`CHEMETTO_CHIAVE_PUBBLICA` in `wrangler.jsonc`, la stessa di `app/src/accesso.ts`);
   solo per ieri, oggi e domani (UTC); dopo aver risposto (`waitUntil`), e un errore finisce solo nel registro del
   Worker: CheMetto non è mai un requisito di Sillage. Le funzioni stanno nella migrazione 066 di CheMetto: finché
