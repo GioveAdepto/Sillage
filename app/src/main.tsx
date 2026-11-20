@@ -18,6 +18,7 @@ import "./stile/diario.css";
 import "./stile/viste.css";
 import "./stile/rifiniture.css";
 import "./stile/aggiungi.css";
+import "./stile/materiali.css";
 import { DatiProvider } from "./dati";
 import { MeteoProvider } from "./meteo-contesto";
 import { AvvisiProvider } from "./componenti/Avvisi";

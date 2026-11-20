@@ -99,7 +99,8 @@ src/componenti/          Guscio, Icone, Piedistallo (con la boccetta presa in ma
 src/pagine/              Collezione, Scheda, Consigliami, Diario, Numeri, Layering, Guida, Acquisti, Confronta,
                          Vetrine (e la vetrina di un altro), Impostazioni, Altro, Segnaposto (pagina non trovata)
 src/stile/               token.css (tutti i colori, chiaro e scuro), base, collezione, scheda, consigliami, diario,
-                         viste, rifiniture (vetrina, luce sul vetro, esame, avviso, cassetto), pagine
+                         viste, rifiniture (vetrina, luce sul vetro, esame, avviso, cassetto), pagine, aggiungi,
+                         materiali (pietra e ottone: grana, rilievi, ottone lucido; si carica per ultimo)
 ```
 
 - **Caratteri**: Cormorant Garamond e Jost sono dentro l'app (pacchetti `@fontsource`, solo l'alfabeto

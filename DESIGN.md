@@ -23,8 +23,14 @@ segue l'iPhone, nessun interruttore). Nessun componente diverso tra i temi. `the
 | Luce | `--faro*`, `--fascio`, `--alone` | caldi e bassi | faretti, fascio del piedistallo |
 | Pietra | `--mensola-*`, `--plinto-*` | | mensole e piedistallo |
 | Ombre | `--ombra`, `--ombra-lunga`, `--ombra-tel`, `--bordo-luce` | più scure; `--bordo-luce` 1px | `drop-shadow` delle boccette scontornate |
+| Materiali | `--metallo` (lastra d'ottone), `--metallo-filo` (filo lucido), `--ottone-chiaro/-scuro`, `--su-ottone` | stessi ottoni, un po' più caldi | ottone vero: pillola scelta, fili, bordi di mensole e piedistallo |
+| Rilievo | `--rilievo-carta`, `--rilievo-basso`, `--rilievo-premuto`, `--luce-bordo`, `--ombra-morbida`, `--avorio-alto`, `--lucido` | luce sul bordo quasi spenta, ombre nere | carte staccate dalla parete, pillole e bottoni in rilievo, premuti |
+| Incavo | `--incavo`, `--incavo-ombra` | pietra più scura della parete | scanalature delle barre, lastre incise delle misure |
+| Piastra | `--piastra`, `--su-piastra`, `--piastra-filo`, `--piastra-incisione` | **d'ottone** col testo inciso (di giorno d'inchiostro col testo d'ottone) | bottoni pieni, «Lo metto oggi», avviso |
+| Grana | `--grana` (travertino), `--grana-parete` (più tenue), `--grana-carta` | pori scuri, striature chiare | texture SVG generate (nessun file), riquadri che si ripetono |
 
-Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei componenti: si usa un token.
+Contrasti verificati ≥ 5:1 sui fondi; il testo inciso sulla lastra d'ottone (`--su-ottone`) resta sopra 4,5:1
+anche nel punto più scuro di `--metallo`. Nessun colore scritto a mano nei componenti: si usa un token.
 
 ## Caratteri e scala
 
@@ -53,7 +59,31 @@ Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei compone
 | `.avviso`, `.aggiornamento` | diario, rifiniture.css | avvisi brevi, «versione nuova» |
 | `.ingresso`, `.ingresso-carta`, `.ingresso-cambio` | rifiniture.css | l'ingresso di chi non è entrato: le ante chiuse e un cartoncino d'avorio con doppio filo d'ottone; il bottone spento resta a filo |
 | `.aggiungi`, `.ag-*` | aggiungi.css | Aggiungi profumo: `.ag-passi` (cinque passi, filo d'ottone su quelli fatti, d'inchiostro su quello di ora), `.ag-rullino` (riquadro tratteggiato d'ottone per scegliere un'immagine), `.ag-campo` (etichetta incisa e riga sotto; `.dubbio` = riga **ambra** + `.ag-perche`), `.ag-righe` (le righe misurate con il valore modificabile), `.ag-scena` (piedistallo semplice), `.ag-opzione` (due scelte affiancate), `.ag-nota` (pillola da togliere), `.ag-avviso`, `.ag-in-attesa` (puntino d'ottone che pulsa: aspetta la rete) |
+| (i materiali) | materiali.css | si carica per ultimo e dà spessore ai pezzi qui sopra: vedi «Materiali» |
 | `.senza-foto` | aggiungi.css | un profumo senza foto: la sagoma di una boccetta di pietra |
+
+## Materiali: pietra e ottone (`materiali.css`)
+
+Direzione B scelta dall'utente il 20/11/2026 («meno piatta»). Gli altri fogli disegnano forma e misure;
+`materiali.css` (ultimo import di `main.tsx`) aggiunge la materia, solo con i token qui sopra. Toglierlo riporta
+la grafica piatta di prima.
+
+- **Parete**: venature di prima + `--grana-parete`. **Mensole e piedistallo**: lastra di travertino con
+  `--grana`, la luce del faretto sul piano, il bordo d'ottone lucido (luce sopra, `--metallo-filo`, ombra sotto).
+  Le nicchie hanno i lati in penombra.
+- **Cartellini** e **carte d'avorio** (`.scelta`, `.carta-avorio`): carta con la grana, cornice d'ottone interna
+  (`outline` a −5/−7px), `--rilievo-carta`. Il cartellino è appeso a un occhiello d'ottone (`::before`: il
+  `::after` resta alla casella del Confronta). Il bagliore d'arrivo si somma al rilievo.
+- **Pillole**: avorio in rilievo; quella scelta è una targhetta `--metallo` con la scritta incisa, e una luce ci
+  passa sopra una volta (`lucida`). **Bottoni**: a filo su carta in rilievo; pieni come `--piastra` con il filo
+  interno (`outline`, mai sopra il fuoco della tastiera). Premuti scendono di 1px.
+- **Barre** (`.traccia`, `.asta-barra`, `.cl-barra`): scanalatura `--incavo` con l'asta arrotondata dentro;
+  le tacche ogni 25 restano sopra e sotto; l'asta «ora» è d'ottone.
+- **Lastre incise**: le misure della scheda e di Numeri, gli strumenti di Consigliami (pietra scavata col filo
+  d'ottone in cima, valori d'ottone).
+- **Fili**: 2px di `--metallo-filo`; i titoli di sezione finiscono con una losanga d'ottone.
+- **Barra in basso**: binario d'ottone sopra, ombra sulla pagina, losanga e bagliore sulla voce attiva.
+- **Altro**: ogni voce è una lastra d'avorio, la freccia in un tondo d'ottone.
 
 ## Movimento
 
@@ -66,6 +96,7 @@ Contrasti verificati ≥ 5:1 sui fondi. Nessun colore scritto a mano nei compone
   d'ingresso (`.ingresso`) e si aprono quando entra; con «meno movimento» l'ingresso resta, senza animazione.
 - Luce sul vetro: col mouse la nicchia si inclina (`--rx`, `--ry`) e un riflesso la segue; col dito un riflesso
   passa una volta (`.riflesso.passa`), senza toccare lo scorrimento.
+- La luce che passa sulla pillola appena scelta (`lucida`, 900ms) e il bottone che scende di 1px quando si preme.
 - **`prefers-reduced-motion`** spegne tutto: animazioni, voli, inclinazioni, riflessi, vetrina.
 
 ## Misure, punti di rottura, iPhone

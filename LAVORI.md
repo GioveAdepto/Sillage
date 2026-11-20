@@ -1,7 +1,7 @@
 # Lavori di Sillage
 
 A che punto siamo. Lo tiene aggiornato la chat di coordinamento, a ogni tappa e nello stesso commit.
-Ultimo aggiornamento: 17 novembre 2026.
+Ultimo aggiornamento: 20 novembre 2026.
 
 ## Fatto (su `main`, pubblicato)
 
@@ -20,6 +20,14 @@ Ultimo aggiornamento: 17 novembre 2026.
 - **CheMetto ▸ Oggi**: con il proprio account compare un profumo per ogni proposta; scegliendolo, «Oggi ho messo»
   arriva nel diario di Sillage. Con un account senza profumi o senza Sillage non deve vedersi niente di rotto o vuoto.
 - **Sillage ▸ Altro ▸ Aggiungi profumo**: la piramide letta da una schermata di Fragrantica esce giusta.
+
+## Pronto sul branch, da unire (con il via libera dell'utente)
+
+- **Grafica meno piatta** (branch `grafica-meno-piatta`, chiesto il 20/11): scelta la direzione B «Pietra e ottone»
+  fra tre anteprime. Mensole e piedistallo di travertino con la grana, ottone lucido, cartellini e carte con la
+  cornice e l'ombra, pillola scelta d'ottone, bottoni in rilievo, barre scavate, lastre incise per i numeri.
+  Tutto in `app/src/stile/materiali.css` e nei token nuovi (`DESIGN.md`, «Materiali»). Da guardare dall'iPhone,
+  in chiaro e in scuro, prima di unirlo; poi vedere se la grana pesa sullo scorrimento delle mensole.
 
 ## Da fare (chiesti dall'utente il 17/11)
 

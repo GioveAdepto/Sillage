@@ -51,6 +51,37 @@
   --chip: rgba(249, 246, 239, 0.7);
   --bagliore: rgba(168, 135, 72, 0.55);
 
+  /* Pietra e ottone (materiali.css): luce sui bordi, ombre morbide, incavi, ottone lucido, grana del travertino */
+  --avorio-alto: #fdfbf6;
+  --inchiostro-alto: #453b30;
+  --luce-bordo: rgba(255, 255, 255, 0.85);
+  --ombra-morbida: rgba(70, 52, 28, 0.15);
+  --incavo: #e4dac9;
+  --lucido: rgba(255, 255, 255, 0.3);
+  --ottone-chiaro: #dcc28a;
+  --ottone-scuro: #7a5c27;
+  --su-ottone: #1f1608;
+  --su-ottone-2: rgba(31, 22, 8, 0.68);
+  --incisione: rgba(255, 246, 222, 0.55);
+  /* la lastra d'ottone (pillola scelta, tacche piene): il punto più scuro tiene il testo sopra 4,5:1 */
+  --metallo: linear-gradient(180deg, #f4e6bd 0%, #dcc07f 24%, #bd9c5e 47%, #b08f52 56%, #c9a866 80%, #e6cf98 100%);
+  /* il filo d'ottone che prende la luce al centro */
+  --metallo-filo: linear-gradient(90deg, #9c7c40 0%, #c9a866 22%, #efdcaa 50%, #c9a866 78%, #9c7c40 100%);
+  /* la piastra dei bottoni pieni: inchiostro col testo d'ottone (di sera: d'ottone col testo inciso) */
+  --piastra: linear-gradient(180deg, var(--inchiostro-alto), var(--inchiostro) 70%);
+  --su-piastra: var(--ottone-chiaro);
+  --piastra-filo: var(--ottone);
+  --piastra-incisione: none;
+  --rilievo-carta: inset 0 1px 0 var(--luce-bordo), 0 1px 1px var(--ombra-morbida), 0 4px 8px -4px var(--ombra-morbida),
+    0 18px 26px -18px var(--ombra-lunga);
+  --rilievo-basso: inset 0 1px 0 var(--luce-bordo), 0 1px 2px var(--ombra-morbida), 0 3px 6px -4px var(--ombra-morbida);
+  --rilievo-premuto: inset 0 1px 3px var(--ombra-morbida);
+  --incavo-ombra: inset 0 1px 2px var(--ombra-morbida), inset 0 0 0 1px var(--filo-2), 0 1px 0 var(--luce-bordo);
+  /* la grana del travertino: pori e striature orizzontali (un riquadro che si ripete senza cuciture) */
+  --grana: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .19' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .34 0 0 0 0 .2 3 0 0 0 -1.72'/%3E%3C/filter%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .18 9 0 0 0 -6.1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23s)' opacity='.3'/%3E%3Crect width='240' height='240' filter='url(%23p)' opacity='.35'/%3E%3C/svg%3E");
+  --grana-parete: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .19' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .34 0 0 0 0 .2 3 0 0 0 -1.72'/%3E%3C/filter%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .18 9 0 0 0 -6.1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23s)' opacity='0.12'/%3E%3Crect width='240' height='240' filter='url(%23p)' opacity='0.14'/%3E%3C/svg%3E");
+  --grana-carta: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .33 0 0 0 0 .2 3 0 0 0 -1.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23f)' opacity='.16'/%3E%3C/svg%3E");
+
   --f-maison: "Cormorant Garamond", "Cormorant", "Didot", "Bodoni 72", Georgia, serif;
   --f-dati: "Jost", "Futura", "Avenir Next", "Century Gothic", sans-serif;
   --curva: cubic-bezier(0.22, 1, 0.36, 1);
@@ -107,5 +138,26 @@
     --timone: rgba(26, 23, 20, 0.95);
     --chip: rgba(36, 32, 27, 0.8);
     --bagliore: rgba(201, 168, 102, 0.5);
+
+    --avorio-alto: #2b261f;
+    --inchiostro-alto: #fffaf0;
+    --luce-bordo: rgba(255, 236, 200, 0.08);
+    --ombra-morbida: rgba(0, 0, 0, 0.45);
+    --incavo: #14110e;
+    --lucido: rgba(255, 240, 210, 0.1);
+    --ottone-chiaro: #ecd59e;
+    --ottone-scuro: #8a6a31;
+    --su-ottone: #1d1508;
+    --su-ottone-2: rgba(29, 21, 8, 0.7);
+    --incisione: rgba(255, 244, 214, 0.45);
+    --metallo: linear-gradient(180deg, #efdcaa 0%, #d4b574 24%, #bd9c5e 47%, #b08f52 56%, #c4a362 80%, #dcc28a 100%);
+    --metallo-filo: linear-gradient(90deg, #7a5c27 0%, #b8975a 22%, #e6cf98 50%, #b8975a 78%, #7a5c27 100%);
+    --piastra: var(--metallo);
+    --su-piastra: var(--su-ottone);
+    --piastra-filo: var(--ottone-scuro);
+    --piastra-incisione: 0 1px 0 var(--incisione);
+    --grana: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .19' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .72 3 0 0 0 -1.72'/%3E%3C/filter%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9 0 0 0 -6.1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23s)' opacity='.08'/%3E%3Crect width='240' height='240' filter='url(%23p)' opacity='.5'/%3E%3C/svg%3E");
+    --grana-parete: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .19' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .72 3 0 0 0 -1.72'/%3E%3C/filter%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9 0 0 0 -6.1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23s)' opacity='0.032'/%3E%3Crect width='240' height='240' filter='url(%23p)' opacity='0.2'/%3E%3C/svg%3E");
+    --grana-carta: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .92 0 0 0 0 .78 3 0 0 0 -1.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23f)' opacity='.05'/%3E%3C/svg%3E");
   }
 }

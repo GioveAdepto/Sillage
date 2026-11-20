@@ -1,0 +1,527 @@
+/* ——— Pietra e ottone: i materiali (direzione B, scelta dall'utente il 2026-11-20) ———
+   Si carica per ultimo e dà spessore ai pezzi disegnati negli altri fogli: l'ottone diventa metallo lucido,
+   la pietra ha la grana del travertino, le carte d'avorio si staccano dalla parete con la loro cornice,
+   pillole e bottoni hanno rilievo e si premono, le barre sono scanalature con l'asta dentro.
+   Solo token di token.css: il tema scuro cambia i valori, non le regole. Togliere questo file (e il suo
+   import in main.tsx) riporta la grafica di prima. */
+
+/* la parete: le venature di prima, più la grana del travertino */
+body {
+  background:
+    var(--grana-parete) 0 0 / 240px 240px,
+    repeating-linear-gradient(
+      179.3deg,
+      transparent 0 7px,
+      var(--vena) 7px 8px,
+      transparent 8px 19px,
+      var(--vena-2) 19px 21px,
+      transparent 21px 37px,
+      var(--vena) 37px 38px,
+      transparent 38px 61px
+    ),
+    var(--parete);
+}
+
+/* ——— fili d'ottone: metallo che prende la luce al centro ——— */
+.filo-ottone {
+  height: 2px;
+  background: var(--metallo-filo);
+}
+.sez-testa .linea {
+  position: relative;
+  height: 2px;
+  opacity: 1;
+  background: var(--metallo-filo);
+}
+/* una losanga d'ottone in fondo al filo */
+.sez-testa .linea::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  transform: rotate(45deg);
+  background: var(--metallo);
+  box-shadow: 0 0 0 2px var(--parete);
+}
+.divisorio,
+.carta-testa,
+.scelta-testa {
+  border-bottom: 0;
+  background: var(--metallo-filo) left bottom / 100% 2px no-repeat;
+}
+.vetrina-bottone::after {
+  height: 2px;
+  background: var(--metallo-filo);
+}
+.mini {
+  border-bottom: 0;
+  background:
+    var(--metallo-filo) left bottom / 100% 2px no-repeat,
+    radial-gradient(70% 80% at 50% 0%, var(--faro), var(--faro-0) 85%);
+}
+.mini.vuota {
+  background:
+    var(--metallo-filo) left bottom / 100% 2px no-repeat,
+    radial-gradient(70% 80% at 50% 0%, var(--faro), var(--faro-0) 85%);
+}
+.cal-foto .mini {
+  background: none;
+}
+.targa {
+  border-color: var(--ottone);
+  background: linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  box-shadow: var(--rilievo-basso);
+}
+
+/* ——— le mensole: lastra di travertino con il bordo d'ottone lucido ——— */
+.voce .nicchia {
+  /* il faretto, e i lati della nicchia in penombra */
+  background:
+    radial-gradient(52% 82% at 50% 0%, var(--faro) 0, var(--faro-mezzo) 45%, var(--faro-0) 78%),
+    linear-gradient(90deg, var(--ombra-morbida), transparent 14% 86%, var(--ombra-morbida));
+}
+.voce .nicchia::after {
+  bottom: -5px;
+  height: 10px;
+  background: radial-gradient(closest-side, var(--ombra) 35%, transparent);
+}
+.mensola {
+  height: 18px;
+  background:
+    /* la luce del faretto sul piano */
+    radial-gradient(55% 120% at 50% 0%, var(--faro-mezzo), transparent 75%) 0 0 / 100% 6px no-repeat,
+    /* il bordo d'ottone: un filo di luce sopra, il metallo, un filo d'ombra sotto */
+    linear-gradient(var(--luce-bordo), var(--luce-bordo)) 0 6px / 100% 1px no-repeat,
+    var(--metallo-filo) 0 7px / 100% 2px no-repeat,
+    linear-gradient(var(--ottone-scuro), var(--ottone-scuro)) 0 9px / 100% 1px no-repeat,
+    var(--grana) 0 0 / 240px 240px,
+    linear-gradient(180deg, var(--mensola-sopra) 0 6px, var(--mensola-fronte) 10px 15px, var(--mensola-sotto) 15px 18px);
+  box-shadow:
+    0 4px 6px -3px var(--ombra-morbida),
+    0 20px 22px -14px var(--ombra-lunga);
+}
+
+/* ——— il cartellino: biglietto d'avorio con la cornice d'ottone, appeso a un occhiello ——— */
+.cartellino {
+  padding: 12px 11px 13px;
+  background:
+    var(--grana-carta) 0 0 / 180px 180px,
+    linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  outline: 1px solid var(--ottone);
+  outline-offset: -5px;
+  box-shadow: var(--rilievo-carta);
+}
+.cartellino::before {
+  top: -15px;
+  width: 7px;
+  height: 18px;
+  margin-left: -3.5px;
+  background:
+    /* l'occhiello: anello d'ottone col foro */
+    radial-gradient(circle at 50% 14.5px, var(--ottone-scuro) 0 1px, var(--ottone-chiaro) 1.3px 2.2px, var(--ottone-scuro) 2.6px 3px, transparent 3.3px),
+    /* il filo */
+    linear-gradient(90deg, transparent 3px, var(--ottone) 3px 4px, transparent 4px) 0 0 / 100% 13px no-repeat;
+}
+.cartellino:focus-visible {
+  outline: 2px solid var(--ottone-testo);
+  outline-offset: 2px;
+}
+.voce.nel-vassoio .cartellino {
+  box-shadow:
+    0 0 0 1px var(--inchiostro),
+    inset 0 -3px 0 var(--ottone),
+    var(--rilievo-carta);
+}
+/* arrivo da un'altra pagina: il bagliore si aggiunge al rilievo, non lo toglie */
+@keyframes bagliore {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 transparent,
+      0 0 0 0 transparent,
+      var(--rilievo-carta);
+  }
+  20%,
+  65% {
+    box-shadow:
+      0 0 0 1px var(--ottone),
+      0 0 24px 3px var(--bagliore),
+      var(--rilievo-carta);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .voce.ancorata .cartellino {
+    box-shadow:
+      0 0 0 1px var(--ottone),
+      0 0 24px 3px var(--bagliore),
+      var(--rilievo-carta);
+  }
+}
+
+/* ——— il piedistallo: travertino con la grana e la fascia d'ottone ——— */
+.piedistallo {
+  background:
+    radial-gradient(50% 100% at 50% 0%, var(--fascio), transparent 80%) 0 0 / 100% 11px no-repeat,
+    linear-gradient(180deg, var(--plinto-sopra) 0 11px, transparent 11px),
+    linear-gradient(var(--luce-bordo), var(--luce-bordo)) 0 11px / 100% 1px no-repeat,
+    var(--metallo-filo) 0 12px / 100% 2px no-repeat,
+    linear-gradient(var(--ottone-scuro), var(--ottone-scuro)) 0 14px / 100% 1px no-repeat,
+    var(--grana) 0 0 / 240px 240px,
+    repeating-linear-gradient(
+      179deg,
+      transparent 0 5px,
+      var(--plinto-vena) 5px 6px,
+      transparent 6px 15px,
+      var(--plinto-vena) 15px 17px,
+      transparent 17px 26px
+    ),
+    linear-gradient(90deg, var(--plinto-a) 0, var(--plinto-b) 22%, var(--plinto-c) 60%, var(--plinto-d) 100%);
+  box-shadow:
+    inset 0 -14px 18px -14px var(--ombra-morbida),
+    0 22px 26px -16px var(--ombra-lunga);
+}
+
+/* ——— le carte d'avorio: carta con la grana, staccata dalla parete ——— */
+.scelta,
+.carta-avorio {
+  background:
+    var(--grana-carta) 0 0 / 180px 180px,
+    linear-gradient(180deg, var(--avorio-alto), var(--avorio) 60%);
+  outline: 1px solid var(--ottone);
+  outline-offset: -7px;
+  box-shadow: var(--rilievo-carta);
+}
+.carta-avorio {
+  padding: 18px 20px 22px;
+}
+.cf-testa,
+.sett-proposta,
+.appunto-editor,
+.cal-g.pieno {
+  background:
+    var(--grana-carta) 0 0 / 180px 180px,
+    linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  box-shadow: var(--rilievo-basso);
+}
+.cal-g.scelto {
+  box-shadow:
+    inset 0 -2px 0 var(--ottone),
+    var(--rilievo-basso);
+}
+.vassoio {
+  border-top-color: var(--ottone);
+}
+
+/* il calendario del Diario: caselle appena in rilievo, quelle future restano piatte */
+.cal-g:not(:disabled):not(.pieno):not(.scelto) {
+  box-shadow:
+    inset 0 1px 0 var(--luce-bordo),
+    0 1px 0 var(--ombra-morbida);
+}
+
+/* Altro: ogni voce è una lastra d'avorio, la freccia in un tondo d'ottone */
+.indice-voci {
+  display: grid;
+  gap: 8px;
+}
+.indice-voci li {
+  border-bottom: 0;
+}
+.indice-voce {
+  grid-template-columns: minmax(0, 1fr) auto 26px;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--bordo-carta);
+  background:
+    var(--grana-carta) 0 0 / 180px 180px,
+    linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  box-shadow: var(--rilievo-basso);
+}
+.indice-voce:active {
+  translate: 0 1px;
+  box-shadow: var(--rilievo-premuto);
+}
+.indice-freccia {
+  box-sizing: content-box;
+  padding: 3px;
+  border: 1px solid var(--ottone);
+  border-radius: 50%;
+  color: var(--ottone-testo);
+}
+
+/* ——— lastre di pietra incise: le misure della scheda, i numeri, gli strumenti di Consigliami ——— */
+.misure,
+.strumenti {
+  gap: 7px;
+  border: 0;
+}
+.misure.seconda {
+  margin-top: 7px;
+}
+.misure div,
+.strumenti div {
+  background:
+    var(--grana) 0 0 / 240px 240px,
+    var(--incavo);
+  border-top: 1px solid var(--ottone);
+  box-shadow:
+    inset 0 2px 4px var(--ombra-morbida),
+    inset 0 0 0 1px var(--filo-2),
+    0 1px 0 var(--luce-bordo);
+}
+.misure div + div,
+.strumenti div + div {
+  border-left: 0;
+}
+.misure .v {
+  color: var(--ottone-testo);
+}
+
+/* ——— pillole: rilievo d'avorio; quella scelta è una targhetta d'ottone con la scritta incisa ——— */
+.chip {
+  background: linear-gradient(180deg, var(--avorio-alto), var(--chip));
+  box-shadow: var(--rilievo-basso);
+}
+.chip[aria-pressed="true"],
+.uso-mom button[aria-pressed="true"] {
+  border-color: var(--ottone-scuro);
+  background:
+    linear-gradient(105deg, transparent 38%, var(--lucido) 50%, transparent 62%) -150% 0 / 250% 100% no-repeat,
+    var(--metallo);
+  color: var(--su-ottone);
+  font-weight: 500;
+  text-shadow: 0 1px 0 var(--incisione);
+  box-shadow:
+    inset 0 1px 0 var(--incisione),
+    0 1px 1px var(--ombra-morbida),
+    0 4px 8px -4px var(--ombra-lunga);
+  animation: lucida 900ms 120ms var(--curva) both;
+}
+.chip[aria-pressed="true"] small {
+  color: var(--su-ottone-2);
+}
+.chip-cassetto.acceso {
+  box-shadow:
+    inset 0 -2px 0 var(--ottone),
+    var(--rilievo-basso);
+}
+/* una luce passa sull'ottone appena si sceglie */
+@keyframes lucida {
+  from {
+    background-position:
+      150% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -150% 0,
+      0 0;
+  }
+}
+.uso-mom button,
+.strato-slot,
+.strato-inverti,
+.sett-giorno {
+  background: linear-gradient(180deg, var(--avorio-alto), var(--chip));
+  box-shadow: var(--rilievo-basso);
+}
+.strato-slot[aria-pressed="true"],
+.sett-giorno[aria-pressed="true"] {
+  background: linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  box-shadow:
+    inset 0 -2px 0 var(--ottone),
+    var(--rilievo-basso);
+}
+.chip:active:not(:disabled),
+.uso-mom button:active,
+.btn-filo:active:not(:disabled):not(.spento),
+.metto-piccolo:active,
+.indossa:active {
+  translate: 0 1px;
+}
+.chip:active:not(:disabled):not([aria-pressed="true"]),
+.uso-mom button:active:not([aria-pressed="true"]) {
+  box-shadow: var(--rilievo-premuto);
+}
+
+/* ——— bottoni: a filo su carta in rilievo; pieni come piastra con la cornice d'ottone ——— */
+.btn-filo {
+  background: linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  box-shadow: var(--rilievo-basso);
+}
+.btn-filo:disabled,
+.btn-filo.spento {
+  box-shadow: none;
+}
+.metto-piccolo {
+  background: linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  box-shadow: var(--rilievo-basso);
+}
+.btn-filo.pieno,
+.indossa,
+.metto-piccolo.fatto {
+  border-color: var(--ottone-scuro);
+  background: var(--piastra);
+  color: var(--su-piastra);
+  text-shadow: var(--piastra-incisione);
+  box-shadow:
+    inset 0 1px 0 var(--lucido),
+    0 2px 3px -1px var(--ombra-morbida),
+    0 14px 22px -14px var(--ombra-lunga);
+}
+.btn-filo.pieno:not(:focus-visible),
+.indossa:not(.fatto):not(:focus-visible) {
+  outline: 1px solid var(--piastra-filo);
+  outline-offset: -5px;
+}
+@media (hover: hover) {
+  .btn-filo.pieno:hover:not(:disabled) {
+    background: var(--piastra);
+    color: var(--su-piastra);
+    filter: brightness(1.06);
+  }
+}
+.indossa.fatto {
+  background:
+    var(--grana-carta) 0 0 / 180px 180px,
+    linear-gradient(180deg, var(--avorio-alto), var(--avorio));
+  color: var(--inchiostro);
+  text-shadow: none;
+  box-shadow:
+    inset 0 0 0 1px var(--inchiostro),
+    var(--rilievo-premuto);
+}
+.indossa::after {
+  background: var(--metallo-filo);
+}
+.avviso {
+  background: var(--piastra);
+  color: var(--su-piastra);
+  text-shadow: var(--piastra-incisione);
+  outline: 1px solid var(--piastra-filo);
+  outline-offset: -4px;
+  box-shadow:
+    inset 0 1px 0 var(--lucido),
+    0 18px 30px -16px var(--ombra-tel);
+}
+
+/* ——— le barre: una scanalatura nella pietra con l'asta dentro; le tacche restano sopra e sotto ——— */
+.traccia {
+  background: repeating-linear-gradient(90deg, var(--filo-3) 0 1px, transparent 1px 25%);
+}
+.traccia::before,
+.asta-barra::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 2px;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--incavo);
+  box-shadow: var(--incavo-ombra);
+}
+.traccia i {
+  z-index: 1;
+  top: 3px;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--inchiostro-alto), var(--inchiostro) 75%);
+  box-shadow: 0 1px 1px var(--ombra-morbida);
+}
+.righe li.attuale .traccia i {
+  background: var(--metallo);
+}
+.asta-barra {
+  background: repeating-linear-gradient(90deg, var(--filo-3) 0 1px, transparent 1px 25%);
+}
+.asta-barra i {
+  position: relative;
+  z-index: 1;
+  height: 5px;
+  margin-top: 3px;
+  background: linear-gradient(180deg, var(--inchiostro-alto), var(--inchiostro) 75%);
+}
+.asta-barra i:first-child {
+  border-radius: 3px 0 0 3px;
+}
+.asta-barra i:last-child {
+  border-radius: 0 3px 3px 0;
+}
+.asta-barra i:only-child {
+  border-radius: 3px;
+}
+.asta-barra i.tenue {
+  background: var(--metallo);
+}
+.cl-barra {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--incavo);
+  box-shadow: var(--incavo-ombra);
+}
+.cl-barra i {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--metallo);
+}
+/* barre divise in parti e giorno/sera: un velo di luce sopra, incassate */
+.segmenti,
+.asta {
+  position: relative;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 2px var(--ombra-morbida),
+    0 1px 0 var(--luce-bordo);
+}
+.segmenti {
+  overflow: hidden;
+}
+.segmenti::after,
+.asta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--lucido), transparent 55%);
+}
+.livello i.pieno,
+.livello button.pieno {
+  background: var(--metallo);
+  border-color: var(--ottone-scuro);
+}
+
+/* ——— la barra in basso: un binario d'ottone sopra, l'ombra sulla pagina, una losanga sulla voce attiva ——— */
+.timone {
+  border-top: 0;
+  box-shadow: 0 -14px 28px -20px var(--ombra-lunga);
+}
+.timone::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--metallo-filo);
+}
+.remo[aria-current="page"] {
+  color: var(--ottone-testo);
+}
+.remo[aria-current="page"]::before {
+  background: var(--metallo-filo);
+  box-shadow: 0 0 10px 1px var(--bagliore);
+}
+.remo[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  transform: rotate(45deg);
+  background: var(--metallo);
+}
