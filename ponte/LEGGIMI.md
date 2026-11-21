@@ -166,7 +166,7 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
   (segnalazione #24 di CheMetto, 21/11; prima erano sempre i primi tre): il primo di Sillage sempre, gli altri solo se
   **validi** (`Candidato.valido` di `app/src/consiglio.ts`: punteggio sopra zero, non fuori stagione, in ufficio non da
   «1 spray sotto i vestiti», non un denso col caldo umido; il punteggio non cambia). Nelle occasioni comuni sono cinque,
-  in palestra d'inverno anche uno solo. Per ognuno id, marca,
+  in palestra, d'autunno, anche uno solo. Per ognuno id, marca,
   nome, foto con l'indirizzo intero, `pro`, `contro`, `abbinamento` = la frase sull'outfit o null, `punteggio`; tutta la
   vetrina della persona (per «Un altro») e l'ultima voce di oggi del suo diario. Solo i dati di chi chiede.
 - **Il profumo di ogni proposta** (richiesta dell'utente: il profumo come accessorio di ogni proposta di Oggi, prima di
