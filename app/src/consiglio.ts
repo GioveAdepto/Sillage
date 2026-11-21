@@ -98,7 +98,7 @@ const densita = (p: Profumo) => {
    stagione non dice: il caldo umido, che rende pesante un orientale denso, e la pioggia, con cui legni
    e resine rendono meglio. */
 function effettoMeteo(p: Profumo, f: Finestra | null) {
-  if (!f) return { s: 0, perche: "", contro: "" };
+  if (!f) return { s: 0, perche: "", contro: "", pesa: false };
   const densi = densita(p) >= 0.45;
   let s = 0,
     perche = "",
@@ -111,7 +111,7 @@ function effettoMeteo(p: Profumo, f: Finestra | null) {
     s += 1;
     perche = `pioggia dalle ${f.pioggia}: legni e resine rendono bene`;
   }
-  return { s, perche, contro };
+  return { s, perche, contro, pesa: !!contro };
 }
 
 // ── la stagione, criterio principale ──────────────────────────────────────
@@ -188,6 +188,9 @@ export interface Candidato {
   f: Finestra | null;
   pro: string[];
   contro: string[];
+  /** un consiglio da mandare anche se non è il primo (CheMetto, ponte/outfit.ts): punteggio sopra zero, non fuori
+      stagione, in ufficio non da «1 spray sotto i vestiti», non un denso col caldo umido. Non cambia il punteggio. */
+  valido: boolean;
 }
 
 export interface Opzioni {
@@ -216,7 +219,8 @@ export function candidati(profumi: Profumo[], occ: Occasione, quando: Quando | D
       // il punteggio e i motivi nascono insieme: ogni voce che sposta la classifica lascia una frase
       const pro: string[] = [],
         contro: string[] = [];
-      let s = mt.s;
+      let s = mt.s,
+        valido = !mt.pesa;
       if (occ === "ufficio") {
         if (p.ufficio === "si") {
           s += 2;
@@ -228,6 +232,7 @@ export function candidati(profumi: Profumo[], occ: Occasione, quando: Quando | D
         // -3, quanto «fuori stagione»: con -1,5 a 8 gradi un gourmand entrava tra i primi cinque
         else {
           s -= 3;
+          valido = false;
           contro.push("in ufficio solo 1 spray, sotto i vestiti");
         }
       } else if (p[occ] === "si") {
@@ -247,8 +252,10 @@ export function candidati(profumi: Profumo[], occ: Occasione, quando: Quando | D
       const clima = sm.T !== null && f ? `con ${f.min === f.max ? f.media : f.min + "–" + f.max}° percepiti` : `in ${oraTop}`;
       const quandoSi = (k: string) => (k === "estate" || k === "inverno" ? "d'" : "in ") + k;
       if (S >= 0.3) pro.push(`${clima} è di stagione: su Fragrantica lo portano soprattutto ${quandoSi(suaTop)} (${Math.round(q[suaTop] * 100)}%)`);
-      else if (S < 0.2)
+      else if (S < 0.2) {
+        valido = false;
         contro.push(`${clima} è fuori stagione: su Fragrantica lo portano soprattutto ${quandoSi(suaTop)} (${Math.round(q[suaTop] * 100)}%)`);
+      }
       // giorno o sera: conta, ma meno (da -1,5 a +1,5)
       const gp = (p.giornoPct ?? 50) / 100,
         dn = mo === "giorno" ? gp - 0.5 : 0.5 - gp;
@@ -264,7 +271,7 @@ export function candidati(profumi: Profumo[], occ: Occasione, quando: Quando | D
       if ((p.rating ?? 0) >= 4.3) pro.push(`è tra i più amati su Fragrantica (★ ${voto(p.rating!)})`);
       if ((p.longevita ?? 0) >= 9 && (occ === "appuntamento" || occ === "festivita" || occ === "formale"))
         pro.push(`dura ${p.longevita}h: arriva a fine serata`);
-      return { p, s, f, pro, contro };
+      return { p, s, f, pro, contro, valido: valido && s > 0 };
     })
     .sort((a, b) => b.s - a.s);
 }

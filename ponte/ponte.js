@@ -891,7 +891,7 @@ async function consiglioOutfit(env, db, p, url) {
     situazione: p.get("situazione"), occasione: p.get("occasione"), momento: p.get("momento"),
     quando: p.get("quando") === "domani" ? "domani" : "oggi", fuso,
     colori: String(p.get("colori") || "").split(",").map(c => c.trim()).filter(Boolean).slice(0, 12),
-    // le proposte di Oggi (campo ripetuto): per ognuna il suo profumo tra i 3 consigli
+    // le proposte di Oggi (campo ripetuto): per ognuna il suo profumo tra i consigli mandati
     outfit: p.getAll("outfit").slice(0, 12).map(o => String(o).split(",").map(c => c.trim()).filter(Boolean).slice(0, 12))
   };
   const meteo = profumi.length ? await meteoPer(numero("lat"), numero("lon")) : null;

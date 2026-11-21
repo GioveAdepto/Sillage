@@ -1,7 +1,7 @@
 # Lavori di Sillage
 
 A che punto siamo. Lo tiene aggiornato la chat di coordinamento, a ogni tappa e nello stesso commit.
-Ultimo aggiornamento: 20 novembre 2026.
+Ultimo aggiornamento: 21 novembre 2026.
 
 ## Fatto (su `main`, pubblicato)
 
@@ -15,11 +15,13 @@ Ultimo aggiornamento: 20 novembre 2026.
 | 17/11 | Aggiungi profumo, con la cartolina di Fragrantica letta nel telefono (gratis) e la piramide da schermata | `10f47d9`, `ff6f178`, `6a328a4` |
 | 17/11 | CheMetto: un profumo per ogni proposta di Oggi; «Oggi ho messo» nei due sensi | `8efee8f`, `d8c03dd`, `03b8618`, `02dac98` |
 | 20/11 | Scheda pubblica `#/p/<id>` (il link da CheMetto, anche senza account), guida a passi in «Aggiungi profumo» (per ora senza schermate), il ponte manda a CheMetto il numero del profumo; in CheMetto (migrazione 070 e codice) il profumo si apre in Sillage da Bacheca, proposte col partner, «Chiedi un parere» e dalla «i» del foglio dei profumi | branch `guida-e-scheda-pubblica`; CheMetto `fdc20a1` e `profumo-in-sillage` |
+| 21/11 | CheMetto (#24): fino a cinque profumi consigliati invece di tre, solo quelli validi (mai fuori stagione); il primo sempre | branch `cinque-consigli` |
 
 ## Da provare dall'iPhone (l'utente)
 
 - **CheMetto ▸ Oggi**: con il proprio account compare un profumo per ogni proposta; scegliendolo, «Oggi ho messo»
   arriva nel diario di Sillage. Con un account senza profumi o senza Sillage non deve vedersi niente di rotto o vuoto.
+  Dal 21/11 fino a cinque consigli (in palestra anche uno solo): nessuno fuori stagione dopo il primo.
 - **Sillage ▸ Altro ▸ Aggiungi profumo**: la piramide letta da una schermata di Fragrantica esce giusta.
 - **Da CheMetto a Sillage** (20/11): nella Bacheca, sotto un outfit condiviso da oggi in poi, «Sillage ›» apre la
   scheda del profumo in Safari; senza accesso a Sillage in Safari si vede la scheda pubblica con «Entra», con l'accesso
