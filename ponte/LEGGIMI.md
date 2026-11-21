@@ -162,13 +162,17 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
   (token buono, account solo di CheMetto: l'unico da ricordare per il giorno), `senza-accesso`, `accesso-scaduto`
   (da rinnovare e riprovare), `accesso-non-valido`, `accesso-non-verificabile` (chiavi di Supabase irraggiungibili un
   istante): questi ultimi sono di passaggio. Chi non ha profumi riceve `consigli: []`.
-- Risponde `{ok, occasione, momento, data, meteo, consigli, vetrina, oggiHoMesso}`: i primi tre consigli (id, marca,
-  nome, foto con l'indirizzo intero, `pro`, `contro`, `abbinamento` = la frase sull'outfit o null, `punteggio`), tutta la
+- Risponde `{ok, occasione, momento, data, meteo, consigli, vetrina, oggiHoMesso}`: **da uno a cinque consigli**
+  (segnalazione #24 di CheMetto, 21/11; prima erano sempre i primi tre): il primo di Sillage sempre, gli altri solo se
+  **validi** (`Candidato.valido` di `app/src/consiglio.ts`: punteggio sopra zero, non fuori stagione, in ufficio non da
+  «1 spray sotto i vestiti», non un denso col caldo umido; il punteggio non cambia). Nelle occasioni comuni sono cinque,
+  in palestra d'inverno anche uno solo. Per ognuno id, marca,
+  nome, foto con l'indirizzo intero, `pro`, `contro`, `abbinamento` = la frase sull'outfit o null, `punteggio`; tutta la
   vetrina della persona (per «Un altro») e l'ultima voce di oggi del suo diario. Solo i dati di chi chiede.
 - **Il profumo di ogni proposta** (richiesta dell'utente: il profumo come accessorio di ogni proposta di Oggi, prima di
   scegliere l'outfit): per ogni campo `outfit`, `perOutfit` = `[{id, abbinamento}]` nello stesso ordine. L'`id` è sempre
-  uno dei 3 `consigli`: «le prime 3 alternative valide per giornata/occasione e poi proprio come ultima cosa, outfit».
-  Il primo di Sillage cede il posto solo a uno dei tre che si abbina chiaramente meglio ai colori della proposta;
+  uno dei `consigli` mandati: «le prime alternative valide per giornata/occasione e poi proprio come ultima cosa, outfit».
+  Il primo di Sillage cede il posto solo a uno degli altri che si abbina chiaramente meglio ai colori della proposta;
   una proposta neutra (grigi, nessun colore) ha sempre il primo. Senza campi `outfit`, `perOutfit: []`.
 - **Il punteggio** è `candidati` di `app/src/consiglio.ts`, lo stesso di Consigliami (`ponte/outfit.ts`, impacchettato da
   Cloudflare). Le situazioni di CheMetto diventano occasioni di Sillage (`DA_CHEMETTO`: lavoro → ufficio, elegante →
@@ -178,7 +182,8 @@ nel diario di Sillage («Oggi ho messo»). **CheMetto non deve dipendere da Sill
 - **L'abbinamento**: i colori dei capi diventano toni (scuri e caldi, scuri, chiari e caldi, pastello, chiari,
   verdi, blu, caldi; i grigi di mezzo non contano) e i toni gli accordi che vanno d'accordo (`AFFINI`). Dentro un
   gruppo di profumi a meno di 0,25 punti dal primo del gruppo passa avanti chi si abbina chiaramente meglio; oltre,
-  mai. Senza colori la classifica è quella di Consigliami: lo controlla `app/strumenti/prova-outfit.mjs`.
+  mai. Senza colori la classifica è quella di Consigliami: lo controlla `app/strumenti/prova-outfit.mjs`, con quanti
+  consigli partono (il primo, poi solo i validi, al più cinque) e la palestra d'autunno con un solo valido.
 - **«Oggi ho messo»**: CheMetto lo scrive con `azione=diario&op=metti` (accesso, `data` di oggi, `t`, `occasione` e
   `momento` della risposta) e `da=chemetto`; cambiare idea = `op=togli` di quella voce e una nuova. Il resto del
   diario resta privato.

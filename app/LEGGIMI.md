@@ -474,4 +474,6 @@ in 224 casi: 4 date × mattina e sera × 7 occasioni × oggi/domani × con e sen
 modifica al punteggio cambia anche quello. `node strumenti/prova-outfit.mjs` (gira anche su GitHub) controlla che
 con un outfit neutro la classifica sia identica a Consigliami (1656 casi, tutte le situazioni di CheMetto), che i
 colori dell'outfit spostino un profumo solo a pari merito (meno di 0,25 punti), che il profumo di ogni proposta
-(campo `outfit`) sia sempre uno dei 3 consigli (il primo per le proposte neutre) e le ore col fuso del telefono.
+(campo `outfit`) sia sempre uno dei consigli mandati (il primo per le proposte neutre), che partano il primo e poi
+solo i validi, al più cinque (`valido` di `candidati`; la palestra d'autunno con un solo valido), e le ore col fuso
+del telefono.

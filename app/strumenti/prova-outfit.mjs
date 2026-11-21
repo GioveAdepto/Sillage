@@ -8,7 +8,9 @@
    2. L'OUTFIT NON RIBALTA: con outfit di colori diversi un profumo passa davanti a un altro solo se i due
       punteggi di Sillage distano meno di SOGLIA; nessun profumo sparisce o si aggiunge.
    3. Le situazioni di CheMetto, l'ora del telefono (fuso) e i toni dei colori.
-   4. Il profumo di ogni proposta (campo outfit): sempre uno dei 3 consigli, il primo per le proposte neutre.
+   4. I consigli: fino a QUANTI, il primo sempre, gli altri solo se validi (non fuori stagione, ecc.). Il profumo di
+      ogni proposta (campo outfit): sempre uno dei consigli, il primo per le proposte neutre. In palestra d'autunno
+      un solo valido: un solo consiglio.
    Esce con codice 1 se qualcosa non torna. */
 process.env.TZ = "UTC"; // come il Worker di Cloudflare (ponte/outfit.ts, «L'ORA»)
 import { readFileSync, mkdtempSync, writeFileSync } from "node:fs";
@@ -92,7 +94,7 @@ for (const data of DATE) for (const ora of ORE) for (const conMeteo of [false, t
       const att = ids(sillage);
       if (fuori.occasione !== occ) no(`${data} ${ora}:00 ${sit}: occasione ${fuori.occasione}, attesa ${occ}`);
       if (fuori.classifica.join(",") !== att) no(`${data} ${ora}:00 ${occ} ${quando} ${sit ?? ""} colori=${JSON.stringify(colori)}`, `${fuori.classifica.slice(0, 5)} ≠ ${att.split(",").slice(0, 5)}`);
-      const s1 = sillage.slice(0, 3).map((c) => Math.round(c.s * 100) / 100).join(",");
+      const s1 = sillage.filter((c, i) => i === 0 || c.valido).slice(0, M.QUANTI).map((c) => Math.round(c.s * 100) / 100).join(",");
       if (fuori.consigli.map((c) => c.punteggio).join(",") !== s1) no(`${data} ${ora}:00 ${occ}: punteggi diversi`);
       if (fuori.consigli.some((c) => c.abbinamento)) no(`${data} ${ora}:00 ${occ}: frase d'abbinamento con un outfit neutro`);
     }
@@ -156,8 +158,9 @@ ok("solo grigi: outfit neutro", M.richiestaOutfit(GRIGI) === null);
 const vuoto = M.consiglioPerOutfit([], { situazione: "lavoro", fuso: 60 }, null, ORA);
 ok("nessun profumo: nessun consiglio, nessun errore", vuoto.consigli.length === 0 && vuoto.classifica.length === 0);
 
-// ── 4. il profumo di ogni proposta: sempre uno dei 3 di Sillage, i colori scelgono per ultimi ──
+// ── 4. i consigli mandati e il profumo di ogni proposta: sempre uno dei consigli, i colori scelgono per ultimi ──
 let proposte = 0, diversi = 0;
+const quanti = {};
 for (const data of DATE) for (const ora of ORE) {
   ORA = new VeraData(`${data}T${pad(ora)}:00:00Z`).getTime();
   const [b, u, pd] = BASE[data.slice(5, 7)];
@@ -169,18 +172,41 @@ for (const data of DATE) for (const ora of ORE) {
     const senza = M.consiglioPerOutfit(profumi, r, meteo, ORA);
     const con = M.consiglioPerOutfit(profumi, { ...r, outfit }, meteo, ORA);
     const tre = senza.consigli.map((c) => c.id);
+    // i consigli: il primo di Sillage, poi solo i validi, al più QUANTI
+    const lista = M.candidati(profumi, occ, M.contesto(r, ORA).da, { meteo });
+    const attesi = lista.filter((c, i) => i === 0 || c.valido).slice(0, M.QUANTI).map((c) => c.p.id);
+    if (tre.join() !== attesi.join()) no(`${data} ${ora}:00 ${occ}: consigli ${tre} invece di ${attesi}`);
+    if (!tre.length || tre.length > M.QUANTI) no(`${data} ${occ}: ${tre.length} consigli`);
+    if (tre.length < M.QUANTI && lista.filter((c, i) => i > 0 && c.valido).length >= M.QUANTI) no(`${data} ${occ}: meno consigli dei validi`);
+    for (const c of lista) {
+      const fuoriStagione = c.contro.some((t) => t.includes("fuori stagione")),
+        sottoIVestiti = c.contro.some((t) => t.includes("solo 1 spray")),
+        denso = c.contro.some((t) => t.includes("un denso pesa"));
+      if (c.valido !== (c.s > 0 && !fuoriStagione && !sottoIVestiti && !denso)) no(`${data} ${occ}: id ${c.p.id} valido=${c.valido}`, c.contro.join("; "));
+    }
+    (quanti[occ] ??= []).push(tre.length);
     if (senza.perOutfit.length !== 0) no(`${data} ${occ}: perOutfit senza proposte`);
-    if (con.consigli.map((c) => c.id).join() !== tre.join()) no(`${data} ${occ}: le proposte cambiano i 3 consigli`);
+    if (con.consigli.map((c) => c.id).join() !== tre.join()) no(`${data} ${occ}: le proposte cambiano i consigli`);
     if (con.perOutfit.length !== outfit.length) no(`${data} ${occ}: perOutfit non ha una voce per proposta`);
     con.perOutfit.forEach((x, i) => {
       proposte++;
-      if (!tre.includes(x.id)) no(`${data} ${occ}: proposta ${i} con un profumo fuori dai 3`, String(x.id));
+      if (!tre.includes(x.id)) no(`${data} ${occ}: proposta ${i} con un profumo fuori dai consigli`, String(x.id));
       if (i < 2 && (x.id !== tre[0] || x.abbinamento)) no(`${data} ${occ}: proposta neutra ${i} senza il primo di Sillage`, JSON.stringify(x));
       if (x.id !== tre[0]) diversi++;
     });
   }
 }
-console.log(`4. ${proposte} proposte: profumo sempre tra i 3 di Sillage, diverso dal primo ${diversi} volte`);
+console.log(`4. consigli mandati per occasione (12 momenti): ${Object.entries(quanti).map(([o, l]) => `${o} ${Math.min(...l)}–${Math.max(...l)}`).join(", ")}`);
+console.log(`   ${proposte} proposte: profumo sempre tra i consigli mandati, diverso dal primo ${diversi} volte`);
+{
+  // meno di QUANTI validi: in palestra d'autunno (25 ottobre, ore 18, senza meteo) uno solo
+  ORA = VeraData.parse("2026-10-25T08:00:00Z");
+  const pal = M.consiglioPerOutfit(profumi, { situazione: "sport", quando: "domani", fuso: 0, outfit: [["#1c1c1c", "#5e4232"], ["#f4f4f2"]] }, null, ORA);
+  const validi = M.candidati(profumi, "palestra", M.contesto({ situazione: "sport", quando: "domani", fuso: 0 }, ORA).da).filter((c) => c.valido).length;
+  ok("palestra d'autunno: meno di 5 validi, solo quelli (il primo sempre)", validi < M.QUANTI && pal.consigli.length === Math.max(1, validi) &&
+    pal.perOutfit.every((x) => pal.consigli.some((c) => c.id === x.id)), `${validi} validi, ${pal.consigli.map((c) => c.id)}`);
+  console.log(`   palestra d'autunno: ${pal.consigli.length} consigli (${pal.consigli.map((c) => c.id)}), ${validi} validi`);
+}
 const nessunProfumo = M.consiglioPerOutfit([], { situazione: "lavoro", fuso: 60, outfit: [["#1c1c1c"]] }, null, ORA);
 ok("nessun profumo: nessuna proposta con profumo", nessunProfumo.perOutfit.length === 0);
 
